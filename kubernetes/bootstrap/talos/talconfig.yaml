@@ -21,69 +21,60 @@ cniConfig:
   name: none
 
 nodes:
-  - hostname: "k8s-0"
-    ipAddress: "192.168.8.155"
+  - hostname: "weatherwax"
+    ipAddress: "192.168.8.10"
     installDisk: "/dev/sda"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
-          hardwareAddr: "bc:24:11:fd:e9:20"
-        vlans:
-          - vlanId: 8
-            addresses:
-              - "192.168.8.155/24"
-            mtu: 1500
-            routes:
-              - network: 0.0.0.0/0
-                gateway: "192.168.8.1"
-            vip:
-              ip: "192.168.8.20"
-  - hostname: "k8s-1"
-    ipAddress: "192.168.8.147"
+          hardwareAddr: "bc:24:11:95:66:3b"
+        dhcp: false
+        addresses:
+          - "192.168.8.10/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.8.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.8.20"
+  - hostname: "ogg"
+    ipAddress: "192.168.8.11"
     installDisk: "/dev/sda"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
-          hardwareAddr: "bc:24:11:bb:06:0c"
-        vlans:
-          - vlanId: 8
-            addresses:
-              - "192.168.8.147/24"
-            mtu: 1500
-            routes:
-              - network: 0.0.0.0/0
-                gateway: "192.168.8.1"
-            vip:
-              ip: "192.168.8.20"
-  - hostname: "k8s-3"
-    ipAddress: "192.168.8.132"
+          hardwareAddr: "bc:24:11:26:e4:81"
+        dhcp: false
+        addresses:
+          - "192.168.8.11/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.8.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.8.20"
+  - hostname: "magrat"
+    ipAddress: "192.168.8.12"
     installDisk: "/dev/sda"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
-          hardwareAddr: "bc:24:11:c0:c2:f5"
-        vlans:
-          - vlanId: 8
-            addresses:
-              - "192.168.8.132/24"
-            mtu: 1500
-            routes:
-              - network: 0.0.0.0/0
-                gateway: "192.168.8.1"
-            vip:
-              ip: "192.168.8.20"
+          hardwareAddr: "bc:24:11:0b:3c:9b"
+        dhcp: false
+        addresses:
+          - "192.168.8.12/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.8.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.8.20"
 
 # Global patches
 patches:
-  - # Force nameserver
-    |-
-    machine:
-      network:
-        nameservers:
-          - 192.168.9.2
   - "@./patches/global/cluster-discovery.yaml"
   - "@./patches/global/containerd.yaml"
   - "@./patches/global/disable-search-domain.yaml"
