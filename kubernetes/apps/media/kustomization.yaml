@@ -7,3 +7,4 @@ resources:
   # Flux-Kustomizations
   - ./sonarr/ks.yaml
   - ./radarr/ks.yaml
+  - ./sabnzbd/ks.yaml
