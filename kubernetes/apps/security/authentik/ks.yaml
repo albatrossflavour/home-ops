@@ -23,7 +23,7 @@ spec:
   dependsOn:
     - name: external-secrets-stores
     - name: authentik-valkey
-    - name: postgres-cluster
+    - name: cloudnative-pg-cluster
   postBuild:
     substitute:
       APP: *appname
