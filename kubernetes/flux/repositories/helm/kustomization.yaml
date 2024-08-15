@@ -16,3 +16,4 @@ resources:
   - ./ingress-nginx.yaml
   - ./k8s-gateway.yaml
   - ./grafana.yaml
+  - ./authentik.yaml
