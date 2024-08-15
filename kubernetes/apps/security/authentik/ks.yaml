@@ -15,7 +15,7 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: homelab-k8s
+    name: home-kubernetes
   wait: true
   interval: 30m
   retryInterval: 1m
@@ -44,6 +44,7 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: homelab-k8s
+    name: home-kubernetes
+    #name: homelab-k8s
   wait: true
   timeout: 15m
