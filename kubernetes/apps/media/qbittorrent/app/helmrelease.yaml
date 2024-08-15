@@ -89,7 +89,7 @@ spec:
         controller: qbittorrent
         type: LoadBalancer
         annotations:
-          io.cilium/lb-ipam-ips: 192.168.42.122
+          io.cilium/lb-ipam-ips: 192.168.8.122
         ports:
           http:
             port: *port
@@ -100,10 +100,10 @@ spec:
     ingress:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.devbu.io
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         className: internal
         hosts:
-          - host: qb.devbu.io
+          - host: qb.${SECRET_DOMAIN}
             paths:
               - path: /
                 service:
@@ -114,8 +114,7 @@ spec:
         existingClaim: qbittorrent
       media:
         type: nfs
-        server: expanse.internal
-        path: /eros/Media
+        server: 192.168.1.22
+        path: /volume1/media
         globalMounts:
-          - path: /media/Downloads/qbittorrent
-            subPath: Downloads/qbittorrent
+          - path: /media/Torrents
