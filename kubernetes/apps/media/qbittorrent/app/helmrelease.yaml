@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: sabnzbd
+  name: qbittorrent
 spec:
   interval: 30m
   chart:
@@ -29,40 +29,41 @@ spec:
       namespace: volsync-system
   values:
     controllers:
-      sabnzbd:
+      qbittorrent:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/sabnzbd
-              tag: 4.3.2@sha256:8e70a877c77805dfe93ce30a8da3362fbddf221ef806951d4e4634bb80dc87b5
+              repository: ghcr.io/onedr0p/qbittorrent
+              tag: 4.6.5@sha256:60bbc09640953f5c218b9a217b905f5f5b2f9b31cca9b6fdfed6409ceeb315af
             env:
               TZ: America/New_York
-              SABNZBD__PORT: &port 80
-              SABNZBD__HOST_WHITELIST_ENTRIES: >-
-                sabnzbd,
-                sabnzbd.default,
-                sabnzbd.default.svc,
-                sabnzbd.default.svc.cluster,
-                sabnzbd.default.svc.cluster.local,
-                sab.${SECRET_DOMAIN}
-            envFrom:
-              - secretRef:
-                  name: sabnzbd-secret
+              QBITTORRENT__PORT: &port 80
+              QBITTORRENT__BT_PORT: &bittorrentPort 50413
+              QBT_Preferences__WebUI__AlternativeUIEnabled: false
+              QBT_Preferences__WebUI__AuthSubnetWhitelistEnabled: true
+              QBT_Preferences__WebUI__AuthSubnetWhitelist: |-
+                10.42.0.0/16, 192.168.42.0/24
+              QBT_Preferences__WebUI__LocalHostAuth: false
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /api?mode=version
+                    path: /api/v2/app/version
                     port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 6
               readiness: *probes
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -71,7 +72,7 @@ spec:
               requests:
                 cpu: 100m
               limits:
-                memory: 8Gi
+                memory: 32Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -85,17 +86,24 @@ spec:
         topology.kubernetes.io/zone: w
     service:
       app:
-        controller: sabnzbd
+        controller: qbittorrent
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: 192.168.42.122
         ports:
           http:
             port: *port
+          bittorrent:
+            enabled: true
+            port: *bittorrentPort
+            protocol: TCP
     ingress:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          external-dns.alpha.kubernetes.io/target: internal.devbu.io
         className: internal
         hosts:
-          - host: sab.${SECRET_DOMAIN}
+          - host: qb.devbu.io
             paths:
               - path: /
                 service:
@@ -103,20 +111,11 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: sabnzbd
-      logs:
-        type: emptyDir
-        globalMounts:
-          - path: /config/logs
-      tmp:
-        type: emptyDir
-      downloads:
-        enabled: true
-        type: nfs
-        server: "192.168.1.22"
-        path: /volume1/Media/Torrents
+        existingClaim: qbittorrent
       media:
-        enabled: true
         type: nfs
-        server: "192.168.1.22"
-        path: /volume1/Media
+        server: expanse.internal
+        path: /eros/Media
+        globalMounts:
+          - path: /media/Downloads/qbittorrent
+            subPath: Downloads/qbittorrent
