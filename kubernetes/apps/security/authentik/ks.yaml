@@ -1,50 +1,24 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.ok8.sh/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &appname authentik
+  name: &app authentik
   namespace: flux-system
-  labels:
-    substitution.flux.home.arpa/enabled: "true"
 spec:
-  targetNamespace: security
+  targetNamespace: default
   commonMetadata:
     labels:
-      app.kubernetes.io/name: *appname
-  path: "./kubernetes/apps/security/authentik/app"
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: cloudnative-pg-cluster
+    - name: external-secrets-stores
+  path: ./kubernetes/apps/default/authentik/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
-  wait: true
+  wait: false
   interval: 30m
   retryInterval: 1m
   timeout: 5m
-  dependsOn:
-    - name: external-secrets-stores
-    - name: authentik-valkey
-    - name: cloudnative-pg-cluster
-  postBuild:
-    substitute:
-      APP: *appname
-      GATUS_SUBDOMAIN: auth
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: &appname authentik-valkey
-  namespace: flux-system
-spec:
-  targetNamespace: security
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *appname
-  interval: 10m
-  path: ./kubernetes/apps/security/authentik/valkey
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: home-kubernetes
-    #name: homelab-k8s
-  wait: true
-  timeout: 15m
