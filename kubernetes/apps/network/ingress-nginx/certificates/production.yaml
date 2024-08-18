@@ -12,3 +12,10 @@ spec:
   dnsNames:
     - "${SECRET_DOMAIN}"
     - "*.${SECRET_DOMAIN}"
+    - toodlepip.com.au
+    - bandcamp.tv
+    - kalooma.org
+    - puppet.lab.albatrossflavour.com
+    - cd4pe.lab.albatrossflavour.com
+    - scm.lab.albatrossflavour.com
+    - dashboard.lab.albatrossflavour.com
