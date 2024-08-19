@@ -1,0 +1,22 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+  generation: 1
+  name: nginx
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: dancer.solutions
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
