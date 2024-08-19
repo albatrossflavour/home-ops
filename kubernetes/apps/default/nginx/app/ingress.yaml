@@ -8,7 +8,7 @@ metadata:
   name: nginx
   namespace: default
 spec:
-  ingressClassName: external
+  ingressClassName: nginx
   rules:
     - host: dancer.solutions
       http:
