@@ -12,6 +12,7 @@ spec:
   dnsNames:
     - "${SECRET_DOMAIN}"
     - "*.${SECRET_DOMAIN}"
+    - dancer.solutions
     # - toodlepip.com.au
     # - bandcamp.tv
     # - kalooma.org
