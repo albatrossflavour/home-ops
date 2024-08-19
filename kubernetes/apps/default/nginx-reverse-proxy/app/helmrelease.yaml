@@ -28,28 +28,14 @@ spec:
         use-proxy-protocol: "true"
       service:
         type: ClusterIP  # or NodePort, depending on your setup
-    ingressClassResource:
-      name: external
-      default: false
-      controllerValue: k8s.io/external
     defaultBackend:
       enabled: false
     ingress:
-      app:
-        enabled: true
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        className: external
-        hosts:
-          - host: dancer.solutions
-            paths:
-              - path: /
-                pathType: Prefix
-                backend:
-                  service:
-                    name: placeholder  # This can be any service that exists; it's just a placeholder
-                    port:
-                      number: 80
+      enabled: true
+      annotations:
+        external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+      ingressClassName: external
+      hosts: ["dancer.solutions"]
     extraVolumeMounts:
       - name: custom-nginx-template
         mountPath: /etc/nginx/template/custom.tmpl
