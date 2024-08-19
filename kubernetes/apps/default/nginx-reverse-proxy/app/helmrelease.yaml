@@ -11,7 +11,6 @@ spec:
   chart:
     spec:
       chart: nginx
-      version: 18.1.9
       sourceRef:
         kind: HelmRepository
         name: bitnami
