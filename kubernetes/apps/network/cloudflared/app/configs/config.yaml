@@ -7,4 +7,6 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "*.${SECRET_DOMAIN}"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "dancer.solutions"
+    service: https://192.168.1.22:5001
   - service: http_status:404
