@@ -10,11 +10,11 @@ spec:
   releaseName: nginx-reverse-proxy
   chart:
     spec:
-      chart: ingress-nginx
-      version: 4.7.0
+      chart: nginx
+      version: 18.1.9
       sourceRef:
         kind: HelmRepository
-        name: ingress-nginx
+        name: bitnami
         namespace: flux-system
   values:
     service:
@@ -35,11 +35,3 @@ spec:
                 service:
                   identifier: app
                   port: http
-    extraVolumes:
-      - name: proxy-config
-        configMap:
-          name: nginx-reverse-proxy-config
-    extraVolumeMounts:
-      - name: proxy-config
-        mountPath: /etc/nginx/conf.d
-        subPath: nginx.conf
