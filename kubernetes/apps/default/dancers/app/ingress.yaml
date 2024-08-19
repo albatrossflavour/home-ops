@@ -4,6 +4,7 @@ kind: Ingress
 metadata:
   annotations:
     external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+  className: external
   name: dancers
   namespace: default
 spec:
