@@ -1,55 +1,95 @@
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: nginx-reverse-proxy
+  name: nginx
   namespace: default
 spec:
   interval: 5m
   chart:
     spec:
-      chart: ingress-nginx
-      version: 4.7.0
+      chart: nginx
+      version: 15.4.5
       sourceRef:
         kind: HelmRepository
-        name: ingress-nginx
+        name: bitnami
         namespace: flux-system
+      interval: 5m
   install:
+    createNamespace: true
     remediation:
       retries: 3
   upgrade:
-    cleanupOnFail: true
     remediation:
-      strategy: rollback
       retries: 3
+      remediateLastFailure: true
+    cleanupOnFail: true
   values:
-    controller:
-      service:
-        type: ClusterIP  # Ensures the service is internal
-      config:
-        proxy-body-size: "64m"
-        use-proxy-protocol: "true"
+    image:
+      registry: docker.io
+      repository: bitnami/nginx
+      tag: 1.25.4-debian-11-r0
+    pullPolicy: IfNotPresent
+    debug: false
+    replicaCount: 1
+    updateStrategy:
+      type: RollingUpdate
+      rollingUpdate: {}
+    serverBlock: |-
+      server {
+        listen 8080;
+        server_name dancer.solutions;
+        location / {
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $host;
+
+          proxy_pass https://192.168.7.10;
+
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_buffer_size 128k;
+          proxy_buffers 4 256k;
+          proxy_busy_buffers_size 256k;
+          large_client_header_buffers 4 16k;
+        }
+      }
+
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-      className: external
-      ingressClassName: external
-      hosts:
-        - host: dancer.solutions
-          paths:
-            - path: /
-              pathType: Prefix
-              backend:
-                service:
-                  name: nginx-reverse-proxy  # This service should exist; adjust as needed
-                  port:
-                    number: 80
-    extraVolumeMounts:
-      - name: custom-nginx-template
-        mountPath: /etc/nginx/template/custom.tmpl
-        subPath: custom.tmpl
-    extraVolumes:
-      - name: custom-nginx-template
-        configMap:
-          name: nginx-reverse-proxy-config
+      hostname: "/*"
+      extraHosts:
+        - name: dancer.solutions
+          path: /
+      main:
+        enabled: true
+        ingressClassName: "external"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          external-dns/is-public: "true"
+        hosts:
+          - host: dancer.solutions
+            paths:
+              - path: /
+                pathType: Prefix
+
+    persistence:
+      data:
+        enabled: false
+        existingClaim: nginx-config
+
+    service:
+      ports:
+        http: &port 8080
+      type: ClusterIP
+      main:
+        ports:
+          http:
+            port: *port
+
+    resources:
+      requests:
+        cpu: 15m
+        memory: 79M
+      limits:
+        cpu: 15m
+        memory: 79M
