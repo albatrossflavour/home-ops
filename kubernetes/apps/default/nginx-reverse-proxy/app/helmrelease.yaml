@@ -33,17 +33,14 @@ spec:
             image:
               repository: nginx
               tag: latest
-            ports:
-              - containerPort: 80
             volumeMounts:
               - name: nginx-config-volume
                 mountPath: /etc/nginx/nginx.conf
                 subPath: nginx.conf
-          resources:
-            requests:
-              cpu: 10m
-            limits:
-              memory: 512Mi
+    volumes:
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-reverse-proxy-config
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -70,10 +67,3 @@ spec:
                 service:
                   identifier: app
                   port: http
-    persistence:
-      config:
-        type: emptyDir
-      logs:
-        type: emptyDir
-      tmp:
-        type: emptyDir
