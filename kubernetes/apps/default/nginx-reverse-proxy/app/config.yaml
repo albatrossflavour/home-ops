@@ -9,7 +9,7 @@ data:
 
     http {
         server {
-            listen 80;
+            listen 8080;
             server_name dancer.solutions
 
             location / {
