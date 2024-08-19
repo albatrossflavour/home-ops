@@ -26,9 +26,6 @@ spec:
     controller:
       service:
         type: ClusterIP  # Ensures the service is internal
-      ingressClassResource:
-        name: external
-        controllerValue: "k8s.io/ingress-nginx"
       config:
         proxy-body-size: "64m"
         use-proxy-protocol: "true"
