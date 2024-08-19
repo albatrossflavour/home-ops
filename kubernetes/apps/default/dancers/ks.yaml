@@ -3,14 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app nginx
+  name: &app dancers
   namespace: flux-system
 spec:
   targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/default/nginx/app
+  path: ./kubernetes/apps/default/dancers/app
   prune: true
   sourceRef:
     kind: GitRepository
