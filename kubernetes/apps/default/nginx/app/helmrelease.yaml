@@ -8,13 +8,12 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: nginx
-      version: 15.4.5
+      chart: ingress-nginx
+      version: 4.11.1
       sourceRef:
         kind: HelmRepository
-        name: bitnami
+        name: ingress-nginx
         namespace: flux-system
-      interval: 5m
   install:
     createNamespace: true
     remediation:
@@ -25,10 +24,6 @@ spec:
       remediateLastFailure: true
     cleanupOnFail: true
   values:
-    image:
-      registry: docker.io
-      repository: bitnami/nginx
-      tag: 1.25.4-debian-11-r0
     pullPolicy: IfNotPresent
     debug: false
     replicaCount: 1
