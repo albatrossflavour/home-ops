@@ -1,37 +1,57 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: nginx-reverse-proxy
   namespace: default
-  annotations:
-    external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
 spec:
   interval: 5m
-  releaseName: nginx-reverse-proxy
   chart:
     spec:
-      chart: nginx
+      chart: ingress-nginx
+      version: 4.7.0
       sourceRef:
         kind: HelmRepository
-        name: bitnami
+        name: ingress-nginx
         namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
   values:
-    service:
-      app:
-        type: ClusterIP
-        controller: nginx-reverse-proxy
-        ports:
-          http:
-            port: 80
+    controller:
+      service:
+        type: ClusterIP  # Ensures the service is internal
+      ingressClassResource:
+        name: external
+        controllerValue: "k8s.io/ingress-nginx"
+      config:
+        proxy-body-size: "64m"
+        use-proxy-protocol: "true"
     ingress:
-      app:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        className: external
-        hosts:
-          - host: dancer.solutions
-            paths:
-              - path: /
+      enabled: true
+      annotations:
+        external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+      ingressClassName: external  # Ensures this ingress is handled by the NGINX Ingress Controller
+      hosts:
+        - host: dancer.solutions
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
                 service:
-                  identifier: app
-                  port: http
+                  name: nginx-reverse-proxy  # This service should exist; adjust as needed
+                  port:
+                    number: 80
+    extraVolumeMounts:
+      - name: custom-nginx-template
+        mountPath: /etc/nginx/template/custom.tmpl
+        subPath: custom.tmpl
+    extraVolumes:
+      - name: custom-nginx-template
+        configMap:
+          name: nginx-reverse-proxy-config
