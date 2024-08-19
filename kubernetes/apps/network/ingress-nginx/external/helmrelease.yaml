@@ -29,6 +29,7 @@ spec:
       service:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: "external.${SECRET_DOMAIN}"
+          ingress.kubernetes.io/force-ssl-redirect: "true"
           io.cilium/lb-ipam-ips: "192.168.8.23"
         externalTrafficPolicy: Cluster
       ingressClassResource:
