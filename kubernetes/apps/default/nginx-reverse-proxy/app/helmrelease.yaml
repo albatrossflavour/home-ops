@@ -23,16 +23,11 @@ spec:
       retries: 3
   values:
     controller:
-      ingressClassResource:
-        name: external
-        controllerValue: "k8s.io/ingress-nginx"
       config:
         proxy-body-size: "64m"
         use-proxy-protocol: "true"
       service:
         type: ClusterIP  # or NodePort, depending on your setup
-        annotations:
-          external-dns.alpha.kubernetes.io/hostname: external.${SECRET_DOMAIN}
     defaultBackend:
       enabled: false
     ingress:
