@@ -6,6 +6,7 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
 spec:
+  interval: 5m
   releaseName: nginx-reverse-proxy
   chart:
     spec:
