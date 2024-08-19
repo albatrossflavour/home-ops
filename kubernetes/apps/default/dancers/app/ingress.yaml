@@ -7,14 +7,15 @@ metadata:
   name: dancers
   namespace: default
 spec:
+  ingressClassName: external
   rules:
-    - host: dancer.solutions
+    - host: "dancer.solutions"
       http:
         paths:
-          - backend:
-              service:
-                name: dancers
-                port:
-                  number: 80
-            path: /
+          - path: /
             pathType: Prefix
+            backend:
+              service:
+                name: dancer
+                port:
+                  number: 80:
