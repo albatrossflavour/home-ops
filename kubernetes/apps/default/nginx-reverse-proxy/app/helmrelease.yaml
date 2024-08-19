@@ -22,23 +22,17 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    controller:
-      config:
-        proxy-body-size: "64m"
-        use-proxy-protocol: "true"
-    defaultBackend:
-      enabled: false
+    service:
+      type: ClusterIP
+      port: 80
     ingress:
       enabled: true
       annotations:
         external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
-      ingressClassName: external
-      hosts: ["dancer.solutions"]
-    extraVolumeMounts:
-      - name: custom-nginx-template
-        mountPath: /etc/nginx/template/custom.tmpl
-        subPath: custom.tmpl
-    extraVolumes:
-      - name: custom-nginx-template
-        configMap:
-          name: nginx-reverse-proxy-config
+        ingressClassName: external
+      hosts:
+        - host: dancer.solutions
+          paths:
+            - /
+    defaultBackend:
+      enabled: false
