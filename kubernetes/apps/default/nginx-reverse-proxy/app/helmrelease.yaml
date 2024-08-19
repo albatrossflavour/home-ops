@@ -23,6 +23,19 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    ingress:
+      annotations:
+        external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+      className: external
+      hosts:
+        - host: dancer.solutions
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: nginx-reverse-proxy
+                  port: 80
     controller:
       config:
         proxy-body-size: "64m"

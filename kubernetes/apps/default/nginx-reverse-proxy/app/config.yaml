@@ -10,7 +10,7 @@ data:
     http {
         server {
             listen 80;
-            server_name dancer.${SECRET_DOMAIN};
+            server_name dancer.solutions
 
             location / {
                 proxy_pass http://192.168.1.22:5001;
