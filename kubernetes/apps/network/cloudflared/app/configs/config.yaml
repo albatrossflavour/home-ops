@@ -9,4 +9,6 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "dancer.solutions"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "toodlepip.com.au"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - service: http_status:404
