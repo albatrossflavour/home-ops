@@ -1,5 +1,3 @@
----
-#
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -24,10 +22,24 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    controller:
+      ingressClassResource:
+        name: external
+        controllerValue: "k8s.io/ingress-nginx"
+      config:
+        proxy-body-size: "64m"
+        use-proxy-protocol: "true"
+      service:
+        type: ClusterIP  # or NodePort, depending on your setup
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: external.${SECRET_DOMAIN}
+    defaultBackend:
+      enabled: false
     ingress:
+      enabled: true
       annotations:
         external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-      className: external
+      ingressClassName: external
       hosts:
         - host: dancer.solutions
           paths:
@@ -35,14 +47,9 @@ spec:
               pathType: Prefix
               backend:
                 service:
-                  name: nginx-reverse-proxy
-                  port: 80
-    controller:
-      config:
-        proxy-body-size: "64m"
-        use-proxy-protocol: "true"
-    defaultBackend:
-      enabled: false
+                  name: placeholder  # This can be any service that exists; it's just a placeholder
+                  port:
+                    number: 80
     extraVolumeMounts:
       - name: custom-nginx-template
         mountPath: /etc/nginx/template/custom.tmpl
