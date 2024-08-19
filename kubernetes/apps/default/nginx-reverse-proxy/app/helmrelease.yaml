@@ -23,16 +23,24 @@ spec:
       retries: 3
   values:
     service:
-      type: ClusterIP
-      port: 80
+      app:
+        serviceName: nginx-reverse-proxy
+        type: ClusterIP
+        ports:
+          http:
+            port: 80
     ingress:
-      enabled: true
-      annotations:
-        external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
-        ingressClassName: external
-      hosts:
-        - host: dancer.solutions
-          paths:
-            - /
+      app:
+        enabled: true
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          className: external
+        hosts:
+          - host: dancer.solutions
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
     defaultBackend:
       enabled: false
