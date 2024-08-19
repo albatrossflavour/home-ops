@@ -5,7 +5,7 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
   generation: 1
-  name: nginx
+  name: nginx-reverse-proxy
   namespace: default
 spec:
   ingressClassName: external
