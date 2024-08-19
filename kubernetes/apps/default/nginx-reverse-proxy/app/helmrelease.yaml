@@ -17,14 +17,24 @@ spec:
         name: ingress-nginx
         namespace: flux-system
   values:
+    service:
+      app:
+        controller: nginx-reverse-proxy
+        ports:
+          http:
+            port: 80
     ingress:
-      enabled: true
-      ingressClassName: external
-      annotations:
-        external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
-      hosts:
-        - host: dancer.solutions
-          paths: ["/"]
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+        className: external
+        hosts:
+          - host: dancer.solutions
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
     extraVolumes:
       - name: proxy-config
         configMap:
@@ -33,7 +43,3 @@ spec:
       - name: proxy-config
         mountPath: /etc/nginx/conf.d
         subPath: nginx.conf
-    service:
-      type: ClusterIP
-      port: 80
-      targetPort: 80
