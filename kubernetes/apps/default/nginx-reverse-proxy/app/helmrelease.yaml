@@ -1,20 +1,17 @@
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
-#
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: nginx-reverse-proxy
   namespace: default
 spec:
-  interval: 30m
+  interval: 5m
   chart:
     spec:
-      chart: app-template
-      version: 3.3.2
+      chart: ingress-nginx
+      version: 4.7.0 # Specify the version you want to use
       sourceRef:
         kind: HelmRepository
-        name: bjw-s
+        name: ingress-nginx-repo
         namespace: flux-system
   install:
     remediation:
@@ -25,46 +22,21 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    controllers:
-      nginx-reverse-proxy:
-        annotations:
-          reloader.stakater.com/auto: "true"
-        containers:
-          app:
-            image:
-              repository: nginx
-              tag: latest
-            volumeMounts:
-              - name: nginx-config-volume
-                mountPath: /etc/nginx/nginx.conf
-                subPath: nginx.conf
-    volumes:
-      - name: nginx-config-volume
-        configMap:
-          name: nginx-reverse-proxy-config
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 101
-        runAsGroup: 101
-        fsGroup: 101
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
-    service:
-      app:
-        controller: nginx-reverse-proxy
-        ports:
-          http:
-            port: 80
-    ingress:
-      app:
+    controller:
+      config:
+        proxy-body-size: "64m"
+        use-proxy-protocol: "true"
+      service:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
         className: external
-        hosts:
-          - host: dancer.solutions
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+    defaultBackend:
+      enabled: false
+    extraVolumeMounts:
+      - name: custom-nginx-template
+        mountPath: /etc/nginx/template/custom.tmpl
+        subPath: custom.tmpl
+    extraVolumes:
+      - name: custom-nginx-template
+        configMap:
+          name: nginx-reverse-proxy-config
