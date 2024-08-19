@@ -17,10 +17,6 @@ spec:
         name: ingress-nginx
         namespace: flux-system
   values:
-    controller:
-      ingressClassResource:
-        name: external
-        default: false
     ingress:
       enabled: true
       ingressClassName: external
