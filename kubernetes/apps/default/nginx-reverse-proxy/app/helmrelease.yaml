@@ -12,7 +12,7 @@ spec:
       version: 4.7.0 # Specify the version you want to use
       sourceRef:
         kind: HelmRepository
-        name: ingress-nginx-repo
+        name: ingress-nginx
         namespace: flux-system
   install:
     remediation:
