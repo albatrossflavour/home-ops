@@ -38,7 +38,25 @@ spec:
     serverBlock: |-
       server {
         listen 8080;
-        server_name dancer.solutions;
+        server_name www.bandcamp.tv bandcamp.tv;
+        return 301 $scheme://albatrossflavour.com;
+      }
+
+      server {
+        listen 8080;
+        server_name www.toodlepip.com.au toodlepip.com.au;
+        return 301 $scheme://www.etsy.com/au/shop/ToodlepipdesignsAU;
+      }
+
+      server {
+        listen 8080;
+        server_name www.kalooma.org kalooma.org;
+        return 301 $scheme://youtube.com/pdlfeggs;
+      }
+
+      server {
+        listen 8080;
+        server_name puppet.lab.albatrossflavour.com;
         location / {
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header Host $host;
@@ -51,7 +69,66 @@ spec:
           proxy_buffer_size 128k;
           proxy_buffers 4 256k;
           proxy_busy_buffers_size 256k;
-          #large_client_header_buffers 4 16k;
+          large_client_header_buffers 4 16k;
+        }
+      }
+
+      server {
+        listen 8080;
+        server_name cd4pe.lab.albatrossflavour.com;
+        location / {
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $host;
+
+          proxy_pass https://192.168.7.11;
+
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_buffer_size 128k;
+          proxy_buffers 4 256k;
+          proxy_busy_buffers_size 256k;
+          large_client_header_buffers 4 16k;
+        }
+      }
+
+
+      server {
+        listen 8080;
+        server_name dashboard.lab.albatrossflavour.com;
+        location / {
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $host;
+
+          proxy_pass http://192.168.7.13:3000;
+
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_buffer_size 128k;
+          proxy_buffers 4 256k;
+          proxy_busy_buffers_size 256k;
+          large_client_header_buffers 4 16k;
+        }
+      }
+
+
+      server {
+        listen 8080;
+        server_name scm.lab.albatrossflavour.com;
+        location / {
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $host;
+
+          proxy_pass https://192.168.7.12;
+
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_buffer_size 128k;
+          proxy_buffers 4 256k;
+          proxy_busy_buffers_size 256k;
+          large_client_header_buffers 4 16k;
         }
       }
 
@@ -69,7 +146,43 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
         hosts:
-          - host: dancer.solutions
+          - host: www.kalooma.org
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: www.kalooma.org
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: toodlepip.com.au
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: www.toodlepipe.com.au
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: www.bandcamp.tv
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: bandcamp.tv
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: puppet.lab.albatrossflavour.com
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: cd4pe.lab.albatrossflavour.com
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: scm.lab.albatrossflavour.com
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: dashboard.lab.albatrossflavour.com
             paths:
               - path: /
                 pathType: Prefix

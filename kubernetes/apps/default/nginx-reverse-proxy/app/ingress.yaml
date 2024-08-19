@@ -12,7 +12,97 @@ spec:
   #annotations:
     #  external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
   rules:
-    - host: dancer.solutions
+    - host: kalooma.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: www.kalooma.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: toodlepip.com.au
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: www.toodlepip.com.au
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: www.bandcamp.tv
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: bandcamp.tv
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: puppet.lab.albatrossflavour.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: cd4pe.lab.albatrossflavour.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: scm.lab.albatrossflavour.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: dashboard.lab.albatrossflavour.com
       http:
         paths:
           - backend:
