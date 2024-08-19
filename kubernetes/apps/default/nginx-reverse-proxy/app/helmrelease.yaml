@@ -18,6 +18,7 @@ spec:
   values:
     service:
       app:
+        type: ClusterIP
         controller: nginx-reverse-proxy
         ports:
           http:
