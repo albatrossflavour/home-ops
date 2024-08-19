@@ -26,8 +26,6 @@ spec:
       config:
         proxy-body-size: "64m"
         use-proxy-protocol: "true"
-      service:
-        type: ClusterIP  # or NodePort, depending on your setup
     defaultBackend:
       enabled: false
     ingress:
