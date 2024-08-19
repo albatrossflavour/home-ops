@@ -33,7 +33,8 @@ spec:
       enabled: true
       annotations:
         external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-      ingressClassName: external  # Ensures this ingress is handled by the NGINX Ingress Controller
+      className: external
+      ingressClassName: external
       hosts:
         - host: dancer.solutions
           paths:
