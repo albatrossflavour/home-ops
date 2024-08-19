@@ -11,4 +11,14 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "toodlepip.com.au"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "bandcamp.tv"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "puppet.lab.albatrossflavour.com"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "cd4pe.lab.albatrossflavour.com"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "scm.lab.albatrossflavour.com"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "dashboard.lab.albatrossflavour.com"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - service: http_status:404
