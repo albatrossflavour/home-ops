@@ -1,20 +1,79 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: nginx-reverse-proxy
   namespace: default
 spec:
-  interval: 5m
+  interval: 30m
   chart:
     spec:
-      chart: nginx-reverse-proxy
+      chart: app-template
+      version: 3.3.2
       sourceRef:
-        kind: GitRepository
-        name: flux-system
+        kind: HelmRepository
+        name: bjw-s
         namespace: flux-system
-      version: "*"
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
   values:
-    replicaCount: 1
-    nginxConfig:
-      serverName: dancer.solutions
-      proxyPass: http://192.168.1.22:5001
+    controllers:
+      nginx-reverse-proxy:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: nginx
+              tag: latest
+            ports:
+              - containerPort: 80
+            volumeMounts:
+              - name: nginx-config-volume
+                mountPath: /etc/nginx/nginx.conf
+                subPath: nginx.conf
+          resources:
+            requests:
+              cpu: 10m
+            limits:
+              memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: nginx-reverse-proxy
+        ports:
+          http:
+            port: 80
+    ingress:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+        className: external
+        hosts:
+          - host: dancer.solutions
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+    persistence:
+      config:
+        type: emptyDir
+      logs:
+        type: emptyDir
+      tmp:
+        type: emptyDir
