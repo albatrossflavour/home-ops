@@ -41,10 +41,6 @@ spec:
       config:
         proxy-body-size: "64m"
         use-proxy-protocol: "true"
-      service:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        className: external
     defaultBackend:
       enabled: false
     extraVolumeMounts:
