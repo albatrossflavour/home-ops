@@ -28,6 +28,10 @@ spec:
         use-proxy-protocol: "true"
       service:
         type: ClusterIP  # or NodePort, depending on your setup
+    ingressClassResource:
+      name: external
+      default: false
+      controllerValue: k8s.io/external
     defaultBackend:
       enabled: false
     ingress:
