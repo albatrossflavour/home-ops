@@ -10,4 +10,4 @@ resources:
   - ./smtp-relay/ks.yaml
   #- ./zigbee2mqtt/ks.yaml
   - ./home-assistant/ks.yaml
-  #- ./nginx-reverse-proxy/ks.yaml
+  - ./nginx-reverse-proxy/ks.yaml
