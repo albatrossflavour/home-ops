@@ -6,6 +6,5 @@ resources:
   - ./namespace.yaml
   - ./minio/ks.yaml
   - ./smtp-relay/ks.yaml
-  - ./zigbee2mqtt/ks.yaml
   - ./home-assistant/ks.yaml
   - ./nginx-reverse-proxy/ks.yaml
