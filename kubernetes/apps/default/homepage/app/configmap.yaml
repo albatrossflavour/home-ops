@@ -11,36 +11,36 @@ data:
         - Ankh:
             - href: https://ankh.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
-              ping: ankh.lab.albatrossflavour.com
+              siteMonitor: https://ankh.lab.albatrossflavour.com
         - Morpork:
             - href: https://morpork.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
-              ping: morpork.lab.albatrossflavour.com
+              siteMonitor: https://morpork.lab.albatrossflavour.com
         - Stolat:
             - href: https://stolat.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
-              ping: stolat.lab.albatrossflavour.com
+              siteMonitor: https://stolat.lab.albatrossflavour.com
         - Backups:
             - href: https://pbs.lab.albatrossflavour.com:8007
               icon: si-proxmox-#E57000
-              ping: pbs.lab.albatrossflavour.com
+              siteMonitor: https://pbs.lab.albatrossflavour.com
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
               href: https://puppet.lab.albatrossflavour.com
-              ping: puppet.lab.albatrossflavour.com
+              siteMonitor: https://puppet.lab.albatrossflavour.com
         - CD4PE:
             - icon: si-puppet-#FFAE1A
               href: https://cd4pe.lab.albatrossflavour.com
-              ping: cd4pe.lab.albatrossflavour.com
+              siteMonitor: https://cd4pe.lab.albatrossflavour.com
         - SCM:
             - icon: si-puppet-#FFAE1A
               href: https://scm.lab.albatrossflavour.com
-              ping: scm.lab.albatrossflavour.com
+              siteMonitor: https://scm.lab.albatrossflavour.com
         - Dashboard:
             - icon: si-puppet-#FFAE1A
               href: https://dashboard.lab.albatrossflavour.com
-              ping: dashboard.lab.albatrossflavour.com
+              siteMonitor: https://dashboard.lab.albatrossflavour.com
         - control-repo:
             - icon: github.png
               href: 'https://github.com/albatrossflavour/control-repo'
