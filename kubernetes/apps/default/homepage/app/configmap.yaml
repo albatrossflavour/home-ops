@@ -68,39 +68,12 @@ data:
   kubernetes.yaml: |
     mode: cluster
   services.yaml: |
-    - Puppet:
-        - Puppet Enterprise:
-            - icon: si-puppet-#FFAE1A
-              href: https://puppet.lab.albatrossflavour.com
-              siteMonitor: https://puppet.lab.albatrossflavour.com
-        - CD4PE:
-            - icon: si-puppet-#FFAE1A
-              href: https://cd4pe.lab.albatrossflavour.com
-              siteMonitor: https://cd4pe.lab.albatrossflavour.com
-        - SCM:
-            - icon: si-puppet-#FFAE1A
-              href: https://scm.lab.albatrossflavour.com
-              siteMonitor: https://scm.lab.albatrossflavour.com
-        - Dashboard:
-            - icon: si-puppet-#FFAE1A
-              href: https://dashboard.lab.albatrossflavour.com
-              siteMonitor: https://dashboard.lab.albatrossflavour.com
-        - control-repo:
-            - icon: github.png
-              href: 'https://github.com/albatrossflavour/control-repo'
-    - Calendar:
-        - Agenda:
-            widget:
-              type: calendar
-              view: agenda # optional - possible values monthly, agenda
-              maxEvents: 20 # optional - defaults to 10
-              integrations: # optional
-                - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-                  service_group: Downloads # group name where widget exists
-                  service_name: Sonarr # service name for that widget
-                - type: radarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-                  service_group: Downloads # group name where widget exists
-                  service_name: Radarr # service name for that widget
+    - Proxmox:
+        widget:
+           type: proxmoxbackupserver
+             url: https://pbs.lab.albatrossflavour.com:8007
+               username: ${PBS_USERNAME}
+               password: ${PBS_TOKEN}
   settings.yaml: |
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
