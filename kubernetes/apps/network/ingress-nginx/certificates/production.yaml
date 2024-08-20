@@ -12,7 +12,8 @@ spec:
   dnsNames:
     - "${SECRET_DOMAIN}"
     - "*.${SECRET_DOMAIN}"
-    - dancer.solutions
+    - www.toodlepip.com.au
+    - www.bandcamp.tv
     - toodlepip.com.au
     - bandcamp.tv
     - kalooma.org

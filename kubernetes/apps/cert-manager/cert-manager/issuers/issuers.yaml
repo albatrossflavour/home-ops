@@ -17,6 +17,8 @@ spec:
         selector:
           dnsZones:
             - "${SECRET_DOMAIN}"
+            - www.toodlepip.com.au
+            - www.bandcamp.tv
             - toodlepip.com.au
             - bandcamp.tv
             - kalooma.org

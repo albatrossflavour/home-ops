@@ -7,9 +7,11 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "*.${SECRET_DOMAIN}"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
-  - hostname: "dancer.solutions"
+  - hostname: "www.toodlepip.com.au"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "toodlepip.com.au"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "www.bandcamp.tv"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "bandcamp.tv"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
