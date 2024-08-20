@@ -47,7 +47,7 @@ data:
     - Media:
         - overseerr:
             - icon: overseerr.png
-              href: https://overseerr.albatrossflavour.com
+              href: https://requests.albatrossflavour.com
         - sonarr:
             - icon: sonarr.png
               href: https://sonarr.albatrossflavour.com
@@ -68,6 +68,26 @@ data:
   kubernetes.yaml: |
     mode: cluster
   services.yaml: |
+    - Puppet:
+        - Puppet Enterprise:
+            - icon: si-puppet-#FFAE1A
+              href: https://puppet.lab.albatrossflavour.com
+              siteMonitor: https://puppet.lab.albatrossflavour.com
+        - CD4PE:
+            - icon: si-puppet-#FFAE1A
+              href: https://cd4pe.lab.albatrossflavour.com
+              siteMonitor: https://cd4pe.lab.albatrossflavour.com
+        - SCM:
+            - icon: si-puppet-#FFAE1A
+              href: https://scm.lab.albatrossflavour.com
+              siteMonitor: https://scm.lab.albatrossflavour.com
+        - Dashboard:
+            - icon: si-puppet-#FFAE1A
+              href: https://dashboard.lab.albatrossflavour.com
+              siteMonitor: https://dashboard.lab.albatrossflavour.com
+        - control-repo:
+            - icon: github.png
+              href: 'https://github.com/albatrossflavour/control-repo'
     - Calendar:
         - Agenda:
             widget:
