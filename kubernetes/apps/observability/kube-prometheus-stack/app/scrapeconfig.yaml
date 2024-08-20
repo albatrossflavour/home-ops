@@ -7,7 +7,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - emqx-exporter:8085
+        - emqx-exporter
   metricsPath: /metrics
   relabelings:
     - action: replace
