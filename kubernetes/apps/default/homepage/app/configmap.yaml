@@ -77,9 +77,6 @@ data:
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
     useEqualHeights: true
     theme: dark
-    background:
-      image: https://raw.githubusercontent.com/joryirving/home-ops/main/docs/src/assets/101518784_p0.jpg
-      opacity: 20
     color: slate
     headerStyle: clean
     quicklaunch:
@@ -123,15 +120,13 @@ data:
         columns: 3
         icon: mdi-download-circle
   widgets.yaml: |
-    - logo:
-        icon: https://raw.githubusercontent.com/joryirving/home-ops/main/docs/src/assets/icons/lds-transparent.png
     - search:
         provider: [duckduckgo, google]
         focus: false
         target: _blank
     - greeting:
         text_size: xl
-        text: "Howdy Hey!"
+        text: "Boomshanka!"
     - kubernetes:
         cluster:
           cpu: true
