@@ -7,7 +7,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - emqx-exporter
+        - emqx-exporter.database.svc.cluster.local
   metricsPath: /metrics
   relabelings:
     - action: replace
