@@ -71,9 +71,9 @@ data:
     - Proxmox:
         widget:
           type: proxmoxbackupserver
-           url: https://pbs.lab.albatrossflavour.com:8007
-           username: ${PBS_USERNAME}
-           password: ${PBS_TOKEN}
+          url: https://pbs.lab.albatrossflavour.com:8007
+          username: ${PBS_USERNAME}
+          password: ${PBS_TOKEN}
   settings.yaml: |
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
