@@ -75,8 +75,8 @@ spec:
         - 192.168.5.22
   metricsPath: /api/export/prometheus/metrics
   basic_auth:
-    username: {{.PIKVM_USER}}
-    password: {{.PIKVM_PASSWORD}}
+    username: "{{.PIKVM_USER}}"
+    password: "{{.PIKVM_PASSWORD}}"
   scheme: https
   static_configs:
     - targets: ["pikvm"]
