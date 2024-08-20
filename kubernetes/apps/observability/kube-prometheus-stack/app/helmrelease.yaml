@@ -78,8 +78,6 @@ spec:
         hosts: ["prometheus.${SECRET_DOMAIN}"]
         pathType: Prefix
       prometheusSpec:
-        useExistingSecrt: true
-        configSecret: prometheus-secret
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false

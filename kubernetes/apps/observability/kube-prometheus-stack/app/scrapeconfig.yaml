@@ -68,6 +68,8 @@ kind: ScrapeConfig
 metadata:
   name: &name pikvm
 spec:
+  useExistingSecrt: true
+  configSecret: pikvm-secret
   staticConfigs:
     - targets:
         - 192.168.5.20
