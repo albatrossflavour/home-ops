@@ -89,6 +89,15 @@ spec:
               path: /var/lib/grafana/dashboards/default
     dashboards:
       default:
+        home:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/home.json
+          datasource: Prometheus
+        nodes:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/nodes.json
+          datasource: Prometheus
+        ups:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/ups.json
+          datasource: Prometheus
         apc-ups:
           # renovate: depName="APC UPS (SNMP)"
           gnetId: 12340
