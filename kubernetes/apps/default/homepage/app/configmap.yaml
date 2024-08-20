@@ -45,9 +45,18 @@ data:
             - icon: github.png
               href: 'https://github.com/albatrossflavour/control-repo'
     - Media:
-        - YouTube:
-            - icon: youtube.png
-              href: 'https://youtube.com/feed/subscriptions'
+        - overseerr:
+            - icon: overseerr.png
+              href: https://overseerr.albatrossflavour.com
+        - sonarr:
+            - icon: sonarr.png
+              href: https://sonarr.albatrossflavour.com
+        - radarr:
+            - icon: radarr.png
+              href: https://radarr.albatrossflavour.com
+        - sabnzbd:
+            - icon: sabnzbd.png
+              href: https://sabnzbd.albatrossflavour.com
     - Git:
         - home-ops:
             - icon: github.png
