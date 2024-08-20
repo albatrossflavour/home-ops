@@ -44,7 +44,7 @@ spec:
               QBT_Preferences__WebUI__AlternativeUIEnabled: false
               QBT_Preferences__WebUI__AuthSubnetWhitelistEnabled: true
               QBT_Preferences__WebUI__AuthSubnetWhitelist: |-
-                10.42.0.0/16, 192.168.0.0/16
+                10.0.0.0/8, 192.168.0.0/16
               QBT_Preferences__WebUI__LocalHostAuth: false
             probes:
               liveness: &probes
