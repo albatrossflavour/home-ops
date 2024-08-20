@@ -18,3 +18,4 @@ resources:
   - ./grafana.yaml
   - ./authentik.yaml
   - ./bitnami.yaml
+  - ./emqx.yaml
