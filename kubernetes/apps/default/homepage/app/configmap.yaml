@@ -33,7 +33,7 @@ data:
         - Dashboard:
             - abbr: DASH
               href: https://dashboard.lab.albatrossflavour.com
-     - Media:
+    - Media:
         - YouTube:
             - icon: youtube.png
               href: 'https://youtube.com/feed/subscriptions'
