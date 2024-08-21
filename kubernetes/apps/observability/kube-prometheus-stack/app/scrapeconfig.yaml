@@ -71,7 +71,7 @@ spec:
         - 192.168.5.21
         - 192.168.5.22
   metricsPath: /api/export/prometheus/metrics
-  scheme: https
+  scheme: HTTPS
   tlsConfig:
     insecureSkipVerify: true
   relabelings:
