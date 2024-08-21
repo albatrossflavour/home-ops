@@ -53,9 +53,6 @@ spec:
   staticConfigs:
     - targets:
         - 10.10.20.208:9100
-        - expanse.internal:9100
-        - pikvm.internal:9100
-        - voyager.internal:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
@@ -75,8 +72,6 @@ spec:
         - 192.168.5.22
   metricsPath: /api/export/prometheus/metrics
   scheme: https
-  static_configs:
-    - targets: ["pikvm"]
   tls_config:
     insecure_skip_verify: true
   relabelings:
