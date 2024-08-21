@@ -68,17 +68,12 @@ kind: ScrapeConfig
 metadata:
   name: &name pikvm
 spec:
-  useExistingSecrt: true
-  configSecret: pikvm-secret
   staticConfigs:
     - targets:
         - 192.168.5.20
         - 192.168.5.21
         - 192.168.5.22
   metricsPath: /api/export/prometheus/metrics
-  basic_auth:
-    username: "{{.PIKVM_USER}}"
-    password: "{{.PIKVM_PASSWORD}}"
   scheme: https
   static_configs:
     - targets: ["pikvm"]
