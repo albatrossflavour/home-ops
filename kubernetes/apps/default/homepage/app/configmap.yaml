@@ -92,7 +92,7 @@ data:
   services.yaml: |
     - Media:
       - sonarr:
-          icon: radarr.png
+          icon: sonarr.png
           href: http://sonarr.albatrossflavour.com/
           description: TV management
           widget:
@@ -106,7 +106,7 @@ data:
           widget:
             type: radarr
             url: http://radarr.albatrossflavour.com
-            key: f2zqcxjcbsezwlbyjcva
+            key: F2ZqCXJcbsEzwLbYJcvA
   settings.yaml: |
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
