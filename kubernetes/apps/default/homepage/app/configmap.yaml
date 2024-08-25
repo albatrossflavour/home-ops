@@ -11,19 +11,15 @@ data:
         - Ankh:
             - href: https://ankh.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
-              siteMonitor: https://ankh.lab.albatrossflavour.com
         - Morpork:
             - href: https://morpork.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
-              siteMonitor: https://morpork.lab.albatrossflavour.com
         - Stolat:
             - href: https://stolat.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
-              siteMonitor: https://stolat.lab.albatrossflavour.com
         - Backups:
             - href: https://pbs.lab.albatrossflavour.com:8007
               icon: si-proxmox-#E57000
-              siteMonitor: https://pbs.lab.albatrossflavour.com
         - Ankh KVM:
             - href: https://192.168.5.20/login/
               icon: si-pikvm
@@ -73,6 +69,10 @@ data:
         - sonarr:
             - icon: sonarr.png
               href: https://sonarr.albatrossflavour.com
+              widget:
+                type: sonarr
+                url: http://sonarr.albatrossflavour.com
+                key: f0834e84a4ec435a854733188f205ed0
         - radarr:
             - icon: radarr.png
               href: https://radarr.albatrossflavour.com
