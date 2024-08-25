@@ -24,6 +24,12 @@ data:
             - href: https://pbs.lab.albatrossflavour.com:8007
               icon: si-proxmox-#E57000
               siteMonitor: https://pbs.lab.albatrossflavour.com
+        - Pi-Hole:
+            - href: http://192.168.9.2/admin/login.php
+              icon: si-pihole
+        - Luggage:
+            - href: https://192.168.1.22:5006
+              icon: si-synology
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
