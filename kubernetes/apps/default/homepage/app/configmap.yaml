@@ -90,15 +90,23 @@ data:
   kubernetes.yaml: |
     mode: cluster
   services.yaml: |
-    - Group B:
-      - Radarr:
+    - Media:
+      - sonarr:
+          icon: radarr.png
+          href: http://sonarr.albatrossflavour.com/
+          description: TV management
+          widget:
+            type: sonarr
+            url: http://sonarr.albatrossflavour.com
+            key: f0834e84a4ec435a854733188f205ed0
+      - radarr:
           icon: radarr.png
           href: http://radarr.albatrossflavour.com/
-          description: Movie management
+          description: movie management
           widget:
             type: radarr
             url: http://radarr.albatrossflavour.com
-            key: F2ZqCXJcbsEzwLbYJcvA
+            key: f2zqcxjcbsezwlbyjcva
   settings.yaml: |
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
