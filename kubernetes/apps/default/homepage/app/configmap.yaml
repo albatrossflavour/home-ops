@@ -102,11 +102,19 @@ data:
       - radarr:
           icon: radarr.png
           href: http://radarr.albatrossflavour.com/
-          description: movie management
+          description: Movie management
           widget:
             type: radarr
             url: http://radarr.albatrossflavour.com
             key: F2ZqCXJcbsEzwLbYJcvA
+      - overseerr:
+          icon: overseerr.png
+          href: http://requests.albatrossflavour.com/
+          description: Media requests
+          widget:
+            type: overseerr
+            url: http://requests.albatrossflavour.com
+            key: MTcyMzk3MjQyOTQ2NDA4NTQyM2Y1LTQ2MWUtNDJlNi04MmRjLWY4YWVmZmNhMzQ3Ng==
   settings.yaml: |
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
