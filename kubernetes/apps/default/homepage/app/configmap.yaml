@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: homepage
 data:
   bookmarks.yaml: |
-    - Proxmox:
+    - Lab:
         - Ankh:
             - href: https://ankh.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
@@ -24,12 +24,28 @@ data:
             - href: https://pbs.lab.albatrossflavour.com:8007
               icon: si-proxmox-#E57000
               siteMonitor: https://pbs.lab.albatrossflavour.com
+        - Ankh KVM:
+            - href: https://192.168.5.20/login/
+              icon: si-pikvm
+        - Morpork KVM:
+            - href: https://192.168.5.21/login/
+              icon: si-pikvm
+        - Stolat KVM:
+            - href: https://192.168.5.22/login/
+              icon: si-pikvm
+    - Infrastructure:
+        - Grafana:
+            - href: http://grafana.albatrossflavour.com
+              icon: si-grafana
         - Pi-Hole:
             - href: http://192.168.9.2/admin/login.php
               icon: si-pihole
         - Luggage:
             - href: https://192.168.1.22:5006
               icon: si-synology
+        - UniFi:
+            - href: https://192.168.1.1
+              icon: si-unifi
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
