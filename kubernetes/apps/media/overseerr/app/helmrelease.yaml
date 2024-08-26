@@ -87,7 +87,7 @@ spec:
           gethomepage.dev/icon: overseerr.png
           gethomepage.dev/description: TV/Movie Requests
           gethomepage.dev/widget.type: overseerr
-          gethomepage.dev/widget.url: https://requests.${SECRET_DOMAIN}
+          gethomepage.dev/widget.url: http://overseerr.media
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_OVERSEERR_TOKEN}}` }}"
         className: external
         hosts:
