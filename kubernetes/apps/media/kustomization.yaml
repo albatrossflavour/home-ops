@@ -11,3 +11,4 @@ resources:
   - ./qbittorrent/ks.yaml
   - ./overseerr/ks.yaml
   - ./tautulli/ks.yaml
+  - ./jackett/ks.yaml
