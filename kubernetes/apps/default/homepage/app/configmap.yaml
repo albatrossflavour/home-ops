@@ -54,12 +54,12 @@ data:
               href: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
-            - icon: github.png-#00485B
+            - icon: si-github-#181717
               href: 'https://github.com/albatrossflavour/control-repo'
               description: ""
     - Git:
         - home-ops:
-            - icon: github.png-#00485B
+            - icon: si-github-#181717
               href: 'https://github.com/albatrossflavour/home-ops'
               description: ""
         - kubesearch:
