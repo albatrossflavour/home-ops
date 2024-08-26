@@ -26,15 +26,15 @@ data:
               description: ""
         - Ankh KVM:
             - href: https://192.168.5.20/login/
-              icon: si-server-network-outline
+              icon: si-server-network-outline-#E57000
               description: ""
         - Morpork KVM:
             - href: https://192.168.5.21/login/
-              icon: si-server-network-outline
+              icon: si-server-network-outline-#E57000
               description: ""
         - Stolat KVM:
             - href: https://192.168.5.22/login/
-              icon: si-server-network-outline
+              icon: si-server-network-outline-#E57000
               description: ""
     - Puppet:
         - Puppet Enterprise:
