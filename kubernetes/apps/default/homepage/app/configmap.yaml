@@ -26,15 +26,15 @@ data:
               description: ""
         - Ankh KVM:
             - href: https://192.168.5.20/login/
-              icon: si-server-network-outline-#636363
+              icon: si-server-network-outline
               description: ""
         - Morpork KVM:
             - href: https://192.168.5.21/login/
-              icon: si-server-network-outline-#636363
+              icon: si-server-network-outline
               description: ""
         - Stolat KVM:
             - href: https://192.168.5.22/login/
-              icon: si-server-network-outline-#636363
+              icon: si-server-network-outline
               description: ""
     - Puppet:
         - Puppet Enterprise:
@@ -54,30 +54,30 @@ data:
               href: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
-            - icon: github.png-#636363
+            - icon: github.png
               href: 'https://github.com/albatrossflavour/control-repo'
               description: ""
     - Git:
         - home-ops:
-            - icon: github.png-#636363
+            - icon: github.png
               href: 'https://github.com/albatrossflavour/home-ops'
               description: ""
         - kubesearch:
-            - icon: kubernetes-dashboard.png-#636363
+            - icon: kubernetes-dashboard.png
               href: 'https://kubesearch.dev/'
               description: ""
     - Infrastructure:
         - Pi-Hole:
             - href: http://192.168.9.2/admin/login.php
-              icon: si-pihole-#636363
+              icon: si-pihole
               description: ""
         - Luggage:
             - href: https://192.168.1.22:5006
-              icon: si-synology-#636363
+              icon: si-synology
               description: ""
         - UniFi:
             - href: https://192.168.1.1
-              icon: si-unifi-#636363
+              icon: si-unifi
               description: ""
   docker.yaml: ""
   kubernetes.yaml: |
