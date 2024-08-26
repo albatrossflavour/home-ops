@@ -86,25 +86,25 @@ data:
       showSearchSuggestions: true
       hideVisitURL: true
     layout:
-      Media:
+      Downloads:
         style: row
         columns: 4
         icon: mdi-download-circle
       Puppet:
         style: row
-        columns: 2
+        columns: 1
         icon: si-puppet-#FFAE1A
       Lab:
         style: row
-        columns: 2
+        columns: 1
         icon: mdi-server
       Observability:
         style: row
-        columns: 2
+        columns: 1
         icon: mdi-chart-line
       Home:
         style: row
-        columns: 2
+        columns: 1
         icon: mdi-home-analytics
   widgets.yaml: |
     - search:
