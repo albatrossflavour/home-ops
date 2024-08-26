@@ -113,6 +113,11 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
           ingress.kubernetes.io/force-ssl-redirect: "true"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Observability
+          gethomepage.dev/name: Gatus
+          gethomepage.dev/icon: gatus.png
+          gethomepage.dev/description: Status
         className: external
         hosts:
           - host: "status.${SECRET_DOMAIN}"

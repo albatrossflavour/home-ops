@@ -40,6 +40,11 @@ spec:
         enabled: true
         annotations:
           external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Observability
+          gethomepage.dev/name: Alert Manager
+          gethomepage.dev/icon: alertmanager.png
+          gethomepage.dev/description: Alert Management
         ingressClassName: internal
         hosts: ["alertmanager.${SECRET_DOMAIN}"]
         pathType: Prefix
@@ -74,6 +79,11 @@ spec:
         enabled: true
         annotations:
           external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Observability
+          gethomepage.dev/name: Prometheus
+          gethomepage.dev/icon: prometheus.png
+          gethomepage.dev/description: Metric Gathering
         ingressClassName: internal
         hosts: ["prometheus.${SECRET_DOMAIN}"]
         pathType: Prefix
