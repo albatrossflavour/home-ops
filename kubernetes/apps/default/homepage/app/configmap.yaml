@@ -54,30 +54,30 @@ data:
               href: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
-            - icon: github.png
+            - icon: github.png-#00485B
               href: 'https://github.com/albatrossflavour/control-repo'
               description: ""
     - Git:
         - home-ops:
-            - icon: github.png
+            - icon: github.png-#00485B
               href: 'https://github.com/albatrossflavour/home-ops'
               description: ""
         - kubesearch:
-            - icon: kubernetes-dashboard.png
+            - icon: kubernetes-dashboard.png-#00485B
               href: 'https://kubesearch.dev/'
               description: ""
     - Infrastructure:
         - Pi-Hole:
             - href: http://192.168.9.2/admin/login.php
-              icon: si-pihole
+              icon: si-pihole-#00485B
               description: ""
         - Luggage:
             - href: https://192.168.1.22:5006
-              icon: si-synology
+              icon: si-synology-#00485B
               description: ""
         - UniFi:
             - href: https://192.168.1.1
-              icon: si-unifi
+              icon: si-unifi-#00485B
               description: ""
   docker.yaml: ""
   kubernetes.yaml: |
