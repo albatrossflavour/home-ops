@@ -101,6 +101,8 @@ data:
       hideVisitURL: true
     layout:
       Downloads:
+        style: row
+        columns: 4
         icon: mdi-download-circle
       Puppet:
         icon: si-puppet-#FFAE1A
