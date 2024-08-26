@@ -35,19 +35,6 @@ data:
         - Stolat KVM:
             - href: https://192.168.5.22/login/
               icon: si-pikvm
-    - Observability:
-        - Pi-Hole:
-            - href: http://192.168.9.2/admin/login.php
-              icon: si-pihole
-              description: ""
-        - Luggage:
-            - href: https://192.168.1.22:5006
-              icon: si-synology
-              description: ""
-        - UniFi:
-            - href: https://192.168.1.1
-              icon: si-unifi
-              description: ""
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
@@ -81,7 +68,20 @@ data:
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
-  services.yaml: ""
+  services.yaml: |
+    - Observability:
+        - Pi-Hole:
+            - href: http://192.168.9.2/admin/login.php
+              icon: si-pihole
+              description: ""
+        - Luggage:
+            - href: https://192.168.1.22:5006
+              icon: si-synology
+              description: ""
+        - UniFi:
+            - href: https://192.168.1.1
+              icon: si-unifi
+              description: ""
   settings.yaml: |
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
@@ -99,12 +99,14 @@ data:
         style: row
         columns: 4
         icon: mdi-download-circle
+      Observability:
+        style: row
+        columns: 4
+        icon: mdi-chart-line
       Puppet:
         icon: si-puppet-#FFAE1A
       Lab:
         icon: mdi-server
-      Observability:
-        icon: mdi-chart-line
       Home:
         icon: mdi-home-analytics
   widgets.yaml: |
