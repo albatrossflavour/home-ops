@@ -28,7 +28,7 @@ spec:
       nameOverride: *app
     controllers:
       *app :
-        replicas: 1 # active nas
+        replicas: 1
 
         containers:
           *app :
@@ -39,11 +39,6 @@ spec:
               PUID: "568"
               PGID: "568"
               TZ: ${TIMEZONE}
-
-    persistence:
-      config:
-        existingClaim: jackett-config-nas
-
     service:
       main:
         controller: *app
@@ -51,8 +46,6 @@ spec:
         ports:
           http:
             port: 9117
-
-
     ingress:
       main:
         enabled: true
