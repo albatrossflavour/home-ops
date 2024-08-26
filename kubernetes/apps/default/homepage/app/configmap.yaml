@@ -29,10 +29,7 @@ data:
         - Stolat KVM:
             - href: https://192.168.5.22/login/
               icon: si-pikvm
-    - Infrastructure:
-        - Grafana:
-            - href: http://grafana.albatrossflavour.com
-              icon: si-grafana
+    - Observability:
         - Pi-Hole:
             - href: http://192.168.9.2/admin/login.php
               icon: si-pihole
