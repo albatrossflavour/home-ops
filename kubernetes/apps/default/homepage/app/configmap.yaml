@@ -26,15 +26,16 @@ data:
               description: ""
         - Ankh KVM:
             - href: https://192.168.5.20/login/
-              icon: si-pikvm
+              icon: si-server-network-outline-#636363
               description: ""
         - Morpork KVM:
             - href: https://192.168.5.21/login/
-              icon: si-pikvm
+              icon: si-server-network-outline-#636363
               description: ""
         - Stolat KVM:
             - href: https://192.168.5.22/login/
-              icon: si-pikvm
+              icon: si-server-network-outline-#636363
+              description: ""
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
@@ -53,35 +54,35 @@ data:
               href: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
-            - icon: github.png
+            - icon: github.png-#636363
               href: 'https://github.com/albatrossflavour/control-repo'
               description: ""
     - Git:
         - home-ops:
-            - icon: github.png
+            - icon: github.png-#636363
               href: 'https://github.com/albatrossflavour/home-ops'
               description: ""
         - kubesearch:
-            - icon: kubernetes-dashboard.png
+            - icon: kubernetes-dashboard.png-#636363
               href: 'https://kubesearch.dev/'
+              description: ""
+    - Infrastructure:
+        - Pi-Hole:
+            - href: http://192.168.9.2/admin/login.php
+              icon: si-pihole-#636363
+              description: ""
+        - Luggage:
+            - href: https://192.168.1.22:5006
+              icon: si-synology-#636363
+              description: ""
+        - UniFi:
+            - href: https://192.168.1.1
+              icon: si-unifi-#636363
               description: ""
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
-  services.yaml: |
-    - Observability:
-        - Pi-Hole:
-            - href: http://192.168.9.2/admin/login.php
-              icon: si-pihole
-              description: ""
-        - Luggage:
-            - href: https://192.168.1.22:5006
-              icon: si-synology
-              description: ""
-        - UniFi:
-            - href: https://192.168.1.1
-              icon: si-unifi
-              description: ""
+  services.yaml: ""
   settings.yaml: |
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
