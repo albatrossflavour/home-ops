@@ -101,24 +101,14 @@ data:
       hideVisitURL: true
     layout:
       Downloads:
-        style: row
-        columns: 4
         icon: mdi-download-circle
       Puppet:
-        style: row
-        columns: 4
         icon: si-puppet-#FFAE1A
       Lab:
-        style: row
-        columns: 4
         icon: mdi-server
       Observability:
-        style: row
-        columns: 1
         icon: mdi-chart-line
       Home:
-        style: row
-        columns: 1
         icon: mdi-home-analytics
   widgets.yaml: |
     - search:
