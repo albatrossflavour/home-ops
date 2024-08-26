@@ -12,3 +12,4 @@ resources:
   - ./overseerr/ks.yaml
   - ./tautulli/ks.yaml
   - ./jackett/ks.yaml
+  - ./flaresolverr/ks.yaml
