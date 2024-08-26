@@ -46,19 +46,15 @@ data:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
               href: https://puppet.lab.albatrossflavour.com
-              siteMonitor: https://puppet.lab.albatrossflavour.com
         - CD4PE:
             - icon: si-puppet-#FFAE1A
               href: https://cd4pe.lab.albatrossflavour.com
-              siteMonitor: https://cd4pe.lab.albatrossflavour.com
         - SCM:
             - icon: si-puppet-#FFAE1A
               href: https://scm.lab.albatrossflavour.com
-              siteMonitor: https://scm.lab.albatrossflavour.com
         - Dashboard:
             - icon: si-puppet-#FFAE1A
               href: https://dashboard.lab.albatrossflavour.com
-              siteMonitor: https://dashboard.lab.albatrossflavour.com
         - control-repo:
             - icon: github.png
               href: 'https://github.com/albatrossflavour/control-repo'
@@ -92,11 +88,11 @@ data:
         icon: mdi-download-circle
       Puppet:
         style: row
-        columns: 1
+        columns: 4
         icon: si-puppet-#FFAE1A
       Lab:
         style: row
-        columns: 1
+        columns: 4
         icon: mdi-server
       Observability:
         style: row
