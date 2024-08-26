@@ -9,11 +9,11 @@ spec:
   chart:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: jackett
-      version: 11.5.2
+      chart: app-template
+      version: 3.3.2
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home
+        name: bjw-s
         namespace: flux-system
       interval: 5m
   install:
@@ -27,8 +27,8 @@ spec:
     global:
       nameOverride: *app
     image:
-      repository: ghcr.io/k8s-at-home/jackett
-      tag: v0.20.715
+      repository: "linuxserver/jackett"
+      tag: 0.20.2943
     env:
       TZ: "${TIMEZONE}"
     service:
