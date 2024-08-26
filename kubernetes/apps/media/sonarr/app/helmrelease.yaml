@@ -101,7 +101,6 @@ spec:
           gethomepage.dev/widget.type: sonarr
           gethomepage.dev/widget.url: http://sonarr.media
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SONARR_TOKEN}}` }}"
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"

@@ -11,21 +11,27 @@ data:
         - Ankh:
             - href: https://ankh.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
+              description: ""
         - Morpork:
             - href: https://morpork.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
+              description: ""
         - Stolat:
             - href: https://stolat.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
+              description: ""
         - Backups:
             - href: https://pbs.lab.albatrossflavour.com:8007
               icon: si-proxmox-#E57000
+              description: ""
         - Ankh KVM:
             - href: https://192.168.5.20/login/
               icon: si-pikvm
+              description: ""
         - Morpork KVM:
             - href: https://192.168.5.21/login/
               icon: si-pikvm
+              description: ""
         - Stolat KVM:
             - href: https://192.168.5.22/login/
               icon: si-pikvm
@@ -33,39 +39,45 @@ data:
         - Pi-Hole:
             - href: http://192.168.9.2/admin/login.php
               icon: si-pihole
+              description: ""
         - Luggage:
             - href: https://192.168.1.22:5006
               icon: si-synology
+              description: ""
         - UniFi:
             - href: https://192.168.1.1
               icon: si-unifi
+              description: ""
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
               href: https://puppet.lab.albatrossflavour.com
-              siteMonitor: https://puppet.lab.albatrossflavour.com
+              description: ""
         - CD4PE:
             - icon: si-puppet-#FFAE1A
               href: https://cd4pe.lab.albatrossflavour.com
-              siteMonitor: https://cd4pe.lab.albatrossflavour.com
+              description: ""
         - SCM:
             - icon: si-puppet-#FFAE1A
               href: https://scm.lab.albatrossflavour.com
-              siteMonitor: https://scm.lab.albatrossflavour.com
+              description: ""
         - Dashboard:
             - icon: si-puppet-#FFAE1A
               href: https://dashboard.lab.albatrossflavour.com
-              siteMonitor: https://dashboard.lab.albatrossflavour.com
+              description: ""
         - control-repo:
             - icon: github.png
               href: 'https://github.com/albatrossflavour/control-repo'
+              description: ""
     - Git:
         - home-ops:
             - icon: github.png
               href: 'https://github.com/albatrossflavour/home-ops'
+              description: ""
         - kubesearch:
             - icon: kubernetes-dashboard.png
               href: 'https://kubesearch.dev/'
+              description: ""
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
@@ -83,40 +95,18 @@ data:
       showSearchSuggestions: true
       hideVisitURL: true
     layout:
-      Network:
-        style: row
-        columns: 3
-        icon: mdi-network
-      Games:
-        style: row
-        columns: 3
-        icon: mdi-minecraft
-      Calendar:
-        style: column
-        icon: mdi-calendar
-      Video:
-        style: column
-        icon: mdi-play-circle
-      Books:
-        style: row
-        columns: 2
-        icon: mdi-book
-      Infrastructure:
-        style: row
-        columns: 5
-        icon: mdi-server
-      Observability:
-        style: row
-        columns: 5
-        icon: mdi-chart-line
-      Home:
-        style: row
-        columns: 5
-        icon: mdi-home-analytics
       Downloads:
         style: row
-        columns: 3
+        columns: 4
         icon: mdi-download-circle
+      Puppet:
+        icon: si-puppet-#FFAE1A
+      Lab:
+        icon: mdi-server
+      Observability:
+        icon: mdi-chart-line
+      Home:
+        icon: mdi-home-analytics
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
