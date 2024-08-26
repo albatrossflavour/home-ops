@@ -63,7 +63,7 @@ data:
               href: 'https://github.com/albatrossflavour/home-ops'
               description: ""
         - kubesearch:
-            - icon: kubernetes-dashboard.png-#00485B
+            - icon: si-kubernetes-#326CE5
               href: 'https://kubesearch.dev/'
               description: ""
     - Infrastructure:
