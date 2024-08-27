@@ -37,7 +37,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - 192.168.7.10:9100
+        - puppet.lab.albatrossflavour.com:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
