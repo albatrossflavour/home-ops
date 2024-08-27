@@ -32,6 +32,7 @@ spec:
       home-assistant:
         annotations:
           reloader.stakater.com/auto: "true"
+        hostNetwork: true
         containers:
           app:
             image:
@@ -87,7 +88,6 @@ spec:
             port: 8123
           code-server:
             port: 12321
-    hostNetwork: true
     ingress:
       app:
         annotations:
