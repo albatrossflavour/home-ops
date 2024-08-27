@@ -52,9 +52,9 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - 10.10.20.208:9100
-        - 192.168.9.100:9100
-        - 192.168.9.23:9100
+        - betty.albatrossflavour.com:9100
+        - smp.kalooma.org:9100
+        - tdarr.albatrossflavour.com:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
