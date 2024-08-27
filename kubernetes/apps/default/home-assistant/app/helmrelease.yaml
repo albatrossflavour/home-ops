@@ -30,6 +30,8 @@ spec:
   values:
     controllers:
       home-assistant:
+        pod:
+          hostNetwork: true
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -71,7 +73,6 @@ spec:
                 cpu: 10m
               limits:
                 memory: 512Mi
-        hostNetwork: true
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
