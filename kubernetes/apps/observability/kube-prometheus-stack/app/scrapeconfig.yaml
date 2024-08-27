@@ -55,6 +55,7 @@ spec:
     - targets:
         - 10.10.20.208:9100
         - 192.168.9.100:9100
+        - 192.168.9.23:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
