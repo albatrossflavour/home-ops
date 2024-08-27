@@ -8,6 +8,7 @@ spec:
   staticConfigs:
     - targets:
         - emqx-exporter.database.svc.cluster.local:8085
+        - mqtt-exporter.database.svc.cluster.local:3321
   metricsPath: /metrics
   relabelings:
     - action: replace
