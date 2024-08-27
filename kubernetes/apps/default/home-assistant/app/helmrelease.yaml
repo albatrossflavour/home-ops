@@ -87,6 +87,7 @@ spec:
             port: 8123
           code-server:
             port: 12321
+    hostNetwork: true
     ingress:
       app:
         annotations:
