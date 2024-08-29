@@ -42,3 +42,6 @@ spec:
           extra_settings:
             - setting: TOWER_URL_BASE
               value: '"awx.${SECRET_DOMAIN}"'
+    persistence:
+      data:
+        existingClaim: awx

@@ -5,3 +5,4 @@ resources:
   - awx-deployment.yaml
   - helmrelease.yaml
   - externalsecret.yaml
+  - pvc.yaml
