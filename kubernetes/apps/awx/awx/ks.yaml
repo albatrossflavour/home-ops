@@ -6,7 +6,7 @@ metadata:
   name: &app awx
   namespace: flux-system
 spec:
-  targetNamespace: default
+  targetNamespace: awx
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
