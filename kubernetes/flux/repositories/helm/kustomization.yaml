@@ -22,3 +22,4 @@ resources:
   - ./awx.yaml
   - ./dysnix.yaml
   - ./external-secrets.yaml
+  - ./rook-ceph.yaml
