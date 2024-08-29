@@ -42,6 +42,13 @@ spec:
           extra_settings:
             - setting: TOWER_URL_BASE
               value: '"awx.${SECRET_DOMAIN}"'
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
     persistence:
       data:
         existingClaim: awx
