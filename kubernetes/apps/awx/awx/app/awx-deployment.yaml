@@ -33,7 +33,7 @@ spec:
           name: awx
           namespace: awx
         spec:
-          postgres_configuration_secret: awx-secrets
+          # postgres_configuration_secret: awx-secrets
           ingress_type: ingress
           hostname: "awx.${SECRET_DOMAIN}"
           ee_images:
