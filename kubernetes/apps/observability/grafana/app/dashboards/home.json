@@ -144,7 +144,7 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "/zigbee2mqtt_(.*) temp/",
+            "regex": "/zigbee2mqtt_(.*) env/",
             "renamePattern": "$1"
           }
         }
@@ -266,7 +266,7 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "/zigbee2mqtt_(.*)temp/",
+            "regex": "/zigbee2mqtt_(.*)env/",
             "renamePattern": "$1"
           }
         }
