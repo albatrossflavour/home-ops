@@ -20,3 +20,4 @@ resources:
   - ./bitnami.yaml
   - ./emqx.yaml
   - ./awx.yaml
+  - ./dysnix.yaml
