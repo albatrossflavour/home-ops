@@ -1,0 +1,44 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: awx-deployment
+  namespace: awx
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: raw
+      version: v0.3.2
+      sourceRef:
+        kind: HelmRepository
+        name: dysnix-charts
+        namespace: flux-system
+  targetNamespace: awx
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: awx-operator
+      namespace: awx
+  values:
+    resources:
+      - apiVersion: awx.ansible.com/v1beta1
+        kind: AWX
+        metadata:
+          name: awx
+          namespace: awx
+        spec:
+          postgres_configuration_secret: awx-secrets
+          ingress_type: ingress
+          hostname: "awx.${SECRET_DOMAIN}"
+          ee_images:
+            - name: personal-awx-ee
+              image: ghcr.io/davralin/awx-ee:awx
+          extra_settings:
+            - setting: TOWER_URL_BASE
+              value: '"awx.${SECRET_DOMAIN}"'
