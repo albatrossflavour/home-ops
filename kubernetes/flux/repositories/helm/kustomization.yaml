@@ -19,3 +19,4 @@ resources:
   - ./authentik.yaml
   - ./bitnami.yaml
   - ./emqx.yaml
+  - ./awx.yaml
