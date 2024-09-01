@@ -108,12 +108,12 @@ data:
         style: row
         columns: 4
         icon: mdi-chart-line
-      Puppet:
-        icon: si-puppet-#FFAE1A
-      Lab:
-        icon: mdi-server
-      Home:
-        icon: mdi-home-analytics
+#     Puppet:
+#       icon: si-puppet-#FFAE1A
+#     Lab:
+#       icon: mdi-server
+#     Home:
+#       icon: mdi-home-analytics
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
