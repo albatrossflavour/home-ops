@@ -85,7 +85,7 @@ data:
   services.yaml: ""
   settings.yaml: |
     background:
-      image: https://source.unsplash.com/random/?night,dark
+      image: https://unsplash.com/photos/silhouette-photography-of-person-oMpAz-DN-9I
       blur: sm
       brightness: 25
       opacity: 50
