@@ -84,6 +84,10 @@ data:
     mode: cluster
   services.yaml: ""
   settings.yaml: |
+    image: https://source.unsplash.com/random/?night,dark
+    blur: sm
+    brightness: 25
+    opacity: 50
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
     useEqualHeights: true
@@ -98,11 +102,11 @@ data:
     layout:
       Downloads:
         style: row
-        columns: 6
+        columns: 4
         icon: mdi-download-circle
       Observability:
         style: row
-        columns: 6
+        columns: 4
         icon: mdi-chart-line
       Puppet:
         icon: si-puppet-#FFAE1A
