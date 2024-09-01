@@ -98,11 +98,11 @@ data:
     layout:
       Downloads:
         style: row
-        columns: 4
+        columns: 6
         icon: mdi-download-circle
       Observability:
         style: row
-        columns: 4
+        columns: 6
         icon: mdi-chart-line
       Puppet:
         icon: si-puppet-#FFAE1A
