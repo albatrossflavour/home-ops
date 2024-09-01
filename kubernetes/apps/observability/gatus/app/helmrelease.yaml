@@ -39,7 +39,7 @@ spec:
             dependsOn: init-db
             image:
               repository: ghcr.io/kiwigrid/k8s-sidecar
-              tag: 1.27.5@sha256:1fc88232e223a6977c626510372a74ca1f73af073e3c361719ccf02f223c8a12
+              tag: 1.27.6@sha256:db85bd5532530d288736b35e63baceacbf570bf863d85a0404b33c1e1631f63b
             env:
               FOLDER: /config
               LABEL: gatus.io/enabled
@@ -113,10 +113,10 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
           ingress.kubernetes.io/force-ssl-redirect: "true"
-          nginx.ingress.kubernetes.io/auth-method: "GET"
-          nginx.ingress.kubernetes.io/auth-url: "http://authentik-server.security.svc.cluster.local"
-          nginx.ingress.kubernetes.io/auth-signin: "https://id.${SECRET_DOMAIN}?rm=$request_method"
-          nginx.ingress.kubernetes.io/auth-response-headers: "Remote-User,Remote-Name,Remote-Groups,Remote-Email"
+          #nginx.ingress.kubernetes.io/auth-method: "GET"
+          #nginx.ingress.kubernetes.io/auth-url: "http://authentik-server.security.svc.cluster.local"
+          #nginx.ingress.kubernetes.io/auth-signin: "https://id.${SECRET_DOMAIN}?rm=$request_method"
+          #nginx.ingress.kubernetes.io/auth-response-headers: "Remote-User,Remote-Name,Remote-Groups,Remote-Email"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Observability
           gethomepage.dev/name: Gatus
