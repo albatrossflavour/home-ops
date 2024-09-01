@@ -84,10 +84,11 @@ data:
     mode: cluster
   services.yaml: ""
   settings.yaml: |
-    image: https://source.unsplash.com/random/?night,dark
-    blur: sm
-    brightness: 25
-    opacity: 50
+    background:
+      image: https://source.unsplash.com/random/?night,dark
+      blur: sm
+      brightness: 25
+      opacity: 50
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
     useEqualHeights: true
