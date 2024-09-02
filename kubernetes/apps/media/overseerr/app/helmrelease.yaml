@@ -89,7 +89,7 @@ spec:
           gethomepage.dev/description: TV/Movie Requests
           gethomepage.dev/widget.type: overseerr
           gethomepage.dev/widget.url: http://overseerr.media.svc.cluster.local
-          gethomepage.dev/widget.key: "{{ `{{OVERSEERR__AUTH__APIKEY}}` }}"
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_OVERSEERR_TOKEN}}` }}"
         className: external
         hosts:
           - host: requests.${SECRET_DOMAIN}

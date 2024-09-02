@@ -90,8 +90,8 @@ spec:
           gethomepage.dev/icon: tautulli.png
           gethomepage.dev/description: Plex Stats
           gethomepage.dev/widget.type: tautulli
-          gethomepage.dev/widget.url: http://tautulli.${SECRET_DOMAIN}
-          gethomepage.dev/widget.key: "{{ `{{TAUTULLI__AUTH__APIKEY}}` }}"
+          gethomepage.dev/widget.url: http://tautulli.media.svc.cluster.local
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_TAUTULLI_TOKEN}}` }}"
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         className: internal
         hosts:
