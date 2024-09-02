@@ -85,7 +85,7 @@ data:
   services.yaml: ""
   settings.yaml: |
     background:
-      image: https://unsplash.com/photos/silhouette-photography-of-person-oMpAz-DN-9I
+      image: https://wallpapercave.com/wp/wp8828809.jpg
       blur: sm
       brightness: 25
       opacity: 50
