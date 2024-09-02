@@ -102,6 +102,7 @@ spec:
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Qbittorrent
           gethomepage.dev/icon: qbittorrent.png
+          gethomepage.dev/siteMonitor: http://qb.${SECRET_DOMAIN}
           gethomepage.dev/description: TV Downloads
           gethomepage.dev/widget.type: qbittorrent
           gethomepage.dev/widget.url: http://qbittorrent.media

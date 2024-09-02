@@ -78,6 +78,7 @@ spec:
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Prowlarr
           gethomepage.dev/icon: prowlarr.png
+          gethomepage.dev/siteMonitor: http://prowlarr.${SECRET_DOMAIN}
           gethomepage.dev/description: Torrent/NZB Indexer Management
           gethomepage.dev/widget.type: prowlarr
           gethomepage.dev/widget.url: http://prowlarr.${SECRET_DOMAIN}

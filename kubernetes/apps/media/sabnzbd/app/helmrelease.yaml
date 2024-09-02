@@ -94,6 +94,7 @@ spec:
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Sabnzbd
           gethomepage.dev/icon: sabnzbd.png
+          gethomepage.dev/siteMonitor: http://sab.${SECRET_DOMAIN}
           gethomepage.dev/description: TV Downloads
           gethomepage.dev/widget.type: sabnzbd
           gethomepage.dev/widget.url: http://sabnzbd.media
