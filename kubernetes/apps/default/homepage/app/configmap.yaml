@@ -89,7 +89,14 @@ data:
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
-  services.yaml: ""
+  services.yaml: |
+    - Infrastructure:
+      - PiHole:
+        href: http://192.168.9.2/
+        widget:
+          type: pihole
+          url: http://192.168.9.2
+          key:  "{{ HOMEPAGE_VAR_PIHOLE_TOKEN }}"
   settings.yaml: |
     background:
       image: https://wallpapercave.com/wp/wp8828809.jpg
