@@ -77,8 +77,9 @@ data:
   kubernetes.yaml: |
     mode: cluster
   services.yaml: |
+    ---
     - Infrastructure:
-        - Pi-Hole:
+        - Pihole:
             - href: http://192.168.9.2/admin/login.php
               icon: si-pihole-#BCBDAC
               description: ""
@@ -86,14 +87,14 @@ data:
                 type: pihole
                 url: http://192.168.9.2
                 key: {{HOMEPAGE_VAR_PIHOLE_TOKEN}}
-        - Luggage:
-            - href: https://192.168.1.22:5006
-              icon: mdi-nas-#BCBDAC
-              description: ""
-        - UniFi:
-            - href: https://192.168.1.1
-              icon: mdi-wifi-#BCBDAC
-              description: ""
+#       - Luggage:
+#           - href: https://192.168.1.22:5006
+#             icon: mdi-nas-#BCBDAC
+#             description: ""
+#       - UniFi:
+#           - href: https://192.168.1.1
+#             icon: mdi-wifi-#BCBDAC
+#             description: ""
   settings.yaml: |
     background:
       image: https://wallpapercave.com/wp/wp8828809.jpg
