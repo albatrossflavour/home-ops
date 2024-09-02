@@ -82,7 +82,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Downloads
+          gethomepage.dev/group: Media
           gethomepage.dev/name: Overseerr
           gethomepage.dev/siteMonitor: http://requests.${SECRET_DOMAIN}
           gethomepage.dev/icon: overseerr.png

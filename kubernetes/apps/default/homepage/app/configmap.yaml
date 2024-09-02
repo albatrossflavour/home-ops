@@ -112,6 +112,10 @@ data:
         style: row
         columns: 4
         icon: mdi-download-circle
+      Media:
+        style: row
+        columns: 4
+        icon: mdi-play-network
       Observability:
         style: row
         columns: 4
