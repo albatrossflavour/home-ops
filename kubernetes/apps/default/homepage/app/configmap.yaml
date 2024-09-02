@@ -103,8 +103,8 @@ data:
     background:
       image: https://wallpapercave.com/wp/wp8828809.jpg
       blur: sm
-      brightness: 25
-      opacity: 25
+      brightness: 20
+      opacity: 20
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
     useEqualHeights: true
@@ -129,7 +129,7 @@ data:
         style: column
       Downloads:
         style: row
-        columns: 4
+        columns: 3
         icon: mdi-download-circle
       Media:
         style: row
@@ -137,10 +137,11 @@ data:
         icon: mdi-play-network
       Observability:
         style: row
-        columns: 4
+        columns: 3
         icon: mdi-chart-line
       Infrastructure:
         icon: mdi-home-analytics
+        columns: 3
         style: row
   widgets.yaml: |
     - search:
