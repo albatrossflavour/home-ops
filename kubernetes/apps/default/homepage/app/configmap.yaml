@@ -80,11 +80,11 @@ data:
               description: ""
         - Luggage:
             - href: https://192.168.1.22:5006
-              icon: si-synology-#BCBDAC
+              icon: mdi-bas-#BCBDAC
               description: ""
         - UniFi:
             - href: https://192.168.1.1
-              icon: si-unifi-#BCBDAC
+              icon: mdi-wifi-#BCBDAC
               description: ""
   docker.yaml: ""
   kubernetes.yaml: |
