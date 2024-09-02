@@ -123,7 +123,7 @@ spec:
           gethomepage.dev/icon: gatus.png
           gethomepage.dev/description: Status
           gethomepage.dev/widget.type: gatus
-          gethomepage.dev/widget.url: http://gatus.${SECRET_DOMAIN}
+          gethomepage.dev/widget.url: http://status.${SECRET_DOMAIN}
         className: external
         hosts:
           - host: "status.${SECRET_DOMAIN}"
