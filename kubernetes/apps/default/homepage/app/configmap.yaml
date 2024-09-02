@@ -99,6 +99,7 @@ data:
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
     useEqualHeights: true
+    iconStyle: theme
     theme: dark
     color: slate
     headerStyle: clean
