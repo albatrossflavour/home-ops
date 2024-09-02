@@ -109,12 +109,10 @@ data:
       hideVisitURL: true
     layout:
       Downloads:
-        tab: Second
         style: row
         columns: 4
         icon: mdi-download-circle
       Observability:
-        tab: Second
         style: row
         columns: 4
         icon: mdi-chart-line
