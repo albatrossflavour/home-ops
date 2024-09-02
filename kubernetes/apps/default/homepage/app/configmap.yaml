@@ -163,6 +163,7 @@ data:
           show: false
           showLabel: true
     - datetime:
+        locale: au
         text_size: l
         format:
           timeStyle: short
