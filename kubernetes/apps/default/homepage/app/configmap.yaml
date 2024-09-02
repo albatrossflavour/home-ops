@@ -88,7 +88,7 @@ data:
       image: https://wallpapercave.com/wp/wp8828809.jpg
       blur: sm
       brightness: 25
-      opacity: 50
+      opacity: 70
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
     useEqualHeights: true
