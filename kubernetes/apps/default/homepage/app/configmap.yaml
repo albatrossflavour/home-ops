@@ -87,22 +87,18 @@ data:
               type: pihole
               url: http://192.168.9.2
               key: {{HOMEPAGE_VAR_PIHOLE_TOKEN}}
-#       - Unifi:
-#           href: https://192.168.1.1
-#           icon: unifi.png
-#           widget:
-#             type: unifi
-#             url: https://192.168.1.1
-#             username: {{HOMEPAGE_VAR_UNIFI_USERNAME}}
-#             password: {{HOMEPAGE_VAR_UNIFI_PASSWORD}}
+        - Unifi:
+            href: https://192.168.1.1
+            icon: mdi-wifi-#BCBDAC
+            widget:
+              type: unifi
+              url: https://192.168.1.1
+              username: {{HOMEPAGE_VAR_UNIFI_USERNAME}}
+              password: {{HOMEPAGE_VAR_UNIFI_PASSWORD}}
         - Luggage:
-            - href: https://192.168.1.22:5006
-              icon: mdi-nas-#BCBDAC
-              description: ""
-        - UniFi:
-            - href: https://192.168.1.1
-              icon: mdi-wifi-#BCBDAC
-              description: ""
+            href: https://192.168.1.22:5006
+            icon: mdi-nas-#BCBDAC
+            description: ""
   settings.yaml: |
     background:
       image: https://wallpapercave.com/wp/wp8828809.jpg
