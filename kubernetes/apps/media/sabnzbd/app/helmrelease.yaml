@@ -98,7 +98,7 @@ spec:
           gethomepage.dev/siteMonitor: http://sab.${SECRET_DOMAIN}
           gethomepage.dev/description: Newsgroup Downloader
           gethomepage.dev/widget.type: sabnzbd
-          gethomepage.dev/widget.url: http://sabnzbd.media
+          gethomepage.dev/widget.url: http://sab.${SECRET_DOMAIN}
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SABNZBD_TOKEN}}` }}"
         className: internal
         hosts:
