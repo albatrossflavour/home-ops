@@ -90,7 +90,7 @@ spec:
           gethomepage.dev/widget.type: overseerr
           gethomepage.dev/widget.url: http://overseerr.media.svc.cluster.local
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_OVERSEERR_TOKEN}}` }}"
-          #          gethomepage.dev/widget.fields: ["pending"]
+          gethomepage.dev/widget.fields: '["pending"]'
         className: external
         hosts:
           - host: requests.${SECRET_DOMAIN}
