@@ -91,6 +91,13 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: Sabnzbd
+          gethomepage.dev/icon: sabnzbd.png
+          gethomepage.dev/description: TV Downloads
+          gethomepage.dev/widget.type: sabnzbd
+          gethomepage.dev/widget.url: http://sabnzbd.media
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SABNZBD_TOKEN}}` }}"
         className: internal
         hosts:
           - host: "sab.${SECRET_DOMAIN}"
