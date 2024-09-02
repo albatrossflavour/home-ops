@@ -61,30 +61,30 @@ data:
               siteMonitor: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
-            - icon: si-github-#181717
+            - icon: si-github-#BCBDAC
               href: 'https://github.com/albatrossflavour/control-repo'
               description: ""
     - Git:
         - home-ops:
-            - icon: si-github-#181717
+            - icon: si-github-#BCBDAC
               href: 'https://github.com/albatrossflavour/home-ops'
               description: ""
         - kubesearch:
-            - icon: si-kubernetes-#326CE5
+            - icon: si-kubernetes-#BCBDAC
               href: 'https://kubesearch.dev/'
               description: ""
     - Infrastructure:
         - Pi-Hole:
             - href: http://192.168.9.2/admin/login.php
-              icon: si-pihole-#00485B
+              icon: si-pihole-#BCBDAC
               description: ""
         - Luggage:
             - href: https://192.168.1.22:5006
-              icon: si-synology-#00485B
+              icon: si-synology-#BCBDAC
               description: ""
         - UniFi:
             - href: https://192.168.1.1
-              icon: si-unifi-#00485B
+              icon: si-unifi-#BCBDAC
               description: ""
   docker.yaml: ""
   kubernetes.yaml: |
