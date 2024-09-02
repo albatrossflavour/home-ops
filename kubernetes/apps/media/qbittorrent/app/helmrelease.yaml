@@ -99,6 +99,12 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: Qbittorrent
+          gethomepage.dev/icon: qbittorrent.png
+          gethomepage.dev/description: TV Downloads
+          gethomepage.dev/widget.type: qbittorrent
+          gethomepage.dev/widget.url: http://qbittorrent.media
         className: internal
         hosts:
           - host: qb.${SECRET_DOMAIN}
