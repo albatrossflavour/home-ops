@@ -10,14 +10,17 @@ data:
     - Lab:
         - Ankh:
             - href: https://ankh.lab.albatrossflavour.com:8006
+              siteMonitor: https://ankh.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
               description: ""
         - Morpork:
             - href: https://morpork.lab.albatrossflavour.com:8006
+              siteMonitor: https://morpork.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
               description: ""
         - Stolat:
             - href: https://stolat.lab.albatrossflavour.com:8006
+              siteMonitor: https://stolat.lab.albatrossflavour.com:8006
               icon: si-proxmox-#E57000
               description: ""
         - Backups:
@@ -40,18 +43,22 @@ data:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
               href: https://puppet.lab.albatrossflavour.com
+              siteMonitor: https://puppet.lab.albatrossflavour.com
               description: ""
         - CD4PE:
             - icon: si-puppet-#FFAE1A
               href: https://cd4pe.lab.albatrossflavour.com
+              siteMonitor: https://cd4pe.lab.albatrossflavour.com
               description: ""
         - SCM:
             - icon: si-puppet-#FFAE1A
               href: https://scm.lab.albatrossflavour.com
+              siteMonitor: https://scm.lab.albatrossflavour.com
               description: ""
         - Dashboard:
             - icon: si-puppet-#FFAE1A
               href: https://dashboard.lab.albatrossflavour.com
+              siteMonitor: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
             - icon: si-github-#181717
