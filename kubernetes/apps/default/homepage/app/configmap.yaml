@@ -118,6 +118,15 @@ data:
       showSearchSuggestions: true
       hideVisitURL: true
     layout:
+      Puppet:
+        icon: si-puppet-#FFAE1A
+        style: column
+      Lab:
+        icon: mdi-server
+        style: column
+      Git:
+        icon: mdi-home-analytics
+        style: column
       Downloads:
         style: row
         columns: 4
@@ -132,16 +141,7 @@ data:
         icon: mdi-chart-line
       Infrastructure:
         icon: mdi-home-analytics
-        style: column
-      Puppet:
-        icon: si-puppet-#FFAE1A
-        style: column
-      Lab:
-        icon: mdi-server
-        style: column
-      Git:
-        icon: mdi-home-analytics
-        style: column
+        style: row
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
