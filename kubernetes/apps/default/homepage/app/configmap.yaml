@@ -29,15 +29,15 @@ data:
               description: ""
         - Ankh KVM:
             - href: https://192.168.5.20/login/
-              icon: pikvm.png
+              icon: si-raspberrypi-#E57000
               description: ""
         - Morpork KVM:
             - href: https://192.168.5.21/login/
-              icon: pikvm.png
+              icon: si-raspberrypi-#E57000
               description: ""
         - Stolat KVM:
             - href: https://192.168.5.22/login/
-              icon: pikvm.png
+              icon: si-raspberrypi-#E57000
               description: ""
     - Puppet:
         - Puppet Enterprise:
@@ -61,35 +61,44 @@ data:
               siteMonitor: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
-            - icon: si-github-#181717
+            - icon: si-github-#BCBDAC
               href: 'https://github.com/albatrossflavour/control-repo'
               description: ""
     - Git:
         - home-ops:
-            - icon: si-github-#181717
+            - icon: si-github-#BCBDAC
               href: 'https://github.com/albatrossflavour/home-ops'
               description: ""
         - kubesearch:
-            - icon: si-kubernetes-#326CE5
+            - icon: si-kubernetes-#BCBDAC
               href: 'https://kubesearch.dev/'
-              description: ""
-    - Infrastructure:
-        - Pi-Hole:
-            - href: http://192.168.9.2/admin/login.php
-              icon: si-pihole-#00485B
-              description: ""
-        - Luggage:
-            - href: https://192.168.1.22:5006
-              icon: si-synology-#00485B
-              description: ""
-        - UniFi:
-            - href: https://192.168.1.1
-              icon: si-unifi-#00485B
               description: ""
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
-  services.yaml: ""
+  services.yaml: |
+    ---
+    - Infrastructure:
+        - Pihole:
+            href: http://192.168.9.2/admin/login.php
+            icon: si-pihole-#BCBDAC
+            description: ""
+            widget:
+              type: pihole
+              url: http://192.168.9.2
+              key: {{HOMEPAGE_VAR_PIHOLE_TOKEN}}
+        - Unifi:
+            href: https://192.168.1.1
+            icon: mdi-wifi-#BCBDAC
+            widget:
+              type: unifi
+              url: https://192.168.1.1
+              username: {{HOMEPAGE_VAR_UNIFI_USERNAME}}
+              password: {{HOMEPAGE_VAR_UNIFI_PASSWORD}}
+        - Luggage:
+            href: https://192.168.1.22:5006
+            icon: mdi-nas-#BCBDAC
+            description: ""
   settings.yaml: |
     background:
       image: https://wallpapercave.com/wp/wp8828809.jpg
@@ -99,6 +108,7 @@ data:
     title: Dashboard
     favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
     useEqualHeights: true
+    iconStyle: theme
     theme: dark
     color: slate
     headerStyle: clean
@@ -108,6 +118,15 @@ data:
       showSearchSuggestions: true
       hideVisitURL: true
     layout:
+      Puppet:
+        icon: si-puppet-#FFAE1A
+        style: column
+      Lab:
+        icon: mdi-server
+        style: column
+      Git:
+        icon: mdi-home-analytics
+        style: column
       Downloads:
         style: row
         columns: 4
@@ -120,18 +139,9 @@ data:
         style: row
         columns: 4
         icon: mdi-chart-line
-      Puppet:
-        icon: si-puppet-#FFAE1A
-        style: column
-      Lab:
-        icon: mdi-server
-        style: column
-      Home:
+      Infrastructure:
         icon: mdi-home-analytics
-        style: column
-      Git:
-        icon: mdi-home-analytics
-        style: column
+        style: row
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
