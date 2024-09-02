@@ -120,19 +120,19 @@ data:
         icon: mdi-chart-line
       Puppet:
         icon: si-puppet-#FFAE1A
-        tag: First
+        tab: First
         style: column
       Lab:
         icon: mdi-server
-        tag: First
+        tab: First
         style: column
       Home:
         icon: mdi-home-analytics
-        tag: First
+        tab: First
         style: column
       Git:
         icon: mdi-home-analytics
-        tag: First
+        tab: First
         style: column
   widgets.yaml: |
     - search:
