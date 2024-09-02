@@ -84,6 +84,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Overseerr
+          gethomepage.dev/siteMonitor: http://requests.${SECRET_DOMAIN}
           gethomepage.dev/icon: overseerr.png
           gethomepage.dev/description: TV/Movie Requests
           gethomepage.dev/widget.type: overseerr
