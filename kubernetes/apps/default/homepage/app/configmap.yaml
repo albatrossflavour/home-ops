@@ -125,14 +125,14 @@ data:
         style: row
         columns: 4
         icon: mdi-chart-line
+      Infrastructure:
+        icon: mdi-home-analytics
+        style: row
       Puppet:
         icon: si-puppet-#FFAE1A
         style: column
       Lab:
         icon: mdi-server
-        style: column
-      Home:
-        icon: mdi-home-analytics
         style: column
       Git:
         icon: mdi-home-analytics
