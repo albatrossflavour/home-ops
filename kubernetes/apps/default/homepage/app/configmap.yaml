@@ -80,7 +80,7 @@ data:
               description: ""
         - Luggage:
             - href: https://192.168.1.22:5006
-              icon: mdi-bas-#BCBDAC
+              icon: mdi-nas-#BCBDAC
               description: ""
         - UniFi:
             - href: https://192.168.1.1
