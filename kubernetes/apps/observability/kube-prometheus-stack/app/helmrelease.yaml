@@ -40,11 +40,6 @@ spec:
         enabled: true
         annotations:
           external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Observability
-          gethomepage.dev/name: Alert Manager
-          gethomepage.dev/icon: alertmanager.png
-          gethomepage.dev/description: Alert Management
         ingressClassName: internal
         hosts: ["alertmanager.${SECRET_DOMAIN}"]
         pathType: Prefix
@@ -83,6 +78,7 @@ spec:
           gethomepage.dev/group: Observability
           gethomepage.dev/name: Prometheus
           gethomepage.dev/icon: prometheus.png
+          gethomepage.dev/serviceMonitor: "http://prometheus.${SECRET_DOMAIN}"
           gethomepage.dev/description: Metric Gathering
           gethomepage.dev/widget.type: prometheus
           gethomepage.dev/widget.url: "http://prometheus.${SECRET_DOMAIN}"
