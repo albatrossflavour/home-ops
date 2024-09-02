@@ -80,8 +80,8 @@ spec:
           gethomepage.dev/icon: prometheus.png
           gethomepage.dev/serviceMonitor: "http://prometheus.${SECRET_DOMAIN}"
           gethomepage.dev/description: Metric Gathering
-          gethomepage.dev/widget.type: prometheus
-          gethomepage.dev/widget.url: "http://prometheus.${SECRET_DOMAIN}"
+#         gethomepage.dev/widget.type: prometheus
+#         gethomepage.dev/widget.url: "http://prometheus.${SECRET_DOMAIN}"
         ingressClassName: internal
         hosts: ["prometheus.${SECRET_DOMAIN}"]
         pathType: Prefix
