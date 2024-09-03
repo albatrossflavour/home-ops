@@ -1,3 +1,5 @@
+[![wakatime](https://wakatime.com/badge/user/97c75e0e-3119-41db-b612-8c629b4e97f4/project/ef519725-9fe1-48f5-83e1-57bf5545021e.svg)](https://wakatime.com/badge/user/97c75e0e-3119-41db-b612-8c629b4e97f4/project/ef519725-9fe1-48f5-83e1-57bf5545021e)
+
 # ⛵ Cluster Template
 
 Welcome to my opinionated and extensible template for deploying a single Kubernetes cluster. The goal of this project is to make it easier for people interested in using Kubernetes to deploy a cluster at home on bare-metal or VMs.
