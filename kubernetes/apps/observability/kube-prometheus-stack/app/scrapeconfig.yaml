@@ -90,12 +90,7 @@ spec:
   staticConfigs:
     - targets:
         - overseer-exporter.observability.svc.cluster.local:9850
-        - prowlarr-exporter.observability.svc.cluster.local:9707
         - qbittorrent-exporter.observability.svc.cluster.local:8000
-        - radarr-exporter.observability.svc.cluster.local:9707
-        - sabnzbd-exporter.observability.svc.cluster.local:9712
-        - sonarr-exporter.observability.svc.cluster.local:9707
-        - tautulli-exporter.observability.svc.cluster.local:9487
   metricsPath: /metrics
   relabelings:
     - action: replace
