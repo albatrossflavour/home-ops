@@ -85,11 +85,32 @@ spec:
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
-  name: &name zigbee-controller
+  name: &name media-exporters
 spec:
   staticConfigs:
     - targets:
-        - zigbee-controller.internal
+        - overseer-exporter.observability.svc.cluster.local:9850
+        - prowlarr-exporter.observability.svc.cluster.local:9707
+        - qbittorrent-exporter.observability.svc.cluster.local:8000
+        - radarr-exporter.observability.svc.cluster.local:9707
+        - sabnzbd-exporter.observability.svc.cluster.local:9712
+        - sonarr-exporter.observability.svc.cluster.local:9707
+        - tautulli-exporter.observability.svc.cluster.local:9487
+  metricsPath: /metrics
+  relabelings:
+    - action: replace
+      targetLabel: job
+      replacement: *name
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: &name speedtest-exporters
+spec:
+  staticConfigs:
+    - targets:
+        - speedtest-exporter.observability.svc.cluster.local:9798
   metricsPath: /metrics
   relabelings:
     - action: replace
