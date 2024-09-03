@@ -108,6 +108,7 @@ kind: ScrapeConfig
 metadata:
   name: &name speedtest-exporters
 spec:
+  scrape_timeout: 40s
   staticConfigs:
     - targets:
         - speedtest-exporter.observability.svc.cluster.local:9798
