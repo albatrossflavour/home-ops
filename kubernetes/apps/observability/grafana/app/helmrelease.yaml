@@ -135,6 +135,11 @@ spec:
         external-secrets:
           url: https://raw.githubusercontent.com/external-secrets/external-secrets/main/docs/snippets/dashboard.json
           datasource: Prometheus
+        exportarr:
+          url: https://raw.githubusercontent.com/onedr0p/exportarr/master/examples/grafana/dashboard2.json
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
         flux-cluster:
           url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/cluster.json
           datasource: Prometheus
