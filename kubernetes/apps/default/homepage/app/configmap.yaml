@@ -99,7 +99,7 @@ data:
             href: https://192.168.1.22:5006
             icon: mdi-nas-#BCBDAC
             description: ""
-    - Calendar:
+    - Media:
         - Calendar:
             name: Calendar
             widget:
@@ -147,14 +147,6 @@ data:
       Git:
         icon: mdi-home-analytics
         style: column
-      Downloads:
-        style: row
-        columns: 3
-        icon: mdi-download-circle
-      Media:
-        style: row
-        columns: 4
-        icon: mdi-play-network
       Observability:
         style: row
         columns: 3
@@ -163,6 +155,14 @@ data:
         icon: mdi-home-analytics
         columns: 3
         style: row
+      Downloads:
+        style: row
+        columns: 3
+        icon: mdi-download-circle
+      Media:
+        style: row
+        columns: 4
+        icon: mdi-play-network
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
