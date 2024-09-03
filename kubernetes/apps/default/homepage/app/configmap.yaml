@@ -100,23 +100,25 @@ data:
             icon: mdi-nas-#BCBDAC
             description: ""
     - Calendar:
-        widget:
-          type: calendar
-          view: monthly
-          maxEvents: 10
-          showTime: true
-          timezone: Australia/Sydney
-          integrations:
-            - type: sonarr
-              service_group: Media
-              service_name: Sonarr
-              params:
-                unmonitored: true
-            - type: radarr
-              service_group: Media
-              service_name: Radarr
-              params:
-                unmonitored: true
+        - Calendar:
+            name: Calendar
+            widget:
+              type: calendar
+              view: monthly
+              maxEvents: 10
+              showTime: true
+              timezone: Australia/Sydney
+              integrations:
+                - type: sonarr
+                  service_group: Media
+                  service_name: Sonarr
+                  params:
+                    unmonitored: true
+                - type: radarr
+                  service_group: Media
+                  service_name: Radarr
+                  params:
+                    unmonitored: true
   settings.yaml: |
     background:
       image: https://wallpapercave.com/wp/wp8828809.jpg
