@@ -99,6 +99,24 @@ data:
             href: https://192.168.1.22:5006
             icon: mdi-nas-#BCBDAC
             description: ""
+      widget:
+        type: calendar
+        view: monthly
+        maxEvents: 10
+        showTime: true
+        timezone: Australia/Sydney
+        integrations:
+          - type: sonarr
+            service_group: Media
+            service_name: Sonarr
+            params:
+              unmonitored: true
+        integrations:
+          - type: radarr
+            service_group: Media
+            service_name: Radarr
+            params:
+              unmonitored: true
   settings.yaml: |
     background:
       image: https://wallpapercave.com/wp/wp8828809.jpg
