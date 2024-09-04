@@ -83,7 +83,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
           nginx.ingress.kubernetes.io/auth-url: |-
-            http://ak-outpost.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx
+            http://authentik-outpost.security.svc.cluster.local:80/outpost.goauthentik.io/auth/nginx
           nginx.ingress.kubernetes.io/auth-signin: |-
             https://id.albatrossflavour.com/outpost.goauthentik.io/start?rd=$escaped_request_uri
           nginx.ingress.kubernetes.io/auth-response-headers: |-
