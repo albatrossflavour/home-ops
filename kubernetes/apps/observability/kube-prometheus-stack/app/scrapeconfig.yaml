@@ -103,6 +103,7 @@ kind: ScrapeConfig
 metadata:
   name: &name speedtest-exporters
 spec:
+  scrape_interval: 1h
   scrape_timeout: 1m
   staticConfigs:
     - targets:
