@@ -9,3 +9,4 @@ resources:
   - ./home-assistant/ks.yaml
   - ./nginx-reverse-proxy/ks.yaml
   - ./homepage/ks.yaml
+  - ./paperless/ks.yaml
