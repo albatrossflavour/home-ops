@@ -100,6 +100,11 @@ data:
             icon: mdi-nas-#BCBDAC
             description: ""
     - Media:
+        - Tdarr:
+            name: Tdarr
+            widget:
+              type: tdarr
+              url: http://192.168.9.23:8265
         - Calendar:
             name: Calendar
             widget:
