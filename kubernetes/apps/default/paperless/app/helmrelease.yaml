@@ -42,7 +42,7 @@ spec:
               PAPERLESS_PORT: "8000"
               PAPERLESS_TIME_ZONE: "Australia/Sydney"
               PAPERLESS_WEBSERVER_WORKERS: "2"
-              PAPERLESS_TASK_WORKERS: "2"
+              PAPERLESS_TASK_WORKERS: "4"
               # Configure folders
               PAPERLESS_CONSUMPTION_DIR: /data/nas/incoming
               PAPERLESS_DATA_DIR: /data/nas/data
