@@ -56,6 +56,7 @@ spec:
         - smp.kalooma.org:9100
         - tdarr.albatrossflavour.com:9100
         - hex.home.albatrossflavour.com:9100
+        - ankh.lab.albatrossflavour.com:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
