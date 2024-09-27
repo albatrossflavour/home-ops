@@ -19,7 +19,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 76,
   "links": [],
   "panels": [
     {
@@ -618,7 +617,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Changed\"}) - sum(puppet_report_resources{name=\"Corrective change\"})",
+          "expr": "sum(puppet_report_resources{name=\"Changed\"}) - sum(puppet_report_resources{name=\"Corrective change\"}) + sum(puppet_report_resources{name=\"Failed\"})",
+          "hide": false,
           "instant": false,
           "interval": "$interval",
           "legendFormat": "Intentional Changes",
@@ -729,6 +729,7 @@
       "type": "bargauge"
     }
   ],
+  "refresh": "",
   "schemaVersion": 39,
   "tags": [
     "puppet"
@@ -802,13 +803,13 @@
     ]
   },
   "time": {
-    "from": "now-24h",
-    "to": "now"
+    "from": "2024-09-21T18:26:11.948Z",
+    "to": "2024-09-23T00:07:07.071Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Puppet Overview",
   "uid": "edxmpd28ow35sd",
-  "version": 13,
+  "version": 1,
   "weekStart": "monday"
 }
