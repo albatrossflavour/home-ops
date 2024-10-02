@@ -19,6 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
+  "id": 22,
   "links": [],
   "panels": [
     {
@@ -76,8 +77,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_node_count",
+          "exemplar": false,
+          "expr": "sum(puppet_node_count{environment=~\"${environment:regex}\"})",
           "instant": false,
+          "interval": "$interval",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -142,7 +145,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(puppet_report_resources{name=\"Total\"})",
+          "expr": "sum(puppet_report_resources{name=\"Total\",environment=~\"${environment:regex}\"})",
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
@@ -212,7 +215,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "count(puppet_noop{} > 1)",
+          "expr": "count(puppet_noop{environment=~\"${environment:regex}\"} > 1)",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -282,7 +285,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_noop_pending)",
+          "expr": "sum(puppet_noop_pending{environment=~\"${environment:regex}\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -351,7 +354,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_patching_data{type=\"all\"})",
+          "expr": "sum(puppet_patching_data{type=\"all\",environment=~\"${environment:regex}\"})",
           "instant": false,
           "interval": "",
           "legendFormat": "__auto",
@@ -422,7 +425,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (version) (puppet_version)",
+          "expr": "sum by (version) (puppet_version{environment=~\"${environment:regex}\"})",
           "instant": true,
           "interval": "",
           "legendFormat": "{{version}}",
@@ -432,6 +435,204 @@
       ],
       "title": "Puppet Agent Versions",
       "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 10,
+        "y": 6
+      },
+      "id": 10,
+      "options": {
+        "displayMode": "lcd",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sort_desc(sum by (role) (puppet_node_trusted{environment=~\"${environment:regex}\"}))",
+          "instant": true,
+          "legendFormat": "{{role}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Roles",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": -48,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": 7200000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 10,
+        "x": 0,
+        "y": 12
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) + sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
+          "hide": false,
+          "instant": false,
+          "interval": "$interval",
+          "legendFormat": "Intentional Changes",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
+          "hide": false,
+          "instant": false,
+          "interval": "$interval",
+          "legendFormat": "Failures",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"})",
+          "hide": false,
+          "instant": false,
+          "interval": "$interval",
+          "legendFormat": "Corrective Changes",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Changes Enforced",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -493,10 +694,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 5,
+        "h": 7,
+        "w": 10,
         "x": 10,
-        "y": 6
+        "y": 12
       },
       "id": 6,
       "options": {
@@ -519,7 +720,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (version) (puppet_configuration_version)",
+          "expr": "sum by (version) (puppet_configuration_version{environment=~\"${environment:regex}\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -537,52 +738,16 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": 7200000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 0,
           "mappings": [],
+          "max": 3,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -593,23 +758,28 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 12
+        "y": 19
       },
-      "id": 1,
+      "id": 11,
       "options": {
-        "legend": {
+        "displayMode": "lcd",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": false
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
+      "pluginVersion": "11.1.5",
       "targets": [
         {
           "datasource": {
@@ -617,45 +787,16 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Changed\"}) - sum(puppet_report_resources{name=\"Corrective change\"}) + sum(puppet_report_resources{name=\"Failed\"})",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "Intentional Changes",
-          "range": true,
+          "exemplar": false,
+          "expr": "sort_desc(sum by (datacenter) (puppet_node_trusted{environment=~\"${environment:regex}\"}))",
+          "instant": true,
+          "legendFormat": "{{datacenter}}",
+          "range": false,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Failed\"})",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "Failures",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Corrective change\"})",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "Corrective Changes",
-          "range": true,
-          "refId": "C"
         }
       ],
-      "title": "Changes Enforced",
-      "type": "timeseries"
+      "title": "Data Centre",
+      "type": "bargauge"
     },
     {
       "datasource": {
@@ -668,6 +809,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 3,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -688,7 +830,7 @@
         "h": 7,
         "w": 10,
         "x": 10,
-        "y": 12
+        "y": 19
       },
       "id": 4,
       "options": {
@@ -718,9 +860,9 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_os_types{}",
+          "expr": "sort_desc(sum by (name,version) (puppet_node_os{environment=~\"${environment:regex}\"}))",
           "instant": true,
-          "legendFormat": "{{name}}",
+          "legendFormat": "{{name}} {{version}}",
           "range": false,
           "refId": "A"
         }
@@ -799,12 +941,39 @@
         "refresh": 2,
         "skipUrlSync": false,
         "type": "interval"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "definition": "label_values(puppet_report_timestamp_epoch,environment)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "environment",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_report_timestamp_epoch,environment)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "2024-09-21T18:26:11.948Z",
-    "to": "2024-09-23T00:07:07.071Z"
+    "from": "now-7d",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
