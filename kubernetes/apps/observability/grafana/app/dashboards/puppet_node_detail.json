@@ -93,7 +93,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_patching_updates{server=\"$host\"}",
+          "expr": "puppet_patching_data{server=\"$host\"}",
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{type}}",

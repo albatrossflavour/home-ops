@@ -351,7 +351,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_patching_updates{type=\"all\"})",
+          "expr": "sum(puppet_patching_data{type=\"all\"})",
           "instant": false,
           "interval": "",
           "legendFormat": "__auto",
