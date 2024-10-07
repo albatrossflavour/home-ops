@@ -19,11 +19,12 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 25,
+  "id": 26,
   "links": [],
   "panels": [
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -78,7 +79,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -87,12 +88,13 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
+          "exemplar": false,
           "expr": "count(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"} > 0)\n",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": false,
+          "instant": true,
           "legendFormat": "{{name}}",
-          "range": true,
+          "range": false,
           "refId": "A",
           "useBackend": false
         }
@@ -102,6 +104,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -157,7 +160,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -166,12 +169,13 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
+          "exemplar": false,
           "expr": "count(puppet_patching_blocked{patch_group=~\"${patchgroup:regex}\"} > 0)\n",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": false,
+          "instant": true,
           "legendFormat": "{{name}}",
-          "range": true,
+          "range": false,
           "refId": "A",
           "useBackend": false
         }
@@ -181,6 +185,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -241,12 +246,13 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
+          "exemplar": false,
           "expr": "puppet_patch_group_overview",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": false,
+          "instant": true,
           "legendFormat": "{{name}}",
-          "range": true,
+          "range": false,
           "refId": "A",
           "useBackend": false
         }
@@ -256,6 +262,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -305,7 +312,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -313,11 +320,12 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
+          "exemplar": false,
           "expr": "sum(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"})",
-          "instant": false,
+          "instant": true,
           "interval": "",
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -326,6 +334,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -375,7 +384,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -383,11 +392,12 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
+          "exemplar": false,
           "expr": "sum(puppet_patching_data{type=\"security\",patch_group=~\"${patchgroup:regex}\"})",
-          "instant": false,
+          "instant": true,
           "interval": "",
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -452,7 +462,7 @@
         "text": {},
         "valueMode": "color"
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -546,7 +556,7 @@
         "text": {},
         "valueMode": "color"
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -894,7 +904,7 @@
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "6h",
           "value": "6h"
         },
@@ -950,13 +960,17 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": [
             "All"
           ],
           "value": [
             "$__all"
           ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "definition": "label_values(puppet_patching_data,patch_group)",
         "hide": 0,
@@ -978,13 +992,17 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": [
             "All"
           ],
           "value": [
             "$__all"
           ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "definition": "label_values(puppet_node_trusted,datacenter)",
         "hide": 0,
@@ -1006,13 +1024,17 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": [
-            "All"
+            "role::pe::master"
           ],
           "value": [
-            "$__all"
+            "role::pe::master"
           ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "definition": "label_values(puppet_node_trusted,role)",
         "hide": 0,
