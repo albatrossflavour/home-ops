@@ -24,7 +24,6 @@
   "panels": [
     {
       "datasource": {
-        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -88,13 +87,12 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "exemplar": false,
           "expr": "count(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"} > 0)\n",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": true,
+          "instant": false,
           "legendFormat": "{{name}}",
-          "range": false,
+          "range": true,
           "refId": "A",
           "useBackend": false
         }
@@ -104,7 +102,6 @@
     },
     {
       "datasource": {
-        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -169,13 +166,12 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "exemplar": false,
           "expr": "count(puppet_patching_blocked{patch_group=~\"${patchgroup:regex}\"} > 0)\n",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": true,
+          "instant": false,
           "legendFormat": "{{name}}",
-          "range": false,
+          "range": true,
           "refId": "A",
           "useBackend": false
         }
@@ -185,7 +181,6 @@
     },
     {
       "datasource": {
-        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -207,7 +202,7 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 8,
+        "w": 10,
         "x": 10,
         "y": 0
       },
@@ -246,13 +241,12 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "exemplar": false,
           "expr": "puppet_patch_group_overview",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": true,
+          "instant": false,
           "legendFormat": "{{name}}",
-          "range": false,
+          "range": true,
           "refId": "A",
           "useBackend": false
         }
@@ -262,7 +256,6 @@
     },
     {
       "datasource": {
-        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -320,12 +313,11 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "exemplar": false,
           "expr": "sum(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"})",
-          "instant": true,
+          "instant": false,
           "interval": "",
           "legendFormat": "__auto",
-          "range": false,
+          "range": true,
           "refId": "A"
         }
       ],
@@ -334,7 +326,6 @@
     },
     {
       "datasource": {
-        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -392,12 +383,11 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "exemplar": false,
           "expr": "sum(puppet_patching_data{type=\"security\",patch_group=~\"${patchgroup:regex}\"})",
-          "instant": true,
+          "instant": false,
           "interval": "",
           "legendFormat": "__auto",
-          "range": false,
+          "range": true,
           "refId": "A"
         }
       ],
@@ -531,7 +521,7 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 8,
+        "w": 10,
         "x": 10,
         "y": 12
       },
@@ -661,8 +651,8 @@
         ]
       },
       "gridPos": {
-        "h": 14,
-        "w": 24,
+        "h": 18,
+        "w": 20,
         "x": 0,
         "y": 25
       },
@@ -750,9 +740,9 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 12,
+        "w": 10,
         "x": 0,
-        "y": 39
+        "y": 43
       },
       "id": 1,
       "options": {
@@ -846,9 +836,9 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 12,
-        "x": 12,
-        "y": 39
+        "w": 10,
+        "x": 10,
+        "y": 43
       },
       "id": 2,
       "options": {
