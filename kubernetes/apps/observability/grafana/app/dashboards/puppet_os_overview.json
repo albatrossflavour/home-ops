@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 77,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -75,7 +75,7 @@
         "sizing": "manual",
         "valueMode": "color"
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -109,30 +109,16 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 22,
+            "fillOpacity": 80,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
+            "lineWidth": 2,
             "scaleDistribution": {
               "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -161,16 +147,25 @@
       },
       "id": 3,
       "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "table",
           "placement": "right",
           "showLegend": true
         },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "normal",
         "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 100
       },
       "pluginVersion": "11.1.5",
       "targets": [
@@ -189,7 +184,7 @@
         }
       ],
       "title": "Historic Count",
-      "type": "timeseries"
+      "type": "barchart"
     },
     {
       "datasource": {
@@ -271,7 +266,7 @@
           }
         ]
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -522,13 +517,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Server OS Overview",
   "uid": "cdzpijufduoe8c",
-  "version": 8,
+  "version": 1,
   "weekStart": ""
 }
