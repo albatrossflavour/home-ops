@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 3,
+  "id": 17,
   "links": [],
   "panels": [
     {
@@ -191,7 +191,14 @@
             "mode": "thresholds"
           },
           "decimals": 0,
+          "links": [
+            {
+              "title": "Restart Details",
+              "url": "https://grafana.albatrossflavour.com/d/ce0arbryermdce/puppet-restart-detail"
+            }
+          ],
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
