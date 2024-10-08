@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 30,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -181,6 +181,91 @@
     },
     {
       "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 5,
+        "x": 10,
+        "y": 0
+      },
+      "id": 12,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "( count(puppet_restart_required{type=\"reboot\"} > 0) )\n/\n( count(puppet_restart_required{type=\"reboot\"}) )\n* 100",
+          "instant": true,
+          "legendFormat": "Server",
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "( count(puppet_restart_required{type=\"app\"} > 0) )\n/\n( count(puppet_restart_required{type=\"app\"}) )\n* 100",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "Application",
+          "range": false,
+          "refId": "B"
+        }
+      ],
+      "title": "Fleet Wide Restart Requirements",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -202,8 +287,8 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 10,
-        "x": 10,
+        "w": 5,
+        "x": 15,
         "y": 0
       },
       "id": 6,
@@ -737,8 +822,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -833,8 +917,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1057,9 +1140,13 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "lab.albatrossflavour.com",
           "value": "lab.albatrossflavour.com"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "definition": "label_values(puppet_node_os,node)",
         "hide": 0,
