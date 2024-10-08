@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 3,
+  "id": 38,
   "links": [],
   "panels": [
     {
@@ -188,6 +188,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -262,7 +263,7 @@
         "sortBy": [
           {
             "desc": false,
-            "displayName": "node"
+            "displayName": "Node Name"
           }
         ]
       },
@@ -275,7 +276,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_node_os{family=~\"${osfamily:regex}\",environment=~\"${environment:regex}\",name=~\"${osname:regex}\",version=~\"$osversion\"}",
+          "expr": "label_replace(puppet_node_os{family=~\"${osfamily:regex}\",environment=~\"${environment:regex}\",name=~\"${osname:regex}\",version=~\"$osversion\"}, \"node\", \"$1\", \"node\", \"${domain}\")",
           "format": "table",
           "instant": true,
           "legendFormat": "{{node}}",
@@ -288,6 +289,7 @@
         {
           "id": "filterFieldsByName",
           "options": {
+            "byVariable": false,
             "include": {
               "names": [
                 "architecture",
@@ -315,7 +317,33 @@
               "node": 0,
               "version": 4
             },
-            "renameByName": {}
+            "renameByName": {
+              "architecture": "Node Architecture",
+              "environment": "Puppet Environment",
+              "family": "OS Family",
+              "hardware": "Node Hardware",
+              "name": "OS Name",
+              "node": "Node Name",
+              "version": "OS Version"
+            }
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "regex",
+                  "options": {
+                    "value": "$doman"
+                  }
+                },
+                "fieldName": "Node Name"
+              }
+            ],
+            "match": "any",
+            "type": "include"
           }
         }
       ],
@@ -331,7 +359,7 @@
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "auto",
           "value": "$__auto_interval_interval"
         },
@@ -512,6 +540,30 @@
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "lab.albatrossflavour.com",
+          "value": "lab.albatrossflavour.com"
+        },
+        "definition": "label_values(puppet_node_os,node)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "DNS Domain",
+        "multi": false,
+        "name": "doman",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_node_os,node)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^[a-zA-Z0-9-]+\\.(.*)$/",
+        "skipUrlSync": false,
+        "sort": 0,
         "type": "query"
       }
     ]
