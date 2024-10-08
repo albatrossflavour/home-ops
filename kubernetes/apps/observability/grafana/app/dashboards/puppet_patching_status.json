@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 26,
+  "id": 30,
   "links": [],
   "panels": [
     {
@@ -689,6 +689,15 @@
         }
       ],
       "title": "Overview ",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "/^([a-zA-Z0-9-]+)\\..*$/",
+            "renamePattern": "$1"
+          }
+        }
+      ],
       "type": "status-history"
     },
     {
@@ -1042,6 +1051,30 @@
         },
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "lab.albatrossflavour.com",
+          "value": "lab.albatrossflavour.com"
+        },
+        "definition": "label_values(puppet_node_os,node)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "DNS Domain",
+        "multi": false,
+        "name": "domain",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_node_os,node)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^[a-zA-Z0-9-]+\\.(.*)$/",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"

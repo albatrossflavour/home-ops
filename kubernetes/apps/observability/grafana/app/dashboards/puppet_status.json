@@ -19,6 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
+  "id": 18,
   "links": [],
   "panels": [
     {
@@ -46,7 +47,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 5,
+        "w": 4,
         "x": 0,
         "y": 0
       },
@@ -68,7 +69,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -113,8 +114,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 5,
-        "x": 5,
+        "w": 4,
+        "x": 4,
         "y": 0
       },
       "id": 3,
@@ -135,7 +136,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -184,8 +185,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 5,
-        "x": 10,
+        "w": 4,
+        "x": 8,
         "y": 0
       },
       "id": 7,
@@ -206,7 +207,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -223,6 +224,41 @@
       ],
       "title": "Servers In noop Mode",
       "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 13,
+      "options": {
+        "alertInstanceLabelFilter": "",
+        "dashboardAlerts": false,
+        "folder": {
+          "title": "Puppet",
+          "uid": "fe0amwupdifi8f"
+        },
+        "groupBy": [],
+        "groupMode": "default",
+        "maxItems": 20,
+        "sortOrder": 1,
+        "stateFilter": {
+          "error": true,
+          "firing": true,
+          "noData": false,
+          "normal": false,
+          "pending": true
+        },
+        "viewMode": "list"
+      },
+      "title": "Alerts",
+      "type": "alertlist"
     },
     {
       "datasource": {
@@ -254,9 +290,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 5,
-        "x": 15,
-        "y": 0
+        "w": 4,
+        "x": 0,
+        "y": 6
       },
       "id": 8,
       "options": {
@@ -276,7 +312,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -323,8 +359,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 5,
-        "x": 0,
+        "w": 4,
+        "x": 4,
         "y": 6
       },
       "id": 5,
@@ -345,7 +381,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -387,8 +423,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 5,
-        "x": 5,
+        "w": 4,
+        "x": 8,
         "y": 6
       },
       "id": 9,
@@ -443,74 +479,6 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
-          },
-          "displayName": "${__series.name}",
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 10,
-        "x": 10,
-        "y": 6
-      },
-      "id": 10,
-      "options": {
-        "displayMode": "lcd",
-        "maxVizHeight": 35,
-        "minVizHeight": 35,
-        "minVizWidth": 8,
-        "namePlacement": "left",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "manual",
-        "valueMode": "color"
-      },
-      "pluginVersion": "11.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "sort_desc(sum by (role) (puppet_node_trusted{environment=~\"${environment:regex}\"}))",
-          "instant": true,
-          "legendFormat": "{{role}}",
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Roles",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
             "mode": "palette-classic"
           },
           "custom": {
@@ -521,6 +489,7 @@
             "axisPlacement": "auto",
             "axisSoftMax": -48,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -567,7 +536,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 10,
+        "w": 12,
         "x": 0,
         "y": 12
       },
@@ -644,7 +613,6 @@
             "mode": "thresholds"
           },
           "displayName": "${__series.name}",
-          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -659,16 +627,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 10,
-        "x": 10,
-        "y": 15
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
       },
-      "id": 11,
+      "id": 10,
       "options": {
         "displayMode": "lcd",
         "maxVizHeight": 35,
-        "minVizHeight": 34,
+        "minVizHeight": 35,
         "minVizWidth": 8,
         "namePlacement": "left",
         "orientation": "horizontal",
@@ -681,10 +649,9 @@
         },
         "showUnfilled": true,
         "sizing": "manual",
-        "text": {},
         "valueMode": "color"
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -693,14 +660,14 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sort_desc(sum by (datacenter) (puppet_node_trusted{environment=~\"${environment:regex}\"}))",
+          "expr": "sort_desc(sum by (role) (puppet_node_trusted{environment=~\"${environment:regex}\"}))",
           "instant": true,
-          "legendFormat": "{{datacenter}}",
+          "legendFormat": "{{role}}",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Servers Per Data Centre",
+      "title": "Roles",
       "type": "bargauge"
     },
     {
@@ -843,8 +810,8 @@
         ]
       },
       "gridPos": {
-        "h": 11,
-        "w": 10,
+        "h": 8,
+        "w": 12,
         "x": 0,
         "y": 20
       },
@@ -974,18 +941,15 @@
           "color": {
             "mode": "thresholds"
           },
+          "displayName": "${__series.name}",
+          "fieldMinMax": false,
           "mappings": [],
-          "max": 3,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -993,16 +957,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 17,
-        "w": 10,
-        "x": 10,
-        "y": 24
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 20
       },
-      "id": 4,
+      "id": 11,
       "options": {
         "displayMode": "lcd",
         "maxVizHeight": 35,
-        "minVizHeight": 35,
+        "minVizHeight": 34,
         "minVizWidth": 8,
         "namePlacement": "left",
         "orientation": "horizontal",
@@ -1015,9 +979,10 @@
         },
         "showUnfilled": true,
         "sizing": "manual",
+        "text": {},
         "valueMode": "color"
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -1026,14 +991,14 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sort_desc(sum by (name,version) (puppet_node_os{environment=~\"${environment:regex}\"}))",
+          "expr": "sort_desc(sum by (datacenter) (puppet_node_trusted{environment=~\"${environment:regex}\"}))",
           "instant": true,
-          "legendFormat": "{{name}} {{version}}",
+          "legendFormat": "{{datacenter}}",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "OS Types",
+      "title": "Servers Per Data Centre",
       "type": "bargauge"
     },
     {
@@ -1053,6 +1018,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1098,9 +1064,9 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 10,
+        "w": 12,
         "x": 0,
-        "y": 31
+        "y": 28
       },
       "id": 6,
       "options": {
@@ -1132,6 +1098,78 @@
       ],
       "title": "Active Config Versions",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 17,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "id": 4,
+      "options": {
+        "displayMode": "lcd",
+        "maxVizHeight": 35,
+        "minVizHeight": 35,
+        "minVizWidth": 8,
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "manual",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sort_desc(sum by (name,version) (puppet_node_os{environment=~\"${environment:regex}\"}))",
+          "instant": true,
+          "legendFormat": "{{name}} {{version}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "OS Types",
+      "type": "bargauge"
     }
   ],
   "refresh": "",
@@ -1146,7 +1184,7 @@
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "auto",
           "value": "$__auto_interval_interval"
         },
