@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 79,
+  "id": 42,
   "links": [],
   "panels": [
     {
@@ -39,6 +39,12 @@
             },
             "inspect": false
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://puppet.lab.albatrossflavour.com/#/inventory/node/${__data.fields.Server}/facts"
+            }
+          ],
           "mappings": [
             {
               "options": {
@@ -175,7 +181,7 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -203,7 +209,7 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
