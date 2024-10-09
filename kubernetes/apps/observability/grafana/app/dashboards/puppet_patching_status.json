@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 19,
+  "id": 21,
   "links": [
     {
       "asDropdown": false,
@@ -75,75 +75,6 @@
   "panels": [
     {
       "datasource": {
-        "default": true,
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 20,
-        "x": 0,
-        "y": 0
-      },
-      "id": 13,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "11.2.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "puppet_state_overview",
-          "instant": true,
-          "legendFormat": "{{state}}",
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Status Overview",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -184,7 +115,7 @@
         "h": 6,
         "w": 5,
         "x": 0,
-        "y": 7
+        "y": 0
       },
       "id": 7,
       "options": {
@@ -268,7 +199,7 @@
         "h": 6,
         "w": 5,
         "x": 5,
-        "y": 7
+        "y": 0
       },
       "id": 9,
       "options": {
@@ -352,7 +283,7 @@
         "h": 12,
         "w": 5,
         "x": 10,
-        "y": 7
+        "y": 0
       },
       "id": 12,
       "options": {
@@ -429,7 +360,7 @@
         "h": 12,
         "w": 5,
         "x": 15,
-        "y": 7
+        "y": 0
       },
       "id": 6,
       "options": {
@@ -517,7 +448,7 @@
         "h": 6,
         "w": 5,
         "x": 0,
-        "y": 13
+        "y": 6
       },
       "id": 4,
       "options": {
@@ -593,7 +524,7 @@
         "h": 6,
         "w": 5,
         "x": 5,
-        "y": 13
+        "y": 6
       },
       "id": 5,
       "options": {
@@ -669,7 +600,7 @@
         "h": 9,
         "w": 10,
         "x": 0,
-        "y": 19
+        "y": 12
       },
       "id": 11,
       "options": {
@@ -763,7 +694,7 @@
         "h": 9,
         "w": 10,
         "x": 10,
-        "y": 19
+        "y": 12
       },
       "id": 8,
       "options": {
@@ -812,7 +743,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 21
       },
       "id": 10,
       "panels": [],
@@ -894,7 +825,7 @@
         "h": 17,
         "w": 20,
         "x": 0,
-        "y": 29
+        "y": 22
       },
       "id": 3,
       "options": {
@@ -997,7 +928,7 @@
         "h": 12,
         "w": 10,
         "x": 0,
-        "y": 46
+        "y": 39
       },
       "id": 1,
       "options": {
@@ -1099,7 +1030,7 @@
         "h": 12,
         "w": 10,
         "x": 10,
-        "y": 46
+        "y": 39
       },
       "id": 2,
       "options": {
