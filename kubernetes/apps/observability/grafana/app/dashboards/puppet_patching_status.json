@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 27,
+  "id": 8,
   "links": [],
   "panels": [
     {
@@ -110,6 +110,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "Blocked Server Details",
+              "url": "https://grafana.albatrossflavour.com/d/ee0avg8jcjz0gc/puppet-patching-blocked-overview?orgId=1"
+            }
+          ],
           "mappings": [],
           "noValue": "None",
           "thresholds": {
