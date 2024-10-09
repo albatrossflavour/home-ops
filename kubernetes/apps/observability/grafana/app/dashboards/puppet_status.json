@@ -15,11 +15,11 @@
       }
     ]
   },
-  "description": "Overview of your Puppet Enterprise estate",
+  "description": "Fleet patching status using Puppet Enterprise",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 18,
+  "id": 4,
   "links": [
     {
       "asDropdown": false,
@@ -75,6 +75,7 @@
   "panels": [
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -84,140 +85,6 @@
             "mode": "thresholds"
           },
           "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 0,
-        "y": 0
-      },
-      "id": 2,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.2.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "sum(puppet_node_count{environment=~\"${environment:regex}\"})",
-          "instant": true,
-          "interval": "$interval",
-          "legendFormat": "__auto",
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Servers In Puppet Enterprise",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 4,
-        "y": 0
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.2.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "sum(puppet_report_resources{name=\"Total\",environment=~\"${environment:regex}\"})",
-          "instant": true,
-          "legendFormat": "__auto",
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Resources Enforced",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -235,10 +102,91 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 8,
+        "h": 7,
+        "w": 20,
+        "x": 0,
         "y": 0
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "puppet_state_overview",
+          "instant": false,
+          "legendFormat": "{{state}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Status Overview",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 0,
+        "y": 7
       },
       "id": 7,
       "options": {
@@ -246,7 +194,7 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "percentChangeColorMode": "standard",
+        "percentChangeColorMode": "inverted",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -254,7 +202,7 @@
           "fields": "",
           "values": false
         },
-        "showPercentChange": false,
+        "showPercentChange": true,
         "textMode": "auto",
         "wideLayout": true
       },
@@ -265,51 +213,20 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "count(puppet_noop{environment=~\"${environment:regex}\"} > 1)",
+          "expr": "count(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"} > 0)\n",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{name}}",
           "range": true,
-          "refId": "A"
+          "refId": "A",
+          "useBackend": false
         }
       ],
-      "title": "Servers In noop Mode",
+      "title": "Servers To Be Patched",
       "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 13,
-      "options": {
-        "alertInstanceLabelFilter": "",
-        "dashboardAlerts": false,
-        "folder": {
-          "title": "Puppet",
-          "uid": "fe0amwupdifi8f"
-        },
-        "groupBy": [],
-        "groupMode": "default",
-        "maxItems": 20,
-        "sortOrder": 1,
-        "stateFilter": {
-          "error": true,
-          "firing": true,
-          "noData": false,
-          "normal": false,
-          "pending": true
-        },
-        "viewMode": "list"
-      },
-      "title": "Alerts",
-      "type": "alertlist"
     },
     {
       "datasource": {
@@ -321,6 +238,99 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0avg8jcjz0gc/puppet-patching-blocked-overview"
+            }
+          ],
+          "mappings": [],
+          "noValue": "None",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 5,
+        "y": 7
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "inverted",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {},
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "count(puppet_patching_blocked{patch_group=~\"${patchgroup:regex}\"} > 0)\n",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "{{name}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Patching Blocked",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "links": [
+            {
+              "title": "Restart Detail",
+              "url": "https://grafana.albatrossflavour.com/d/ce0arbryermdce/puppet-restart-detail"
+            }
+          ],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -335,23 +345,22 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 0,
-        "y": 6
+        "h": 12,
+        "w": 5,
+        "x": 10,
+        "y": 7
       },
-      "id": 8,
+      "id": 12,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -359,9 +368,9 @@
           "fields": "",
           "values": false
         },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
       "pluginVersion": "11.2.1",
       "targets": [
@@ -371,88 +380,34 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_noop_pending{environment=~\"${environment:regex}\"})",
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
+          "exemplar": false,
+          "expr": "( count(puppet_restart_required{type=\"reboot\"} > 0) )\n/\n( count(puppet_restart_required{type=\"reboot\"}) )\n* 100",
+          "instant": true,
+          "legendFormat": "Server",
+          "range": false,
           "refId": "A"
-        }
-      ],
-      "title": "Pending noop Changes",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 4,
-        "y": 6
-      },
-      "id": 5,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.2.1",
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_patching_data{type=\"all\",environment=~\"${environment:regex}\"})",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
+          "exemplar": false,
+          "expr": "( count(puppet_restart_required{type=\"app\"} > 0) )\n/\n( count(puppet_restart_required{type=\"app\"}) )\n* 100",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "Application",
+          "range": false,
+          "refId": "B"
         }
       ],
-      "title": "Patches Outstanding",
-      "type": "stat"
+      "title": "Fleet Wide Restart Requirements",
+      "type": "gauge"
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -473,12 +428,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 8,
-        "y": 6
+        "h": 12,
+        "w": 5,
+        "x": 15,
+        "y": 7
       },
-      "id": 9,
+      "id": 6,
       "options": {
         "displayLabels": [
           "name",
@@ -486,8 +441,11 @@
         ],
         "legend": {
           "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "placement": "right",
+          "showLegend": false,
+          "values": [
+            "value"
+          ]
         },
         "pieType": "pie",
         "reduceOptions": {
@@ -502,24 +460,26 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.1.5",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (version) (puppet_version{environment=~\"${environment:regex}\"})",
+          "expr": "puppet_patching_groups\n",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
           "instant": true,
-          "interval": "",
-          "legendFormat": "{{version}}",
+          "legendFormat": "{{patch_group}}",
           "range": false,
-          "refId": "A"
+          "refId": "A",
+          "useBackend": false
         }
       ],
-      "title": "Puppet Agent Versions",
+      "title": "Patch Group Overview",
       "type": "piechart"
     },
     {
@@ -530,44 +490,14 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMax": -48,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": 7200000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
             }
-          },
-          "decimals": 0,
-          "fieldMinMax": false,
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -586,111 +516,18 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 6,
+        "w": 5,
         "x": 0,
-        "y": 12
+        "y": 13
       },
-      "id": 1,
+      "id": 4,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) + sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "Intentional Changes",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "Failures",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"})",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "Corrective Changes",
-          "range": true,
-          "refId": "C"
-        }
-      ],
-      "title": "Changes Enforced",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "displayName": "${__series.name}",
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 12
-      },
-      "id": 10,
-      "options": {
-        "displayMode": "lcd",
-        "maxVizHeight": 35,
-        "minVizHeight": 35,
-        "minVizWidth": 8,
-        "namePlacement": "left",
-        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "inverted",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -698,9 +535,9 @@
           "fields": "",
           "values": false
         },
-        "showUnfilled": true,
-        "sizing": "manual",
-        "valueMode": "color"
+        "showPercentChange": true,
+        "textMode": "auto",
+        "wideLayout": true
       },
       "pluginVersion": "11.2.1",
       "targets": [
@@ -710,16 +547,16 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "exemplar": false,
-          "expr": "sort_desc(sum by (role) (puppet_node_trusted{environment=~\"${environment:regex}\"}))",
-          "instant": true,
-          "legendFormat": "{{role}}",
-          "range": false,
+          "expr": "sum(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"})",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Roles",
-      "type": "bargauge"
+      "title": "All Patches Outstanding",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -729,29 +566,14 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "left",
-            "fillOpacity": 72,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 2,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
             }
-          },
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -767,127 +589,33 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "changed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "failed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "noop"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-purple",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "unchanged"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "unreported"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "unresponsive"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-orange",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 20
+        "h": 6,
+        "w": 5,
+        "x": 5,
+        "y": 13
       },
-      "id": 12,
+      "id": 5,
       "options": {
-        "barRadius": 0.25,
-        "barWidth": 0.93,
-        "fullHighlight": false,
-        "groupWidth": 0.7,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "inverted",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "orientation": "vertical",
-        "showValue": "never",
-        "stacking": "normal",
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 100
+        "showPercentChange": true,
+        "textMode": "auto",
+        "wideLayout": true
       },
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -895,92 +623,16 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "exemplar": true,
-          "expr": "puppet_state_overview{state=\"unchanged\"}",
+          "expr": "sum(puppet_patching_data{type=\"security\",patch_group=~\"${patchgroup:regex}\"})",
           "instant": false,
-          "interval": "$interval",
-          "legendFormat": "{{state}}",
+          "interval": "",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "puppet_state_overview{state=\"changed\"}",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "puppet_state_overview{state=\"noop\"}",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "puppet_state_overview{state=\"unresponsive\"}",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "puppet_state_overview{state=\"unreported\"}",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "puppet_state_overview{state=\"failed\"}",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "D"
         }
       ],
-      "title": "Status Overview",
-      "type": "barchart"
+      "title": "Security Patches Outstanding",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -993,7 +645,6 @@
             "mode": "thresholds"
           },
           "displayName": "${__series.name}",
-          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1001,17 +652,26 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 800010
+              },
+              {
+                "color": "red",
+                "value": 1600010
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 20
+        "h": 9,
+        "w": 10,
+        "x": 0,
+        "y": 19
       },
       "id": 11,
       "options": {
@@ -1019,7 +679,7 @@
         "maxVizHeight": 35,
         "minVizHeight": 34,
         "minVizWidth": 8,
-        "namePlacement": "left",
+        "namePlacement": "top",
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
@@ -1042,15 +702,243 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sort_desc(sum by (datacenter) (puppet_node_trusted{environment=~\"${environment:regex}\"}))",
+          "expr": "(time() - puppet_patch_run) * on(node) group_left() puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"} > 0",
+          "format": "time_series",
           "instant": true,
-          "legendFormat": "{{datacenter}}",
+          "legendFormat": "{{node}}",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Servers Per Data Centre",
+      "title": "Last time servers were patched",
       "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "${__series.name}",
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Puppet Console",
+                    "url": "https://puppet.lab.albatrossflavour.com/#/inventory/node/${__field.labels.server}/facts"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 10,
+        "y": 19
+      },
+      "id": 8,
+      "options": {
+        "displayMode": "lcd",
+        "maxVizHeight": 34,
+        "minVizHeight": 35,
+        "minVizWidth": 8,
+        "namePlacement": "top",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "limit": 10,
+          "values": true
+        },
+        "showUnfilled": true,
+        "sizing": "manual",
+        "text": {},
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sort_desc(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"} > 0)",
+          "format": "time_series",
+          "instant": true,
+          "legendFormat": "{{node}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Top 10 Clients To Patch",
+      "type": "bargauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 10,
+      "panels": [],
+      "title": "Fleet Detail",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "light-green",
+                "value": 1
+              },
+              {
+                "color": "super-light-yellow",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 20
+              },
+              {
+                "color": "orange",
+                "value": 40
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Puppet Console",
+                    "url": "https://puppet.lab.albatrossflavour.com/#/inventory/node/${__field.labels.server}/facts"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 17,
+        "w": 20,
+        "x": 0,
+        "y": 29
+      },
+      "id": 3,
+      "options": {
+        "colWidth": 0.9,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "rowHeight": 0.9,
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"}",
+          "instant": false,
+          "interval": "$interval",
+          "legendFormat": "{{node}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Overview ",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "/^([a-zA-Z0-9-]+)\\..*$/",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "status-history"
     },
     {
       "datasource": {
@@ -1068,35 +956,29 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
+            "fillOpacity": 100,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
             "lineWidth": 1,
-            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
             }
           },
+          "fieldMinMax": false,
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
           "mappings": [],
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1114,23 +996,32 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 12,
+        "h": 12,
+        "w": 10,
         "x": 0,
-        "y": 28
+        "y": 46
       },
-      "id": 6,
+      "id": 1,
       "options": {
+        "barRadius": 0.2,
+        "barWidth": 0.83,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "normal",
         "tooltip": {
           "mode": "single",
-          "sort": "none"
-        }
+          "sort": "desc"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 100
       },
       "pluginVersion": "11.1.5",
       "targets": [
@@ -1140,15 +1031,16 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (version) (puppet_configuration_version{environment=~\"${environment:regex}\"})",
+          "expr": "sum(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"}) by (node)",
           "instant": false,
+          "interval": "$interval",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Active Config Versions",
-      "type": "timeseries"
+      "title": "Fleet Patching Status - All Patches",
+      "type": "barchart"
     },
     {
       "datasource": {
@@ -1158,10 +1050,37 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
           "mappings": [],
-          "max": 3,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1179,31 +1098,34 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 17,
-        "w": 12,
-        "x": 12,
-        "y": 28
+        "h": 12,
+        "w": 10,
+        "x": 10,
+        "y": 46
       },
-      "id": 4,
+      "id": 2,
       "options": {
-        "displayMode": "lcd",
-        "maxVizHeight": 35,
-        "minVizHeight": 35,
-        "minVizWidth": 8,
-        "namePlacement": "left",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "barRadius": 0.25,
+        "barWidth": 0.83,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
-        "showUnfilled": true,
-        "sizing": "manual",
-        "valueMode": "color"
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "normal",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xField": "Time",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 100
       },
-      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -1211,19 +1133,19 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "exemplar": false,
-          "expr": "sort_desc(sum by (name,version) (puppet_node_os{environment=~\"${environment:regex}\"}))",
-          "instant": true,
-          "legendFormat": "{{name}} {{version}}",
-          "range": false,
+          "expr": "sum(puppet_patching_data{type=\"security\",patch_group=~\"${patchgroup:regex}\"}) by (node)",
+          "instant": false,
+          "interval": "$interval",
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "OS Types",
-      "type": "bargauge"
+      "title": "Fleet Patching Status - Security Only",
+      "type": "barchart"
     }
   ],
-  "refresh": "",
+  "refresh": "30s",
   "schemaVersion": 39,
   "tags": [
     "puppet"
@@ -1231,22 +1153,17 @@
   "templating": {
     "list": [
       {
-        "auto": true,
+        "auto": false,
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
           "selected": false,
-          "text": "auto",
-          "value": "$__auto_interval_interval"
+          "text": "6h",
+          "value": "6h"
         },
         "hide": 0,
         "name": "interval",
         "options": [
-          {
-            "selected": true,
-            "text": "auto",
-            "value": "$__auto_interval_interval"
-          },
           {
             "selected": false,
             "text": "30m",
@@ -1258,7 +1175,7 @@
             "value": "1h"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "6h",
             "value": "6h"
           },
@@ -1308,19 +1225,112 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(puppet_report_timestamp_epoch,environment)",
+        "definition": "label_values(puppet_patching_data,patch_group)",
         "hide": 0,
         "includeAll": true,
+        "label": "Patch Group",
         "multi": true,
-        "name": "environment",
+        "name": "patchgroup",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_report_timestamp_epoch,environment)",
+          "query": "label_values(puppet_patching_data,patch_group)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_node_trusted,datacenter)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Data Centre",
+        "multi": true,
+        "name": "datacenter",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_node_trusted,datacenter)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_node_trusted,role)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Role",
+        "multi": true,
+        "name": "role",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_node_trusted,role)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "lab.albatrossflavour.com",
+          "value": "lab.albatrossflavour.com"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_node_os,node)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "DNS Domain",
+        "multi": false,
+        "name": "domain",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_node_os,node)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^[a-zA-Z0-9-]+\\.(.*)$/",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
@@ -1331,10 +1341,12 @@
     "from": "now-7d",
     "to": "now"
   },
-  "timepicker": {},
+  "timepicker": {
+    "hidden": false
+  },
   "timezone": "browser",
-  "title": "Puppet Overview",
-  "uid": "edxmpd28ow35sd",
+  "title": "Patching Status",
+  "uid": "adxlx9zde88owb",
   "version": 1,
   "weekStart": "monday"
 }
