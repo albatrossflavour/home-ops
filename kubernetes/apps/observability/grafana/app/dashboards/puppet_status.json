@@ -84,6 +84,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Puppet Event Dashboard",
+              "url": "https://puppet.lab.albatrossflavour.com/#/enforcement/events/aggregates/classes/failures?selectedDurationSeconds=86400"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
