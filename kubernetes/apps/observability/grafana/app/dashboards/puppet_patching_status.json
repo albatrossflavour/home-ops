@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 8,
+  "id": 27,
   "links": [],
   "panels": [
     {
@@ -116,6 +116,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0avg8jcjz0gc/puppet-patching-blocked-overview"
+            }
+          ],
           "mappings": [],
           "noValue": "None",
           "thresholds": {
@@ -279,6 +285,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -338,13 +345,14 @@
             "uid": "prometheus"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "puppet_patch_group_overview",
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "puppet_patching_groups\n",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "{{name}}",
-          "range": true,
+          "instant": true,
+          "legendFormat": "{{patch_group}}",
+          "range": false,
           "refId": "A",
           "useBackend": false
         }
