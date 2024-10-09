@@ -32,6 +32,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -110,12 +116,6 @@
           "color": {
             "mode": "thresholds"
           },
-          "links": [
-            {
-              "title": "Blocked Server Details",
-              "url": "https://grafana.albatrossflavour.com/d/ee0avg8jcjz0gc/puppet-patching-blocked-overview?orgId=1"
-            }
-          ],
           "mappings": [],
           "noValue": "None",
           "thresholds": {
@@ -362,6 +362,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -432,6 +438,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -830,12 +842,19 @@
             }
           },
           "fieldMinMax": false,
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -925,12 +944,19 @@
             }
           },
           "fieldMinMax": false,
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
