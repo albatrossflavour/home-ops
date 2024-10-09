@@ -18,8 +18,59 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 81,
-  "links": [],
+  "id": 19,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Puppet Enterprise Console",
+      "tooltip": "",
+      "type": "link",
+      "url": "https://puppet.lab.albatrossflavour.com"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Security Compliance Manager",
+      "tooltip": "",
+      "type": "link",
+      "url": "https://scm.lab.albatrossflavour.com"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Continuous Delivery",
+      "tooltip": "",
+      "type": "link",
+      "url": "https://cd4pe.lab.albatrossflavour.com"
+    },
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "puppet"
+      ],
+      "targetBlank": false,
+      "title": "Puppet Dashboards",
+      "tooltip": "",
+      "type": "dashboards",
+      "url": ""
+    }
+  ],
   "panels": [
     {
       "datasource": {
@@ -37,6 +88,7 @@
             "cellOptions": {
               "type": "auto"
             },
+            "filterable": true,
             "inspect": false
           },
           "links": [],
@@ -200,6 +252,7 @@
             "cellOptions": {
               "type": "auto"
             },
+            "filterable": true,
             "inspect": false
           },
           "links": [],
@@ -356,6 +409,7 @@
             "cellOptions": {
               "type": "auto"
             },
+            "filterable": true,
             "inspect": false
           },
           "links": [],
@@ -519,6 +573,7 @@
             "cellOptions": {
               "type": "auto"
             },
+            "filterable": false,
             "inspect": false
           },
           "links": [],
@@ -649,7 +704,7 @@
                 "operation": "groupby"
               }
             },
-            "showSubframeHeaders": false
+            "showSubframeHeaders": true
           }
         },
         {
@@ -715,6 +770,10 @@
             "$__all"
           ]
         },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(puppet_patching_detail,patch_group)",
         "hide": 0,
         "includeAll": true,
@@ -775,6 +834,6 @@
   "timezone": "browser",
   "title": "Puppet Patching Detail",
   "uid": "ee0awoi89u5fkc",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }

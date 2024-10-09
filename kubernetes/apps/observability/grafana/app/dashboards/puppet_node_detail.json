@@ -29,10 +29,48 @@
       "keepTime": false,
       "tags": [],
       "targetBlank": true,
-      "title": "Open Node in Puppet Enterprise Console",
+      "title": "Puppet Enterprise Console",
       "tooltip": "",
       "type": "link",
-      "url": "https://puppet.lab.albatrossflavour.com/#/inventory/node/$host"
+      "url": "https://puppet.lab.albatrossflavour.com"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Security Compliance Manager",
+      "tooltip": "",
+      "type": "link",
+      "url": "https://scm.lab.albatrossflavour.com"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Continuous Delivery",
+      "tooltip": "",
+      "type": "link",
+      "url": "https://cd4pe.lab.albatrossflavour.com"
+    },
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "puppet"
+      ],
+      "targetBlank": false,
+      "title": "Puppet Dashboards",
+      "tooltip": "",
+      "type": "dashboards",
+      "url": ""
     }
   ],
   "panels": [
