@@ -20,7 +20,7 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 700,
   "graphTooltip": 1,
-  "id": 74,
+  "id": 18,
   "links": [
     {
       "asDropdown": false,
@@ -76,6 +76,7 @@
   "panels": [
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -123,7 +124,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -131,7 +132,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_patching_data{server=\"$host\"}",
+          "expr": "puppet_patching_data{node=\"$host\"}",
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{type}}",
@@ -144,6 +145,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -152,23 +154,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "False"
-                },
-                "1": {
-                  "color": "yellow",
-                  "index": 1,
-                  "text": "True"
-                }
-              },
-              "type": "value"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -181,7 +167,76 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "bool_yes_no"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 7,
+        "y": 0
+      },
+      "id": 21,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "puppet_patching_blocked{node=\"${host}\"}",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Patching Blocked",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bool_yes_no"
         },
         "overrides": [
           {
@@ -204,7 +259,7 @@
       "gridPos": {
         "h": 5,
         "w": 3,
-        "x": 7,
+        "x": 10,
         "y": 0
       },
       "id": 17,
@@ -225,7 +280,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -233,14 +288,159 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_noop{host=\"$host\",environment=\"$environment\"}",
-          "instant": false,
+          "exemplar": false,
+          "expr": "puppet_noop{host=\"$host\"}",
+          "instant": true,
           "legendFormat": "No-Op mode",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
       "title": "noop Mode",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bool_yes_no"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 13,
+        "y": 0
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "puppet_restart_required{type=\"reboot\",node=\"${host}\"}",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Reboot Required",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bool_yes_no"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 16,
+        "y": 0
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "puppet_restart_required{type=\"app\",node=\"${host}\"}",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "App Restart Required",
       "type": "stat"
     },
     {
@@ -271,6 +471,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -335,7 +536,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -344,7 +545,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "time()-puppet_report_timestamp_epoch{host=~\"$host\",environment=~\"$environment\"}",
+          "expr": "time()-puppet_report_timestamp_epoch{host=~\"${host}\"}",
           "hide": false,
           "instant": true,
           "intervalFactor": 2,
@@ -368,6 +569,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -426,7 +628,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -435,7 +637,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_report_events{host=\"$host\",environment=\"$environment\",name=\"Total\"} > -1",
+          "expr": "puppet_report_events{host=\"$host\",name=\"Total\"} > -1",
           "instant": false,
           "interval": "$interval",
           "intervalFactor": 1,
@@ -451,6 +653,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -509,7 +712,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -517,7 +720,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_report_events{name=\"Failure\",host=\"$host\",environment=\"$environment\"} > -1",
+          "expr": "puppet_report_events{name=\"Failure\",host=\"$host\"}",
           "interval": "$interval",
           "intervalFactor": 1,
           "legendFormat": "{{name}}",
@@ -532,6 +735,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -590,7 +794,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -598,7 +802,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_report_events{host=\"$host\",environment=\"$environment\",name=\"Success\"} > -1",
+          "expr": "puppet_report_events{host=\"$host\",name=\"Success\"}",
           "interval": "$interval",
           "intervalFactor": 1,
           "legendFormat": "{{name}}",
@@ -613,6 +817,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -668,7 +873,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -676,7 +881,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_report_resources{name=\"Total\",host=\"$host\",environment=\"$environment\"} > -1",
+          "expr": "puppet_report_resources{name=\"Total\",host=\"$host\"}",
           "interval": "$interval",
           "intervalFactor": 1,
           "legendFormat": "{{name}}",
@@ -691,6 +896,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -749,7 +955,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -758,7 +964,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_report_changes{host=\"$host\",environment=\"$environment\"}",
+          "expr": "puppet_report_changes{host=\"$host\"}",
           "instant": true,
           "interval": "$interval",
           "intervalFactor": 1,
@@ -799,6 +1005,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -889,7 +1096,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(7,puppet_report_time{host=\"$host\",environment=\"$environment\",name!~\"(Total|Catalog application|Transaction evaluation)\"} > - 1)",
+          "expr": "topk(7,puppet_report_time{host=\"$host\",name!~\"(Total|Catalog application|Transaction evaluation)\"} > - 1)",
           "instant": true,
           "interval": "$interval",
           "intervalFactor": 2,
@@ -915,6 +1122,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -983,7 +1191,7 @@
           "showLegend": false
         },
         "orientation": "auto",
-        "showValue": "auto",
+        "showValue": "never",
         "stacking": "none",
         "tooltip": {
           "mode": "single",
@@ -1000,7 +1208,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_report_resources{host=\"$host\",environment=\"$environment\",name!~\"(Total|Out of sync)\"} > -1",
+          "expr": "puppet_report_resources{host=\"$host\",name!~\"(Total|Out of sync)\"} > -1",
           "instant": true,
           "interval": "$interval",
           "intervalFactor": 2,
@@ -1051,6 +1259,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -1118,7 +1327,7 @@
           "unit": "s"
         }
       },
-      "pluginVersion": "11.1.5",
+      "pluginVersion": "11.2.1",
       "targets": [
         {
           "datasource": {
@@ -1127,7 +1336,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_report_time{environment=\"$environment\",host=\"$host\"}",
+          "expr": "puppet_report_time{host=\"$host\"}",
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{name}}",
@@ -1140,6 +1349,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -1155,6 +1365,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 100,
             "gradientMode": "none",
@@ -1185,7 +1396,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1355,7 +1567,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_report_resources{host=\"$host\",environment=\"$environment\"} > -1",
+          "expr": "puppet_report_resources{host=\"$host\"} > -1",
           "interval": "$interval",
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
@@ -1369,6 +1581,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -1384,6 +1597,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -1414,7 +1628,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1576,7 +1791,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_report_time{name=~\"Config retrieval|Total\",host=\"$host\",environment=\"$environment\"} > -1",
+          "expr": "puppet_report_time{name=~\"Config retrieval|Total\",host=\"$host\"}",
           "interval": "$interval",
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
@@ -1599,9 +1814,9 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "alma-8-puppet-prod-1.lab.albatrossflavour.com",
-          "value": "alma-8-puppet-prod-1.lab.albatrossflavour.com"
+          "selected": true,
+          "text": "puppet.lab.albatrossflavour.com",
+          "value": "puppet.lab.albatrossflavour.com"
         },
         "datasource": {
           "type": "prometheus",
@@ -1610,7 +1825,7 @@
         "definition": "label_values(puppet_report_timestamp_epoch,host)",
         "hide": 0,
         "includeAll": false,
-        "label": "Host",
+        "label": "Server",
         "multi": false,
         "name": "host",
         "options": [],
@@ -1622,56 +1837,33 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "production",
-          "value": "production"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(puppet_report_timestamp_epoch,environment)",
-        "hide": 0,
-        "includeAll": false,
-        "label": "Environment",
-        "multi": false,
-        "name": "environment",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values(puppet_report_timestamp_epoch,environment)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "auto": false,
+        "auto": true,
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": false,
-          "text": "1h",
-          "value": "1h"
+          "selected": true,
+          "text": "auto",
+          "value": "$__auto_interval_interval"
         },
         "hide": 0,
         "name": "interval",
         "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval_interval"
+          },
           {
             "selected": false,
             "text": "30m",
             "value": "30m"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "1h",
             "value": "1h"
           },
@@ -1746,6 +1938,6 @@
   "timezone": "browser",
   "title": "Puppet Node Detail",
   "uid": "ddxit1oqlm874d",
-  "version": 21,
+  "version": 1,
   "weekStart": "monday"
 }
