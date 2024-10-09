@@ -52,9 +52,13 @@
                   "index": 0,
                   "text": "Applications"
                 },
+                "app, reboot": {
+                  "index": 2,
+                  "text": "Server Reboot & Applications"
+                },
                 "reboot": {
                   "index": 1,
-                  "text": "Server"
+                  "text": "Server Reboot"
                 }
               },
               "type": "value"
@@ -107,7 +111,7 @@
           "expr": "puppet_restart_required{environment=~\"${environment:regex}\",node=~\"${node}\",type=~\"${type:regex}\"} > 0",
           "format": "table",
           "instant": true,
-          "legendFormat": "{{node}}",
+          "legendFormat": "__auto",
           "range": false,
           "refId": "A"
         }
@@ -115,14 +119,33 @@
       "title": "Panel Title",
       "transformations": [
         {
-          "id": "filterFieldsByName",
+          "id": "groupBy",
           "options": {
-            "include": {
-              "names": [
-                "node",
-                "type"
-              ]
+            "fields": {
+              "node": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "type": {
+                "aggregations": [
+                  "allValues"
+                ],
+                "operation": "aggregate"
+              }
             }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "string",
+                "joinWith": ", ",
+                "targetField": "type (allValues)"
+              }
+            ],
+            "fields": {}
           }
         },
         {
@@ -135,7 +158,7 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "type",
+            "regex": "type.*",
             "renamePattern": "Restart Type"
           }
         }
@@ -181,7 +204,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -209,7 +232,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
