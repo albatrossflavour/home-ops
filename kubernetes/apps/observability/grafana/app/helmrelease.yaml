@@ -104,6 +104,9 @@ spec:
         puppet-restart-overview:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/puppet_restart_overview.json
           datasource: Prometheus
+        puppet-patching-blocked:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/puppet_patching_blocked.json
+          datasource: Prometheus
         puppet-os-overview:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/puppet_os_overview.json
           datasource: Prometheus
