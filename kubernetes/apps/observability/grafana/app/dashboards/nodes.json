@@ -1080,9 +1080,7 @@
     }
   ],
   "refresh": "30s",
-  "tags": [
-    "puppet"
-  ],
+  "tags": [ ],
    "schemaVersion": 37,
   "style": "dark",
   "templating": {
