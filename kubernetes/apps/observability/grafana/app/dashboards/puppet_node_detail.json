@@ -20,7 +20,7 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 700,
   "graphTooltip": 1,
-  "id": 18,
+  "id": 7,
   "links": [
     {
       "asDropdown": false,
@@ -85,6 +85,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail?from=now-7d&to=now&var-environment=All&var-patch_group=All&orgId=1"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -154,6 +160,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ee0avg8jcjz0gc/puppet-patching-blocked-overview"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -310,6 +322,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ce0arbryermdce/puppet-restart-overview?from=now-7d&to=now&var-environment=All&var-patch_group=All&var-type=All&orgId=1"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -382,6 +400,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://grafana.albatrossflavour.com/d/ce0arbryermdce/puppet-restart-overview?from=now-7d&to=now&var-environment=All&var-patch_group=All&var-type=All&orgId=1"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1814,7 +1838,7 @@
     "list": [
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "puppet.lab.albatrossflavour.com",
           "value": "puppet.lab.albatrossflavour.com"
         },
