@@ -113,6 +113,9 @@ spec:
         puppet-os-overview:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/puppet_os_overview.json
           datasource: Prometheus
+        puppet-dashboards:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/puppet_dashboards.json
+          datasource: Prometheus
         nodes:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/nodes.json
           datasource: Prometheus
