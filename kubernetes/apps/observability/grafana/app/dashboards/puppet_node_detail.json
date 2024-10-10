@@ -20,7 +20,7 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 700,
   "graphTooltip": 1,
-  "id": 7,
+  "id": 38,
   "links": [
     {
       "asDropdown": false,
@@ -1360,7 +1360,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_report_time{host=\"$host\"}",
+          "expr": "puppet_report_time{host=\"$host\",name!~\"(Total|Catalog application|Transaction evaluation)\"}",
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{name}}",
@@ -1931,7 +1931,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
