@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 30,
+  "id": 6,
   "links": [
     {
       "asDropdown": false,
@@ -567,6 +567,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -596,7 +597,26 @@
           },
           "unit": "s"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "number"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "",
+                    "url": "https://puppet.lab.albatrossflavour.com/#/inventory/node/${__field.labels.node}/facts"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 12,
@@ -633,7 +653,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "(time() - puppet_patch_run) * on(node) group_left() puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"} > 0",
+          "expr": "topk(10,sort_desc((time() - puppet_patch_run) * on(node) group_left() puppet_patching_data{type=\"all\", patch_group=~\"${patchgroup:regex}\"} > 0))",
           "format": "time_series",
           "instant": true,
           "legendFormat": "{{node}}",
@@ -641,11 +661,12 @@
           "refId": "A"
         }
       ],
-      "title": "Last time servers were patched",
+      "title": "Last time servers that need patching were patched",
       "type": "bargauge"
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
