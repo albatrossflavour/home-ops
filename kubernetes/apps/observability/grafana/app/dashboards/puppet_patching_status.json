@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 21,
+  "id": 39,
   "links": [
     {
       "asDropdown": false,
@@ -159,6 +159,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -229,12 +230,13 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
+          "exemplar": false,
           "expr": "count(puppet_patching_blocked{patch_group=~\"${patchgroup:regex}\"} > 0)\n",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": false,
+          "instant": true,
           "legendFormat": "{{name}}",
-          "range": true,
+          "range": false,
           "refId": "A",
           "useBackend": false
         }
@@ -912,8 +914,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1014,8 +1015,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1082,17 +1082,22 @@
   "templating": {
     "list": [
       {
-        "auto": false,
+        "auto": true,
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": false,
-          "text": "6h",
-          "value": "6h"
+          "selected": true,
+          "text": "auto",
+          "value": "$__auto_interval_interval"
         },
         "hide": 0,
         "name": "interval",
         "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval_interval"
+          },
           {
             "selected": false,
             "text": "30m",
@@ -1104,7 +1109,7 @@
             "value": "1h"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "6h",
             "value": "6h"
           },
