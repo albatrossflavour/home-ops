@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 20,
+  "id": 32,
   "links": [
     {
       "asDropdown": false,
@@ -106,7 +106,122 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "failed"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Failed"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "changed"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Changed"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "noop"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "NoOp"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#808080",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unchanged"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unchanged"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "shades"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unreported"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unreporting"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "shades"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unresponsive"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unresponsive"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "shades"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
@@ -147,6 +262,29 @@
         }
       ],
       "title": "State Overview",
+      "transformations": [
+        {
+          "id": "concatenate",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "changed": 2,
+              "failed": 3,
+              "noop": 4,
+              "unchanged": 1,
+              "unreported": 5,
+              "unresponsive": 6
+            },
+            "renameByName": {}
+          }
+        }
+      ],
       "type": "gauge"
     },
     {
@@ -667,15 +805,57 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failures"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Corrective Changes"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Intentional Changes"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -691,7 +871,7 @@
           ],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
           "mode": "multi",
@@ -705,13 +885,14 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) + sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
+          "exemplar": false,
+          "expr": "sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
           "hide": false,
           "instant": false,
           "interval": "$interval",
-          "legendFormat": "Intentional Changes",
+          "legendFormat": "Failures",
           "range": true,
-          "refId": "A"
+          "refId": "FAILED"
         },
         {
           "datasource": {
@@ -719,13 +900,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
+          "expr": "sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) + sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
           "hide": false,
           "instant": false,
           "interval": "$interval",
-          "legendFormat": "Failures",
+          "legendFormat": "Intentional Changes",
           "range": true,
-          "refId": "B"
+          "refId": "INTENTIONAL"
         },
         {
           "datasource": {
@@ -739,7 +920,7 @@
           "interval": "$interval",
           "legendFormat": "Corrective Changes",
           "range": true,
-          "refId": "C"
+          "refId": "CORRECTIVE"
         }
       ],
       "title": "Changes Enforced",
