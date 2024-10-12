@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
+  "id": 4,
   "links": [
     {
       "asDropdown": false,
@@ -576,6 +576,7 @@
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 0,
           "displayName": "${__series.name}",
           "mappings": [],
           "noValue": "None",
@@ -654,7 +655,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10,sort_desc((time() - puppet_patch_run) * on(node) group_left() puppet_patching_data{type=\"all\", patch_group=~\"${patchgroup:regex}\"} > 0))",
+          "expr": "topk(10, sort_desc(timestamp(max_over_time(puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"}[$__range])) / 86400) and puppet_patching_data{type=\"all\",patch_group=~\"${patchgroup:regex}\"} > 0)",
           "format": "time_series",
           "instant": true,
           "legendFormat": "{{node}}",
@@ -662,7 +663,7 @@
           "refId": "A"
         }
       ],
-      "title": "Last time servers that need patching were patched",
+      "title": "How long since patches were available for the server?",
       "type": "bargauge"
     },
     {
