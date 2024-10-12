@@ -642,29 +642,6 @@
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "lab.albatrossflavour.com",
-          "value": "lab.albatrossflavour.com"
-        },
-        "definition": "label_values(puppet_server_used,instance)",
-        "hide": 2,
-        "includeAll": false,
-        "multi": false,
-        "name": "domain",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values(puppet_server_used,instance)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "/^[a-zA-Z0-9-]+\\.(.*):.*$/",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
       }
     ]
   },
