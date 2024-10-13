@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 32,
+  "id": 24,
   "links": [
     {
       "asDropdown": false,
@@ -542,6 +542,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -600,10 +601,11 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "count(puppet_noop{environment=~\"${environment:regex}\"} > 1)",
-          "instant": false,
+          "exemplar": false,
+          "expr": "count(puppet_noop{environment=~\"${environment:regex}\"} > 0)",
+          "instant": true,
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
