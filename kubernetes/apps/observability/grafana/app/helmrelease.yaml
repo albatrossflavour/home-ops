@@ -314,7 +314,7 @@ spec:
     ingress:
       enabled: true
       annotations:
-        external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+        external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
         gethomepage.dev/enabled: "true"
         gethomepage.dev/group: Observability
         gethomepage.dev/name: Grafana
@@ -325,7 +325,7 @@ spec:
         gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_GRAFANA_USERNAME}}` }}"
         gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}` }}"
 
-      ingressClassName: internal
+      ingressClassName: external
       hosts: ["grafana.${SECRET_DOMAIN}"]
     persistence:
       enabled: false
