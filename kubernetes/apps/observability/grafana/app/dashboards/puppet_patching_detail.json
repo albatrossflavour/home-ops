@@ -30,7 +30,7 @@
       "title": "Puppet Enterprise Console",
       "tooltip": "",
       "type": "link",
-      "url": "https://puppet.lab.albatrossflavour.com"
+      "url": "https://${puppetserver}"
     },
     {
       "asDropdown": false,
@@ -42,7 +42,7 @@
       "title": "Security Compliance Manager",
       "tooltip": "",
       "type": "link",
-      "url": "https://scm.lab.albatrossflavour.com"
+      "url": "https://scm.${domain}"
     },
     {
       "asDropdown": false,
@@ -54,7 +54,7 @@
       "title": "Continuous Delivery",
       "tooltip": "",
       "type": "link",
-      "url": "https://cd4pe.lab.albatrossflavour.com"
+      "url": "https://cd4pe.${domain}"
     },
     {
       "asDropdown": true,
@@ -823,6 +823,53 @@
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "puppet.lab.albatrossflavour.com",
+          "value": "puppet.lab.albatrossflavour.com"
+        },
+        "definition": "label_values(puppet_server_used,instance)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Puppet Server",
+        "multi": false,
+        "name": "puppetserver",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_server_used,instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^(.*):.*/",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "lab.albatrossflavour.com",
+          "value": "lab.albatrossflavour.com"
+        },
+        "definition": "label_values(puppet_server_used,instance)",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "domain",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_server_used,instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^[a-zA-Z0-9-]+\\.(.*):.*$/",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },

@@ -31,7 +31,7 @@
       "title": "Puppet Enterprise Console",
       "tooltip": "",
       "type": "link",
-      "url": "https://puppet.lab.albatrossflavour.com"
+      "url": "https://${puppetserver}"
     },
     {
       "asDropdown": false,
@@ -43,7 +43,7 @@
       "title": "Security Compliance Manager",
       "tooltip": "",
       "type": "link",
-      "url": "https://scm.lab.albatrossflavour.com"
+      "url": "https://scm.${domain}"
     },
     {
       "asDropdown": false,
@@ -55,7 +55,7 @@
       "title": "Continuous Delivery",
       "tooltip": "",
       "type": "link",
-      "url": "https://cd4pe.lab.albatrossflavour.com"
+      "url": "https://cd4pe.${domain}"
     },
     {
       "asDropdown": true,
@@ -88,7 +88,7 @@
             {
               "targetBlank": true,
               "title": "Puppet Event Dashboard",
-              "url": "https://puppet.lab.albatrossflavour.com/#/enforcement/events/aggregates/classes/failures?selectedDurationSeconds=86400"
+              "url": "https://${puppetserver}/#/enforcement/events/aggregates/classes/failures?selectedDurationSeconds=86400"
             }
           ],
           "mappings": [],
@@ -106,7 +106,122 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "failed"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Failed"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "changed"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Changed"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "noop"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "NoOp"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#808080",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unchanged"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unchanged"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "shades"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unreported"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unreporting"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "shades"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unresponsive"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unresponsive"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "shades"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
@@ -147,6 +262,29 @@
         }
       ],
       "title": "State Overview",
+      "transformations": [
+        {
+          "id": "concatenate",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "changed": 2,
+              "failed": 3,
+              "noop": 4,
+              "unchanged": 1,
+              "unreported": 5,
+              "unresponsive": 6
+            },
+            "renameByName": {}
+          }
+        }
+      ],
       "type": "gauge"
     },
     {
@@ -159,6 +297,12 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "d/cdzpijufduoe8c/server-os-overview"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -284,6 +428,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -292,8 +437,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "/d/ee0awoi89u5fkc/puppet-patching-detail"
+            }
+          ],
           "mappings": [],
-          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -316,7 +466,7 @@
         "x": 8,
         "y": 7
       },
-      "id": 7,
+      "id": 5,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -342,14 +492,16 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "count(puppet_noop{environment=~\"${environment:regex}\"} > 1)",
-          "instant": false,
+          "exemplar": false,
+          "expr": "sum(puppet_patching_data{type=\"all\",environment=~\"${environment:regex}\"})",
+          "instant": true,
+          "interval": "",
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
-      "title": "Servers In noop Mode",
+      "title": "Patches Outstanding",
       "type": "stat"
     },
     {
@@ -390,6 +542,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -420,6 +573,77 @@
         "h": 6,
         "w": 4,
         "x": 0,
+        "y": 13
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "count(puppet_noop{environment=~\"${environment:regex}\"} > 0)",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Servers In noop Mode",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 4,
         "y": 13
       },
       "id": 8,
@@ -456,76 +680,6 @@
         }
       ],
       "title": "Pending noop Changes",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 4,
-        "y": 13
-      },
-      "id": 5,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.2.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(puppet_patching_data{type=\"all\",environment=~\"${environment:regex}\"})",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Patches Outstanding",
       "type": "stat"
     },
     {
@@ -601,6 +755,7 @@
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -652,15 +807,57 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failures"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Corrective Changes"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Intentional Changes"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -676,7 +873,7 @@
           ],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
           "mode": "multi",
@@ -690,13 +887,14 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) + sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
+          "exemplar": false,
+          "expr": "sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
           "hide": false,
           "instant": false,
           "interval": "$interval",
-          "legendFormat": "Intentional Changes",
+          "legendFormat": "Failures",
           "range": true,
-          "refId": "A"
+          "refId": "FAILED"
         },
         {
           "datasource": {
@@ -704,13 +902,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
+          "expr": "sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) + sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
           "hide": false,
           "instant": false,
           "interval": "$interval",
-          "legendFormat": "Failures",
+          "legendFormat": "Intentional Changes",
           "range": true,
-          "refId": "B"
+          "refId": "INTENTIONAL"
         },
         {
           "datasource": {
@@ -724,7 +922,7 @@
           "interval": "$interval",
           "legendFormat": "Corrective Changes",
           "range": true,
-          "refId": "C"
+          "refId": "CORRECTIVE"
         }
       ],
       "title": "Changes Enforced",
@@ -1201,11 +1399,11 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "placement": "right",
+          "showLegend": false
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -1237,8 +1435,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "d/cdzpijufduoe8c/server-os-overview"
+            }
+          ],
           "mappings": [],
-          "max": 3,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1312,7 +1515,7 @@
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "auto",
           "value": "$__auto_interval_interval"
         },
@@ -1398,6 +1601,61 @@
         },
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "puppet.lab.albatrossflavour.com",
+          "value": "puppet.lab.albatrossflavour.com"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_server_used,instance)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Puppet Server",
+        "multi": false,
+        "name": "puppetserver",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_server_used,instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^(.*):.*/",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "lab.albatrossflavour.com",
+          "value": "lab.albatrossflavour.com"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_server_used,instance)",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "domain",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_server_used,instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^[a-zA-Z0-9-]+\\.(.*):.*$/",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
