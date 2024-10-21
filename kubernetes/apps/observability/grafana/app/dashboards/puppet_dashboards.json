@@ -117,9 +117,7 @@
     }
   ],
   "schemaVersion": 39,
-  "tags": [
-    "puppet"
-  ],
+  "tags": [ ],
   "templating": {
     "list": []
   },
