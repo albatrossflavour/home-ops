@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 82,
+  "id": 48,
   "links": [
     {
       "asDropdown": false,
@@ -90,7 +90,7 @@
         "keepTime": false,
         "maxItems": 10,
         "query": "",
-        "showFolderNames": true,
+        "showFolderNames": false,
         "showHeadings": false,
         "showRecentlyViewed": false,
         "showSearch": true,
@@ -117,9 +117,7 @@
     }
   ],
   "schemaVersion": 39,
-  "tags": [
-    "puppet"
-  ],
+  "tags": [],
   "templating": {
     "list": []
   },

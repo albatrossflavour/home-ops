@@ -36,8 +36,8 @@ spec:
       avatars: "gravatar,initials"
       email:
         host: smtp-relay.default.svc.cluster.local
-        port: 2525
-        from: "Access <access@albatrossflavour.com>"
+        port: 25
+        from: "Tony Green <tgreen@albatrossflavour.com>"
       error_reporting:
         enable: false
         send_pii: false

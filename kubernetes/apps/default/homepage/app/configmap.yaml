@@ -127,12 +127,12 @@ data:
               fields: ["queue", "saved"]
   settings.yaml: |
     background:
-      image: https://wallpapercave.com/wp/wp8828809.jpg
+      image: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/security/authentik/app/images/background.jpg
       blur: sm
       brightness: 20
       opacity: 20
     title: Dashboard
-    favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/heimdall.png
+    favicon: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/security/authentik/app/images/favicon.ico
     useEqualHeights: true
     iconStyle: theme
     theme: dark
