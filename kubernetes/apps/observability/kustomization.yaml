@@ -9,7 +9,7 @@ resources:
   - ./gatus/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
   - ./unpoller/ks.yaml
-  - ./smartctl-exporter/ks.yaml
+  #  - ./smartctl-exporter/ks.yaml
   - ./mqtt-exporter/ks.yaml
   - ./speedtest-exporter/ks.yaml
   - ./sabnzbd-exporter/ks.yaml

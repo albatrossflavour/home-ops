@@ -192,12 +192,12 @@ spec:
           gnetId: 19105
           revision: 3
           datasource: Prometheus
-        smart:
-          # renovate: depName="Dashboard for smartctl_exporter"
-          gnetId: 20204
-          revision: 1
-          datasource:
-            - { name: DS_PROMETHEUS, value: Prometheus }
+#       smart:
+#         # renovate: depName="Dashboard for smartctl_exporter"
+#         gnetId: 20204
+#         revision: 1
+#         datasource:
+#           - { name: DS_PROMETHEUS, value: Prometheus }
         speedtest-exporter:
           # renovate: depName="Speedtest-Exporter Dashboard"
           gnetId: 13665
