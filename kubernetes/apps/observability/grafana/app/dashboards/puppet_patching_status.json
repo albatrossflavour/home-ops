@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 45,
+  "id": 46,
   "links": [
     {
       "asDropdown": false,
@@ -708,7 +708,7 @@
                   {
                     "targetBlank": true,
                     "title": "Puppet Console",
-                    "url": "https://${puppetserver}/#/inventory/node/${__field.labels.server}/facts"
+                    "url": "https://${puppetserver}/#/inventory/node/${__field.labels.node}/facts"
                   }
                 ]
               }
@@ -839,7 +839,7 @@
                   {
                     "targetBlank": true,
                     "title": "Puppet Console",
-                    "url": "https://${puppetserver}/#/inventory/node/${__field.labels.server}/facts"
+                    "url": "https://${puppetserver}/#/inventory/node/${__field.labels.node}/facts"
                   }
                 ]
               }
