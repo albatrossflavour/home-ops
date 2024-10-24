@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 83,
+  "id": 39,
   "links": [
     {
       "asDropdown": true,
@@ -48,6 +48,8 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -107,7 +109,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "bottomk(5,puppet_cis_scores{benchmark=~\"$benchmark\",level=~\"$level\"})",
+          "expr": "bottomk(5,puppet_cis_data{scanned_benchmark=~\"$benchmark\",scanned_profile=~\"$level\",score_type=~\"$type\"})",
           "instant": true,
           "interval": "$interval",
           "legendFormat": "{{node}}",
@@ -130,6 +132,8 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -189,7 +193,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(5,puppet_cis_scores{benchmark=~\"$benchmark\",level=~\"$level\"})",
+          "expr": "topk(5,puppet_cis_data{scanned_benchmark=~\"$benchmark\",scanned_profile=~\"$level\",score_type=~\"$type\"})",
           "instant": true,
           "interval": "$interval",
           "legendFormat": "{{node}}",
@@ -217,18 +221,17 @@
             "scaleDistribution": {
               "type": "linear"
             }
-          },
-          "fieldMinMax": false
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 14,
-        "w": 23,
+        "h": 18,
+        "w": 24,
         "x": 0,
         "y": 8
       },
-      "id": 1,
+      "id": 4,
       "options": {
         "calculate": false,
         "cellGap": 1,
@@ -238,13 +241,11 @@
         "color": {
           "exponent": 0.5,
           "fill": "dark-orange",
-          "max": 100,
-          "min": 70,
           "mode": "scheme",
           "reverse": true,
           "scale": "exponential",
           "scheme": "RdYlGn",
-          "steps": 37
+          "steps": 64
         },
         "exemplars": {
           "color": "rgba(255,0,255,0.7)"
@@ -276,7 +277,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "puppet_cis_scores{benchmark=~\"${benchmark}\",level=~\"${level}\"}",
+          "exemplar": false,
+          "expr": "puppet_cis_data{scanned_benchmark=~\"$benchmark\",scanned_profile=~\"$level\",score_type=~\"$type\"}",
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{node}}",
@@ -361,7 +363,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -369,7 +371,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(puppet_cis_scores,benchmark)",
+        "definition": "label_values(puppet_cis_data,scanned_benchmark)",
         "hide": 0,
         "includeAll": true,
         "label": "CIS Benchmark",
@@ -378,7 +380,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_cis_scores,benchmark)",
+          "query": "label_values(puppet_cis_data,scanned_benchmark)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -389,15 +391,15 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "Level 1 - Server",
-          "value": "Level 1 - Server"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(puppet_cis_scores,level)",
+        "definition": "label_values(puppet_cis_data,scanned_profile)",
         "hide": 0,
         "includeAll": true,
         "label": "Level",
@@ -406,7 +408,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_cis_scores,level)",
+          "query": "label_values(puppet_cis_data,scanned_profile)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -420,6 +422,10 @@
           "selected": false,
           "text": "puppet.lab.albatrossflavour.com",
           "value": "puppet.lab.albatrossflavour.com"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
         "definition": "label_values(puppet_server_used,instance)",
         "hide": 2,
@@ -445,6 +451,10 @@
           "text": "lab.albatrossflavour.com",
           "value": "lab.albatrossflavour.com"
         },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(puppet_server_used,instance)",
         "hide": 2,
         "includeAll": false,
@@ -461,17 +471,45 @@
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "base",
+          "value": "base"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_cis_data,score_type)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Score Type",
+        "multi": false,
+        "name": "type",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_cis_data,score_type)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Puppet CIS Compliance",
   "uid": "ee0hpsalu8ohsf",
-  "version": 5,
+  "version": 1,
   "weekStart": ""
 }
