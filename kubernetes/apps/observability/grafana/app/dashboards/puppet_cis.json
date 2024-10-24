@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 43,
+  "id": 41,
   "links": [
     {
       "asDropdown": true,
@@ -204,6 +204,119 @@
       ],
       "title": "Unscanned Nodes",
       "type": "stat"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 316
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 7,
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_replace((time() - sort_desc(puppet_cis_scan_time)), \"unit\", \"minutes\", \"\", \"\")",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Last scan times",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "environment": true,
+              "instance": true,
+              "job": true,
+              "scanned_benchmark": true,
+              "scanned_profile": true,
+              "score_type": true,
+              "unit": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Value": "Time since scan",
+              "node": "Node"
+            }
+          }
+        }
+      ],
+      "type": "table"
     },
     {
       "datasource": {
@@ -470,7 +583,7 @@
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "auto",
           "value": "$__auto_interval_interval"
         },
