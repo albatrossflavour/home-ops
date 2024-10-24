@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 39,
+  "id": 38,
   "links": [
     {
       "asDropdown": true,
@@ -36,6 +36,101 @@
     }
   ],
   "panels": [
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "green",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "avg(puppet_cis_data{score_type=\"base\"})",
+          "instant": false,
+          "legendFormat": "Base",
+          "range": true,
+          "refId": "BASE"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "avg(puppet_cis_data{score_type=\"adjusted\"})",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Adjusted",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Compliance Average Fleet Wide",
+      "type": "stat"
+    },
     {
       "datasource": {
         "default": true,
@@ -77,8 +172,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 0,
+        "w": 8,
+        "x": 8,
         "y": 0
       },
       "id": 2,
@@ -109,7 +204,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "bottomk(5,puppet_cis_data{scanned_benchmark=~\"$benchmark\",scanned_profile=~\"$level\",score_type=~\"$type\"})",
+          "expr": "sort(bottomk(5,puppet_cis_data{scanned_benchmark=~\"$benchmark\",scanned_profile=~\"$level\",score_type=~\"$type\"}))",
           "instant": true,
           "interval": "$interval",
           "legendFormat": "{{node}}",
@@ -161,8 +256,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 0
       },
       "id": 3,
@@ -363,7 +458,7 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -391,7 +486,7 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -475,8 +570,8 @@
       {
         "current": {
           "selected": true,
-          "text": "base",
-          "value": "base"
+          "text": "adjusted",
+          "value": "adjusted"
         },
         "datasource": {
           "type": "prometheus",
