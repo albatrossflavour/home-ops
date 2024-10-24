@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 41,
+  "id": 38,
   "links": [
     {
       "asDropdown": false,
@@ -836,7 +836,7 @@
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "blue",
+                  "fixedColor": "yellow",
                   "mode": "fixed"
                 }
               }
@@ -851,7 +851,7 @@
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "green",
+                  "fixedColor": "blue",
                   "mode": "fixed"
                 }
               }
@@ -902,7 +902,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) + sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
+          "expr": "sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
           "hide": false,
           "instant": false,
           "interval": "$interval",
@@ -1515,7 +1515,7 @@
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "auto",
           "value": "$__auto_interval_interval"
         },
@@ -1576,7 +1576,7 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": [
             "All"
           ],
