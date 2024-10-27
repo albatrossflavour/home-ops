@@ -136,14 +136,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/puppet
-          - name: monitoring
+          - name: nodes
             orgId: 1
-            folder: "Monitoring"
+            folder: "Nodes"
             type: file
             disableDeletion: false
             editable: true
             options:
-              path: /var/lib/grafana/dashboards/monitoring
+              path: /var/lib/grafana/dashboards/nodes
     dashboards:
       media:
         exportarr:
@@ -197,7 +197,14 @@ spec:
         home:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/home.json
           datasource: Prometheus
-      monitoring:
+        speedtest-exporter:
+          # renovate: depName="Speedtest-Exporter Dashboard"
+          gnetId: 13665
+          revision: 4
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+      nodes:
         node-exporter-full:
           # renovate: depName="Node Exporter Full"
           gnetId: 1860
@@ -211,19 +218,6 @@ spec:
           gnetId: 19105
           revision: 3
           datasource: Prometheus
-#       smart:
-#         # renovate: depName="Dashboard for smartctl_exporter"
-#         gnetId: 20204
-#         revision: 1
-#         datasource:
-#           - { name: DS_PROMETHEUS, value: Prometheus }
-        speedtest-exporter:
-          # renovate: depName="Speedtest-Exporter Dashboard"
-          gnetId: 13665
-          revision: 4
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
         zfs:
           # renovate: depName="ZFS"
           gnetId: 7845
