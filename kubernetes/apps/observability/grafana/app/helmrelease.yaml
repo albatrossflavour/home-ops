@@ -136,6 +136,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/puppet
+          - name: monitoring
+            orgId: 1
+            folder: "Monitoring"
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/monitoring
     dashboards:
       media:
         exportarr:
@@ -189,6 +197,7 @@ spec:
         home:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/home.json
           datasource: Prometheus
+      monitoring:
         node-exporter-full:
           # renovate: depName="Node Exporter Full"
           gnetId: 1860
