@@ -144,6 +144,10 @@ data:
       showSearchSuggestions: true
       hideVisitURL: true
     layout:
+      Utilities:
+        style: row
+        columns: 4
+        icon: mdi-tools
       Puppet:
         icon: si-puppet-#FFAE1A
         style: column
@@ -169,10 +173,6 @@ data:
         style: row
         columns: 4
         icon: mdi-play-network
-      Utilities:
-        style: row
-        columns: 4
-        icon: mdi-tools
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
