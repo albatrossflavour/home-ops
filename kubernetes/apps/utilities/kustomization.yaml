@@ -5,4 +5,5 @@ resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
   # Flux-Kustomizations
+  - ./it-tools/ks.yaml
   - ./jsoncrack/ks.yaml
