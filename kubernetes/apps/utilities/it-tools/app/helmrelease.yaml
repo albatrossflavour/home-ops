@@ -32,7 +32,7 @@ spec:
               tag: latest
               pullPolicy: IfNotPresent
             env:
-              TZ: America/Santiago
+              TZ: "${TZ}"
             resources:
               requests:
                 cpu: 10m
@@ -49,9 +49,9 @@ spec:
       app:
         className: internal
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.mapanare.net
+          external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
         hosts:
-          - host: &host "utils.mapanare.net"
+          - host: &host "utils.${SECRET_DOMAIN}"
             paths:
               - path: /
                 service:
