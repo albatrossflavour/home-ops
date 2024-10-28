@@ -53,8 +53,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Utilities
           gethomepage.dev/name: IT Tools
-          gethomepage.dev/icon: json.png
-          gethomepage.dev/siteMonitor: http://utils.${SECRET_DOMAIN}
+          gethomepage.dev/icon: mdi-tools
         hosts:
           - host: &host "utils.${SECRET_DOMAIN}"
             paths:

@@ -73,6 +73,8 @@ data:
             - icon: si-kubernetes-#BCBDAC
               href: 'https://kubesearch.dev/'
               description: ""
+    - Utilities: []
+    - Dev: []
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster

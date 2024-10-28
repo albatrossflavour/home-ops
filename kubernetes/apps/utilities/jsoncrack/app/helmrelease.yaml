@@ -55,8 +55,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Utilities
           gethomepage.dev/name: JSON Crack
-          gethomepage.dev/icon: json.png
-          gethomepage.dev/siteMonitor: http://jsoncrack.${SECRET_DOMAIN}
+          gethomepage.dev/icon: mdi-json-code
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:

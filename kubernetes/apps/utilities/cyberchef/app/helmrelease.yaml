@@ -55,8 +55,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Utilities
           gethomepage.dev/name: CyberChef
-          gethomepage.dev/icon: json.png
-          gethomepage.dev/siteMonitor: http://cyberchef.${SECRET_DOMAIN}
+          gethomepage.dev/icon: mdi-chef-hat json.png
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
