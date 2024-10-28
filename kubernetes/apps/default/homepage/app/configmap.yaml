@@ -73,8 +73,6 @@ data:
             - icon: si-kubernetes-#BCBDAC
               href: 'https://kubesearch.dev/'
               description: ""
-    - Utilities: []
-    - Dev: []
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
@@ -171,6 +169,10 @@ data:
         style: row
         columns: 4
         icon: mdi-play-network
+      Utilities:
+        style: row
+        columns: 4
+        icon: mdi-tools
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
