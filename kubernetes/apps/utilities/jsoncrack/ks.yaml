@@ -1,0 +1,25 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app jsoncrack
+  namespace: flux-system
+spec:
+  targetNamespace: utilities
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  path: ./kubernetes/apps/utilities/jsoncrack/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: jsoncrack
+      namespace: utilities
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 3m
