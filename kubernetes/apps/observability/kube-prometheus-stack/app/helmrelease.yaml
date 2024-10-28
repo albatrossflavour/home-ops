@@ -44,10 +44,7 @@ spec:
           gethomepage.dev/group: Observability
           gethomepage.dev/name: "Alert Manager"
           gethomepage.dev/icon: alertmanager.png
-          gethomepage.dev/serviceMonitor: "http://alertmanager.${SECRET_DOMAIN}"
           gethomepage.dev/description: Alert Managemnet
-          gethomepage.dev/widget.type: alertmanager
-          gethomepage.dev/widget.url: "http://alertmanager.${SECRET_DOMAIN}"
         ingressClassName: internal
         hosts: ["alertmanager.${SECRET_DOMAIN}"]
         pathType: Prefix
