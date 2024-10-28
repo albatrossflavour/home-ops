@@ -7,3 +7,6 @@ resources:
   # Flux-Kustomizations
   - ./it-tools/ks.yaml
   - ./jsoncrack/ks.yaml
+  - ./cyberchef/ks.yaml
+  - ./send/ks.yaml
+  - ./stirling-pdf/ks.yaml

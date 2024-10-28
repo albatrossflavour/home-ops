@@ -38,7 +38,7 @@ spec:
               tag: 0.30.1@sha256:3eb983b2043c923553ec549db63f184da456b743e50ef97f4388386483641176
               pullPolicy: IfNotPresent
             env:
-              TZ: America/Santiago
+              TZ: "${TZ}"
               SYSTEM_DEFAULTLOCALE: "en-GB"
               DOCKER_ENABLE_SECURITY: true
               SECURITY_ENABLE_LOGIN: true
@@ -71,9 +71,9 @@ spec:
         enabled: true
         className: internal
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.mapanare.net
+          external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
         hosts:
-          - host: &host pdf.mapanare.net
+          - host: &host "pdf.${SECRET_DOMAIN}"
             paths:
               - path: /
                 service:

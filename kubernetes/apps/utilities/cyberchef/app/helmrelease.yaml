@@ -33,7 +33,7 @@ spec:
               repository: ghcr.io/gchq/cyberchef
               tag: 10.19.4
             env:
-              TZ: America/Santiago
+              TZ: "${TZ}"
             resources:
               requests:
                 cpu: 5m
@@ -50,10 +50,10 @@ spec:
       app:
         className: internal
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.mapanare.net
+          external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
           authentik.home.arpa/enabled: "true"
         hosts:
-          - host: &host "{{ .Release.Name }}.mapanare.net"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
                 service:
