@@ -9,4 +9,3 @@ resources:
   - ./jsoncrack/ks.yaml
   - ./cyberchef/ks.yaml
   - ./send/ks.yaml
-  - ./stirling-pdf/ks.yaml
