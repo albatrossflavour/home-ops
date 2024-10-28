@@ -36,7 +36,7 @@ spec:
             env:
               TZ: "${TZ}"
               BASE_URL: "send.${SECRET_DOMAIN}"
-              REDIS_HOST: dragonfly.databases.svc.cluster.local
+              REDIS_HOST: dragonfly.database.svc.cluster.local
               REDIS_PORT: 6379
               FILE_DIR: /uploads
               MAX_FILE_SIZE: 5368709120
