@@ -93,12 +93,6 @@ spec:
         className: internal
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Dev
-          gethomepage.dev/name: Atuin
-          gethomepage.dev/icon: atuin.png
-          gethomepage.dev/description: Shell History
-          gethomepage.dev/widget.type: atuin
-          gethomepage.dev/widget.url: http://sh.${SECRET_DOMAIN}
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths: &paths
