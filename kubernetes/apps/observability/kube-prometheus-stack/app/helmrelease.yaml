@@ -48,7 +48,7 @@ spec:
           gethomepage.dev/description: Alert Managemnet
           gethomepage.dev/widget.type: alertmanager
           gethomepage.dev/widget.url: "http://alertmanager.${SECRET_DOMAIN}"
-         ingressClassName: internal
+        ingressClassName: internal
         hosts: ["alertmanager.${SECRET_DOMAIN}"]
         pathType: Prefix
       alertmanagerSpec:
