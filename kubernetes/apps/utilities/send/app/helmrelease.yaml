@@ -76,6 +76,11 @@ spec:
           nginx.ingress.kubernetes.io/proxy-body-size: 5G
           #external-dns.home.arpa/enabled: "true"
           external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Utilities
+          gethomepage.dev/name: Send
+          gethomepage.dev/icon: json.png
+          gethomepage.dev/siteMonitor: http://send.${SECRET_DOMAIN}
         hosts:
           - host: &host "send.${SECRET_DOMAIN}"
             paths:
