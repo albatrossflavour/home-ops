@@ -41,13 +41,13 @@ spec:
               repository: ghcr.io/shlinkio/shlink
               tag: 4.2.4@sha256:9f2f42db8cd756584b3f781ffbc895c270db4ffff3dfd9e4846c939a5b0c595e
             env:
-              TIMEZONE: America/Santiago
-              DEFAULT_DOMAIN: &host ln.mapanare.net
+              TIMEZONE: ${TZ}
+              DEFAULT_DOMAIN: &host ln.${SECRET_DOMAIN}
               DISABLE_TRACKING_FROM: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
               IS_HTTPS_ENABLED: "true"
               PORT: &port 80
               REDIS_PUB_SUB_ENABLED: "true"
-              REDIS_SERVERS: "dragonfly.databases.svc.cluster.local:6379"
+              REDIS_SERVERS: "dragonfly.database.svc.cluster.local:6379"
               SHELL_VERBOSITY: 3
               TASK_WORKER_NUM: 4
               WEB_WORKER_NUM: 1
