@@ -1,0 +1,58 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: influxdb
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: influxdb2
+      version: 2.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: influxdata
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    fullnameOverride: influxdb2
+    image:
+      repository: influxdb
+      tag: 2.7.10
+    podAnnotations:
+      secret.reloader.stakater.com/reload: &secret influxdb-secret
+    pdb:
+      create: false
+    adminUser:
+      organization: "homelab"
+      user: "admin"
+      retention_policy: "0s"
+      bucket: "default"
+      existingSecret: *secret
+    persistence:
+      existingClaim: influxdb2-volsync
+      mountPath: /var/lib/influxdb2
+    ingress:
+      enabled: true
+      className: internal
+      annotations:
+        nginx.ingress.kubernetes.io/whitelist-source-range: |
+          10.0.0.0/8,172.16.0.0/12,192.168.1.0/24
+      hostname: "influxdb.${SECRET_DOMAIN}"
+      path: /
+      tls: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
