@@ -28,4 +28,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: *app
+      GATUS_SUBDOMAIN: send
