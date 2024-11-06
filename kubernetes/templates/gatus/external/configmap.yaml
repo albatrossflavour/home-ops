@@ -9,12 +9,12 @@ data:
   config.yaml: |
     endpoints:
       - name: "${APP}"
-        group: guarded
+        group: external
         url: 1.1.1.1
         interval: 1m
         ui:
-          hide-hostname: false
-          hide-url: false
+          hide-hostname: true
+          hide-url: true
         dns:
           query-name: "${GATUS_SUBDOMAIN:-${APP}}.${SECRET_DOMAIN}"
           query-type: A
