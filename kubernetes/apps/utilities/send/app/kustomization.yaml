@@ -5,4 +5,4 @@ resources:
   #- ./externalsecret.yaml
   #- ./redis.yaml
   - ./helmrelease.yaml
-  - ../../../../templates/gatus/external
+  #- ../../../../templates/gatus/external
