@@ -432,7 +432,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_report_resources{name=\"Corrective change\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"}) - sum(puppet_report_resources{name=\"Failed\",environment=~\"${environment:regex}\"})",
+          "expr": "sum(puppet_report_resources{name=\"Changed\",environment=~\"${environment:regex}\"})",
           "hide": false,
           "instant": false,
           "interval": "$interval",
