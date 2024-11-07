@@ -35,3 +35,4 @@ resources:
   - ./kyverno.yaml
   - ./node-feature-discovery.yaml
   - ./stevehipwell.yaml
+  - ./influxdata.yaml
