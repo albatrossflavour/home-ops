@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 38,
+  "id": 34,
   "links": [
     {
       "asDropdown": false,
@@ -255,9 +255,9 @@
           "editorMode": "code",
           "exemplar": false,
           "expr": "puppet_state_overview",
-          "instant": false,
+          "instant": true,
           "legendFormat": "{{state}}",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -1576,7 +1576,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": [
             "All"
           ],
