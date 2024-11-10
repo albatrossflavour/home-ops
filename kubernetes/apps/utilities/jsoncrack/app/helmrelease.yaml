@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: docker.io/enmanuelmoreira/jsoncrack
-              tag: v3.2.0@sha256:6df2bf2e97835f6e11b474a59841336a2d77f6a149869895997ed5b9c39cd50d
+              tag: v3.2.0@sha256:cfd257a13dec324fc0e29b76d778a5a02b8f3863e5c4fca6aa6f39da272d06d3
               pullPolicy: IfNotPresent
             env:
               TZ: "${TZ}"
