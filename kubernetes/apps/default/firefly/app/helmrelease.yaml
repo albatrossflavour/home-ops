@@ -101,7 +101,7 @@ spec:
     persistence:
       upload:
         enabled: true
-        existingClaim: "${VOLSYNC_CLAIM}"
+        existingClaim: firefly-volsync
         advancedMounts:
           firefly:
             firefly:
