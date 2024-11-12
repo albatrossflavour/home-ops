@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./k8s/kubernetes/apps/default/firefly/app
+  path: ./kubernetes/apps/default/firefly/app
   prune: true
   sourceRef:
     kind: GitRepository
