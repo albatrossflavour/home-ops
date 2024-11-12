@@ -1,0 +1,116 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: firefly-iii
+  namespace: finance
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      firefly:
+        pod:
+          enableServiceLinks: false
+          annotations:
+            reloader.stakater.com/auto: "true"
+
+        initContainers:
+          01-init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 16.0
+            imagePullPolicy: IfNotPresent
+            envFrom:
+              - secretRef:
+                  name: firefly-init-secret
+
+        containers:
+          firefly:
+            image:
+              repository: registry.skysolutions.fi/docker.io/fireflyiii/core
+              tag: version-6.1.19
+            env:
+              TZ: "${TZ}"
+              APP_URL: "https://firefly.${SECRET_DOMAIN}"
+              APP_ENV: "production"
+              DB_CONNECTION: "pgsql"
+              DB_HOST: postgres16-rw.databases.svc.nebula.local
+              DB_PORT: "5432"
+              MAIL_MAILER: log
+              TRUSTED_PROXIES: "**" # TODO: This should be changed..
+              SEND_REGISTRATION_MAIL: false
+              SEND_ERROR_MESSAGE: false
+              SEND_LOGIN_NEW_IP_WARNING: false
+              COOKIE_DOMAIN: "firefly"
+              COOKIE_SECURE: "true"
+              COOKIE_SAMESITE: "lax"
+              AUTHENTICATION_GUARD: "remote_user_guard"
+              AUTHENTICATION_GUARD_HEADER: "X-authentik-uid"
+              AUTHENTICATION_GUARD_EMAIL: "X-authentik-email"
+              # Requires version 6.0.21.
+              # FIREFLY_III_LAYOUT: v2
+            envFrom:
+              - secretRef:
+                  name: firefly-secret
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 100m
+                memory: 512Mi
+
+    service:
+      firefly:
+        controller: firefly
+        ports:
+          http:
+            port: 8080
+
+    ingress:
+      main:
+        enabled: true
+        className: "internal"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: ingress.${SECRET_DOMAIN}
+        hosts:
+          - host: firefly.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+
+    persistence:
+      upload:
+        enabled: true
+        existingClaim: "${VOLSYNC_CLAIM}"
+        advancedMounts:
+          firefly:
+            firefly:
+              - path: /var/www/html/storage/upload
+      logs:
+        enabled: true
+        type: emptyDir
+        advancedMounts:
+          firefly:
+            firefly:
+              - path: /var/www/html/storage/logs
