@@ -51,7 +51,7 @@ spec:
               APP_URL: "https://firefly.${SECRET_DOMAIN}"
               APP_ENV: "production"
               DB_CONNECTION: "pgsql"
-              DB_HOST: postgres16-rw.database.svc.nebula.local
+              DB_HOST: postgres16-rw.database.svc.cluster.local
               DB_PORT: "5432"
               MAIL_MAILER: log
               TRUSTED_PROXIES: "**" # TODO: This should be changed..
