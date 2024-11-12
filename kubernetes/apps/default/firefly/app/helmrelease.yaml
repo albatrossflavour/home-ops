@@ -48,7 +48,7 @@ spec:
               tag: version-6.1.19
             env:
               TZ: "${TZ}"
-              APP_URL: "https://firefly.${SECRET_DOMAIN}"
+              #APP_URL: "https://firefly.${SECRET_DOMAIN}"
               APP_ENV: "production"
               DB_CONNECTION: "pgsql"
               DB_HOST: postgres16-rw.database.svc.cluster.local
@@ -58,9 +58,9 @@ spec:
               SEND_REGISTRATION_MAIL: false
               SEND_ERROR_MESSAGE: false
               SEND_LOGIN_NEW_IP_WARNING: false
-              COOKIE_DOMAIN: "firefly"
-              COOKIE_SECURE: "true"
-              COOKIE_SAMESITE: "lax"
+              #COOKIE_DOMAIN: "firefly"
+              #COOKIE_SECURE: "true"
+              #COOKIE_SAMESITE: "lax"
               #AUTHENTICATION_GUARD: "remote_user_guard"
               #AUTHENTICATION_GUARD_HEADER: "X-authentik-uid"
               #AUTHENTICATION_GUARD_EMAIL: "X-authentik-email"
