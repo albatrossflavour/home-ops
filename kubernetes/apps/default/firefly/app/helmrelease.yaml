@@ -78,7 +78,7 @@ spec:
                 memory: 512Mi
 
     service:
-      firefly:
+      app:
         controller: firefly
         ports:
           http:
