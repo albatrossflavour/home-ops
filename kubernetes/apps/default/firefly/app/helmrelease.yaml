@@ -37,7 +37,6 @@ spec:
             image:
               repository: ghcr.io/onedr0p/postgres-init
               tag: 16.0
-            imagePullPolicy: IfNotPresent
             envFrom:
               - secretRef:
                   name: firefly-init-secret
