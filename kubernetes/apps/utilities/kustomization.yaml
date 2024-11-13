@@ -9,4 +9,4 @@ resources:
   - ./jsoncrack/ks.yaml
   - ./cyberchef/ks.yaml
   - ./send/ks.yaml
-  # - ./shlink/ks.yaml
+  - ./shlink/ks.yaml
