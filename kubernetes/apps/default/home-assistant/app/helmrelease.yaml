@@ -115,13 +115,9 @@ spec:
                   port: code-server
     persistence:
       config:
-        existingClaim: home-assistant
-        globalMounts:
-          - path: /config
-      config-volsync:
         existingClaim: home-assistant-volsync
         globalMounts:
-          - path: /config-volsync
+          - path: /config
       logs:
         type: emptyDir
         globalMounts:
