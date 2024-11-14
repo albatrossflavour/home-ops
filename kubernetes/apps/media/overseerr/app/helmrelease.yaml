@@ -101,13 +101,9 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: overseerr
-        globalMounts:
-          - path: /app/config
-      config-new:
         existingClaim: overseerr-volsync
         globalMounts:
-          - path: /app/config-new
+          - path: /app/config
       cache:
         existingClaim: overseerr-cache
         globalMounts:
