@@ -118,6 +118,10 @@ spec:
         existingClaim: home-assistant
         globalMounts:
           - path: /config
+      config-volsync:
+        existingClaim: home-assistant-volsync
+        globalMounts:
+          - path: /config-volsync
       logs:
         type: emptyDir
         globalMounts:
