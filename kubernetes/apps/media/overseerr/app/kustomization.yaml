@@ -8,4 +8,4 @@ resources:
   - ./helmrelease.yaml
   - ./configmap.yaml
   # - ../../../../templates/gatus/external
-  - ../../../../templates/volsync-old
+  - ../../../../templates/volsync
