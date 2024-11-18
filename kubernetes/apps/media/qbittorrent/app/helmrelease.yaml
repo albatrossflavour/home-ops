@@ -120,10 +120,6 @@ spec:
     persistence:
       config:
         existingClaim: qbittorrent
-      config-volsync:
-        existingClaim: qbittorrent-volsync
-        globalMounts:
-          - path: /volsync
       media:
         type: nfs
         server: 192.168.1.22
