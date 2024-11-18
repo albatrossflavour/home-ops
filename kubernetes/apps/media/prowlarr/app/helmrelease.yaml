@@ -92,4 +92,5 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: prowlarr
+        enabled: true
+        type: emptyDir
