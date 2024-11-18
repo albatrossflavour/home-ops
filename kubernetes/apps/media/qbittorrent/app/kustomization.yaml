@@ -6,7 +6,7 @@ resources:
   - ./helmrelease.yaml
   - ./pvc.yaml
   - ../../../../templates/gatus/guarded
-  - ../../../../templates/volsync-old
+  - ../../../../templates/volsync
 configMapGenerator:
   - name: qbittorrent-loki-rules
     files:
