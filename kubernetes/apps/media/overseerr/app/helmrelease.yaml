@@ -104,10 +104,10 @@ spec:
         existingClaim: overseerr
         globalMounts:
           - path: /app/config
-#     cache:
-#       existingClaim: overseerr-cache
-#       globalMounts:
-#         - path: /app/config/cache
+      cache:
+        existingClaim: overseerr-cache
+        globalMounts:
+          - path: /app/config/cache
       logs:
         type: emptyDir
         globalMounts:
