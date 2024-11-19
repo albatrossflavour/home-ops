@@ -13,14 +13,13 @@ spec:
     template:
       engineVersion: v2
       data:
-        RESTIC_REPOSITORY: "s3:http://minio.default.svc.cluster.local:9000/volsync/${APP}"
+        RESTIC_REPOSITORY: "s3:http://192.168.1.22:9000/volsync/${APP}"
         RESTIC_PASSWORD: "{{ .RESTIC_PASSWORD }}"
-        AWS_ACCESS_KEY_ID: "{{ .AWS_ACCESS_KEY_ID }}"
-        AWS_SECRET_ACCESS_KEY: "{{ .AWS_SECRET_ACCESS_KEY }}"
-        MID: "asdf"
+        AWS_ACCESS_KEY_ID: "{{ .MINIO_ROOT_USER }}"
+        AWS_SECRET_ACCESS_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
   dataFrom:
     - extract:
-        key: cloudflare
+        key: minio
     - extract:
         key: volsync-r2-template
 ---
