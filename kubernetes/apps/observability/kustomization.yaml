@@ -19,4 +19,4 @@ resources:
   - ./radarr-exporter/ks.yaml
   - ./overseerr-exporter/ks.yaml
   - ./prowlarr-exporter/ks.yaml
-  #- ./influxdb/ks.yaml
+  - ./influxdb/ks.yaml

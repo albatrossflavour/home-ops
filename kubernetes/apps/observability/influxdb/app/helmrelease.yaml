@@ -39,7 +39,7 @@ spec:
       bucket: "default"
       existingSecret: *secret
     persistence:
-      existingClaim: influxdb2
+      existingClaim: influxdb
       mountPath: /var/lib/influxdb2
     ingress:
       enabled: true
