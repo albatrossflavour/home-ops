@@ -50,6 +50,15 @@ spec:
 
     ingress:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/name: Maintainerr
+          gethomepage.dev/icon: maintainerr.png
+          gethomepage.dev/siteMonitor: http://maintainerr.${SECRET_DOMAIN}
+          gethomepage.dev/description: Plex maintainence
+          gethomepage.dev/widget.type: maintainerr
+          gethomepage.dev/widget.url: http://maintainerr.media
         className: internal
         hosts:
           - host:  "{{ .Release.Name }}.${SECRET_DOMAIN}"
