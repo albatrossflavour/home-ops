@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta2.json
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: maintainerr
@@ -50,6 +50,13 @@ spec:
 
     ingress:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/name: Maintainerr
+          gethomepage.dev/icon: maintainerr.png
+          gethomepage.dev/siteMonitor: http://maintainerr.${SECRET_DOMAIN}
+          gethomepage.dev/description: Plex maintainence
         className: internal
         hosts:
           - host:  "{{ .Release.Name }}.${SECRET_DOMAIN}"

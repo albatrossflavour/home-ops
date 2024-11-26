@@ -59,6 +59,7 @@ spec:
         - ankh.lab.albatrossflavour.com:9100
         - morpork.lab.albatrossflavour.com:9100
         - stolat.lab.albatrossflavour.com:9100
+        - 192.168.1.22:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
