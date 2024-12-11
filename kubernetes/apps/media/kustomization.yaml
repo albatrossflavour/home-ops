@@ -13,4 +13,4 @@ resources:
   - ./tautulli/ks.yaml
   - ./prowlarr/ks.yaml
   - ./flaresolverr/ks.yaml
-  - ./maintainerr/ks.yaml
+  #- ./maintainerr/ks.yaml
