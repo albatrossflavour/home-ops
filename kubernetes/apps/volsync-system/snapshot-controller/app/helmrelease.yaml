@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: snapshot-controller
-      version: 4.0.0
+      version: 3.0.6
       sourceRef:
         kind: HelmRepository
         name: piraeus
@@ -17,7 +17,7 @@ spec:
   install:
     crds: CreateReplace
     remediation:
-      retries: 4
+      retries: 3
   upgrade:
     cleanupOnFail: true
     crds: CreateReplace
