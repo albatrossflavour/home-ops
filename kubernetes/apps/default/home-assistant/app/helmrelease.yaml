@@ -135,10 +135,12 @@ spec:
         type: nfs
         server: "192.168.1.22"
         path: /volume2/Backups/ha/local
-        mountPath: /config/local
+        globalMounts:
+          - path: /config/local
       photos:
         enabled: true
         type: nfs
         server: "192.168.1.22"
         path: /volume2/Backups/ha/photos
-        mountPath: /config/photos
+        globalMounts:
+          - path: /config/photos
