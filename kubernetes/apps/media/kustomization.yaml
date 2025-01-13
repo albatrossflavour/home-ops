@@ -10,7 +10,7 @@ resources:
   - ./sabnzbd/ks.yaml
   - ./qbittorrent/ks.yaml
   - ./overseerr/ks.yaml
-  - ./tautulli/ks.yaml
+  #- ./tautulli/ks.yaml
   - ./prowlarr/ks.yaml
   - ./flaresolverr/ks.yaml
   - ./maintainerr/ks.yaml
