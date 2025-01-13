@@ -36,7 +36,7 @@ spec:
           app:
             image:
               repository: ghcr.io/onedr0p/qbittorrent
-              tag: 5.0.2@sha256:b905a9e4eef9ffabd10ad8618ffdc2661d20c1a910441e5f921c851c10974444
+              tag: 5.0.3@sha256:025f32d260a3e924885405c0ca01ab8e396360330438ef8562ffd973d2dbb927
             env:
               TZ: Australia/Sydney
               QBITTORRENT__PORT: &port 80
@@ -72,7 +72,7 @@ spec:
               requests:
                 cpu: 100m
               limits:
-                memory: 4Gi
+                memory: 3Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true

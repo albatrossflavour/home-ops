@@ -10,5 +10,5 @@ resources:
   - ./nginx-reverse-proxy/ks.yaml
   - ./homepage/ks.yaml
   #- ./paperless/ks.yaml
-  - ./atuin/ks.yaml
+  #- ./atuin/ks.yaml
   - ./firefly/ks.yaml
