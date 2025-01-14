@@ -11,4 +11,4 @@ resources:
   - ./homepage/ks.yaml
   #- ./paperless/ks.yaml
   #- ./atuin/ks.yaml
-  - ./firefly/ks.yaml
+  #- ./firefly/ks.yaml
