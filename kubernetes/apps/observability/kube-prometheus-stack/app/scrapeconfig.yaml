@@ -94,7 +94,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - overseerr-exporter.observability.svc.cluster.local:9850
+        #        - overseerr-exporter.observability.svc.cluster.local:9850
         - qbittorrent-exporter.observability.svc.cluster.local:8000
   metricsPath: /metrics
   relabelings:
