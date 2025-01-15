@@ -94,9 +94,9 @@ spec:
         osd:
           requests:
             cpu: 500m
-            memory: 2Gi
+            memory: 1Gi
           limits:
-            memory: 4Gi
+            memory: 2Gi
         mgr-sidecar:
           requests:
             cpu: 50m
@@ -160,7 +160,7 @@ spec:
                 cpu: 100m
                 memory: 1Gi
               limits:
-                memory: 4Gi
+                memory: 3Gi
         storageClass:
           enabled: true
           isDefault: false
