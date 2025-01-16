@@ -125,8 +125,6 @@ kind: ScrapeConfig
 metadata:
   name: &name nut-exporters
 spec:
-  scrapeInterval: 1h
-  scrapeTimeout: 1m
   staticConfigs:
     - targets:
         - 192.168.2.143:9199
