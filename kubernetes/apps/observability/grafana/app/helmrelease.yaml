@@ -208,6 +208,10 @@ spec:
             - name: DS_PROMETHEUS
               value: Prometheus
       nodes:
+        windows-exporter:
+          gnetId: 14694
+          revision: 2
+          datasource: Prometheus
         node-exporter-full:
           # renovate: depName="Node Exporter Full"
           gnetId: 1860
