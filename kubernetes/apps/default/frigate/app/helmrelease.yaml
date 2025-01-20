@@ -104,8 +104,9 @@ spec:
 
     ingress:
       main:
-        enabled: true
-        className: internal-nginx
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        className: internal
         hosts:
           - host: frigate.${SECRET_DOMAIN}
             paths:
