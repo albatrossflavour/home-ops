@@ -34,10 +34,10 @@ spec:
       main:
         annotations:
           reloader.stakater.com/auto: "true"
-        pod:
-          nodeSelector:
-            google.feature.node.kubernetes.io/coral: "true"
-            intel.feature.node.kubernetes.io/gpu: "true"
+#       pod:
+#         nodeSelector:
+#           google.feature.node.kubernetes.io/coral: "true"
+#           intel.feature.node.kubernetes.io/gpu: "true"
         containers:
           main:
             image:
