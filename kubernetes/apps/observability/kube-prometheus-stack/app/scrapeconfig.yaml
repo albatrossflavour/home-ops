@@ -60,6 +60,20 @@ spec:
         - morpork.lab.albatrossflavour.com:9100
         - stolat.lab.albatrossflavour.com:9100
         - 192.168.1.22:9100
+  metricsPath: /metrics
+  relabelings:
+    - action: replace
+      targetLabel: job
+      replacement: *name
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: &name windows-node-exporter
+spec:
+  staticConfigs:
+    - targets:
         - 192.168.1.181:9182
   metricsPath: /metrics
   relabelings:
