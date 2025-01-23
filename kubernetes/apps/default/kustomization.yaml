@@ -9,7 +9,7 @@ resources:
   - ./home-assistant/ks.yaml
   - ./nginx-reverse-proxy/ks.yaml
   - ./homepage/ks.yaml
-  - ./frigate/ks.yaml
+  #- ./frigate/ks.yaml
   #- ./paperless/ks.yaml
   #- ./atuin/ks.yaml
   #- ./firefly/ks.yaml
