@@ -84,7 +84,7 @@ spec:
             cpu: 100m
             memory: 512Mi
           limits:
-            memory: 2Gi
+            memory: 1536Mi
         mon:
           requests:
             cpu: 50m
@@ -96,7 +96,7 @@ spec:
             cpu: 500m
             memory: 1Gi
           limits:
-            memory: 2Gi
+            memory: 1536Mi
         mgr-sidecar:
           requests:
             cpu: 50m
@@ -160,7 +160,7 @@ spec:
                 cpu: 100m
                 memory: 1Gi
               limits:
-                memory: 3Gi
+                memory: 2Gi
         storageClass:
           enabled: true
           isDefault: false
@@ -203,7 +203,7 @@ spec:
                 cpu: 100m
                 memory: 1Gi
               limits:
-                memory: 2Gi
+                memory: 1536Mi
             instances: 2
             priorityClassName: system-cluster-critical
           healthCheck:
