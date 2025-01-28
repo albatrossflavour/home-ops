@@ -25,7 +25,7 @@ spec:
   values:
     controllers:
       homepage:
-        replicas: 2
+        replicas: 1
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -44,7 +44,7 @@ spec:
                 cpu: 15m
                 memory: 200M
               limits:
-                memory: 2G
+                memory: 1G
     service:
       app:
         controller: *app
