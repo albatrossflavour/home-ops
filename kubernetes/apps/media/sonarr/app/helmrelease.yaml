@@ -29,6 +29,12 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
+          cleanup-config:
+            image: busybox
+            command: ["sh", "-c", "rm -f /config/config.xml"]
+            volumeMounts:
+              - name: config
+                mountPath: /config
           init-db:
             image:
               repository: ghcr.io/onedr0p/postgres-init
