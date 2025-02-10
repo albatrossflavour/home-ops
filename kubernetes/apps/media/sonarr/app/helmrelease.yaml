@@ -30,7 +30,9 @@ spec:
           reloader.stakater.com/auto: "true"
         initContainers:
           cleanup-config:
-            image: busybox
+            image:
+              repository: busybox
+              tag: "latest"
             command: ["sh", "-c", "rm -f /config/config.xml"]
             volumeMounts:
               - name: config
