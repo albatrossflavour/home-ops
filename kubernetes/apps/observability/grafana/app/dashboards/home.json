@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -54,13 +54,13 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -133,6 +133,7 @@
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
+          "interval": "$interval",
           "legendFormat": "{{topic}}",
           "range": true,
           "refId": "A",
@@ -178,13 +179,13 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -259,6 +260,7 @@
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
+          "interval": "$interval",
           "legendFormat": "{{topic}}",
           "range": true,
           "refId": "A",
@@ -304,13 +306,13 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "stepBefore",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -449,6 +451,7 @@
           "expr": "kiln_target",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
+          "interval": "$interval",
           "legendFormat": "Target",
           "range": true,
           "refId": "A",
@@ -465,6 +468,7 @@
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
+          "interval": "$interval",
           "legendFormat": "Temp",
           "range": true,
           "refId": "B",
@@ -481,6 +485,7 @@
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
+          "interval": "$interval",
           "legendFormat": "Time Remaining",
           "range": true,
           "refId": "C",
@@ -494,6 +499,7 @@
           "editorMode": "builder",
           "expr": "node_hwmon_temp_celsius{instance=\"10.10.20.208:9100\", sensor=\"temp0\"}",
           "hide": false,
+          "interval": "$interval",
           "legendFormat": "Pi temp",
           "range": true,
           "refId": "D"
@@ -508,7 +514,68 @@
   "schemaVersion": 40,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "auto": true,
+        "auto_count": 30,
+        "auto_min": "10s",
+        "current": {
+          "text": "$__auto",
+          "value": "$__auto"
+        },
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          },
+          {
+            "selected": false,
+            "text": "7d",
+            "value": "7d"
+          },
+          {
+            "selected": false,
+            "text": "14d",
+            "value": "14d"
+          },
+          {
+            "selected": false,
+            "text": "30d",
+            "value": "30d"
+          }
+        ],
+        "query": "10m,30m,1h,6h,12h,1d,7d,14d,30d",
+        "refresh": 2,
+        "type": "interval"
+      }
+    ]
   },
   "time": {
     "from": "now-24h",
