@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: authentik
-      version: 2024.12.2
+      version: 2024.12.3
       sourceRef:
         kind: HelmRepository
         name: authentik
@@ -50,7 +50,7 @@ spec:
     server:
       initContainers:
         - name: init-db
-          image: ghcr.io/onedr0p/postgres-init:16.6
+          image: ghcr.io/onedr0p/postgres-init:16.8
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:

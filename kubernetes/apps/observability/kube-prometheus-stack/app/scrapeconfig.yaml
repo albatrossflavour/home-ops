@@ -22,7 +22,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - 10.10.20.208:80
+        - 10.10.20.208
   metricsPath: /metrics
   relabelings:
     - action: replace

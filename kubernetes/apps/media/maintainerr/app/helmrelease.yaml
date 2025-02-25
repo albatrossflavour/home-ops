@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.6.1
+      version: 3.7.1
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -33,7 +33,7 @@ spec:
           main:
             image:
               repository: ghcr.io/jorenn92/maintainerr
-              tag: 2.8.0@sha256:b160b782c46e2d9012afc8affafc5b67a7a0a26a4955922118402d781a49be36
+              tag: 2.10.0@sha256:e4d6c5c1017a2e6969d87c10d3c80f5d221096dc06863c5004774ea5c7621606
             resources:
               requests:
                 cpu: 5m
