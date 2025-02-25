@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -101,7 +101,7 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 9,
+        "w": 12,
         "x": 0,
         "y": 0
       },
@@ -113,7 +113,9 @@
           ],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "sortBy": "Last *",
+          "sortDesc": true
         },
         "tooltip": {
           "hideZeros": false,
@@ -227,8 +229,8 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 9,
-        "x": 9,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
       "id": 2,
@@ -239,9 +241,7 @@
           ],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
+          "showLegend": true
         },
         "tooltip": {
           "hideZeros": false,
@@ -419,7 +419,7 @@
       },
       "gridPos": {
         "h": 16,
-        "w": 18,
+        "w": 24,
         "x": 0,
         "y": 12
       },
