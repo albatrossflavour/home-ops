@@ -112,3 +112,13 @@ spec:
                   number: 8080
             path: /
             pathType: Prefix
+    - host: smarthome.pdlf.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-reverse-proxy
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
