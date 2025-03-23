@@ -37,7 +37,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - 192.168.7.10:9100
+        - puppet.lab.albatrossflavour.com:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
@@ -56,10 +56,10 @@ spec:
         - smp.kalooma.org:9100
         - tdarr.albatrossflavour.com:9100
         - hex.home.albatrossflavour.com:9100
-        - 192.168.1.22:9100
-        - 192.168.5.10:9100
-        - 192.168.5.11:9100
-        - 192.168.5.12:9100
+        - luggage.lab.albatrossflavour.com:9100
+        - ankh.lab.albatrossflavour.com:9100
+        - morpork.lab.albatrossflavour.com:9100
+        - stolat.lab.albatrossflavour.com:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
