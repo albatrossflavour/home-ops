@@ -22,7 +22,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - 10.10.20.208
+        - betty.albatrossflavour.com
   metricsPath: /metrics
   relabelings:
     - action: replace
