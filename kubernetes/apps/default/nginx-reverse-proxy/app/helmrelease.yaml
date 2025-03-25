@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: nginx
-      version: 19.0.0
+      version: 19.0.2
       sourceRef:
         kind: HelmRepository
         name: bitnami
@@ -28,7 +28,7 @@ spec:
     image:
       registry: docker.io
       repository: bitnami/nginx
-      tag: 1.27.4-debian-12-r4
+      tag: 1.27.4-debian-12-r7
     pullPolicy: IfNotPresent
     debug: false
     replicaCount: 1
@@ -113,6 +113,25 @@ spec:
         }
       }
 
+      server {
+        listen 8080;
+        server_name smarthome.pdlf.net;
+        location / {
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $host;
+
+          proxy_pass http://192.168.1.223:8123;
+
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_buffer_size 128k;
+          proxy_buffers 4 256k;
+          proxy_busy_buffers_size 256k;
+          #large_client_header_buffers 4 16k;
+        }
+      }
+
 
       server {
         listen 8080;
@@ -184,6 +203,11 @@ spec:
               - path: /
                 pathType: Prefix
           - host: dashboard.lab.albatrossflavour.com
+            paths:
+              - path: /
+                pathType: Prefix
+
+          - host: smarthome.pdlf.net
             paths:
               - path: /
                 pathType: Prefix
