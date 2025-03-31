@@ -28,6 +28,12 @@ servers:
         configBlock: |-
           pods insecure
           fallthrough in-addr.arpa ip6.arpa
+      - name: hosts
+        configBlock: |-
+          192.168.1.22    luggage.albatrossflavour.com
+          192.168.1.37    printer.home.albatrossflavour.com
+          192.168.1.1     udm.albatrossflavour.com
+          fallthrough
       - name: forward
         parameters: . 192.168.9.2
       - name: cache
