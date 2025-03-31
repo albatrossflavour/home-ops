@@ -5,6 +5,8 @@ serviceAccount:
   create: true
 service:
   name: kube-dns
+  type: LoadBalancer
+  externalTrafficPolicy: Local
   clusterIP: "10.96.0.10"
 servers:
   - zones:
