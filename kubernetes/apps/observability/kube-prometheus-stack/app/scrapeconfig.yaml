@@ -60,8 +60,8 @@ spec:
         - ankh.lab.albatrossflavour.com:9100
         - morpork.lab.albatrossflavour.com:9100
         - stolat.lab.albatrossflavour.com:9100
-        - kiosk.lab.albatrossflavour.com:9100
-        - pihole.lab.albatrossflavour.com:9100
+        - kiosk.albatrossflavour.com:9100
+        - pihole.albatrossflavour.com:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
