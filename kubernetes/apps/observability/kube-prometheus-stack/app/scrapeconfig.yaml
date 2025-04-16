@@ -62,6 +62,8 @@ spec:
         - stolat.lab.albatrossflavour.com:9100
         - kiosk.albatrossflavour.com:9100
         - pihole.albatrossflavour.com:9100
+        - pihole2.albatrossflavour.com:9100
+        - pihole3.albatrossflavour.com:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
