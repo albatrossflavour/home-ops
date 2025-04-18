@@ -208,6 +208,10 @@ spec:
             - name: DS_PROMETHEUS
               value: Prometheus
       nodes:
+        pihole:
+          gentId: 10176
+          revision: 3
+          datasource: Prometheus
         windows-exporter:
           gnetId: 14694
           revision: 2
