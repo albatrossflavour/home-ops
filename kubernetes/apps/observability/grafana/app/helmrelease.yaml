@@ -197,6 +197,9 @@ spec:
         home:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/home.json
           datasource: Prometheus
+        pihole:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/pihole.json
+          datasource: Prometheus
         ups:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/ups.json
           datasource: Prometheus
@@ -208,10 +211,6 @@ spec:
             - name: DS_PROMETHEUS
               value: Prometheus
       nodes:
-        pihole:
-          gentId: 10176
-          revision: 3
-          datasource: Prometheus
         windows-exporter:
           gnetId: 14694
           revision: 2
