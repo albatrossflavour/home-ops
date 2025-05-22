@@ -57,7 +57,7 @@ spec:
               storageClassName: openebs-hostpath
               resources:
                 requests:
-                  storage: 1Gi
+                  storage: 3Gi
     kubeApiServer:
       serviceMonitor:
         selector:
@@ -116,7 +116,7 @@ spec:
               storageClassName: openebs-hostpath
               resources:
                 requests:
-                  storage: 75Gi
+                  storage: 250Gi
     prometheus-node-exporter:
       fullnameOverride: node-exporter
       prometheus:
