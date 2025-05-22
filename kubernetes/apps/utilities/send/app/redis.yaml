@@ -23,7 +23,7 @@ spec:
           main:
             image:
               repository: public.ecr.aws/docker/library/redis
-              tag: "7"
+              tag: "8"
             # yamllint disable rule:indentation
             command:
               [
