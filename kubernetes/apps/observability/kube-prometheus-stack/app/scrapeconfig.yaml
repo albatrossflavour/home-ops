@@ -23,6 +23,7 @@ spec:
   staticConfigs:
     - targets:
         - betty.albatrossflavour.com
+        - dotty.albatrossflavour.com
   metricsPath: /metrics
   relabelings:
     - action: replace
@@ -69,6 +70,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
+        - dotty.albatrossflavour.com:9100
         - betty.albatrossflavour.com:9100
         - smp.kalooma.org:9100
         - tdarr.albatrossflavour.com:9100
