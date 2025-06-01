@@ -169,9 +169,6 @@ spec:
         puppet-node-detail:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/puppet_node_detail.json
           datasource: Prometheus
-        puppet-status-v1:
-          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/puppet_status_v1.json
-          datasource: Prometheus
         puppet-node-detail-v1:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/puppet_node_detail_v1.json
           datasource: Prometheus
