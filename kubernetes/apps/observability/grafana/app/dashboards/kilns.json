@@ -18,6 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -267,13 +268,13 @@
             "uid": "prometheus"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "node_hwmon_temp_celsius{instance=\"$kiln\"}",
+          "editorMode": "code",
+          "expr": "node_hwmon_temp_celsius{instance=\"$kiln:9100\",sensor=\"temp0\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "Pi Temp",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -384,5 +385,6 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "Kilns",
-  "version": 0
+  "uid": "7dba2bb8-458a-427e-8b6f-39d1e410117c",
+  "version": 1
 }
