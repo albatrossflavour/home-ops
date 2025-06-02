@@ -40,7 +40,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 10,
+            "fillOpacity": 6,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -94,6 +94,10 @@
               {
                 "id": "unit",
                 "value": "s"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 7
               },
               {
                 "id": "custom.lineStyle",
@@ -236,6 +240,21 @@
               {
                 "id": "color",
                 "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pi Temp"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
                   "fixedColor": "blue",
                   "mode": "fixed"
                 }
@@ -260,9 +279,6 @@
           "placement": "bottom",
           "showLegend": true
         },
-        "timezone": [
-          "Australia/Sydney"
-        ],
         "tooltip": {
           "hideZeros": false,
           "mode": "multi",
