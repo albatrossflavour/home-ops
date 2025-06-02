@@ -190,8 +190,8 @@
         ]
       },
       "gridPos": {
-        "h": 12,
-        "w": 20,
+        "h": 15,
+        "w": 24,
         "x": 0,
         "y": 0
       },
@@ -224,7 +224,7 @@
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "interval": "$interval",
-          "legendFormat": "Temp $kiln",
+          "legendFormat": "Temp",
           "range": true,
           "refId": "Temp",
           "useBackend": false
@@ -242,7 +242,7 @@
           "includeNullMetadata": true,
           "instant": false,
           "interval": "$interval",
-          "legendFormat": "Target $kiln",
+          "legendFormat": "Target",
           "range": true,
           "refId": "Target",
           "useBackend": false
@@ -260,7 +260,7 @@
           "includeNullMetadata": true,
           "instant": false,
           "interval": "$interval",
-          "legendFormat": "Remaining $kiln",
+          "legendFormat": "Remaining",
           "range": true,
           "refId": "Remaining",
           "useBackend": false
