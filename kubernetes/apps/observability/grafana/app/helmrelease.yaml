@@ -40,8 +40,9 @@ spec:
     envFromSecrets:
       - name: grafana-admin-secret
     grafana.ini:
-      cookie_secure: true
-      cookie_samesite: none
+      security:
+        cookie_secure: true
+        cookie_samesite: none
       analytics:
         check_for_updates: false
         check_for_plugin_updates: false
