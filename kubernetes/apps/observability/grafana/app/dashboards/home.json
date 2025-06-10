@@ -70,6 +70,7 @@
               "mode": "off"
             }
           },
+          "decimals": 0,
           "mappings": [
             {
               "options": {
@@ -86,8 +87,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -123,7 +123,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -150,6 +150,13 @@
           "options": {
             "regex": "/zigbee2mqtt_(.*) env/",
             "renamePattern": "$1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "zigbee2mqtt_air quality",
+            "renamePattern": "studio"
           }
         }
       ],
@@ -214,8 +221,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -249,7 +255,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -276,6 +282,13 @@
           "options": {
             "regex": "/zigbee2mqtt_(.*)env/",
             "renamePattern": "$1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "zigbee2mqtt_air quality",
+            "renamePattern": "studio"
           }
         }
       ],
@@ -340,8 +353,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -442,7 +454,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -514,7 +526,7 @@
   ],
   "preload": false,
   "refresh": "1m",
-  "schemaVersion": 40,
+  "schemaVersion": 41,
   "tags": [],
   "templating": {
     "list": [
@@ -588,6 +600,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "pIG2JDZ4k",
-  "version": 1,
-  "weekStart": ""
+  "version": 1
 }
