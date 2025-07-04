@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 38,
+  "id": 46,
   "links": [
     {
       "asDropdown": false,
@@ -1511,7 +1511,7 @@
           "calcs": [],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
           "hideZeros": false,
@@ -1527,7 +1527,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (version) (puppet_configuration_version{environment=~\"${environment:regex}\"})",
+          "exemplar": false,
+          "expr": "sum by (version) (\n    puppet_configuration_version{environment=~\"${environment:regex}\", version!=\"\"}\n)",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
