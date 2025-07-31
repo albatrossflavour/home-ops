@@ -1101,7 +1101,7 @@
       "type": "barchart"
     }
   ],
-  "refresh": "30s",
+  "refresh": "10m",
   "schemaVersion": 39,
   "tags": [
     "puppet"
@@ -1111,7 +1111,7 @@
       {
         "auto": true,
         "auto_count": 30,
-        "auto_min": "10s",
+        "auto_min": "30m",
         "current": {
           "selected": true,
           "text": "auto",
