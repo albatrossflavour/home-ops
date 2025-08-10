@@ -119,12 +119,6 @@ data:
                   service_name: Radarr
                   params:
                     unmonitored: true
-        - Tdarr:
-            name: Tdarr
-            widget:
-              type: tdarr
-              url: http://192.168.9.23:8265
-              fields: ["queue", "saved"]
   settings.yaml: |
     background:
       image: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/security/authentik/app/images/background.jpg
