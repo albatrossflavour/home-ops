@@ -19,7 +19,7 @@ resources:
   - ./authentik.yaml
   - ./bitnami.yaml
   - ./emqx.yaml
-  - ./awx.yaml
+# - ./awx.yaml
   - ./dysnix.yaml
   - ./external-secrets.yaml
   - ./rook-ceph.yaml
