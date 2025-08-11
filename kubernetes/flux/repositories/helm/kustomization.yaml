@@ -26,13 +26,13 @@ resources:
   - ./cloudnative-pg.yaml
   - ./piraeus.yaml
   - ./backube.yaml
-  - ./actions-runner-controller.yaml
+# - ./actions-runner-controller.yaml
   - ./crossplane.yaml
-  - ./crunchydata.yaml
+# - ./crunchydata.yaml
   - ./csi-driver-nfs.yaml
   - ./descheduler.yaml
   - ./intel.yaml
-  - ./kyverno.yaml
+# - ./kyverno.yaml
   - ./node-feature-discovery.yaml
-  - ./stevehipwell.yaml
-  - ./influxdata.yaml
+# - ./stevehipwell.yaml
+# - ./influxdata.yaml
