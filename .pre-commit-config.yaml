@@ -166,9 +166,7 @@ repos:
       - id: sops-encrypted
         name: Check SOPS encryption
         language: system
-        entry: >-
-          sh -c 'if file "$1" | grep -q "ASCII text";
-          then echo "$1 should be encrypted with SOPS"; exit 1; fi'
+        entry: sh -c 'for file in "$@"; do if ! grep -q "^sops:" "$file"; then echo "$file should be encrypted with SOPS"; exit 1; fi; done' --
         files: .*\.sops\.ya?ml$
         pass_filenames: true
       - id: kube-score
