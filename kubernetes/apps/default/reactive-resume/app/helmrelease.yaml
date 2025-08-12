@@ -1,0 +1,109 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app resume
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      resume:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: amruthpillai/reactive-resume
+              tag: latest
+            env:
+              TZ: ${TIMEZONE}
+              PORT: "3000"
+              PUBLIC_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
+              DATABASE_URL: "postgresql://resume:${RESUME_DB_PASSWORD}@postgres16-rw.database.svc.cluster.local:5432/resume"
+              ACCESS_TOKEN_SECRET: ${RESUME_ACCESS_TOKEN_SECRET}
+              REFRESH_TOKEN_SECRET: ${RESUME_REFRESH_TOKEN_SECRET}
+              MAIL_FROM: "noreply@${SECRET_DOMAIN}"
+              STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
+              STORAGE_PORT: "9000"
+              STORAGE_REGION: "us-east-1"
+              STORAGE_BUCKET: "resume"
+              STORAGE_ACCESS_KEY: ${RESUME_STORAGE_ACCESS_KEY}
+              STORAGE_SECRET_KEY: ${RESUME_STORAGE_SECRET_KEY}
+              STORAGE_USE_SSL: "false"
+              CHROME_TOKEN: ${RESUME_CHROME_TOKEN}
+              CHROME_URL: "ws://browserless.default.svc.cluster.local:3000"
+            envFrom:
+              - secretRef:
+                  name: resume-secret
+            resources:
+              requests:
+                cpu: 15m
+                memory: 200M
+              limits:
+                memory: 1G
+      browserless:
+        replicas: 1
+        containers:
+          app:
+            image:
+              repository: browserless/chrome
+              tag: latest
+            env:
+              TOKEN: ${RESUME_CHROME_TOKEN}
+            resources:
+              requests:
+                cpu: 50m
+                memory: 500M
+              limits:
+                memory: 2G
+    service:
+      app:
+        controller: resume
+        ports:
+          http:
+            port: 3000
+      browserless:
+        controller: browserless
+        ports:
+          http:
+            port: 3000
+    ingress:
+      app:
+        className: internal
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        hosts:
+          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        globalMounts:
+          - path: /app/data
