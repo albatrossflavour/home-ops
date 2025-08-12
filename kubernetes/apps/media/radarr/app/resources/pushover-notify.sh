@@ -8,7 +8,7 @@ PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"false"}"
 # export radarr=Download;
 # ./pushover-notify.sh
 
-CONFIG_FILE="/config/config.xml" && [[ "${PUSHOVER_DEBUG}" == "true" ]] && CONFIG_FILE="config.xml"
+export CONFIG_FILE="/config/config.xml" && [[ "${PUSHOVER_DEBUG}" == "true" ]] && CONFIG_FILE="config.xml"
 ERRORS=()
 
 #
