@@ -10,12 +10,14 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: |
           (?x)^(
+            bootstrap/|
             kubernetes/apps/.*/(charts?/|helm-charts?/)|
             .*/(templates/|crds/)
           )
       - id: end-of-file-fixer
         exclude: |
           (?x)^(
+            bootstrap/|
             kubernetes/apps/.*/(charts?/|helm-charts?/)|
             .*/(templates/|crds/)
           )
@@ -29,6 +31,7 @@ repos:
         args: [--unsafe]
         exclude: |
           (?x)^(
+            bootstrap/|
             kubernetes/apps/.*/(charts?/|helm-charts?/)|
             .*/(templates/|crds/)
           )
@@ -38,6 +41,7 @@ repos:
         args: [--fix=lf]
         exclude: |
           (?x)^(
+            bootstrap/|
             kubernetes/apps/.*/(charts?/|helm-charts?/)|
             .*/(templates/|crds/)
           )
@@ -52,7 +56,9 @@ repos:
     hooks:
       - id: ruff
         args: [--fix]
+        exclude: ^bootstrap/
       - id: ruff-format
+        exclude: ^bootstrap/
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.14.1
@@ -60,6 +66,7 @@ repos:
       - id: mypy
         additional_dependencies: [types-requests]
         args: [--ignore-missing-imports]
+        exclude: ^bootstrap/
 
   # Shell script linting
   - repo: https://github.com/shellcheck-py/shellcheck-py
@@ -67,6 +74,7 @@ repos:
     hooks:
       - id: shellcheck
         args: [--severity=warning]
+        exclude: ^bootstrap/
 
   # YAML linting
   - repo: https://github.com/adrienverge/yamllint
@@ -127,6 +135,7 @@ repos:
     hooks:
       - id: pycln
         args: [--config=pyproject.toml]
+        exclude: ^bootstrap/
 
   # Sort imports
   - repo: https://github.com/pycqa/isort
@@ -134,6 +143,7 @@ repos:
     hooks:
       - id: isort
         args: ["--profile", "black"]
+        exclude: ^bootstrap/
 
   # Validate GitHub Actions
   - repo: https://github.com/python-jsonschema/check-jsonschema
