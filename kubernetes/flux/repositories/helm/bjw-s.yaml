@@ -8,3 +8,5 @@ spec:
   type: oci
   interval: 5m
   url: oci://ghcr.io/bjw-s/helm
+  secretRef:
+    name: github-oci-auth
