@@ -20,13 +20,9 @@ Welcome to the comprehensive documentation for this Kubernetes homelab setup. Th
 ### 🏗 Installation & Setup
 
 - **[Prerequisites](./installation/prerequisites.md)** - Hardware, accounts, and planning
-- **[Network Planning](./installation/network-planning.md)** - IP addressing and DNS setup
+- **[Quick Start](./installation/quick-start.md)** - 30-minute deployment guide
 - **[Cloudflare Setup](./installation/cloudflare.md)** - Domain, tunnels, and DNS integration
 - **[SSO Setup](./installation/sso-setup.md)** - Complete Authentik SSO configuration
-- **[Secrets Management](./installation/secrets.md)** - SOPS and 1Password configuration
-- **[Cluster Deployment](./installation/cluster-deployment.md)** - Talos and Kubernetes setup
-- **[Application Deployment](./installation/application-deployment.md)** - Core services and apps
-- **[Production Readiness](./installation/production-readiness.md)** - Security and monitoring
 
 ### ⚙️ Operations & Maintenance
 
@@ -49,9 +45,6 @@ Welcome to the comprehensive documentation for this Kubernetes homelab setup. Th
 ### 🔧 Troubleshooting & Maintenance
 
 - **[Common Issues](./troubleshooting/common-issues.md)** - Frequent problems and solutions
-- **[Diagnostic Commands](./troubleshooting/diagnostics.md)** - Health checks and debugging
-- **[Recovery Procedures](./troubleshooting/recovery.md)** - Disaster recovery
-- **[Performance Tuning](./troubleshooting/performance.md)** - Optimization guides
 
 ### 🛠 Development & Customization
 
@@ -110,13 +103,12 @@ task kubernetes:kubeconform
 ### Immediate Issues
 
 1. Check **[Common Issues](./troubleshooting/common-issues.md)** first
-2. Run **[Diagnostic Commands](./troubleshooting/diagnostics.md)**
-3. Review logs: `kubectl logs -n <namespace> <pod>`
+2. Review application logs: `kubectl logs -n <namespace> <pod>`
+3. Check cluster status: `kubectl get nodes` and `flux get all -A`
 
 ### Emergency Procedures
 
-- **[Recovery Procedures](./troubleshooting/recovery.md)** - When things go wrong
-- **[Emergency Contacts](./troubleshooting/emergency.md)** - Support channels
+- **[Common Issues](./troubleshooting/common-issues.md)** - Troubleshooting and recovery procedures
 
 ### Community Support
 

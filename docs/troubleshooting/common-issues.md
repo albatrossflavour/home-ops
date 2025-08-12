@@ -416,4 +416,4 @@ kubectl get certificates -A -o custom-columns="NAMESPACE:.metadata.namespace,NAM
 - [Daily Operations](../operations/daily-operations.md) - Routine maintenance tasks
 - [Application Management](../operations/application-management.md) - Managing deployed services
 - [DNS & Networking](../operations/dns-networking.md) - Network configuration
-- [Emergency Procedures](./recovery.md) - Disaster recovery procedures
+- [Backup & Recovery](../operations/backup-recovery.md) - Disaster recovery procedures

@@ -625,7 +625,7 @@ curl http://localhost:8080/metrics
 
 - [Production Readiness](./production-readiness.md) - Security and monitoring setup
 - [DNS & Networking](../operations/dns-networking.md) - Operational DNS management
-- [SSO Setup](../operations/sso-setup.md) - Secure application access
+- [SSO Setup](./sso-setup.md) - Secure application access
 
 **Related Documentation:**
 
