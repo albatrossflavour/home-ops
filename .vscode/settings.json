@@ -37,7 +37,7 @@
             "./kubeconfig"
         ]
     },
-    "workbench.colorTheme": "GitHub Dark Default",
+    "workbench.colorTheme": "Jellybeans",
     "editor.rulers": [80, 120],
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 120,

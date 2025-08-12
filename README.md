@@ -41,35 +41,6 @@ A production-ready Kubernetes homelab built on **Talos Linux** with **Flux GitOp
 
 **First time with this setup?** Start with the **[Prerequisites](./docs/installation/prerequisites.md)** and **[Architecture Overview](./docs/architecture/overview.md)**.
 
-### Essential Commands
-
-```bash
-# Initialize and configure
-task init
-task configure
-
-# Deploy cluster
-task talos:bootstrap
-task flux:bootstrap
-
-# Check status
-kubectl get nodes
-flux get all -A
-```
-
-## 📚 Documentation
-
-### 🚀 Essential Guides
-
-| Guide | Description |
-|-------|-------------|
-| **[Quick Start](./docs/installation/quick-start.md)** | 30-minute deployment guide |
-| **[Architecture Overview](./docs/architecture/overview.md)** | High-level system design |
-| **[SSO Setup](./docs/installation/sso-setup.md)** | Complete Authentik SSO configuration |
-| **[Daily Operations](./docs/operations/daily-operations.md)** | Common tasks and workflows |
-
-**📖 [Complete Documentation Index](./docs/README.md)** - Browse all installation, operations, and troubleshooting guides
-
 ## 🎯 Cluster Information
 
 ### Node Configuration
@@ -115,20 +86,6 @@ task workstation:venv
 ### Adding Applications
 
 See **[Adding Applications](./docs/development/adding-applications.md)** for deploying new services to the cluster.
-
-## 📊 Monitoring & Access
-
-### Dashboards
-
-- **Grafana**: https://grafana.albatrossflavour.com
-- **Prometheus**: https://prometheus.albatrossflavour.com
-- **Gatus**: https://status.albatrossflavour.com
-
-### Applications
-
-- **Home Assistant**: https://homeassistant.albatrossflavour.com
-- **Overseerr**: https://overseerr.albatrossflavour.com
-- **Paperless**: https://paperless.albatrossflavour.com
 
 ## 🤝 Community & Support
 
