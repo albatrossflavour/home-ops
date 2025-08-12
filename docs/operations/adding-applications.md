@@ -28,29 +28,38 @@ kubernetes/apps/<namespace>/<app-name>/
 
 ## 🎯 Quick Start Example
 
-Let's walk through adding a new application called "paperless-ngx" to the "documents" namespace.
+Let's walk through adding a new application. First, decide on your application and namespace details:
+
+**Example Variables:**
+
+- `NAMESPACE`: `media` (or `documents`, `monitoring`, etc.)
+- `APP_NAME`: `sonarr` (or `paperless-ngx`, `grafana`, etc.)
 
 ### Step 1: Create Directory Structure
 
 ```bash
-# Navigate to the apps directory
-cd kubernetes/apps
+# Set your variables (adjust these for your application)
+NAMESPACE="media"
+APP_NAME="sonarr"
+
+# Navigate to the repository root
+cd /path/to/your/home-ops
 
 # Create namespace directory if it doesn't exist
-mkdir -p documents/paperless-ngx/app
+mkdir -p kubernetes/apps/${NAMESPACE}/${APP_NAME}/app
 
 # Create the application structure
-touch documents/paperless-ngx/ks.yaml
-touch documents/paperless-ngx/app/pvc.yaml
-touch documents/paperless-ngx/app/externalsecret.yaml
-touch documents/paperless-ngx/app/helmrelease.yaml
-touch documents/paperless-ngx/app/kustomization.yaml
-touch documents/paperless-ngx/README.md
+touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/ks.yaml
+touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/pvc.yaml
+touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/externalsecret.yaml
+touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/helmrelease.yaml
+touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/kustomization.yaml
+touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/README.md
 ```
 
 ### Step 2: Configure Flux Kustomization
 
-**File**: `documents/paperless-ngx/ks.yaml`
+**File**: `kubernetes/apps/${NAMESPACE}/${APP_NAME}/ks.yaml`
 
 ```yaml
 ---
@@ -58,17 +67,17 @@ touch documents/paperless-ngx/README.md
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app paperless-ngx
+  name: &app ${APP_NAME}
   namespace: flux-system
 spec:
-  targetNamespace: documents
+  targetNamespace: ${NAMESPACE}
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
     - name: ceph-csi-rbd
-  path: ./kubernetes/apps/documents/paperless-ngx/app
+  path: ./kubernetes/apps/${NAMESPACE}/${APP_NAME}/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -80,63 +89,63 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: paperless
-      VOLSYNC_CLAIM: paperless-data
+      GATUS_SUBDOMAIN: ${APP_NAME}
+      VOLSYNC_CLAIM: ${APP_NAME}-data
       VOLSYNC_CAPACITY: 15Gi
 ```
 
 ### Step 3: Configure External Secrets
 
-**File**: `documents/paperless-ngx/app/externalsecret.yaml`
+**File**: `kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/externalsecret.yaml`
 
 ```yaml
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: paperless-ngx-secret
+  name: ${APP_NAME}-secret
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword-connect
   target:
-    name: paperless-ngx-secret
+    name: ${APP_NAME}-secret
     creationPolicy: Owner
     template:
       engineVersion: v2
       data:
         # Database configuration
-        PAPERLESS_DBUSER: "{{ .PAPERLESS_DBUSER }}"
-        PAPERLESS_DBPASS: "{{ .PAPERLESS_DBPASS }}"
-        PAPERLESS_DBHOST: "paperless-postgresql"
-        PAPERLESS_DBNAME: "paperless"
+        DB_USER: "{{ .DB_USER }}"
+        DB_PASS: "{{ .DB_PASS }}"
+        DB_HOST: "${APP_NAME}-postgresql"
+        DB_NAME: "${APP_NAME}"
 
         # Admin user
-        PAPERLESS_ADMIN_USER: "{{ .PAPERLESS_ADMIN_USER }}"
-        PAPERLESS_ADMIN_PASSWORD: "{{ .PAPERLESS_ADMIN_PASSWORD }}"
+        ADMIN_USER: "{{ .ADMIN_USER }}"
+        ADMIN_PASSWORD: "{{ .ADMIN_PASSWORD }}"
 
         # Security
-        PAPERLESS_SECRET_KEY: "{{ .PAPERLESS_SECRET_KEY }}"
+        SECRET_KEY: "{{ .SECRET_KEY }}"
 
-        # Redis
-        PAPERLESS_REDIS: "redis://paperless-redis:6379"
+        # Additional app-specific secrets
+        API_KEY: "{{ .API_KEY }}"
   dataFrom:
     - extract:
-        key: paperless-ngx
+        key: ${APP_NAME}
 ```
 
 **Note**: Since we're using 1Password integration, this file doesn't need SOPS encryption - External Secrets will fetch the values directly from 1Password.
 
 ### Step 4: Create Persistent Volume Claim
 
-**File**: `documents/paperless-ngx/app/pvc.yaml`
+**File**: `kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/pvc.yaml`
 
 ```yaml
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: paperless-data
+  name: ${APP_NAME}-data
 spec:
   accessModes:
     - ReadWriteOnce
@@ -148,19 +157,19 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: paperless-media
+  name: ${APP_NAME}-config
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 50Gi
+      storage: 1Gi
   storageClassName: ceph-block
 ```
 
 ### Step 5: Configure Helm Release
 
-**File**: `documents/paperless-ngx/app/helmrelease.yaml`
+**File**: `kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/helmrelease.yaml`
 
 ```yaml
 ---
@@ -290,7 +299,7 @@ spec:
 
 ### Step 6: Configure Kustomization
 
-**File**: `documents/paperless-ngx/app/kustomization.yaml`
+**File**: `kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/kustomization.yaml`
 
 ```yaml
 ---
@@ -315,19 +324,20 @@ generatorOptions:
 
 ### Step 7: Add Secrets to 1Password
 
-Create a new item in 1Password with the key `paperless-ngx`:
+Create a new item in 1Password with the key `${APP_NAME}`:
 
 ```text
-PAPERLESS_DBUSER=paperless
-PAPERLESS_DBPASS=<secure-password>
-PAPERLESS_ADMIN_USER=admin
-PAPERLESS_ADMIN_PASSWORD=<admin-password>
-PAPERLESS_SECRET_KEY=<50-character-random-string>
+DB_USER=${APP_NAME}
+DB_PASS=<secure-password>
+ADMIN_USER=admin
+ADMIN_PASSWORD=<admin-password>
+SECRET_KEY=<50-character-random-string>
+API_KEY=<application-specific-api-key>
 ```
 
 ### Step 8: Update Namespace Kustomization
 
-**File**: `kubernetes/apps/documents/kustomization.yaml`
+**File**: `kubernetes/apps/${NAMESPACE}/kustomization.yaml`
 
 ```yaml
 ---
@@ -335,21 +345,21 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./namespace.yaml
-  - ./paperless-ngx/ks.yaml
+  - ./${APP_NAME}/ks.yaml
 ```
 
 ### Step 9: Create Namespace (if needed)
 
-**File**: `kubernetes/apps/documents/namespace.yaml`
+**File**: `kubernetes/apps/${NAMESPACE}/namespace.yaml`
 
 ```yaml
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: documents
+  name: ${NAMESPACE}
   labels:
-    name: documents
+    name: ${NAMESPACE}
     kustomize.toolkit.fluxcd.io/prune: disabled
 ```
 
@@ -368,7 +378,7 @@ spec:
   # ... existing config ...
   dependsOn:
     - name: cluster-apps-external-secrets-stores
-    - name: cluster-apps-documents  # Add this line
+    - name: cluster-apps-${NAMESPACE}  # Add this line
 ```
 
 **File**: `kubernetes/flux/kustomization.yaml`
@@ -467,13 +477,13 @@ Before committing your changes, verify:
 
 ```bash
 # Validate Kubernetes manifests
-kubectl apply --dry-run=client -f documents/paperless-ngx/app/
+kubectl apply --dry-run=client -f kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/
 
 # Check Flux Kustomization syntax
-flux create kustomization test --source=flux-system --path="./kubernetes/apps/documents/paperless-ngx/app" --dry-run
+flux create kustomization test --source=flux-system --path="./kubernetes/apps/${NAMESPACE}/${APP_NAME}/app" --dry-run
 
 # Validate External Secrets configuration
-kubectl apply --dry-run=client -f documents/paperless-ngx/app/externalsecret.yaml
+kubectl apply --dry-run=client -f kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/externalsecret.yaml
 ```
 
 ## 🚀 Deployment Process
@@ -482,16 +492,16 @@ kubectl apply --dry-run=client -f documents/paperless-ngx/app/externalsecret.yam
 
 ```bash
 # Add all new files
-git add kubernetes/apps/documents/paperless-ngx/
+git add kubernetes/apps/${NAMESPACE}/${APP_NAME}/
 
 # Commit changes
-git commit -m "Add paperless-ngx document management system
+git commit -m "Add ${APP_NAME} to ${NAMESPACE} namespace
 
 - Configure Helm release with app-template
 - Set up External Secrets integration
-- Add persistent storage for data and media
+- Add Ceph persistent storage
 - Configure external ingress with TLS
-- Include PostgreSQL and Redis dependencies"
+- Include Volsync backup and Gatus monitoring"
 
 # Push to repository
 git push
@@ -507,26 +517,26 @@ flux get kustomizations -A -w
 kubectl get namespaces -w
 
 # Check application deployment
-kubectl -n documents get pods -w
+kubectl -n ${NAMESPACE} get pods -w
 
 # Verify secrets creation
-kubectl -n documents get secrets
+kubectl -n ${NAMESPACE} get secrets
 ```
 
 ### Step 3: Verify Application
 
 ```bash
 # Check ingress status
-kubectl -n documents get ingress
+kubectl -n ${NAMESPACE} get ingress
 
 # Verify external DNS record creation
 kubectl -n network logs deployment/external-dns --tail=20
 
 # Test external access
-curl -I https://paperless.albatrossflavour.com
+curl -I https://${APP_NAME}.albatrossflavour.com
 
 # Check certificate status
-kubectl -n documents get certificates
+kubectl -n ${NAMESPACE} get certificates
 ```
 
 ## 💾 Storage Configuration
