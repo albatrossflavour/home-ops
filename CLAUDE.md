@@ -15,6 +15,7 @@ This is a Kubernetes home operations repository based on the onedr0p cluster tem
 - **SOPS**: Encrypted secrets management using Age encryption
 - **Kustomize**: Kubernetes native configuration management
 - **Helm**: Package manager for Kubernetes applications
+- **Storage**: Dual approach with OpenEBS (temporary/stateless) and Rook-Ceph (persistent/replicated)
 
 ### Directory Structure
 

@@ -472,12 +472,21 @@ Storage: Application data, media files
 - **Multi-tenancy**: Namespace isolation
 - **SOPS integration**: Native secret decryption
 
-### Why OpenEBS over Rook-Ceph?
+### Storage Strategy: EBS + Ceph
 
-- **Simplicity**: Easier to operate and troubleshoot
-- **Performance**: Local storage performance
-- **Resource usage**: Lower overhead
-- **Backup strategy**: Application-level backups
+This cluster uses a dual storage approach:
+
+#### OpenEBS (EBS)
+
+- **Use case**: Temporary and stateless workloads
+- **Benefits**: High performance local storage, low overhead
+- **Storage class**: `openebs-hostpath`
+
+#### Rook-Ceph
+
+- **Use case**: Persistent data requiring replication and backups
+- **Benefits**: Distributed storage, data redundancy, snapshot capabilities
+- **Storage class**: `ceph-block`, `ceph-filesystem`
 
 ### Why Cilium over Calico?
 
