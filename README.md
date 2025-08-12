@@ -30,6 +30,7 @@ The features included will depend on the type of configuration you want to use. 
 ### System requirements
 
 > [!NOTE]
+>
 > 1. The included behaviour of Talos is that all nodes are able to run workloads, **including** the controller nodes. **Worker nodes** are therefore **optional**.
 > 2. Do you have 3 or more nodes? It is highly recommended to make 3 of them controller nodes for a highly available control plane.
 > 3. Running the cluster on Proxmox VE? My thoughts and recommendations about that are documented [here](https://onedr0p.github.io/home-ops/notes/proxmox-considerations.html).
@@ -168,7 +169,7 @@ You have two different options for setting up your local workstation.
     task talos:bootstrap
     ```
 
-2. ⚠️ It might take a while for the cluster to be setup (10+ minutes is normal), during which time you will see a variety of error messages like: "couldn't get current server API group list," "error: no matching resources found", etc. This is a normal. If this step gets interrupted, e.g. by pressing <kbd>Ctrl</kbd> + <kbd>C</kbd>, you likely will need to [nuke the cluster](#-Nuke) before trying again.
+2. ⚠️ It might take a while for the cluster to be setup (10+ minutes is normal), during which time you will see a variety of error messages like: "couldn't get current server API group list," "error: no matching resources found", etc. This is a normal. If this step gets interrupted, e.g. by pressing <kbd>Ctrl</kbd> + <kbd>C</kbd>, you likely will need to [nuke the cluster](#-nuke) before trying again.
 
 #### Cluster validation
 
@@ -251,11 +252,14 @@ The `external-dns` application created in the `networking` namespace will handle
 
 > [!TIP]
 > Below is how to configure a Pi-hole for split DNS. Other platforms should be similar.
+>
 > 1. Apply this file on the Pihole server while substituting the variables
+>
 > ```sh
 > # /etc/dnsmasq.d/99-k8s-gateway-forward.conf
 > server=/${bootstrap_cloudflare.domain}/${bootstrap_cloudflare.gateway_vip}
 > ```
+>
 > 2. Restart dnsmasq on the server.
 > 3. Query an internal-only subdomain from your workstation (any `internal` class ingresses): `dig @${home-dns-server-ip} echo-server-internal.${bootstrap_cloudflare.domain}`. It should resolve to `${bootstrap_cloudflare.ingress_vip}`.
 
