@@ -45,18 +45,13 @@ spec:
               TZ: ${TIMEZONE}
               PORT: "3000"
               PUBLIC_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
-              DATABASE_URL: "postgresql://resume:${RESUME_DB_PASSWORD}@postgres16-rw.database.svc.cluster.local:5432/resume"
-              ACCESS_TOKEN_SECRET: ${RESUME_ACCESS_TOKEN_SECRET}
-              REFRESH_TOKEN_SECRET: ${RESUME_REFRESH_TOKEN_SECRET}
+              DATABASE_URL: "postgresql://resume:$(RESUME_DB_PASSWORD)@postgres16-rw.database.svc.cluster.local:5432/resume"
               MAIL_FROM: "noreply@${SECRET_DOMAIN}"
               STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
               STORAGE_PORT: "9000"
               STORAGE_REGION: "us-east-1"
               STORAGE_BUCKET: "resume"
-              STORAGE_ACCESS_KEY: ${RESUME_STORAGE_ACCESS_KEY}
-              STORAGE_SECRET_KEY: ${RESUME_STORAGE_SECRET_KEY}
               STORAGE_USE_SSL: "false"
-              CHROME_TOKEN: ${RESUME_CHROME_TOKEN}
               CHROME_URL: "ws://browserless.default.svc.cluster.local:3000"
             envFrom:
               - secretRef:
@@ -75,7 +70,10 @@ spec:
               repository: browserless/chrome
               tag: latest
             env:
-              TOKEN: ${RESUME_CHROME_TOKEN}
+              TOKEN: "$(RESUME_CHROME_TOKEN)"
+            envFrom:
+              - secretRef:
+                  name: resume-secret
             resources:
               requests:
                 cpu: 50m
