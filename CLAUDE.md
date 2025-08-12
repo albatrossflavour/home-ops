@@ -164,6 +164,22 @@ Uses makejinja for Jinja2 templating:
 - Custom delimiters: `#{variable}#`, `#%block%#`, `#|comment|#`
 - Templates in `bootstrap/templates/` render to `kubernetes/`
 
+## Development Tools Integration
+
+### Wakatime Time Tracking
+
+- Project configured as "home-ops" for consistent tracking
+- VS Code integration with recommended extensions
+- Tracks time across YAML, Jinja2, scripts, and documentation
+- See `docs/WAKATIME.md` for full setup and analytics guide
+
+### VS Code Configuration
+
+- Enhanced YAML schemas for Kubernetes and Flux manifests
+- SOPS integration for encrypted secrets editing
+- Kubernetes tools integration with local kubeconfig
+- File associations for homelab-specific file types
+
 ## Important Notes
 
 - All SOPS files must be encrypted before committing
@@ -171,3 +187,4 @@ Uses makejinja for Jinja2 templating:
 - Talos configuration stored in `kubernetes/bootstrap/talos/clusterconfig/talosconfig`
 - Pre-commit hooks enforce code quality and security scanning
 - Renovate handles automated dependency updates via GitHub PRs
+- 1Password integration supports both personal/family and business accounts

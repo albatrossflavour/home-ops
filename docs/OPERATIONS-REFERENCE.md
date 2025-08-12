@@ -1,6 +1,8 @@
-# Witches Cluster Operations Guide
+# 📋 Operations Reference Manual
 
-This document provides operational guidance for managing the "witches" Kubernetes cluster running on Talos Linux.
+> **Note**: This is the comprehensive operations reference. For current structured operations guides, see the [Operations Documentation](./operations/) and [Documentation Index](./README.md).
+
+This document provides complete operational guidance for managing the "witches" Kubernetes cluster running on Talos Linux.
 
 ## Cluster Information
 
