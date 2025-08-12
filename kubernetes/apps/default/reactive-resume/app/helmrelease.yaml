@@ -53,6 +53,7 @@ spec:
               STORAGE_REGION: "us-east-1"
               STORAGE_BUCKET: "resume"
               STORAGE_USE_SSL: "false"
+              STORAGE_SKIP_BUCKET_CHECK: "true"
               CHROME_URL: "ws://browserless.default.svc.cluster.local:3000"
             envFrom:
               - secretRef:
@@ -111,5 +112,7 @@ spec:
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
-        globalMounts:
-          - path: /app/data
+        advancedMounts:
+          resume:
+            app:
+              - path: /app/data
