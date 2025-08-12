@@ -59,53 +59,28 @@ flux get all -A
 
 ## 📚 Documentation
 
-### 🏗 Installation & Setup
+### 🚀 Essential Guides
 
 | Guide | Description |
 |-------|-------------|
 | **[Quick Start](./docs/installation/quick-start.md)** | 30-minute deployment guide |
-| **[Prerequisites](./docs/installation/prerequisites.md)** | Requirements and planning |
-| **[Network Planning](./docs/installation/network-planning.md)** | IP addressing and DNS setup |
-| **[Cloudflare Setup](./docs/installation/cloudflare.md)** | Domain and tunnel configuration |
-| **[Cluster Deployment](./docs/installation/cluster-deployment.md)** | Complete installation process |
-
-### ⚙️ Operations & Maintenance
-
-| Guide | Description |
-|-------|-------------|
+| **[Architecture Overview](./docs/architecture/overview.md)** | High-level system design |
+| **[SSO Setup](./docs/operations/sso-setup.md)** | Complete Authentik SSO configuration |
 | **[Daily Operations](./docs/operations/daily-operations.md)** | Common tasks and workflows |
-| **[Application Management](./docs/operations/application-management.md)** | Managing services |
-| **[DNS & Networking](./docs/operations/dns-networking.md)** | Traffic flow and troubleshooting |
-| **[Monitoring](./docs/operations/monitoring.md)** | Observability and alerting |
 
-### 🏛 Architecture & Design
-
-| Guide | Description |
-|-------|-------------|
-| **[System Overview](./docs/architecture/overview.md)** | High-level architecture |
-| **[Network Architecture](./docs/architecture/networking.md)** | Traffic flow and DNS |
-| **[Security Model](./docs/architecture/security.md)** | Authentication and authorization |
-
-### 🔧 Troubleshooting
-
-| Guide | Description |
-|-------|-------------|
-| **[Common Issues](./docs/troubleshooting/common-issues.md)** | Frequent problems and solutions |
-| **[Diagnostic Commands](./docs/troubleshooting/diagnostics.md)** | Health checks and debugging |
-| **[Recovery Procedures](./docs/troubleshooting/recovery.md)** | Disaster recovery |
-
-**📖 [Complete Documentation Index](./docs/README.md)** - Browse all guides and references
+**📖 [Complete Documentation Index](./docs/README.md)** - Browse all installation, operations, and troubleshooting guides
 
 ## 🎯 Cluster Information
 
 ### Node Configuration
 
-- **Control Plane**: 3 nodes (weatherwax, ogg, magrat) *
+- **Control Plane**: 3 nodes (weatherwax, ogg, magrat)
+- **Worker Nodes**: 3 nodes (aching, greebo, wuffles)
 - **Network**: 192.168.8.0/24
 - **VIPs**: Controller (192.168.8.20), Ingress (192.168.8.21), Gateway (192.168.8.22)
 - **Domain**: albatrossflavour.com
 
-*\* Node names follow [Discworld naming conventions](./docs/about/naming-conventions.md) - because why shouldn't infrastructure have personality?*
+*Node names follow [Discworld naming conventions](./docs/about/naming-conventions.md) - because why shouldn't infrastructure have personality?*
 
 ### Key Features
 
