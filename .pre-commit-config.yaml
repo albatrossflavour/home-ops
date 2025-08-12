@@ -168,6 +168,7 @@ repos:
         language: system
         entry: sh -c 'for file in "$@"; do if ! grep -q "^sops:" "$file"; then echo "$file should be encrypted with SOPS"; exit 1; fi; done' --
         files: .*\.sops\.ya?ml$
+        exclude: ^\.sops\.ya?ml$
         pass_filenames: true
       - id: kube-score
         name: kube-score
