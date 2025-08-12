@@ -1,16 +1,46 @@
 {
+    "wakatime.project_name": "home-ops",
+    "wakatime.include_only_with_project_file": true,
     "files.associations": {
         "*.json5": "jsonc",
+        "*.yaml": "yaml",
+        "*.yml": "yaml",
+        "*.j2": "jinja",
+        "Taskfile.yaml": "yaml",
+        "kustomization.yaml": "yaml",
+        "*.sops.yaml": "yaml",
+        "*.sops.yml": "yaml",
         "./kubernetes/**/*.sops.toml": "plaintext"
     },
     "sops.defaults.ageKeyFile": "age.key",
     "yaml.schemas": {
-        "Kubernetes": "./kubernetes/*.yaml"
+        "Kubernetes": "./kubernetes/*.yaml",
+        "https://json.schemastore.org/kustomization.json": [
+            "kustomization.yaml",
+            "kustomization.yml"
+        ],
+        "https://json.schemastore.org/helmfile.json": [
+            "helmfile.yaml",
+            "helmfile.yml"
+        ],
+        "https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/schemas/kustomization_v1beta2.json": [
+            "**/flux/**/kustomization.yaml",
+            "**/flux/**/kustomization.yml"
+        ]
     },
+    "yaml.customTags": [
+        "!vault"
+    ],
     "vs-kubernetes": {
         "vs-kubernetes.kubeconfig": "./kubeconfig",
         "vs-kubernetes.knownKubeconfigs": [
-          "./kubeconfig"
-      ]
-    }
+            "./kubeconfig"
+        ]
+    },
+    "workbench.colorTheme": "GitHub Dark Default",
+    "editor.rulers": [80, 120],
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 120,
+    "editor.minimap.enabled": false,
+    "git.openRepositoryInParentFolders": "always"
 }

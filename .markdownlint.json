@@ -1,0 +1,14 @@
+{
+  "default": true,
+  "MD003": { "style": "consistent" },
+  "MD004": { "style": "consistent" },
+  "MD013": false,
+  "MD024": { "allow_different_nesting": true },
+  "MD033": false,
+  "MD034": false,
+  "MD056": false,
+  "MD029": false,
+  "MD051": false,
+  "MD001": false,
+  "MD041": false
+}

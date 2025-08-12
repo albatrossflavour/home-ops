@@ -1,5 +1,6 @@
 {
     "recommendations": [
+        "wakatime.vscode-wakatime",
         "albert.TabOut",
         "britesnow.vscode-toggle-quotes",
         "fcrespo82.markdown-table-formatter",
@@ -9,6 +10,18 @@
         "will-stone.in-any-case",
         "EditorConfig.editorconfig",
         "PKief.material-icon-theme",
-        "Gruntfuggly.todo-tree"
+        "Gruntfuggly.todo-tree",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "ms-vscode.vscode-json",
+        "samuelcolvin.jinjahtml",
+        "ms-python.python",
+        "wholroyd.jinja",
+        "mads-hartmann.bash-ide-vscode",
+        "timonwong.shellcheck",
+        "foxundermoon.shell-format",
+        "ms-vscode.makefile-tools",
+        "github.vscode-github-actions",
+        "eamodio.gitlens"
     ]
 }
