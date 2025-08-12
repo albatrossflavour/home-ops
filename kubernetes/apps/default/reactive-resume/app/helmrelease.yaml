@@ -71,7 +71,7 @@ spec:
               repository: browserless/chrome
               tag: latest
             env:
-              TOKEN: "$(RESUME_CHROME_TOKEN)"
+              TOKEN: "$(CHROME_TOKEN)"
             envFrom:
               - secretRef:
                   name: resume-secret
