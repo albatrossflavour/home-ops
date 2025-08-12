@@ -33,9 +33,7 @@
     ],
     "vs-kubernetes": {
         "vs-kubernetes.kubeconfig": "./kubeconfig",
-        "vs-kubernetes.knownKubeconfigs": [
-            "./kubeconfig"
-        ]
+        "vs-kubernetes.knownKubeconfigs": []
     },
     "workbench.colorTheme": "Jellybeans",
     "editor.rulers": [80, 120],
