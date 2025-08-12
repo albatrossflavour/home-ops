@@ -65,7 +65,7 @@ flux get all -A
 |-------|-------------|
 | **[Quick Start](./docs/installation/quick-start.md)** | 30-minute deployment guide |
 | **[Architecture Overview](./docs/architecture/overview.md)** | High-level system design |
-| **[SSO Setup](./docs/operations/sso-setup.md)** | Complete Authentik SSO configuration |
+| **[SSO Setup](./docs/installation/sso-setup.md)** | Complete Authentik SSO configuration |
 | **[Daily Operations](./docs/operations/daily-operations.md)** | Common tasks and workflows |
 
 **📖 [Complete Documentation Index](./docs/README.md)** - Browse all installation, operations, and troubleshooting guides

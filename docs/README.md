@@ -22,6 +22,7 @@ Welcome to the comprehensive documentation for this Kubernetes homelab setup. Th
 - **[Prerequisites](./installation/prerequisites.md)** - Hardware, accounts, and planning
 - **[Network Planning](./installation/network-planning.md)** - IP addressing and DNS setup
 - **[Cloudflare Setup](./installation/cloudflare.md)** - Domain, tunnels, and DNS integration
+- **[SSO Setup](./installation/sso-setup.md)** - Complete Authentik SSO configuration
 - **[Secrets Management](./installation/secrets.md)** - SOPS and 1Password configuration
 - **[Cluster Deployment](./installation/cluster-deployment.md)** - Talos and Kubernetes setup
 - **[Application Deployment](./installation/application-deployment.md)** - Core services and apps
@@ -30,12 +31,12 @@ Welcome to the comprehensive documentation for this Kubernetes homelab setup. Th
 ### ⚙️ Operations & Maintenance
 
 - **[Daily Operations](./operations/daily-operations.md)** - Common tasks and workflows
-- **[SSO Setup Guide](./operations/sso-setup.md)** - Complete Authentik SSO configuration
+- **[Adding Applications](./operations/adding-applications.md)** - Step-by-step guide for new apps
 - **[Application Management](./operations/application-management.md)** - Managing services
 - **[DNS & Networking](./operations/dns-networking.md)** - Traffic flow and troubleshooting
-- **[Updates & Upgrades](./operations/updates.md)** - Keeping the system current
 - **[Backup & Recovery](./operations/backup-recovery.md)** - Data protection
 - **[Monitoring](./operations/monitoring.md)** - Observability and alerting
+- **[Updates & Upgrades](./operations/updates.md)** - Keeping the system current
 
 ### 🏛 Architecture & Design
 
@@ -54,7 +55,7 @@ Welcome to the comprehensive documentation for this Kubernetes homelab setup. Th
 
 ### 🛠 Development & Customization
 
-- **[Adding Applications](./development/adding-applications.md)** - Deploy new services
+- **[Adding Applications](./operations/adding-applications.md)** - Deploy new services
 - **[Template Customization](./development/templates.md)** - Modifying configurations
 - **[Development Workflow](./development/workflow.md)** - Local development setup
 - **[Testing](./development/testing.md)** - Validation and quality assurance
