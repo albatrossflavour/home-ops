@@ -411,6 +411,204 @@ kubectl get networkpolicies -A
 kubectl get certificates -A -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name,READY:.status.conditions[0].status"
 ```
 
+## 🔄 Application Deployment Issues
+
+### PVC Multi-Attach Errors
+
+**Symptoms:** `Multi-Attach error for volume`, pods stuck in `ContainerCreating`
+
+**Cause:** Multiple containers trying to use the same ReadWriteOnce PVC
+
+**Diagnosis:**
+
+```bash
+# Check pod events
+kubectl describe pod <pod-name>
+
+# Check PVC usage
+kubectl get pods -o wide | grep <pvc-name>
+```
+
+**Solution:**
+
+```bash
+# 1. Force delete conflicting pods
+kubectl delete pods -l app=<appname> --force --grace-period=0
+
+# 2. Fix HelmRelease to use advancedMounts instead of globalMounts
+# In helmrelease.yaml:
+persistence:
+  data:
+    advancedMounts:
+      main-controller:  # Only mount to specific controller
+        app:
+          - path: /app/data
+    # Remove: globalMounts
+
+# 3. Apply changes
+flux reconcile kustomization <appname>
+```
+
+### Helm Upgrade Timeouts
+
+**Symptoms:** `context deadline exceeded`, HelmRelease stuck in "Running 'upgrade'"
+
+**Diagnosis:**
+
+```bash
+# Check HelmRelease status
+kubectl get helmrelease <appname>
+
+# Check Helm controller logs
+kubectl -n flux-system logs -f deployment/helm-controller
+```
+
+**Solution:**
+
+```bash
+# Force reconciliation with fresh source
+flux reconcile kustomization <appname> --with-source
+
+# If still stuck, suspend and resume
+flux suspend helmrelease <appname>
+flux resume helmrelease <appname>
+```
+
+### ExternalSecret Sync Issues
+
+**Symptoms:** Environment variables are empty, "SecretSyncError"
+
+**Diagnosis:**
+
+```bash
+# Check ExternalSecret status
+kubectl get externalsecret <appname>
+kubectl describe externalsecret <appname>
+
+# Check secret contents
+kubectl get secret <appname>-secret -o yaml
+
+# Test 1Password connectivity
+kubectl -n external-secrets-system logs deployment/external-secrets
+```
+
+**Solution:**
+
+```bash
+# Force resync
+kubectl annotate externalsecret <appname> force-sync=$(date +%s)
+
+# Check 1Password item exists
+op item get <appname> --vault=discworld
+
+# Verify ClusterSecretStore
+kubectl get clustersecretstore onepassword-connect
+```
+
+### Database Connection Issues
+
+**Symptoms:** "Authentication failed", "database does not exist"
+
+**Diagnosis:**
+
+```bash
+# Check init container ran
+kubectl logs <pod-name> -c init-db
+
+# Verify database user was created
+kubectl exec -n database deployment/postgres16 -- psql -U postgres -c "\du"
+
+# Test database connection
+kubectl exec -n database deployment/postgres16 -- psql -U postgres -d <dbname> -c "SELECT 1"
+```
+
+**Solution:**
+
+```bash
+# Delete pod to re-run init container
+kubectl delete pod <pod-name>
+
+# Check postgres-init image is available
+kubectl run test-init --image=ghcr.io/home-operations/postgres-init:17 --rm -it -- /bin/sh
+
+# Verify DATABASE_URL format
+kubectl exec deployment/<appname> -- env | grep DATABASE_URL
+```
+
+### Minio Storage Access Issues
+
+**Symptoms:** "Valid and authorized credentials required", S3Error AccessDenied
+
+**Diagnosis:**
+
+```bash
+# Check storage environment variables
+kubectl exec deployment/<appname> -- env | grep STORAGE
+
+# Test Minio connectivity
+kubectl run minio-test --image=minio/mc --rm -it -- mc ls minio.default.svc.cluster.local:9000
+
+# Check bucket exists
+# Access Minio UI at https://minio.<domain>
+```
+
+**Solution:**
+
+```bash
+# Add bucket check bypass
+# In helmrelease.yaml:
+env:
+  STORAGE_SKIP_BUCKET_CHECK: "true"
+
+# Create missing bucket in Minio UI
+# Verify credentials match minio secret
+kubectl get secret minio-secret -o jsonpath='{.data.MINIO_ROOT_USER}' | base64 -d
+```
+
+## 🔍 Advanced Debugging Workflow
+
+### Systematic Troubleshooting Steps
+
+1. **Check Resource Status**
+
+   ```bash
+   kubectl get helmrelease,externalsecret,pvc -n <namespace>
+   ```
+
+2. **Review Pod Events**
+
+   ```bash
+   kubectl describe pod <pod-name>
+   ```
+
+3. **Check Init Containers**
+
+   ```bash
+   kubectl logs <pod-name> -c init-db
+   ```
+
+4. **Verify Environment Variables**
+
+   ```bash
+   kubectl exec deployment/<appname> -- env | grep -E "DB|STORAGE|SECRET"
+   ```
+
+5. **Test Dependencies**
+
+   ```bash
+   # Database connectivity
+   kubectl exec -n database deployment/postgres16 -- pg_isready
+
+   # Minio connectivity  
+   kubectl run test --image=busybox --rm -it -- wget -qO- http://minio.default.svc.cluster.local:9000
+   ```
+
+6. **Force Reconciliation**
+
+   ```bash
+   flux reconcile kustomization <appname> --with-source
+   ```
+
 ## 📚 Related Documentation
 
 - [Daily Operations](../operations/daily-operations.md) - Routine maintenance tasks

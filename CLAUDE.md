@@ -15,7 +15,7 @@ This is a Kubernetes home operations repository based on the onedr0p cluster tem
 - **SOPS**: Encrypted secrets management using Age encryption
 - **Kustomize**: Kubernetes native configuration management
 - **Helm**: Package manager for Kubernetes applications
-- **Storage**: Dual approach with OpenEBS (temporary/stateless) and Rook-Ceph (persistent/replicated)
+- **Storage**: Multi-tier approach with OpenEBS (temporary/stateless), Rook-Ceph (persistent/replicated), and NFS (large shared data)
 
 ### Directory Structure
 
@@ -155,6 +155,198 @@ Applications are organized by namespace:
 - `network/`: Ingress, DNS, tunneling
 - `observability/`: Monitoring and alerting
 - `security/`: Authentication and security tools
+
+## Storage Architecture
+
+### Storage Strategy: EBS + Ceph + NFS
+
+This cluster uses a multi-tier storage approach optimized for different workload types:
+
+#### OpenEBS (EBS)
+
+- **Use case**: Temporary and stateless workloads, high-performance local storage
+- **Benefits**: High performance local storage, low overhead, fast I/O
+- **Storage class**: `openebs-hostpath`
+- **Examples**: Cache data, temporary processing, application logs
+
+#### Rook-Ceph
+
+- **Use case**: Persistent data requiring replication and backups
+- **Benefits**: Distributed storage, data redundancy, snapshot capabilities
+- **Storage class**: `ceph-block`, `ceph-filesystem`  
+- **Examples**: Application databases, user data, configuration files
+
+#### NFS
+
+- **Use case**: Large shared storage, bulk data, media files
+- **Benefits**: High capacity, shared across multiple pods, cost-effective
+- **Configuration**: `192.168.1.22:/volume2/apps/<appname>`
+- **Examples**: Media files, backups, shared application assets
+
+## Database Provisioning Pattern
+
+### Standard PostgreSQL Setup with CloudNative-PG
+
+For apps requiring PostgreSQL databases, use this standard pattern:
+
+#### ExternalSecret Configuration
+
+```yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: appname
+spec:
+  target:
+    name: appname-secret
+    template:
+      engineVersion: v2
+      data:
+        # App-specific variables
+        APPNAME_DB_PASSWORD: &dbPass "{{ .APPNAME_DB_PASSWORD }}"
+
+        # Postgres Init variables
+        INIT_POSTGRES_DBNAME: &dbName appname
+        INIT_POSTGRES_HOST: &dbHost postgres16-rw.database.svc.cluster.local
+        INIT_POSTGRES_USER: &dbUser appname
+        INIT_POSTGRES_PASS: *dbPass
+        INIT_POSTGRES_SUPER_PASS: "{{ .POSTGRES_SUPER_PASS }}"
+  dataFrom:
+    - extract:
+        key: appname
+    - extract:
+        key: cloudnative-pg
+```
+
+#### HelmRelease Init Container
+
+```yaml
+controllers:
+  appname:
+    initContainers:
+      init-db:
+        image:
+          repository: ghcr.io/home-operations/postgres-init
+          tag: "17"
+        envFrom:
+          - secretRef:
+              name: appname-secret
+```
+
+#### Dependencies
+
+```yaml
+# In ks.yaml
+dependsOn:
+  - name: external-secrets-stores
+  - name: cloudnative-pg-cluster
+```
+
+## Multi-Container Application Patterns
+
+### Avoiding PVC Conflicts
+
+When deploying applications with multiple containers (main app + sidecar services), use `advancedMounts` instead of `globalMounts` to prevent ReadWriteOnce PVC conflicts:
+
+#### Correct Pattern
+
+```yaml
+persistence:
+  data:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: ceph-block
+    advancedMounts:
+      main-controller:  # Only mount to specific controller
+        app:
+          - path: /app/data
+
+controllers:
+  main-controller:
+    containers:
+      app:
+        # Main application container
+  sidecar-controller:
+    containers:
+      app:
+        # Sidecar container (no storage mount)
+```
+
+#### Incorrect Pattern (Causes Conflicts)
+
+```yaml
+persistence:
+  data:
+    type: persistentVolumeClaim
+    globalMounts:  # ❌ Mounts to ALL containers
+      - path: /app/data
+```
+
+## Minio Integration Best Practices
+
+### Standard Configuration
+
+- **Always reuse existing credentials**: Use `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD` from existing minio 1Password item
+- **Standard endpoint**: `minio.default.svc.cluster.local:9000`
+- **Skip bucket validation**: Set `STORAGE_SKIP_BUCKET_CHECK: "true"` for apps that validate buckets on startup
+- **Create buckets manually**: Use Minio web UI to create required buckets before app deployment
+
+### Environment Variables Pattern
+
+```yaml
+# In HelmRelease
+env:
+  STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
+  STORAGE_PORT: "9000"
+  STORAGE_REGION: "us-east-1"
+  STORAGE_BUCKET: "appname"
+  STORAGE_USE_SSL: "false"
+  STORAGE_SKIP_BUCKET_CHECK: "true"
+
+# In ExternalSecret
+data:
+  STORAGE_ACCESS_KEY: "{{ .MINIO_ROOT_USER }}"
+  STORAGE_SECRET_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
+```
+
+## Troubleshooting Workflow
+
+### Common Issues and Resolution Steps
+
+1. **Check init containers completed successfully**
+
+   ```bash
+   kubectl logs <pod-name> -c init-db
+   ```
+
+2. **Verify ExternalSecret synchronization**
+
+   ```bash
+   kubectl get externalsecret <appname>
+   kubectl describe externalsecret <appname>
+   ```
+
+3. **Check environment variables are populated**
+
+   ```bash
+   kubectl exec deployment/<appname> -- env | grep <VARIABLE>
+   ```
+
+4. **Resolve PVC conflicts**
+   - Use `advancedMounts` instead of `globalMounts`
+   - Force delete conflicting pods: `kubectl delete pods -l app=<name> --force --grace-period=0`
+
+5. **Handle Helm upgrade timeouts**
+
+   ```bash
+   flux reconcile kustomization <appname> --with-source
+   ```
+
+6. **Database connection issues**
+   - Verify init container ran successfully
+   - Check database user was created: `kubectl exec -n database deployment/postgres16 -- psql -U postgres -c "\du"`
+   - Verify connection string format and credentials
 
 ## Templating System
 

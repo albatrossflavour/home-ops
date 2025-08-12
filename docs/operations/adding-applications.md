@@ -931,6 +931,170 @@ kubectl get storageclass
 kubectl -n openebs-system get pods
 ```
 
+## Advanced Patterns
+
+### Multi-Container Applications
+
+When deploying applications with multiple containers (main app + sidecar services), use `advancedMounts` instead of `globalMounts` to prevent ReadWriteOnce PVC conflicts:
+
+#### Correct Pattern (Prevents PVC Conflicts)
+
+```yaml
+# In helmrelease.yaml
+controllers:
+  main-app:
+    containers:
+      app:
+        image:
+          repository: myapp/main
+          tag: latest
+        # Main application logic
+
+  sidecar-service:
+    containers:
+      app:
+        image:
+          repository: myapp/sidecar
+          tag: latest
+        # Supporting service (e.g., browserless, redis)
+
+persistence:
+  data:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: ceph-block
+    advancedMounts:
+      main-app:  # Only mount to main controller
+        app:
+          - path: /app/data
+
+service:
+  main:
+    controller: main-app
+    ports:
+      http:
+        port: 3000
+  sidecar:
+    controller: sidecar-service
+    ports:
+      http:
+        port: 8080
+```
+
+#### Incorrect Pattern (Causes PVC Conflicts)
+
+```yaml
+persistence:
+  data:
+    type: persistentVolumeClaim
+    globalMounts:  # ❌ Mounts to ALL containers
+      - path: /app/data
+```
+
+### Database Provisioning with CloudNative-PG
+
+For applications requiring PostgreSQL databases, use this standard pattern:
+
+#### 1. ExternalSecret Configuration
+
+```yaml
+# In externalsecret.yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: myapp
+spec:
+  target:
+    name: myapp-secret
+    template:
+      engineVersion: v2
+      data:
+        # App-specific variables
+        MYAPP_DB_PASSWORD: &dbPass "{{ .MYAPP_DB_PASSWORD }}"
+
+        # Database connection string
+        DATABASE_URL: "postgresql://myapp:{{ .MYAPP_DB_PASSWORD }}@postgres16-rw.database.svc.cluster.local:5432/myapp"
+
+        # Postgres Init variables (for database creation)
+        INIT_POSTGRES_DBNAME: &dbName myapp
+        INIT_POSTGRES_HOST: &dbHost postgres16-rw.database.svc.cluster.local
+        INIT_POSTGRES_USER: &dbUser myapp
+        INIT_POSTGRES_PASS: *dbPass
+        INIT_POSTGRES_SUPER_PASS: "{{ .POSTGRES_SUPER_PASS }}"
+  dataFrom:
+    - extract:
+        key: myapp
+    - extract:
+        key: cloudnative-pg  # For postgres superuser credentials
+```
+
+#### 2. HelmRelease with Init Container
+
+```yaml
+# In helmrelease.yaml
+controllers:
+  myapp:
+    initContainers:
+      init-db:
+        image:
+          repository: ghcr.io/home-operations/postgres-init
+          tag: "17"
+        envFrom:
+          - secretRef:
+              name: myapp-secret
+    containers:
+      app:
+        image:
+          repository: myapp/app
+          tag: latest
+        envFrom:
+          - secretRef:
+              name: myapp-secret
+```
+
+#### 3. Dependencies
+
+```yaml
+# In ks.yaml
+dependsOn:
+  - name: external-secrets-stores
+  - name: cloudnative-pg-cluster
+```
+
+### Minio Storage Integration
+
+For applications requiring object storage:
+
+#### Environment Variables
+
+```yaml
+# In helmrelease.yaml
+env:
+  STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
+  STORAGE_PORT: "9000"
+  STORAGE_REGION: "us-east-1"
+  STORAGE_BUCKET: "myapp"
+  STORAGE_USE_SSL: "false"
+  STORAGE_SKIP_BUCKET_CHECK: "true"  # Skip validation on startup
+```
+
+#### ExternalSecret for Credentials
+
+```yaml
+# In externalsecret.yaml (template section)
+data:
+  STORAGE_ACCESS_KEY: "{{ .MINIO_ROOT_USER }}"
+  STORAGE_SECRET_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
+dataFrom:
+  - extract:
+      key: myapp
+  - extract:
+      key: minio  # Reuse existing Minio credentials
+```
+
+**Important**: Create the bucket manually in Minio web UI before deploying the application.
+
 ## 📚 Related Documentation
 
 - [Application Management](./application-management.md) - Managing deployed applications

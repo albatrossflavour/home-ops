@@ -241,21 +241,37 @@ System Disk: 500GB NVMe SSD
 - Available: ~400GB for PVs
 ```
 
-#### Persistent Volume Strategy
+#### Multi-Tier Storage Strategy
 
-#### OpenEBS LocalPV
+The cluster uses three complementary storage tiers optimized for different workload types:
 
-- Hostpath-based storage
-- Local SSD performance
-- No replication (application-level backups)
-- Dynamic provisioning
+#### OpenEBS LocalPV (EBS)
 
-**Volume Types:**
+- **Use case**: Temporary and stateless workloads, high-performance caching
+- **Benefits**: Local SSD performance, low overhead, fast I/O
+- **Storage class**: `openebs-hostpath`
+- **No replication**: Suitable for recreatable data
 
-- **Config volumes**: 1-10GB for configuration
-- **Database volumes**: 10-100GB for application data
-- **Media volumes**: 100GB-1TB for media files
-- **Log volumes**: 10-50GB for centralized logging
+#### Rook-Ceph
+
+- **Use case**: Persistent data requiring replication and backups
+- **Benefits**: Distributed storage, data redundancy, snapshot capabilities
+- **Storage classes**: `ceph-block`, `ceph-filesystem`
+- **Replication**: Triple-replicated across nodes
+
+#### NFS Storage
+
+- **Use case**: Large shared storage, bulk data, media files
+- **Benefits**: High capacity, shared across multiple pods, cost-effective
+- **Configuration**: `192.168.1.22:/volume2/apps/<appname>`
+- **Capacity**: Multi-TB for media and backup data
+
+**Storage Selection Guide:**
+
+- **Config volumes** (1-10GB): `openebs-hostpath` for speed
+- **Database volumes** (10-100GB): `ceph-block` for reliability
+- **Media volumes** (100GB-1TB+): NFS for capacity and sharing
+- **Cache/temp volumes** (1-50GB): `openebs-hostpath` for performance
 
 ### Backup Architecture
 
@@ -471,22 +487,6 @@ Storage: Application data, media files
 - **Kubernetes-native**: CRD-based configuration
 - **Multi-tenancy**: Namespace isolation
 - **SOPS integration**: Native secret decryption
-
-### Storage Strategy: EBS + Ceph
-
-This cluster uses a dual storage approach:
-
-#### OpenEBS (EBS)
-
-- **Use case**: Temporary and stateless workloads
-- **Benefits**: High performance local storage, low overhead
-- **Storage class**: `openebs-hostpath`
-
-#### Rook-Ceph
-
-- **Use case**: Persistent data requiring replication and backups
-- **Benefits**: Distributed storage, data redundancy, snapshot capabilities
-- **Storage class**: `ceph-block`, `ceph-filesystem`
 
 ### Why Cilium over Calico?
 
