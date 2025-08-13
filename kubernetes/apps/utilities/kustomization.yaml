@@ -8,4 +8,5 @@ resources:
   - ./it-tools/ks.yaml
   - ./jsoncrack/ks.yaml
   - ./cyberchef/ks.yaml
+  - ./n8n/ks.yaml
   - ./send/ks.yaml
