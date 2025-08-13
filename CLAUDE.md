@@ -485,14 +485,16 @@ When deploying any new application, follow this exact sequence:
 4. **Create app/kustomization.yaml**: Include volsync and gatus templates
 5. **Create ks.yaml**: Use only `external-secrets-stores` dependency unless database needed
 6. **Update namespace kustomization.yaml**: Add `- ./APPNAME/ks.yaml`
-7. **Test with**: `task flux:apply path=NAMESPACE/APPNAME`
+7. **Create 1Password item**: `op item create --vault="discworld" --title="APPNAME" --category="Server" FIELD="$(openssl rand -base64 32)"`
+8. **Test with**: `task flux:apply path=NAMESPACE/APPNAME`
 
 **Key patterns**:
 
 - Dependencies: `external-secrets-stores` (standard), `cloudnative-pg-cluster` (if database)
 - Persistence: `existingClaim: APPNAME` + volsync template + `VOLSYNC_CAPACITY`
 - Monitoring: Include gatus template in kustomization
-- Secrets: Always use 1Password via ExternalSecret
+- Secrets: Always use 1Password via ExternalSecret, create item with secure random values
+- 1Password fields: Use descriptive names (e.g. `APPNAME_PASSWORD`, `APPNAME_API_KEY`)
 
 ## Important Notes
 
