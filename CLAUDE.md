@@ -495,6 +495,34 @@ When deploying any new application, follow this exact sequence:
 - Monitoring: Include gatus template in kustomization
 - Secrets: Always use 1Password via ExternalSecret, create item with secure random values
 - 1Password fields: Use descriptive names (e.g. `APPNAME_PASSWORD`, `APPNAME_API_KEY`)
+- **Images: Always use `tag: version@sha256:digest` format for Renovate compatibility and security**
+
+### Renovate Image Management
+
+**CRITICAL**: All container images MUST use SHA256 digest pinning for security and Renovate automation.
+
+**Getting digests for new images:**
+
+```bash
+# Pull and get digest in one command
+docker pull repository/image:tag && docker inspect repository/image:tag --format='{{index .RepoDigests 0}}'
+
+# Example output: repository/image@sha256:abc123...
+# Use as: tag: "version@sha256:abc123..." (MUST be quoted due to @ character)
+```
+
+**Configuration:**
+
+- Renovate config includes `docker:pinDigests` preset for automatic digest pinning
+- New images without digests will be automatically updated with digests by Renovate
+- Digest updates create separate PRs with `chore(container)` commits
+- Version updates include both new version and new digest
+
+**No special annotations required** - Renovate automatically detects and manages:
+
+- Container images in HelmReleases
+- Version updates with digest updates
+- Security-first pinning approach
 
 ## Important Notes
 

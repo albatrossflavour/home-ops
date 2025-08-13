@@ -28,7 +28,7 @@ spec:
     image:
       registry: docker.io
       repository: bitnami/nginx
-      tag: 1.29.0-debian-12-r6
+      tag: 1.29.0-debian-12-r6@sha256:1c62847abc9f760bf2019849e7c25b8855d4637113684b22cd26183d5cbbab6c
     pullPolicy: IfNotPresent
     debug: false
     replicaCount: 1
