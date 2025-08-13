@@ -46,7 +46,7 @@ spec:
           app:
             image:
               repository: nocodb/nocodb
-              tag: 0.259.4
+              tag: 0.264.4
             env:
               TZ: Australia/Sydney
               NC_DISABLE_TELE: "true"
