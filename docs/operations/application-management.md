@@ -27,6 +27,12 @@ Comprehensive guide for managing applications deployed in the Kubernetes homelab
 - **gatus**: Uptime monitoring
 - Various exporters for application metrics
 
+### Utilities & Automation
+
+- **n8n**: Workflow automation platform
+- **node-red**: Visual programming for IoT and automation
+- **nocodb**: No-code database and API platform
+
 ### Other Services
 
 - **home-assistant**: Home automation
@@ -40,9 +46,12 @@ Comprehensive guide for managing applications deployed in the Kubernetes homelab
 ```bash
 # Deploy/update specific application
 task flux:apply path=media/sonarr
+task flux:apply path=utilities/node-red
+task flux:apply path=database/nocodb
 
 # Apply changes to entire namespace
 task flux:apply path=media
+task flux:apply path=utilities
 
 # Force immediate reconciliation
 flux reconcile kustomization cluster
@@ -53,12 +62,16 @@ flux reconcile kustomization cluster
 ```bash
 # Check application logs
 kubectl -n media logs -f deployment/sonarr
+kubectl -n utilities logs -f deployment/node-red
+kubectl -n database logs -f deployment/nocodb
 
 # View application pods
 kubectl -n media get pods -l app.kubernetes.io/name=sonarr
+kubectl -n utilities get pods -l app.kubernetes.io/name=node-red
 
 # Check resource usage
 kubectl -n media top pods
+kubectl -n utilities top pods
 ```
 
 ### Restart Applications

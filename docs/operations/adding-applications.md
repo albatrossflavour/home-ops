@@ -18,13 +18,14 @@ Each application follows a standardized directory structure:
 ```text
 kubernetes/apps/<namespace>/<app-name>/
 ├── app/
-│   ├── pvc.yaml                    # Persistent Volume Claims
 │   ├── externalsecret.yaml         # Secrets from 1Password
 │   ├── helmrelease.yaml            # Helm chart deployment
-│   └── kustomization.yaml          # Kustomization config
+│   └── kustomization.yaml          # Includes volsync + gatus templates
 ├── ks.yaml                         # Flux Kustomization
-└── README.md                       # Application documentation
+└── README.md                       # Application documentation (optional)
 ```
+
+**Note:** No separate PVC files needed - persistence is handled via volsync templates.
 
 ## 🎯 Quick Start Example
 
@@ -48,13 +49,11 @@ cd /path/to/your/home-ops
 # Create namespace directory if it doesn't exist
 mkdir -p kubernetes/apps/${NAMESPACE}/${APP_NAME}/app
 
-# Create the application structure
+# Create the application structure (no PVC needed - handled by volsync)
 touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/ks.yaml
-touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/pvc.yaml
 touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/externalsecret.yaml
 touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/helmrelease.yaml
 touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/app/kustomization.yaml
-touch kubernetes/apps/${NAMESPACE}/${APP_NAME}/README.md
 ```
 
 ### Step 2: Configure Flux Kustomization
@@ -76,12 +75,12 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
-    - name: ceph-csi-rbd
+    # Add cloudnative-pg-cluster only if app needs database
   path: ./kubernetes/apps/${NAMESPACE}/${APP_NAME}/app
   prune: true
   sourceRef:
     kind: GitRepository
-    name: flux-system
+    name: home-kubernetes
   wait: false
   interval: 30m
   retryInterval: 1m
@@ -90,7 +89,6 @@ spec:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: ${APP_NAME}
-      VOLSYNC_CLAIM: ${APP_NAME}-data
       VOLSYNC_CAPACITY: 15Gi
 ```
 

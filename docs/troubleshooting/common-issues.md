@@ -565,6 +565,72 @@ env:
 kubectl get secret minio-secret -o jsonpath='{.data.MINIO_ROOT_USER}' | base64 -d
 ```
 
+## 🤖 Renovate Automation Issues
+
+### Branch Protection Requirements
+
+**Symptoms:** "Your main branch isn't protected" error in Renovate logs
+
+**Cause:** Renovate requires branch protection to create pull requests
+
+**Solution:**
+
+| Issue | Symptom | Solution |
+|-------|---------|----------|
+| Branch not protected | "Error updating branch" in Renovate | Enable branch protection in GitHub Settings → Branches |
+| Missing status checks | PRs created but no automation | Add required status checks in branch protection |
+| Admin bypass disabled | Manual pushes bypass checks | Enable "Include administrators" in protection rules |
+| Outdated fileMatch patterns | No PRs for containers | Update Renovate config with correct `fileMatch` patterns |
+
+### SHA256 Digest Issues
+
+**Symptoms:** YAML lint failures, unquoted digest strings
+
+**Diagnosis:**
+
+```bash
+# Check for unquoted @ symbols
+yamllint kubernetes/ --format=parsable | grep "@"
+
+# Find missing digests
+grep -r "tag:" kubernetes/apps/ | grep -v "@sha256"
+```
+
+**Solutions:**
+
+```bash
+# Get digest for any image
+docker pull repository/image:tag
+docker inspect repository/image:tag --format='{{index .RepoDigests 0}}'
+
+# Ensure tags with @ are quoted
+# ❌ Wrong: tag: 1.0.0@sha256:abcd...
+# ✅ Correct: tag: "1.0.0@sha256:abcd..."
+```
+
+### Renovate Configuration Problems
+
+**Common Issues:**
+
+- **Excess registryUrls warning**: Remove deprecated `managerFilePatterns` in favor of `fileMatch`
+- **No updates detected**: Verify `docker:pinDigests` preset is enabled
+- **Wrong file patterns**: Ensure `fileMatch` covers all YAML files
+
+```json5
+// Correct Renovate configuration
+{
+  extends: [
+    "docker:pinDigests",  // Auto-add SHA256 digests
+  ],
+  flux: {
+    fileMatch: ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
+  },
+  kubernetes: {
+    fileMatch: ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
+  }
+}
+```
+
 ## 🔍 Advanced Debugging Workflow
 
 ### Systematic Troubleshooting Steps

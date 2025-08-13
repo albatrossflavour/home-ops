@@ -486,7 +486,8 @@ When deploying any new application, follow this exact sequence:
 5. **Create ks.yaml**: Use only `external-secrets-stores` dependency unless database needed
 6. **Update namespace kustomization.yaml**: Add `- ./APPNAME/ks.yaml`
 7. **Create 1Password item**: `op item create --vault="discworld" --title="APPNAME" --category="Server" FIELD="$(openssl rand -base64 32)"`
-8. **Test with**: `task flux:apply path=NAMESPACE/APPNAME`
+8. **Ensure branch protection**: Main branch must be protected for Renovate to work
+9. **Test with**: `task flux:apply path=NAMESPACE/APPNAME`
 
 **Key patterns**:
 
@@ -523,6 +524,73 @@ docker pull repository/image:tag && docker inspect repository/image:tag --format
 - Container images in HelmReleases
 - Version updates with digest updates
 - Security-first pinning approach
+
+### Renovate Branch Protection Requirements
+
+**CRITICAL**: Main branch MUST be protected for Renovate to function properly.
+
+**Required GitHub branch protection settings**:
+
+1. Go to repo **Settings → Branches**
+2. Add protection rule for `main` branch
+3. **Minimum required settings**:
+   - ✅ **Require status checks to pass before merging**
+   - ✅ **Require branches to be up to date before merging**
+   - ✅ Add status checks: `pre-commit` (if using pre-commit hooks)
+   - ❌ **Do NOT** enforce on administrators (allows emergency fixes)
+
+**Alternative: GitHub CLI setup**:
+
+```bash
+gh api repos/:owner/:repo/branches/main/protection \
+  --method PUT \
+  --field required_status_checks='{"strict":true,"contexts":["pre-commit"]}' \
+  --field enforce_admins=false \
+  --field required_pull_request_reviews='{"required_approving_review_count":0}' \
+  --field restrictions=null
+```
+
+### Renovate Troubleshooting
+
+**Common issues and solutions**:
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Error updating branch" | Unprotected main branch | Enable branch protection |
+| "Excess registryUrls found" | Conflicting Helm repo configs | Check fileMatch patterns in renovate.json5 |
+| No PRs created | Schedule restrictions | Check `schedule: ["every weekend"]` in config |
+| YAML syntax errors | Unquoted @sha256 digests | Always quote: `tag: "version@sha256:digest"` |
+
+**Manual trigger Renovate**:
+
+- Comment `@renovatebot rebase` on any issue/PR
+- Push empty commit: `git commit --allow-empty -m "trigger renovate"`
+- GitHub Actions → Run "Renovate" workflow manually
+
+## Repository Setup Requirements
+
+### GitHub Branch Protection (MANDATORY)
+
+**Branch protection is required for Renovate to function**:
+
+- Main branch must have protection rules enabled
+- Required status checks should include pre-commit hooks
+- Allows automated PR creation and merging
+- Prevents accidental force pushes or deletions
+
+### Pre-commit Hooks
+
+- Enforce YAML syntax validation (prevents @sha256 quote issues)  
+- Run security scanning with detect-secrets
+- Validate Kubernetes manifests with kubeval/kubeconform
+- Format code consistently across the repository
+
+### Renovate Configuration
+
+- Configured for weekend runs to minimize disruption
+- Automatic digest pinning for all container images
+- Grouped updates for related components (Flux, Talos)
+- Auto-merge enabled for minor/patch updates and digests
 
 ## Important Notes
 
