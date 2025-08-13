@@ -23,34 +23,22 @@
     '**/*.sops.*',
   ],
   flux: {
-    managerFilePatterns: [
-      '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
-    ],
+    fileMatch: ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
   },
-  'helm-values': {
-    managerFilePatterns: [
-      '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
-    ],
+  "helm-values": {
+    fileMatch: ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
   },
   helmfile: {
-    managerFilePatterns: [
-      '/(^|/)helmfile\\.ya?ml(?:\\.j2)?$/',
-    ],
+    fileMatch: ["(^|/)helmfile\\.ya?ml(?:\\.j2)?$"]
   },
   kubernetes: {
-    managerFilePatterns: [
-      '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
-    ],
+    fileMatch: ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
   },
   kustomize: {
-    managerFilePatterns: [
-      '/(^|/)kustomization\\.ya?ml(?:\\.j2)?$/',
-    ],
+    fileMatch: ["(^|/)kustomization\\.ya?ml(?:\\.j2)?$"]
   },
   pip_requirements: {
-    managerFilePatterns: [
-      '/(^|/)[\\w-]*requirements(-\\w+)?\\.(txt|pip)(?:\\.j2)?$/',
-    ],
+    fileMatch: ["(^|/)[\\w-]*requirements(-\\w+)?\\.(txt|pip)(?:\\.j2)?$"]
   },
   commitMessageTopic: '{{depName}}',
   commitMessageExtra: 'to {{newVersion}}',
@@ -85,8 +73,8 @@
         commitMessageTopic: '{{{groupName}}} group',
       },
       separateMinorPatch: true,
-      matchPackageNames: [
-        '/fluxcd/',
+      matchPackagePatterns: [
+        "fluxcd"
       ],
     },
     {
@@ -101,9 +89,9 @@
         commitMessageTopic: '{{{groupName}}} group',
       },
       separateMinorPatch: true,
-      matchPackageNames: [
-        '/siderolabs/talosctl/',
-        '/siderolabs/installer/',
+      matchPackagePatterns: [
+        "siderolabs/talosctl",
+        "siderolabs/installer"
       ],
     },
     {
@@ -311,8 +299,8 @@
       description: [
         'Process custom dependencies',
       ],
-      managerFilePatterns: [
-        '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
+      fileMatch: [
+        "(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"
       ],
       matchStrings: [
         'datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( repository=(?<registryUrl>\\S+))?\\n.+: (&\\S+\\s)?(?<currentValue>\\S+)',
