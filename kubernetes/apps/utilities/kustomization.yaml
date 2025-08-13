@@ -9,4 +9,5 @@ resources:
   - ./jsoncrack/ks.yaml
   - ./cyberchef/ks.yaml
   - ./n8n/ks.yaml
+  - ./node-red/ks.yaml
   - ./send/ks.yaml

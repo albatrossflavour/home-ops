@@ -416,18 +416,48 @@ resources:
 
 #### ks.yaml Dependencies and Variables
 
-Ensure correct dependency order and minimal variable set:
+**CRITICAL**: Most apps only need `external-secrets-stores` dependency. Only add others if specifically needed:
 
 ```yaml
 dependsOn:
-  - name: external-secrets          # Base operator first
-  - name: external-secrets-stores   # Then stores
-  - name: cloudnative-pg-cluster    # Database if needed
+  - name: external-secrets-stores   # Standard for ALL apps
+  - name: cloudnative-pg-cluster    # Only if app needs database
+  - name: rook-ceph-cluster         # Only if app needs ceph storage
 postBuild:
   substitute:
     APP: *app                       # Application name
     GATUS_SUBDOMAIN: app-name      # Monitoring subdomain
     VOLSYNC_CAPACITY: 20Gi         # Storage size
+```
+
+#### Standard Persistence Pattern
+
+**CRITICAL**: Never create PVCs directly in HelmRelease. Always use volsync template pattern:
+
+1. **HelmRelease persistence**: Use `existingClaim: appname` (NOT size/storageClass)
+2. **Kustomization**: Include `../../../../templates/volsync`
+3. **ks.yaml**: Set `VOLSYNC_CAPACITY` in postBuild.substitute
+4. **Volsync template** automatically creates PVC with backup/restore capabilities
+
+```yaml
+# In HelmRelease
+persistence:
+  data:
+    existingClaim: node-red  # Uses APP variable from ks.yaml
+    globalMounts:
+      - path: /data
+
+# In app/kustomization.yaml  
+resources:
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ../../../../templates/gatus/external
+  - ../../../../templates/volsync
+
+# In ks.yaml
+postBuild:
+  substitute:
+    VOLSYNC_CAPACITY: 10Gi  # This creates the PVC
 ```
 
 #### Namespace Organization
@@ -444,6 +474,25 @@ postBuild:
 - Vault name: `discworld`
 - Use `op cli` for creating items: `op item create --vault="discworld"`
 - Generate secure secrets: `openssl rand -base64 32` # pragma: allowlist secret
+
+### Standard App Deployment Workflow
+
+When deploying any new application, follow this exact sequence:
+
+1. **Create directory structure**: `mkdir -p kubernetes/apps/NAMESPACE/APPNAME/app`
+2. **Create externalsecret.yaml**: Always use `apiVersion: external-secrets.io/v1`
+3. **Create helmrelease.yaml**: Use `existingClaim: APPNAME` for persistence
+4. **Create app/kustomization.yaml**: Include volsync and gatus templates
+5. **Create ks.yaml**: Use only `external-secrets-stores` dependency unless database needed
+6. **Update namespace kustomization.yaml**: Add `- ./APPNAME/ks.yaml`
+7. **Test with**: `task flux:apply path=NAMESPACE/APPNAME`
+
+**Key patterns**:
+
+- Dependencies: `external-secrets-stores` (standard), `cloudnative-pg-cluster` (if database)
+- Persistence: `existingClaim: APPNAME` + volsync template + `VOLSYNC_CAPACITY`
+- Monitoring: Include gatus template in kustomization
+- Secrets: Always use 1Password via ExternalSecret
 
 ## Important Notes
 
