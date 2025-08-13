@@ -48,6 +48,19 @@ tasks:
       - cmd: echo {{.BOOTSTRAP_CONFIG_FILE}}
     status:
       - test -f {{.BOOTSTRAP_CONFIG_FILE}}
+
+  commit:
+    desc: Auto-commit with pre-commit retry
+    cmds:
+      - ./scripts/git-auto-commit.sh "{{.CLI_ARGS | default "chore: update configuration"}}"
+
+  commit-and-push:
+    desc: Auto-commit and push with pre-commit retry
+    cmds:
+      - task: commit
+        vars:
+          CLI_ARGS: "{{.CLI_ARGS}}"
+      - git push
     silent: true
 
   configure:

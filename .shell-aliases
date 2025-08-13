@@ -1,0 +1,30 @@
+# Git auto-commit aliases and functions
+# Add to your ~/.bashrc, ~/.zshrc, or ~/.profile
+
+# Source the auto-commit function
+source ~/dev/home-ops/scripts/git-auto-commit.sh
+
+# Quick aliases
+alias gac='auto_commit'
+alias gacp='auto_commit "$(git diff --cached --name-only)" && git push'
+
+# More comprehensive git aliases
+alias gs='git status'
+alias ga='git add -A'
+alias gc='git commit'
+alias gp='git push'
+
+# Pre-commit specific aliases
+alias pc='pre-commit run --all-files'
+alias pci='pre-commit install'
+alias pcu='pre-commit autoupdate'
+
+# Kubernetes deployment aliases (existing)
+alias k="kubectl"
+alias kgp="kubectl get pods"
+alias kgs="kubectl get services"
+alias flux-apply='task flux:apply path='
+
+# Combined workflow aliases
+alias commit-and-deploy='auto_commit "$1" && git push'
+alias quick-deploy='git add -A && auto_commit "chore: update configuration" && git push'

@@ -1,0 +1,28 @@
+# Auto-commit alias with pre-commit retry
+# Add this to your ~/.gitconfig [alias] section
+
+[alias]
+    # Auto-commit with pre-commit retry
+    acommit = "!f() { \
+        echo 'Running pre-commit auto-fix and retry...'; \
+        max_retries=3; \
+        retry_count=0; \
+        while [ $retry_count -lt $max_retries ]; do \
+            if git commit \"$@\"; then \
+                echo 'Commit successful!'; \
+                break; \
+            else \
+                retry_count=$((retry_count + 1)); \
+                if [ $retry_count -lt $max_retries ]; then \
+                    echo \"Commit failed, auto-fixing and retrying ($retry_count/$max_retries)...\"; \
+                    git add -A; \
+                else \
+                    echo 'Max retries reached. Please check remaining issues manually.'; \
+                    exit 1; \
+                fi; \
+            fi; \
+        done; \
+    }; f"
+
+    # Shorter version - single retry
+    ac = "!git commit \"$@\" || (echo 'Auto-fixing and retrying...' && git add -A && git commit \"$@\")"

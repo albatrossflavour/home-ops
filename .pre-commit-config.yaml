@@ -76,7 +76,7 @@ repos:
         args: [--severity=warning]
         exclude: ^bootstrap/
 
-  # YAML linting
+  # YAML linting and auto-fixing
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.37.1
     hooks:
@@ -101,6 +101,20 @@ repos:
             .*/(templates/|crds/)|
             bootstrap/
           )
+
+  # YAML auto-formatting (optional - can conflict with yamllint)
+  # - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  #   rev: v2.14.0
+  #   hooks:
+  #     - id: pretty-format-yaml
+  #       args: [--autofix, --indent, "2"]
+  #       exclude: |
+  #         (?x)^(
+  #           kubernetes/flux/|
+  #           kubernetes/apps/.*/(charts?/|helm-charts?/)|
+  #           .*/(templates/|crds/)|
+  #           bootstrap/
+  #         )
 
   # Kubernetes manifest validation (using local hook)
   # Note: kube-score must be installed separately: brew install kube-score
