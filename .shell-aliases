@@ -1,8 +1,9 @@
 # Git auto-commit aliases and functions
 # Add to your ~/.bashrc, ~/.zshrc, or ~/.profile
 
-# Source the auto-commit function
+# Source the auto-commit function and enhanced gg
 source ~/dev/home-ops/scripts/git-auto-commit.sh
+source ~/dev/home-ops/scripts/enhanced-gg.sh
 
 # Quick aliases
 alias gac='auto_commit'
@@ -25,6 +26,11 @@ alias kgp="kubectl get pods"
 alias kgs="kubectl get services"
 alias flux-apply='task flux:apply path='
 
+# Enhanced gg variants
+alias gg_retry='gg'        # Enhanced version with auto-fix retry (default)
+alias gg_orig='gg_original' # Original behavior without retry
+alias gg_fast='gg_quick'   # Quick commit without review pause
+
 # Combined workflow aliases
 alias commit-and-deploy='auto_commit "$1" && git push'
-alias quick-deploy='git add -A && auto_commit "chore: update configuration" && git push'
+alias quick-deploy='gg_quick'
