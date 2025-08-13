@@ -173,7 +173,7 @@ This cluster uses a multi-tier storage approach optimized for different workload
 
 - **Use case**: Persistent data requiring replication and backups
 - **Benefits**: Distributed storage, data redundancy, snapshot capabilities
-- **Storage class**: `ceph-block`, `ceph-filesystem`  
+- **Storage class**: `ceph-block`, `ceph-filesystem`
 - **Examples**: Application databases, user data, configuration files
 
 #### NFS
@@ -372,6 +372,78 @@ Uses makejinja for Jinja2 templating:
 - SOPS integration for encrypted secrets editing
 - Kubernetes tools integration with local kubeconfig
 - File associations for homelab-specific file types
+
+## Application Deployment Patterns
+
+### Standard Application Structure
+
+When deploying new applications, follow these exact patterns to avoid common issues:
+
+#### ExternalSecret Configuration pragma: allowlist secret
+
+Always use the correct API version and structure:
+
+```yaml
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+apiVersion: external-secrets.io/v1  # Always v1, never v1beta1
+kind: ExternalSecret
+metadata:
+  name: appname
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword-connect
+  target:
+    name: appname-secret
+    template:
+      engineVersion: v2
+```
+
+#### Kustomization.yaml Structure
+
+Use templates instead of hardcoded configurations:
+
+```yaml
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ../../../../templates/gatus/external    # For monitoring
+  - ../../../../templates/volsync           # For backups
+```
+
+#### ks.yaml Dependencies and Variables
+
+Ensure correct dependency order and minimal variable set:
+
+```yaml
+dependsOn:
+  - name: external-secrets          # Base operator first
+  - name: external-secrets-stores   # Then stores
+  - name: cloudnative-pg-cluster    # Database if needed
+postBuild:
+  substitute:
+    APP: *app                       # Application name
+    GATUS_SUBDOMAIN: app-name      # Monitoring subdomain
+    VOLSYNC_CAPACITY: 20Gi         # Storage size
+```
+
+#### Namespace Organization
+
+- `utilities`: Workflow/automation tools (n8n, cyberchef, it-tools)
+- `default`: Core home services (Home Assistant, Minio)
+- `database`: Data services (PostgreSQL, Redis, EMQX)
+- `media`: Media server stack (Sonarr, Radarr, etc.)
+- `observability`: Monitoring and alerting
+- `security`: Authentication and security tools
+
+#### 1Password Integration
+
+- Vault name: `discworld`
+- Use `op cli` for creating items: `op item create --vault="discworld"`
+- Generate secure secrets: `openssl rand -base64 32` # pragma: allowlist secret
 
 ## Important Notes
 
