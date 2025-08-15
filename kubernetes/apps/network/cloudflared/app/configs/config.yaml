@@ -25,4 +25,6 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "smarthome.pdlf.net"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "pdlf.net"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - service: http_status:404
