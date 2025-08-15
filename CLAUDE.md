@@ -310,6 +310,101 @@ data:
   STORAGE_SECRET_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
 ```
 
+## DNS and Certificate Management
+
+### External Domain Configuration
+
+For hosting services on external domains (non-${SECRET_DOMAIN}), follow this pattern:
+
+#### DNS and Certificate Integration
+
+This cluster uses an integrated approach for external domains:
+
+1. **Certificate Management**: Add domain to production certificate in `kubernetes/apps/network/ingress-nginx/certificates/production.yaml`
+2. **Tunnel Configuration**: Add hostname to Cloudflare tunnel config in `kubernetes/apps/network/cloudflared/app/configs/config.yaml`
+3. **cert-manager Integration**: Add domain to cert-manager issuers in `kubernetes/apps/cert-manager/cert-manager/issuers/issuers.yaml`
+
+**CRITICAL**: Do NOT modify external-dns domain filters. External domains are managed through the certificate creation process.
+
+#### Pattern for Adding External Domains
+
+##### Example: Adding pdlf.net domain
+
+1. **Production Certificate** (`kubernetes/apps/network/ingress-nginx/certificates/production.yaml`):
+
+```yaml
+dnsNames:
+  - smarthome.pdlf.net
+  - pdlf.net  # Add new domain here
+```
+
+2. **Cloudflare Tunnel** (`kubernetes/apps/network/cloudflared/app/configs/config.yaml`):
+
+```yaml
+ingress:
+  - hostname: "smarthome.pdlf.net"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "pdlf.net"  # Add new hostname here
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+```
+
+3. **cert-manager Issuers** (`kubernetes/apps/cert-manager/cert-manager/issuers/issuers.yaml`):
+
+```yaml
+dnsZones:
+  - smarthome.pdlf.net
+  - pdlf.net  # Add domain here
+```
+
+4. **Application Ingress** uses `className: external` and automatic SSL:
+
+```yaml
+ingress:
+  app:
+    className: external
+    hosts:
+      - host: pdlf.net  # SSL certificate applied automatically
+```
+
+#### How It Works
+
+- **cert-manager** requests Let's Encrypt certificates using Cloudflare DNS validation
+- **DNS validation process** creates temporary DNS records in Cloudflare
+- **These validation records establish DNS routing** for the domain through Cloudflare
+- **Cloudflare tunnel** routes traffic to the ingress-nginx-external controller
+- **No external-dns configuration needed** for external domains
+
+### Static Website Deployment Pattern
+
+For simple static websites:
+
+```yaml
+# Use nginx with ConfigMap for webroot files
+persistence:
+  webroot:
+    type: configMap
+    name: app-webroot
+    globalMounts:
+      - path: /usr/share/nginx/html
+
+# In kustomization.yaml
+configMapGenerator:
+  - name: app-webroot
+    files:
+      - webroot/index.html  # Reference individual files, not directories
+```
+
+**File Structure**:
+
+```text
+app/
+├── webroot/
+│   ├── index.html
+│   └── assets/
+├── helmrelease.yaml
+└── kustomization.yaml
+```
+
 ## Troubleshooting Workflow
 
 ### Common Issues and Resolution Steps
