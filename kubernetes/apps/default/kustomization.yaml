@@ -10,3 +10,4 @@ resources:
   - ./nginx-reverse-proxy/ks.yaml
   - ./homepage/ks.yaml
   - ./reactive-resume/ks.yaml
+  - ./pdlf-website/ks.yaml
