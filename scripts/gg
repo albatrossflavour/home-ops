@@ -40,33 +40,48 @@ if [[ "$is_home_ops" == "true" ]]; then
     while [[ $retry_count -lt $max_retries ]]; do
         echo "📝 Attempt $((retry_count + 1))/$max_retries"
 
-        if [[ $# -gt 0 ]]; then
-            # Use provided commit message
-            if git commit -m "$*"; then
-                echo "✅ Commit successful!"
-                break
+        # Check if there are changes to commit
+        if ! git diff --cached --quiet; then
+            if [[ $# -gt 0 ]]; then
+                # Use provided commit message
+                if git commit -m "$*"; then
+                    echo "✅ Commit successful!"
+                    break
+                fi
+            else
+                # Interactive commit
+                if git commit; then
+                    echo "✅ Commit successful!"
+                    break
+                fi
             fi
-        else
-            # Interactive commit
-            if git commit; then
-                echo "✅ Commit successful!"
-                break
-            fi
-        fi
 
-        # Commit failed
-        ((retry_count++))
-        if [[ $retry_count -lt $max_retries ]]; then
-            echo "🔧 Pre-commit failed, auto-fixing and retrying..."
-            echo "   Files may have been automatically corrected"
-            git add -A
-            sleep 1
+            # Commit failed
+            ((retry_count++))
+            if [[ $retry_count -lt $max_retries ]]; then
+                echo "🔧 Pre-commit failed, auto-fixing and retrying..."
+                echo "   Files may have been automatically corrected"
+                git add -A
+                sleep 1
+            else
+                echo "❌ Max retries reached. Manual intervention needed:"
+                echo "   1. Check pre-commit output above"
+                echo "   2. Fix remaining issues"
+                echo "   3. Run: git add -A && git commit && git push"
+                exit 1
+            fi
         else
-            echo "❌ Max retries reached. Manual intervention needed:"
-            echo "   1. Check pre-commit output above"
-            echo "   2. Fix remaining issues"
-            echo "   3. Run: git add -A && git commit && git push"
-            exit 1
+            echo "🔧 Pre-commit hooks auto-fixed files - checking for remaining changes..."
+            git add -A
+            if ! git diff --cached --quiet; then
+                # There are new changes after auto-fix, continue the loop
+                continue
+            else
+                # No changes left to commit after auto-fix
+                echo "✅ All issues were auto-fixed by pre-commit hooks!"
+                echo "📋 Working tree is now clean - nothing to commit"
+                exit 0
+            fi
         fi
     done
 else
