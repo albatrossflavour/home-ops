@@ -25,8 +25,10 @@ spec:
   values:
     deploymentStrategy:
       type: Recreate
-    downloadDashboards:
-      enabled: false
+    downloadDashboardsImage:
+      registry: docker.io
+      repository: library/alpine
+      tag: latest
     admin:
       existingSecret: grafana-admin-secret
     env:
