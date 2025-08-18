@@ -443,6 +443,46 @@ app/
    - Check database user was created: `kubectl exec -n database deployment/postgres16 -- psql -U postgres -c "\du"`
    - Verify connection string format and credentials
 
+### Emergency GitOps Workflow
+
+**CRITICAL**: This is a GitOps repository. All changes MUST go through Git to be permanent.
+
+#### Emergency Procedure (Only for critical issues during demos/production incidents)
+
+1. **Make the fix in the Git repository files**
+2. **Commit and push immediately**
+3. **Apply via Flux reconciliation**
+
+```bash
+# Emergency workflow
+git add -A && git commit -m "fix(emergency): describe the critical issue"
+git push
+flux reconcile kustomization <affected-app> --with-source
+```
+
+#### What NOT to do (Anti-patterns)
+
+❌ **Never apply kubectl patches directly** - they will be reverted by Flux
+❌ **Never edit resources with kubectl edit** - changes are temporary
+❌ **Never use helm upgrade directly** - bypasses GitOps workflow
+
+#### Why this matters
+
+- **Flux syncs from Git every 10 minutes** - manual changes get reverted
+- **GitOps ensures reproducibility** - direct kubectl changes are not tracked
+- **Emergency fixes must be permanent** - temporary fixes waste time when they get reverted
+
+#### Exception: Read-only debugging
+
+These commands are safe for troubleshooting (read-only):
+
+```bash
+kubectl logs <pod> -c <container>    # ✅ Safe
+kubectl describe <resource>          # ✅ Safe  
+kubectl get <resources>              # ✅ Safe
+flux get sources                     # ✅ Safe
+```
+
 ## Templating System
 
 Uses makejinja for Jinja2 templating:
