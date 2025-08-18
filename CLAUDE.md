@@ -33,6 +33,34 @@ This is a Kubernetes home operations repository based on the onedr0p cluster tem
 - SOPS configuration in `.sops.yaml`
 - All `.sops.yaml` files contain encrypted secrets
 
+### Infrastructure Backup & Recovery
+
+Critical infrastructure files that are NOT stored in Git are automatically backed up to 1Password:
+
+- **`age.key`** - SOPS encryption key (most critical - cannot recover cluster without this)
+- **`config.yaml`** - Bootstrap configuration with cluster-specific values
+- **`kubeconfig`** & **`talosconfig`** - Cluster access credentials
+- **`bootstrap/`** - Jinja2 templates for cluster setup
+
+**Backup Commands:**
+
+```bash
+# Create/update backups (run monthly or before major changes)
+task backup:create
+
+# List current backup items in 1Password vault
+task backup:list
+
+# Restore files to safe timestamped directory
+task backup:restore
+```
+
+**Recovery Priority:**
+
+1. **CRITICAL**: `age.key` - Without this, all SOPS-encrypted secrets are unrecoverable
+2. **IMPORTANT**: `config.yaml` - Contains all cluster-specific configuration values
+3. **CONVENIENT**: Access credentials and templates - Can be regenerated but saves significant time
+
 ## Common Commands
 
 ### Development Environment Setup
@@ -443,6 +471,99 @@ app/
    - Check database user was created: `kubectl exec -n database deployment/postgres16 -- psql -U postgres -c "\du"`
    - Verify connection string format and credentials
 
+### Disaster Recovery Procedures
+
+If you lose your machine, repository, or critical files, follow this recovery sequence:
+
+#### Complete Infrastructure Loss Recovery
+
+1. **Restore critical files from 1Password**
+
+   ```bash
+   # Clone repository and restore infrastructure files
+   git clone https://github.com/albatrossflavour/home-ops.git
+   cd home-ops
+   task backup:restore
+
+   # Copy restored files to proper locations (review first!)
+   cp restored-*/age.key ./age.key
+   cp restored-*/config.yaml ./config.yaml
+   cp restored-*/kubeconfig ./kubeconfig
+   cp restored-*/talosconfig ./talosconfig
+   cp -r restored-*/bootstrap ./bootstrap
+   ```
+
+2. **Verify SOPS decryption**
+
+   ```bash
+   # Test that age.key works with existing encrypted secrets
+   sops -d kubernetes/flux/vars/cluster-secrets.sops.yaml
+   ```
+
+3. **Cluster Recovery Options**
+
+   **Option A: Cluster Still Running**
+
+   ```bash
+   # Test cluster access
+   kubectl --kubeconfig kubeconfig get nodes
+
+   # If cluster is healthy, just re-bootstrap Flux
+   task flux:bootstrap
+   ```
+
+   **Option B: Complete Cluster Rebuild**
+
+   ```bash
+   # Bootstrap new Talos cluster (if nodes are accessible)
+   task talos:bootstrap
+
+   # Bootstrap Flux
+   task flux:bootstrap
+
+   # All applications will be restored from Git automatically
+   ```
+
+4. **Verification Steps**
+
+   ```bash
+   # Verify all kustomizations are healthy
+   kubectl get kustomization -A
+
+   # Check critical applications
+   kubectl get pods -A | grep -v Running
+
+   # Verify SOPS decryption in cluster
+   kubectl get secret -n flux-system cluster-secrets
+   ```
+
+#### Partial Loss Recovery
+
+**Lost age.key only:**
+
+```bash
+task backup:restore
+cp restored-*/age.key ./age.key
+# Test: sops -d kubernetes/flux/vars/cluster-secrets.sops.yaml
+```
+
+**Lost cluster access:**
+
+```bash
+task backup:restore  
+cp restored-*/kubeconfig ./kubeconfig
+cp restored-*/talosconfig ./talosconfig
+# Test: kubectl get nodes
+```
+
+**Lost bootstrap configuration:**
+
+```bash
+task backup:restore
+cp restored-*/config.yaml ./config.yaml
+cp -r restored-*/bootstrap ./bootstrap
+```
+
 ### Emergency GitOps Workflow
 
 **CRITICAL**: This is a GitOps repository. All changes MUST go through Git to be permanent.
@@ -735,3 +856,11 @@ gh api repos/:owner/:repo/branches/main/protection \
 - Pre-commit hooks enforce code quality and security scanning
 - Renovate handles automated dependency updates via GitHub PRs
 - 1Password integration supports both personal/family and business accounts
+
+### Backup Reminders
+
+- **Run `task backup:create` monthly** or before major cluster changes
+- **Critical**: `age.key` is your master key - losing it means losing all encrypted secrets
+- **1Password vault**: All backups stored in `discworld` vault for easy recovery
+- **Safe restore**: `task backup:restore` never overwrites existing files
+- **Test recovery**: Periodically verify backups work with `task backup:list`

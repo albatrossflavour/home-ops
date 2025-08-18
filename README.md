@@ -83,6 +83,28 @@ task workstation:venv
 - **[Flux CLI](https://fluxcd.io/flux/cmd/)** - GitOps management
 - **[kubectl](https://kubernetes.io/docs/reference/kubectl/)** - Kubernetes CLI
 
+### Infrastructure Backup
+
+Critical infrastructure files (not stored in Git) are automatically backed up to 1Password:
+
+```bash
+# Create/update backups (run monthly)
+task backup:create
+
+# List current backups
+task backup:list
+
+# Restore to safe directory
+task backup:restore
+```
+
+Protects your most critical assets:
+
+- **`age.key`** - SOPS encryption master key
+- **`config.yaml`** - Bootstrap configuration
+- **Access credentials** - kubeconfig and talosconfig
+- **Templates** - Bootstrap Jinja2 templates
+
 ### Adding Applications
 
 See **[Adding Applications](./docs/development/adding-applications.md)** for deploying new services to the cluster.
