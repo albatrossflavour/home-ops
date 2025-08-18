@@ -25,10 +25,8 @@ spec:
   values:
     deploymentStrategy:
       type: Recreate
-    downloadDashboardsImage:
-      registry: docker.io
-      repository: library/busybox
-      tag: 1.36.1
+    downloadDashboards:
+      enabled: false
     admin:
       existingSecret: grafana-admin-secret
     env:
