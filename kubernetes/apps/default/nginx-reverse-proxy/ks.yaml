@@ -22,3 +22,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      CHART_NAME: nginx
+      CHART_VERSION: "21.1.22"

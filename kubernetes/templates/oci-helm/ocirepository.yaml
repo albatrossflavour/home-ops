@@ -1,0 +1,14 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: ${CHART_NAME}
+  namespace: flux-system
+spec:
+  interval: 12h
+  url: oci://registry-1.docker.io/bitnamicharts/${CHART_NAME}
+  ref:
+    tag: ${CHART_VERSION}
+  layerSelector:
+    mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
+    operation: copy
