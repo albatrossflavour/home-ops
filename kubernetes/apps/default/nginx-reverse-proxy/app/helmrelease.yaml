@@ -11,8 +11,8 @@ spec:
       chart: nginx
       version: 21.1.22
       sourceRef:
-        kind: OCIRepository
-        name: nginx
+        kind: HelmRepository
+        name: bitnami
         namespace: flux-system
       interval: 5m
   install:
