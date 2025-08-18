@@ -27,8 +27,8 @@ spec:
       type: Recreate
     downloadDashboardsImage:
       registry: docker.io
-      repository: curlimages/curl
-      tag: 8.9.1
+      repository: library/busybox
+      tag: 1.36.1
     admin:
       existingSecret: grafana-admin-secret
     env:
