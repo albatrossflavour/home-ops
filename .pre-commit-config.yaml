@@ -203,3 +203,19 @@ repos:
             .*helmrelease\.yaml|
             .*kustomization\.yaml
           )
+      - id: container-arch-check
+        name: Check container architecture compatibility
+        description: Validate containers use SHA256 digests and known good architectures
+        entry: >-
+          bash -c 'for file in "$@"; do
+            if grep -q "image:" "$file"; then
+              if grep -E "image:.*[^@]$" "$file" | grep -v "@sha256:"; then
+                echo "ERROR: $file contains container images without SHA256 digests"
+                echo "Add @sha256:digest to ensure architecture compatibility"
+                exit 1
+              fi
+            fi
+          done'
+        language: system
+        files: kubernetes/.*helmrelease\.ya?ml$
+        pass_filenames: true

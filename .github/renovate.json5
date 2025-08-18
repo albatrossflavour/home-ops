@@ -9,6 +9,11 @@
     ':semanticCommits',
     ':automergeBranch',
   ],
+  docker: {
+    // Force AMD64 architecture for all container pulls
+    pinDigests: true,
+    versioning: 'docker'
+  },
   dependencyDashboard: true,
   dependencyDashboardTitle: 'Renovate Dashboard 🤖',
   suppressNotifications: [
