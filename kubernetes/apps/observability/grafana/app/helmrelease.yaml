@@ -27,7 +27,7 @@ spec:
       type: Recreate
     downloadDashboardsImage:
       registry: docker.io
-      repository: library/alpine
+      repository: alpine/curl
       tag: latest
     admin:
       existingSecret: grafana-admin-secret
