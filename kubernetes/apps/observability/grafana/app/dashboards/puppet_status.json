@@ -1550,7 +1550,7 @@
           "refId": "A"
         }
       ],
-      "title": "Active Config Versions",
+      "title": "Resources Under Enforcement",
       "type": "timeseries"
     },
     {
