@@ -67,6 +67,53 @@ tasks:
       - task: sops:encrypt
       - task: .validate
 
+  backup:create:
+    desc: Backup critical infrastructure files to 1Password
+    summary: |
+      Backs up critical files that are not stored in the Git repository to 1Password:
+      - age.key (SOPS encryption key)
+      - config.yaml (bootstrap configuration)
+      - kubeconfig and talosconfig (cluster access)
+      - bootstrap/ directory (templates)
+    cmds:
+      - "{{.SCRIPTS_DIR}}/backup-to-1password.sh"
+    preconditions:
+      - msg: 1Password CLI not found - install from https://developer.1password.com/docs/cli/get-started/
+        sh: command -v op
+      - msg: Not authenticated with 1Password CLI - run 'op signin'
+        sh: op vault list >/dev/null 2>&1
+      - msg: Missing backup script
+        sh: test -f {{.SCRIPTS_DIR}}/backup-to-1password.sh
+
+  backup:restore:
+    desc: Restore critical infrastructure files from 1Password
+    summary: |
+      Restores critical files from 1Password to a timestamped directory.
+      Files are restored to restored-YYYYMMDD-HHMMSS/ for safe review.
+      This command will NOT overwrite existing files.
+    cmds:
+      - "{{.SCRIPTS_DIR}}/restore-from-1password.sh"
+    preconditions:
+      - msg: 1Password CLI not found - install from https://developer.1password.com/docs/cli/get-started/
+        sh: command -v op
+      - msg: Not authenticated with 1Password CLI - run 'op signin'
+        sh: op vault list >/dev/null 2>&1
+      - msg: Missing restore script
+        sh: test -f {{.SCRIPTS_DIR}}/restore-from-1password.sh
+
+  backup:list:
+    desc: List backed up items in 1Password vault
+    summary: |
+      Shows all homeops backup items currently stored in the 1Password vault.
+      Useful for verifying backups exist before attempting restore.
+    cmds:
+      - op item list --vault="discworld" | grep "homeops-" || echo "No backup items found"
+    preconditions:
+      - msg: 1Password CLI not found - install from https://developer.1password.com/docs/cli/get-started/
+        sh: command -v op
+      - msg: Not authenticated with 1Password CLI - run 'op signin'
+        sh: op vault list >/dev/null 2>&1
+
   .template:
     internal: true
     cmd: "{{.VIRTUAL_ENV}}/bin/makejinja"
