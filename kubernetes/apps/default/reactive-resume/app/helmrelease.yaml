@@ -73,7 +73,7 @@ spec:
               tag: latest
             env:
               TOKEN: "$(CHROME_TOKEN)"
-              PUBLIC_URL: "http://resume.default.svc.cluster.local:3000"
+              PUBLIC_URL: "http://resume-app.default.svc.cluster.local:3000"
               TIMEOUT: "180000"                 # allow up to 3 minutes
               CONNECTION_TIMEOUT: "60000"
               PREBOOT_CHROME: "true"            # avoid cold start delays
