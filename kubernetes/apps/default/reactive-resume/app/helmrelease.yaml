@@ -108,10 +108,7 @@ spec:
                   port: http
     persistence:
       data:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
+        existingClaim: *app
         advancedMounts:
           resume:
             app:
