@@ -73,6 +73,7 @@ spec:
               tag: latest
             env:
               TOKEN: "$(CHROME_TOKEN)"
+              PUBLIC_URL: "http://resume.default.svc.cluster.local:3000"
             envFrom:
               - secretRef:
                   name: resume-secret
