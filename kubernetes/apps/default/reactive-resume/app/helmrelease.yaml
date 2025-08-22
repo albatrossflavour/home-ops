@@ -114,7 +114,5 @@ spec:
     persistence:
       data:
         existingClaim: *app
-        advancedMounts:
-          resume:
-            app:
-              - path: /app/data
+        globalMounts:
+          - path: /app/data
