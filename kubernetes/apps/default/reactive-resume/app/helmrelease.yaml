@@ -74,11 +74,11 @@ spec:
             env:
               TOKEN: "$(CHROME_TOKEN)"
               PUBLIC_URL: "http://resume-app.default.svc.cluster.local:3000"
-              TIMEOUT: "180000"                 # allow up to 3 minutes
+              TIMEOUT: "180000"
               CONNECTION_TIMEOUT: "60000"
-              PREBOOT_CHROME: "true"            # avoid cold start delays
+              PREBOOT_CHROME: "true"
               KEEP_ALIVE: "true"
-              MAX_CONCURRENT_SESSIONS: "2"      # keep small & predictable
+              MAX_CONCURRENT_SESSIONS: "2"
               DEFAULT_IGNORE_HTTPS_ERRORS: "true"
               DEFAULT_LAUNCH_ARGS: '["--no-sandbox","--disable-dev-shm-usage","--ignore-certificate-errors"]'
             envFrom:
