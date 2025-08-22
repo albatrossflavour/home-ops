@@ -50,12 +50,11 @@ spec:
               MAIL_FROM: "noreply@${SECRET_DOMAIN}"
               STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
               STORAGE_PORT: "9000"
-              STORAGE_REGION: "us-east-1"
               STORAGE_BUCKET: "resume"
+              STORAGE_ACCESS_KEY: "$(STORAGE_ACCESS_KEY)"
+              STORAGE_SECRET_KEY: "$(STORAGE_SECRET_KEY)"
               STORAGE_USE_SSL: "false"
-              STORAGE_SKIP_BUCKET_CHECK: "true"
               CHROME_URL: "ws://resume-browserless.default.svc.cluster.local:3000"
-              STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
             envFrom:
               - secretRef:
                   name: resume-secret
