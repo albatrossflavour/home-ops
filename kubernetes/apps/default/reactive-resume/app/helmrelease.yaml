@@ -70,7 +70,6 @@ spec:
           app:
             image:
               repository: ghcr.io/browserless/chromium:v2.18.0
-              tag: latest
             env:
               TOKEN: "$(CHROME_TOKEN)"
               PUBLIC_URL: "http://resume-app.default.svc.cluster.local:3000"
