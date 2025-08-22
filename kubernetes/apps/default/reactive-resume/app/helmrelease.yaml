@@ -52,8 +52,8 @@ spec:
               STORAGE_PATH: "/app/storage"
               STORAGE_ACCESS_KEY: "dummy" # pragma: allowlist secret
               STORAGE_SECRET_KEY: "dummy" # pragma: allowlist secret
-              STORAGE_URL: "http://dummy"
-              STORAGE_ENDPOINT: "dummy"
+              STORAGE_URL: "http://localhost:9000"
+              STORAGE_ENDPOINT: "localhost"
               STORAGE_PORT: "9000"
               STORAGE_BUCKET: "dummy"
               NODE_TLS_REJECT_UNAUTHORIZED: "0"
