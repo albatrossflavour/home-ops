@@ -58,6 +58,9 @@ spec:
               AWS_ENDPOINT_URL: "http://minio.default.svc.cluster.local:9000"
               AWS_FORCE_PATH_STYLE: "true"
               NODE_TLS_REJECT_UNAUTHORIZED: "0"
+              NODE_ENV: "development"
+              LOG_LEVEL: "debug"
+              DEBUG: "*"
               CHROME_URL: "ws://localhost:3001"
             envFrom:
               - secretRef:
