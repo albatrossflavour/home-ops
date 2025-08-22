@@ -53,6 +53,7 @@ spec:
               STORAGE_BUCKET: "resume"
               STORAGE_REGION: "us-east-1"
               STORAGE_USE_SSL: "false"
+              STORAGE_SKIP_BUCKET_CHECK: "true"
               STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
               AWS_REGION: "us-east-1"
               AWS_ENDPOINT_URL: "http://minio.default.svc.cluster.local:9000"
