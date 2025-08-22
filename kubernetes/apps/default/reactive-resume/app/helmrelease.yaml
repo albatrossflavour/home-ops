@@ -52,6 +52,7 @@ spec:
               STORAGE_PORT: "9000"
               STORAGE_BUCKET: "resume"
               STORAGE_USE_SSL: "false"
+              NODE_TLS_REJECT_UNAUTHORIZED: "0"
               CHROME_URL: "ws://resume-browserless.default.svc.cluster.local:3000"
             envFrom:
               - secretRef:
