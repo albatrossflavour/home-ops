@@ -54,7 +54,7 @@ spec:
               STORAGE_BUCKET: "resume"
               STORAGE_USE_SSL: "false"
               STORAGE_SKIP_BUCKET_CHECK: "true"
-              CHROME_URL: "ws://resume-browserless.default.svc.cluster.local:3000"
+              CHROME_URL: "ws://resume-browserless.default.svc.cluster.local:3000/chromium"
             envFrom:
               - secretRef:
                   name: resume-secret
@@ -74,10 +74,13 @@ spec:
             env:
               TOKEN: "$(CHROME_TOKEN)"
               PUBLIC_URL: "http://resume-app.default.svc.cluster.local:3000"
-              TIMEOUT: "180000"
+              STORAGE_URL: "https://resume.albatrossflavour.com"
+              TIMEOUT: "30000"
               CONNECTION_TIMEOUT: "60000"
-              PREBOOT_CHROME: "true"
-              KEEP_ALIVE: "true"
+              PREBOOT_CHROME: "false"
+              KEEP_ALIVE: "false"
+              ENABLE_CORS: "false"
+              ALLOW_GET: "false"
               # MAX_CONCURRENT_SESSIONS: "2"
               DEFAULT_IGNORE_HTTPS_ERRORS: "true"
               DEFAULT_LAUNCH_ARGS: '["--no-sandbox","--disable-dev-shm-usage","--ignore-certificate-errors"]'
