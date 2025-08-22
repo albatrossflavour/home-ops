@@ -74,7 +74,7 @@ spec:
             env:
               TOKEN: "$(CHROME_TOKEN)"
               PUBLIC_URL: "http://resume-app.default.svc.cluster.local:3000"
-              STORAGE_URL: "https://resume.albatrossflavour.com"
+              STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
               ENABLE_CORS: "false"
               ALLOW_GET: "false"
               TIMEOUT: 180000
