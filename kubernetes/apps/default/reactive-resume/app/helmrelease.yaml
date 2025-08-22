@@ -54,6 +54,9 @@ spec:
               STORAGE_REGION: "us-east-1"
               STORAGE_USE_SSL: "false"
               STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
+              AWS_REGION: "us-east-1"
+              AWS_ENDPOINT_URL: "http://minio.default.svc.cluster.local:9000"
+              AWS_FORCE_PATH_STYLE: "true"
               NODE_TLS_REJECT_UNAUTHORIZED: "0"
               CHROME_URL: "ws://localhost:3001"
             envFrom:
