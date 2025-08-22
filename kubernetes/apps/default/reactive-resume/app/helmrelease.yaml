@@ -51,8 +51,6 @@ spec:
               STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
               STORAGE_PORT: "9000"
               STORAGE_BUCKET: "resume"
-              STORAGE_ACCESS_KEY: "$(STORAGE_ACCESS_KEY)"
-              STORAGE_SECRET_KEY: "$(STORAGE_SECRET_KEY)"
               STORAGE_USE_SSL: "false"
               CHROME_URL: "ws://resume-browserless.default.svc.cluster.local:3000"
             envFrom:
