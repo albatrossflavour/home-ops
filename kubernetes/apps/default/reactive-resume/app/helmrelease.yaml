@@ -48,16 +48,8 @@ spec:
               PUBLIC_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
               DATABASE_URL: "postgresql://resume:$(RESUME_DB_PASSWORD)@postgres16-rw.database.svc.cluster.local:5432/resume"
               MAIL_FROM: "noreply@${SECRET_DOMAIN}"
-              STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
-              STORAGE_PORT: "9000"
-              STORAGE_BUCKET: "resume"
-              STORAGE_REGION: "us-east-1"
-              STORAGE_USE_SSL: "false"
-              STORAGE_SKIP_BUCKET_CHECK: "true"
-              STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
-              AWS_REGION: "us-east-1"
-              AWS_ENDPOINT_URL: "http://minio.default.svc.cluster.local:9000"
-              AWS_FORCE_PATH_STYLE: "true"
+              STORAGE_PROVIDER: "filesystem"
+              STORAGE_PATH: "/app/storage"
               NODE_TLS_REJECT_UNAUTHORIZED: "0"
               NODE_ENV: "development"
               LOG_LEVEL: "debug"
@@ -121,3 +113,9 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: /app/data
+      storage:
+        type: nfs
+        server: "192.168.1.22"
+        path: /volume2/Backups/resume
+        globalMounts:
+          - path: /app/storage
