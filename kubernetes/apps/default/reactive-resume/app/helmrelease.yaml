@@ -51,6 +51,7 @@ spec:
               STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
               STORAGE_PORT: "9000"
               STORAGE_BUCKET: "resume"
+              STORAGE_REGION: "us-east-1"
               STORAGE_USE_SSL: "false"
               STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
               NODE_TLS_REJECT_UNAUTHORIZED: "0"
