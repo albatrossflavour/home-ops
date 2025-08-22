@@ -54,7 +54,7 @@ spec:
               STORAGE_BUCKET: "resume"
               STORAGE_USE_SSL: "false"
               STORAGE_SKIP_BUCKET_CHECK: "true"
-              CHROME_URL: "ws://resume-browserless.default.svc.cluster.local:3000/chromium"
+              CHROME_URL: "ws://resume-browserless.default.svc.cluster.local:3000"
             envFrom:
               - secretRef:
                   name: resume-secret
@@ -78,7 +78,6 @@ spec:
               ENABLE_CORS: "false"
               ALLOW_GET: "false"
               TIMEOUT: 180000
-              CONNECTION_TIMEOUT: 60000
               CONCURRENT: 1
               PREBOOT_CHROME: false
               KEEP_ALIVE: false
