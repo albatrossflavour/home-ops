@@ -55,6 +55,7 @@ spec:
               STORAGE_USE_SSL: "false"
               STORAGE_SKIP_BUCKET_CHECK: "true"
               CHROME_URL: "ws://resume-browserless.default.svc.cluster.local:3000"
+              STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
             envFrom:
               - secretRef:
                   name: resume-secret
@@ -74,7 +75,6 @@ spec:
             env:
               TOKEN: "$(CHROME_TOKEN)"
               PUBLIC_URL: "http://resume-app.default.svc.cluster.local:3000"
-              STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
               ENABLE_CORS: "false"
               ALLOW_GET: "false"
               TIMEOUT: 180000
