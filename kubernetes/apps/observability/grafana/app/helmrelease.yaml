@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: grafana
-      version: 9.3.1
+      version: 9.3.4
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -355,7 +355,7 @@ spec:
       image:
         registry: quay.io
         repository: kiwigrid/k8s-sidecar
-        tag: 1.30.3
+        tag: 1.30.9@sha256:8c06e1ba643a4625de14b2db65c356f5db6b1482a25fce4754380a2936207338
       dashboards:
         enabled: true
         searchNamespace: ALL
