@@ -72,8 +72,6 @@ spec:
     - targets:
         - dotty.albatrossflavour.com:9100
         - betty.albatrossflavour.com:9100
-        - smp.kalooma.org:9100
-        - tdarr.albatrossflavour.com:9100
         - hex.home.albatrossflavour.com:9100
         - luggage.lab.albatrossflavour.com:9100
         - ankh.lab.albatrossflavour.com:9100
@@ -83,21 +81,6 @@ spec:
         - pihole.albatrossflavour.com:9100
         - pihole2.albatrossflavour.com:9100
         - pihole3.albatrossflavour.com:9100
-  metricsPath: /metrics
-  relabelings:
-    - action: replace
-      targetLabel: job
-      replacement: *name
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
-apiVersion: monitoring.coreos.com/v1alpha1
-kind: ScrapeConfig
-metadata:
-  name: &name windows-node-exporter
-spec:
-  staticConfigs:
-    - targets:
-        - 192.168.1.181:9182
   metricsPath: /metrics
   relabelings:
     - action: replace
