@@ -51,7 +51,7 @@ spec:
               TZ: Australia/Sydney
               NC_DISABLE_TELE: "true"
               NC_PUBLIC_URL: https://nocodb.${SECRET_DOMAIN}
-              NC_REDIS_URL: "redis://dragonfly.database.svc.cluster.local:6379/1"
+              NC_REDIS_URL: "redis://dragonfly.database.svc.cluster.local:6379"
             envFrom:
               - secretRef:
                   name: nocodb-secret
