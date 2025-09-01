@@ -30,9 +30,9 @@ spec:
         containers:
           app:
             image:
-              repository: docker.io/enmanuelmoreira/jsoncrack
-              tag: v4.0.0@sha256:8006a7279c34551a06fd218e808e68cd6910bd8f33667bc5b6b1f210e27e1a1f
-              pullPolicy: IfNotPresent
+              repository: docker.io/shokohsc/jsoncrack
+              tag: 125372390a554aa9c58354b694e5853b64f4e8b4e913e58ff94c0ef75709b2e3 # pragma: allowlist secret
+              # tag: v4.0.0@sha256:8006a7279c34551a06fd218e808e68cd6910bd8f33667bc5b6b1f210e27e1a1f
             env:
               TZ: "${TZ}"
             resources:
