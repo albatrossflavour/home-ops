@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: docker.n8n.io/n8nio/n8n
-              tag: 1.108.1@sha256:8509288ac9c0591ddb8a4e4a8e432e003f3cc91bf492cfed6e2c8125c3de3a94
+              tag: 1.110.1@sha256:6c0c7650150a3fb0fd30d13160a87b5227963c36c9297b5bda618bcadfcee932
             env:
               TZ: Australia/Sydney
               N8N_HOST: 0.0.0.0
