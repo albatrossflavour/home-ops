@@ -62,7 +62,7 @@ spec:
       network:
         provider: host
         connections:
-          requireMsgr2: true
+          requireMsgr2: false
       storage:
         useAllNodes: true
         useAllDevices: false
