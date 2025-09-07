@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: bitnami-nginx
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: oci://registry-1.docker.io/bitnamicharts/nginx
+  ref:
+    tag: 18.3.6
+  layerSelector:
+    mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
