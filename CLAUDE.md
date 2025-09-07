@@ -471,6 +471,72 @@ app/
    - Check database user was created: `kubectl exec -n database deployment/postgres16 -- psql -U postgres -c "\du"`
    - Verify connection string format and credentials
 
+7. **OCI Repository and Helm Chart Issues**
+
+   **Symptoms:**
+   - `"unsupported protocol scheme \"oci\""` errors from helm-controller
+   - `"failed to determine artifact digest"` errors with malformed GitHub URLs
+   - HelmReleases stuck with SourceNotReady status
+
+   **Root Causes and Solutions:**
+
+   **Issue**: Bitnami charts migrated to OCI format but HelmRelease uses HelmRepository
+
+   ```bash
+   # Check for OCI protocol errors
+   kubectl get helmrelease <name> -o yaml | grep -i "unsupported protocol"
+   ```
+
+   **Solution**: Migrate to OCIRepository pattern:
+
+   ```yaml
+   # Create OCIRepository
+   apiVersion: source.toolkit.fluxcd.io/v1
+   kind: OCIRepository
+   metadata:
+     name: bitnami-nginx
+     namespace: flux-system
+   spec:
+     interval: 5m
+     url: oci://registry-1.docker.io/bitnamicharts/nginx
+     ref:
+       tag: 18.3.6
+     layerSelector:
+       mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
+
+   # Update HelmRelease to use chartRef
+   spec:
+     chartRef:
+       kind: OCIRepository
+       name: bitnami-nginx
+       namespace: flux-system
+   ```
+
+   **Issue**: Flux OCIRepository with pinned digest causing 404 errors
+
+   ```bash
+   # Check for digest-related failures
+   kubectl get ocirepository -A | grep False
+   kubectl describe ocirepository <name>
+   ```
+
+   **Solution**: Remove digest pin and use tag-only references:
+
+   ```yaml
+   spec:
+     ref:
+       tag: v2.6.4  # Remove @sha256:digest portion
+   ```
+
+   **OCI Migration Checklist:**
+   - [ ] Create OCIRepository resource with correct mediaType
+   - [ ] Update HelmRelease to use `chartRef` instead of `chart.spec.sourceRef`
+   - [ ] Use v1 API version for OCIRepository (not v1beta2)
+   - [ ] Include repository name in OCI URL (e.g., `/nginx` not just base URL)
+   - [ ] Remove SHA256 digest pins if causing 404 errors
+   - [ ] Verify OCIRepository Ready=True before expecting HelmRelease to work
+   - [ ] Clean up old HelmChart resources if they get stuck
+
 ### Disaster Recovery Procedures
 
 If you lose your machine, repository, or critical files, follow this recovery sequence:
