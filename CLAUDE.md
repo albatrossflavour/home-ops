@@ -528,6 +528,8 @@ app/
        tag: v2.6.4  # Remove @sha256:digest portion
    ```
 
+   **Important**: Digest pins can be automatically re-added by automation tools (like Renovate), causing the issue to recur. Monitor OCI repositories for digest pins being reintroduced and remove them as needed.
+
    **OCI Migration Checklist:**
    - [ ] Create OCIRepository resource with correct mediaType
    - [ ] Update HelmRelease to use `chartRef` instead of `chart.spec.sourceRef`
