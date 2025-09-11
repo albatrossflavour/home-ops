@@ -163,6 +163,7 @@ spec:
           - path: /config/www/photos
       matter-data:
         type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
         globalMounts:
