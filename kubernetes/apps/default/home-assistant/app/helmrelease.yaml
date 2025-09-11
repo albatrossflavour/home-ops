@@ -73,21 +73,6 @@ spec:
                 cpu: 10m
               limits:
                 memory: 512Mi
-          matter-server:
-            image:
-              repository: ghcr.io/home-assistant-libs/python-matter-server
-              tag: stable
-            env:
-              TZ: Australia/Sydney
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -96,9 +81,6 @@ spec:
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
-        supplementalGroups: [27]  # Add dialout group for Bluetooth access
-      annotations:
-        container.apparmor.security.beta.kubernetes.io/matter-server: unconfined
     service:
       app:
         controller: home-assistant
@@ -108,8 +90,6 @@ spec:
           code-server:
             port: 12321
             #hostNetwork: true
-          matter:
-            port: 5580
     ingress:
       app:
         annotations:
@@ -164,16 +144,3 @@ spec:
         path: /volume2/Backups/ha/photos
         globalMounts:
           - path: /config/www/photos
-      matter-data:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
-        globalMounts:
-          - path: /data
-      dbus:
-        type: hostPath
-        hostPath: /run/dbus
-        globalMounts:
-          - path: /run/dbus
-            readOnly: true
