@@ -67,4 +67,4 @@ spec:
       config:
         existingClaim: scrypted
         globalMounts:
-          - path: /config
+          - path: /server/volume
