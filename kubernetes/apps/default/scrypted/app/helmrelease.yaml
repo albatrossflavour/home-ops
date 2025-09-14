@@ -8,12 +8,9 @@ spec:
   interval: 30m
   chart:
     spec:
-      chart: scrypted
-      version: 0.3.2
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
+      chartRef:
+        kind: OCIRepository
+        name: scrypted
   install:
     remediation:
       retries: 3
@@ -30,17 +27,30 @@ spec:
     - name: home-assistant
       namespace: home
   values:
-    image:
-      repository: koush/scrypted
-      tag: v0.4.6
-    env:
-      TZ: "${TIMEZONE}"
-      SCRYPTED_INSECURE_PORT: &port 80
+    securityContext:
+      runAsUser: 2000
+      runAsGroup: 2000
+      fsGroup: 2000
+    containers:
+      app:
+        image:
+          repository: ghcr.io/bjw-s-labs/scrypted
+          tag: 0.141.0@sha256:5a18d0dc431ff8ec0388e4177e53b4abc58c07fea1111a9deb5dcbe2947bb66a
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
     service:
       app:
         ports:
           http:
-            port: 80
+            port: &port 11080
+            primary: true
+          rebroadcast1:
+            port: 34135
+          rebroadcast2:
+            port: 34136
     ingress:
       app:
         annotations:
@@ -52,7 +62,7 @@ spec:
               - path: /
                 service:
                   identifier: app
-                  port: http
+                  port: $port
     persistence:
       config:
         existingClaim: scrypted
