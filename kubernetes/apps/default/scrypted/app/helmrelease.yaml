@@ -23,7 +23,7 @@ spec:
     - name: volsync
       namespace: volsync-system
     - name: home-assistant
-      namespace: home
+      namespace: default
   values:
     securityContext:
       runAsUser: 2000
