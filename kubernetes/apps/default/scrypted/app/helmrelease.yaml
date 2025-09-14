@@ -6,11 +6,9 @@ metadata:
   name: &app scrypted
 spec:
   interval: 30m
-  chart:
-    spec:
-      chartRef:
-        kind: OCIRepository
-        name: scrypted
+  chartRef:
+    kind: OCIRepository
+    name: scrypted
   install:
     remediation:
       retries: 3
