@@ -25,20 +25,22 @@ spec:
     - name: home-assistant
       namespace: default
   values:
-    securityContext:
-      runAsUser: 2000
-      runAsGroup: 2000
-      fsGroup: 2000
-    containers:
-      app:
-        image:
-          repository: ghcr.io/bjw-s-labs/scrypted
-          tag: 0.141.0@sha256:5a18d0dc431ff8ec0388e4177e53b4abc58c07fea1111a9deb5dcbe2947bb66a
-        probes:
-          liveness:
-            enabled: true
-          readiness:
-            enabled: true
+    controllers:
+      scrypted:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/bjw-s-labs/scrypted
+              tag: 0.141.0@sha256:5a18d0dc431ff8ec0388e4177e53b4abc58c07fea1111a9deb5dcbe2947bb66a
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+            securityContext:
+              runAsUser: 2000
+              runAsGroup: 2000
+              fsGroup: 2000
     service:
       app:
         ports:
@@ -60,7 +62,7 @@ spec:
               - path: /
                 service:
                   identifier: app
-                  port: $port
+                  port: *port
     persistence:
       config:
         existingClaim: scrypted
