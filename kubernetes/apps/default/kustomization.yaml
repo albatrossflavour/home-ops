@@ -11,3 +11,4 @@ resources:
   - ./homepage/ks.yaml
 # - ./reactive-resume/ks.yaml
   - ./pdlf-website/ks.yaml
+  - ./scrypted/ks.yaml
