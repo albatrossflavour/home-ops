@@ -272,11 +272,50 @@ dependsOn:
 
 ## Multi-Container Application Patterns
 
-### Avoiding PVC Conflicts
+### Storage Mounting Strategies
 
-When deploying applications with multiple containers (main app + sidecar services), use `advancedMounts` instead of `globalMounts` to prevent ReadWriteOnce PVC conflicts:
+When deploying applications with multiple containers, choose the appropriate mounting strategy based on your needs:
 
-#### Correct Pattern
+#### Pattern 1: Shared Storage (globalMounts)
+
+Use `globalMounts` when containers need to share storage or when using ReadWriteMany volumes. Example: Home Assistant with Matter server and code-server sidecars:
+
+```yaml
+controllers:
+  home-assistant:
+    containers:
+      app:
+        # Main Home Assistant container
+      matter-server:
+        # Matter protocol server sidecar
+        image:
+          repository: ghcr.io/home-assistant-libs/python-matter-server
+          tag: stable
+      code-server:
+        # Configuration editor sidecar
+
+persistence:
+  config:
+    existingClaim: home-assistant
+    globalMounts:
+      - path: /config  # Shared between HA and code-server
+  matter-data:
+    type: persistentVolumeClaim
+    size: 1Gi
+    storageClass: ceph-block
+    globalMounts:
+      - path: /data  # Matter server data
+  dbus:
+    type: hostPath
+    hostPath: /run/dbus
+    globalMounts:
+      - path: /run/dbus  # Host D-Bus access for Bluetooth
+        readOnly: true
+```
+
+#### Pattern 2: Isolated Storage (advancedMounts)
+
+Use `advancedMounts` when containers have conflicting storage requirements or when using ReadWriteOnce PVCs that cannot be shared:
 
 ```yaml
 persistence:
@@ -301,15 +340,17 @@ controllers:
         # Sidecar container (no storage mount)
 ```
 
-#### Incorrect Pattern (Causes Conflicts)
+### Matter Server Integration
 
-```yaml
-persistence:
-  data:
-    type: persistentVolumeClaim
-    globalMounts:  # ❌ Mounts to ALL containers
-      - path: /app/data
-```
+When adding Matter protocol support to Home Assistant:
+
+1. **Container Configuration**: Add as sidecar container to existing Home Assistant pod
+2. **Network Requirements**: Requires `hostNetwork: true` for mDNS discovery (already enabled in HA)
+3. **Storage Requirements**:
+   - Persistent storage for Matter fabric data (`/data` mount)
+   - Host D-Bus access for Bluetooth functionality (`/run/dbus` readonly mount)
+4. **Port Configuration**: Exposes WebSocket API on port 5580
+5. **Image**: Use `ghcr.io/home-assistant-libs/python-matter-server:stable` (Renovate will add digest)
 
 ## Minio Integration Best Practices
 
