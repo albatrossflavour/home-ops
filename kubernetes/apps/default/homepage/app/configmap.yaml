@@ -100,9 +100,9 @@ data:
             href: https://192.168.1.22:5006
             icon: mdi-nas-#BCBDAC
             description: ""
-    - Media:
+    - Schedule:
         - Calendar:
-            name: Calendar
+            name: Media Calendar
             widget:
               type: calendar
               view: monthly
@@ -120,6 +120,7 @@ data:
                   service_name: Radarr
                   params:
                     unmonitored: true
+    - Media:
   settings.yaml: |
     background:
       image: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/security/authentik/app/images/background.jpg
@@ -168,6 +169,10 @@ data:
         style: row
         columns: 3
         icon: mdi-download-circle
+      Schedule:
+        style: row
+        columns: 1
+        icon: mdi-calendar
       Media:
         style: row
         columns: 4
