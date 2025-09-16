@@ -75,14 +75,24 @@ data:
               description: ""
   docker.yaml: ""
   custom.css: |
-    /* Increase vertical spacing between section rows */
-    .grid > div {
-      margin-bottom: 2rem !important;
+    /* Increase vertical spacing between main grid sections */
+    .grid.grid-cols-1 > div,
+    .grid.grid-cols-2 > div,
+    .grid.grid-cols-3 > div {
+      margin-bottom: 4rem !important;
+      padding-bottom: 2rem !important;
     }
 
-    /* Additional spacing between service groups */
-    .grid .flex.flex-col {
-      margin-bottom: 1.5rem !important;
+    /* Target service group containers specifically */
+    [data-testid="service-group"],
+    .service-group {
+      margin-bottom: 3rem !important;
+      padding-bottom: 1.5rem !important;
+    }
+
+    /* General spacing for any grid children */
+    .grid > * {
+      margin-bottom: 3rem !important;
     }
   kubernetes.yaml: |
     mode: cluster
