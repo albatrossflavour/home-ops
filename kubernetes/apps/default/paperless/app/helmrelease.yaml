@@ -60,6 +60,7 @@ spec:
               PAPERLESS_REDIS: redis://paperless-redis.default.svc.cluster.local:6379
               # Configure user permissions
               USERMAP_GID: "65542" # gladius:external-services
+              PAPERLESS_IGNORE_PERMISSIONS: "true"
               # Configure admin user
               PAPERLESS_ADMIN_USER:
                 valueFrom:
