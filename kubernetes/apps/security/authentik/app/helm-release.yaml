@@ -66,6 +66,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/pod-selector: ""
           gethomepage.dev/group: Security
+          gethomepage.dev/siteMonitor: "https://id.${SECRET_DOMAIN}"
           gethomepage.dev/name: Authentik
           gethomepage.dev/icon: authentik.png
           gethomepage.dev/description: Identity Provider
