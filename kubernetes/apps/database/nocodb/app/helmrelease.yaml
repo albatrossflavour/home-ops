@@ -100,7 +100,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Automation
           gethomepage.dev/name: NoCoDB
-          gethomepage.dev/icon: database.png
+          gethomepage.dev/icon: sh-nocodb.png
           gethomepage.dev/description: No Code Database
         className: external
         hosts:

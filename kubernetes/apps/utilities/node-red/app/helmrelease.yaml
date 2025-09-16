@@ -88,7 +88,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Automation
           gethomepage.dev/name: Node-Red
-          gethomepage.dev/icon: database.png
+          gethomepage.dev/icon: sh-node-red.png
           gethomepage.dev/description: Node-Red
         className: internal
         hosts:
