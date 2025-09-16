@@ -47,19 +47,17 @@ spec:
                     name: paperless-ai-secret
                     key: OPENAI_API_KEY
 
-              # Optional AI providers
-              AZURE_OPENAI_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: paperless-ai-secret
-                    key: AZURE_OPENAI_KEY
-                    optional: true
-              DEEPSEEK_API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: paperless-ai-secret
-                    key: DEEPSEEK_API_KEY
-                    optional: true
+              # Optional AI providers (commented out for now)
+              # AZURE_OPENAI_KEY:
+              #   valueFrom:
+              #     secretKeyRef:
+              #       name: paperless-ai-secret
+              #       key: AZURE_OPENAI_KEY
+              # DEEPSEEK_API_KEY:
+              #   valueFrom:
+              #     secretKeyRef:
+              #       name: paperless-ai-secret
+              #       key: DEEPSEEK_API_KEY
 
               # Application settings
               NODE_ENV: production
