@@ -69,7 +69,6 @@ data:
             - icon: si-snowflake-#FFAE1A
               href: https://dev205736.service-now.com
               siteMonitor: https://dev205736.service-now.com
-              siteMonitor: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
             - icon: si-github-#BCBDAC
