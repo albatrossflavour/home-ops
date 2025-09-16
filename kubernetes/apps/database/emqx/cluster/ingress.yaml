@@ -8,6 +8,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Database
     gethomepage.dev/siteMonitor: "http://emqx.${SECRET_DOMAIN}"
+    gethomepage.dev/pod-selector: ""
     gethomepage.dev/name: EMQX
     gethomepage.dev/icon: emqx.png
     gethomepage.dev/description: MQTT Broker
