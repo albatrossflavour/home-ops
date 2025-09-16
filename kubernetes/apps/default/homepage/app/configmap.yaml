@@ -175,22 +175,18 @@ data:
       Puppet:
         tab: Home
         icon: si-puppet-#FFAE1A
-        style: row
-        columns: 2
+        style: column
       Lab:
         tab: Home
         icon: mdi-server
-        style: row
-        columns: 2
+        style: column
       Git:
         tab: Home
         icon: mdi-home-analytics
-        style: row
-        columns: 2
+        style: column
       Schedule:
         tab: Home
-        style: row
-        columns: 1
+        style: column
         icon: mdi-calendar
       # Media tab
       Media:
