@@ -12,3 +12,4 @@ resources:
 # - ./reactive-resume/ks.yaml
   - ./pdlf-website/ks.yaml
   - ./scrypted/ks.yaml
+  - ./paperless/ks.yaml
