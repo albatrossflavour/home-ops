@@ -120,7 +120,7 @@ data:
                   service_name: Radarr
                   params:
                     unmonitored: true
-    - Media:
+    - Media: []
   settings.yaml: |
     background:
       image: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/security/authentik/app/images/background.jpg
