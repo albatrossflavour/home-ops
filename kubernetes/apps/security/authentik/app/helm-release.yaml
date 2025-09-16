@@ -68,9 +68,6 @@ spec:
           gethomepage.dev/name: Authentik
           gethomepage.dev/icon: authentik.png
           gethomepage.dev/description: Identity Provider
-          gethomepage.dev/widget.type: authentik
-          gethomepage.dev/widget.url: "https://id.${SECRET_DOMAIN}"
-          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_AUTHENTIK_API_KEY}}` }}"
         hosts:
           - &host id.${SECRET_DOMAIN}
         paths:
