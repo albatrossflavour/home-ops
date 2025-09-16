@@ -7,6 +7,7 @@ metadata:
     external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Database
+    gethomepage.dev/siteMonitor: "http://emxq.${SECRET_DOMAIN}"
     gethomepage.dev/name: EMQX
     gethomepage.dev/icon: emqx.png
     gethomepage.dev/description: MQTT Broker
