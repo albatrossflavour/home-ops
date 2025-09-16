@@ -56,8 +56,19 @@ data:
               siteMonitor: https://scm.lab.albatrossflavour.com
               description: ""
         - Dashboard:
-            - icon: si-puppet-#FFAE1A
+            - icon: si-grafana-#FFAE1A
+              href: https://nessus.lab.albatrossflavour.com
+              siteMonitor: https://dashboard.lab.albatrossflavour.com
+              description: ""
+        - Nessus:
+            - icon: si-securityscorecard-#FFAE1A
               href: https://dashboard.lab.albatrossflavour.com
+              siteMonitor: https://dashboard.lab.albatrossflavour.com
+              description: ""
+        - ServiceNow:
+            - icon: si-snowflake-#FFAE1A
+              href: https://dev205736.service-now.com
+              siteMonitor: https://dev205736.service-now.com
               siteMonitor: https://dashboard.lab.albatrossflavour.com
               description: ""
         - control-repo:
