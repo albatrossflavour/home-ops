@@ -160,7 +160,7 @@ data:
       showSearchSuggestions: true
       hideVisitURL: true
     layout:
-      # First tab - Bookmarks and Calendar
+      # Home tab - Bookmarks and Calendar
       Puppet:
         tab: Home
         icon: si-puppet-#FFAE1A
@@ -175,42 +175,43 @@ data:
         style: column
       Schedule:
         tab: Home
-        style: row
-        columns: 1
+        style: column
         icon: mdi-calendar
+      # Media tab
+      Media:
+        tab: Media
+        style: column
+        icon: mdi-play-network
+      Downloads:
+        tab: Media
+        style: column
+        icon: mdi-download-circle
       # Infrastructure tab
       Infrastructure:
         tab: Infrastructure
         icon: mdi-home-analytics
-        columns: 3
-        style: row
+        style: column
       Observability:
         tab: Infrastructure
-        style: row
-        columns: 3
+        style: column
         icon: mdi-chart-line
+      Database:
+        tab: Infrastructure
+        style: column
+        icon: mdi-database
+      Security:
+        tab: Infrastructure
+        style: column
+        icon: mdi-shield-check
       # Automation tab
       Automation:
         tab: Automation
-        style: row
-        columns: 3
+        style: column
         icon: mdi-home-automation
       Utilities:
         tab: Automation
-        style: row
-        columns: 3
+        style: column
         icon: mdi-tools
-      # Media tab
-      Media:
-        tab: Media
-        style: row
-        columns: 3
-        icon: mdi-play-network
-      Downloads:
-        tab: Media
-        style: row
-        columns: 3
-        icon: mdi-download-circle
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
