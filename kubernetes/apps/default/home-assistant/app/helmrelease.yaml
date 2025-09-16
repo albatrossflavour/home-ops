@@ -99,6 +99,7 @@ spec:
           gethomepage.dev/name: Home Assistant
           gethomepage.dev/icon: home-assistant.png
           gethomepage.dev/description: Smart Home Hub
+          gethomepage.dev/siteMonitor: "https://home-assistant.${SECRET_DOMAIN}"
           gethomepage.dev/widget.type: homeassistant
           gethomepage.dev/widget.url: "https://home-assistant.${SECRET_DOMAIN}"
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}` }}"
@@ -116,6 +117,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Automation
           gethomepage.dev/name: HASS Code Server
+          gethomepage.dev/siteMonitor: "https://hass-code.${SECRET_DOMAIN}"
           gethomepage.dev/icon: vscode.png
           gethomepage.dev/description: HA Configuration Editor
         className: internal
