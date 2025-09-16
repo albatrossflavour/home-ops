@@ -94,6 +94,14 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Automation
+          gethomepage.dev/name: Home Assistant
+          gethomepage.dev/icon: home-assistant.png
+          gethomepage.dev/description: Smart Home Hub
+          gethomepage.dev/widget.type: homeassistant
+          gethomepage.dev/widget.url: "http://home-assistant.${SECRET_DOMAIN}"
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_HOME_ASSISTANT_TOKEN}}` }}"
         className: external
         hosts:
           - host: home-assistant.${SECRET_DOMAIN}
@@ -105,6 +113,11 @@ spec:
       code-server:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Automation
+          gethomepage.dev/name: HASS Code Server
+          gethomepage.dev/icon: vscode.png
+          gethomepage.dev/description: HA Configuration Editor
         className: internal
         hosts:
           - host: hass-code.${SECRET_DOMAIN}

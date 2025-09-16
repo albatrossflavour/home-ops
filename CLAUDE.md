@@ -738,6 +738,98 @@ Uses makejinja for Jinja2 templating:
 - Kubernetes tools integration with local kubeconfig
 - File associations for homelab-specific file types
 
+## Homepage Dashboard Integration
+
+All HTTP-enabled services in the cluster should be configured with homepage annotations for automatic discovery and dashboard integration. This provides a unified interface to access and monitor all homelab services.
+
+### Homepage Annotation Standards
+
+**Required for all HTTP services with ingress:**
+
+```yaml
+ingress:
+  app:
+    annotations:
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: "Category"
+      gethomepage.dev/name: "Service Name"
+      gethomepage.dev/icon: "service-icon.png"
+      gethomepage.dev/description: "Brief description"
+```
+
+**Optional widget integration (for supported services):**
+
+```yaml
+      gethomepage.dev/widget.type: "service-type"
+      gethomepage.dev/widget.url: "http://service.${SECRET_DOMAIN}"
+      gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SERVICE_API_KEY}}` }}"
+      # OR for services requiring username/password:
+      gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_SERVICE_USERNAME}}` }}"
+      gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_SERVICE_PASSWORD}}` }}"
+```
+
+### Service Categories
+
+**Automation:**
+
+- Home Assistant, HASS Code Server, Scrypted, Node-RED
+
+**Media:**
+
+- Sonarr, Radarr, Bazarr, Overseerr, Prowlarr, qBittorrent, SABnzbd, Tautulli
+
+**Utilities:**
+
+- n8n, CyberChef, IT Tools, JSONCrack, Send
+
+**Observability:**
+
+- Grafana, Prometheus, AlertManager, Gatus
+
+**Infrastructure:**
+
+- Minio, Pihole, Unifi
+
+**Security:**
+
+- Authentik
+
+**Database:**
+
+- NocoDB, EMQX, Rook Ceph Dashboard
+
+### Widget URL Standards
+
+- Always use the ingress hostname: `http://service.${SECRET_DOMAIN}`
+- Never use internal cluster service names for widgets
+- HTTPS for external ingresses, HTTP for internal ingresses
+- Port numbers only if different from standard HTTP/HTTPS
+
+### API Key Management
+
+All widget API keys are managed through the homepage ExternalSecret:
+
+```yaml
+# In homepage ExternalSecret data section:
+HOMEPAGE_VAR_SERVICE_API_KEY: "{{ .SERVICE_API_KEY }}"
+
+# In homepage ExternalSecret dataFrom section:
+- extract:
+    key: service-name  # 1Password item name
+```
+
+### Supported Widgets
+
+Homepage supports widgets for most common homelab services:
+
+- **Media Stack**: Sonarr, Radarr, Bazarr, Overseerr, Prowlarr, qBittorrent, SABnzbd, Tautulli
+- **Infrastructure**: Minio, Pihole, Unifi
+- **Monitoring**: Grafana, Prometheus, AlertManager, Gatus
+- **Automation**: Home Assistant, n8n
+- **Security**: Authentik
+
+See [Homepage Documentation](https://gethomepage.dev/widgets/) for complete widget list and configuration options.
+
 ## Application Deployment Patterns
 
 ### Standard Application Structure
@@ -973,3 +1065,4 @@ gh api repos/:owner/:repo/branches/main/protection \
 - **1Password vault**: All backups stored in `discworld` vault for easy recovery
 - **Safe restore**: `task backup:restore` never overwrites existing files
 - **Test recovery**: Periodically verify backups work with `task backup:list`
+- When adding new cluster services, always make sure they're added to homepage if appropriate

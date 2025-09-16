@@ -99,6 +99,15 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: Minio
+          gethomepage.dev/icon: minio.png
+          gethomepage.dev/description: Object Storage
+          gethomepage.dev/widget.type: minio
+          gethomepage.dev/widget.url: "http://minio.${SECRET_DOMAIN}"
+          gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_MINIO_USERNAME}}` }}"
+          gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_MINIO_PASSWORD}}` }}"
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
