@@ -13,3 +13,4 @@ resources:
   - ./pdlf-website/ks.yaml
   - ./scrypted/ks.yaml
   - ./paperless/ks.yaml
+  - ./paperless-ai/ks.yaml
