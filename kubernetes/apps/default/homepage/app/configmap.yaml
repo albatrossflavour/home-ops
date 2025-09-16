@@ -138,6 +138,10 @@ data:
       showSearchSuggestions: true
       hideVisitURL: true
     layout:
+      Automation:
+        style: row
+        columns: 4
+        icon: mdi-home-automation
       Utilities:
         style: row
         columns: 4
