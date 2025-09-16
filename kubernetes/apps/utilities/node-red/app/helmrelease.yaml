@@ -85,6 +85,11 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Automation
+          gethomepage.dev/name: Node-Red
+          gethomepage.dev/icon: database.png
+          gethomepage.dev/description: Node-Red
         className: internal
         hosts:
           - host: &host node-red.${SECRET_DOMAIN}
