@@ -124,10 +124,6 @@ spec:
           gethomepage.dev/name: "Paperless NGX"
           gethomepage.dev/icon: "paperless.png"
           gethomepage.dev/description: "Document management system"
-          gethomepage.dev/widget.type: "paperlessngx"
-          gethomepage.dev/widget.url: "http://paperless.${SECRET_DOMAIN}"
-          gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_PAPERLESS_USERNAME}}` }}"
-          gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_PAPERLESS_PASSWORD}}` }}"
         hosts:
           - host: paperless.${SECRET_DOMAIN}
             paths:
