@@ -160,6 +160,7 @@ data:
     title: Dashboard
     favicon: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/security/authentik/app/images/favicon.ico
     useEqualHeights: true
+    maxGroupColumns: 3
     iconStyle: theme
     theme: dark
     color: slate
