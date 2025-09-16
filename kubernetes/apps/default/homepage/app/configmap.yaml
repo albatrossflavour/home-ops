@@ -142,11 +142,11 @@ data:
     layout:
       Automation:
         style: row
-        columns: 4
+        columns: 3
         icon: mdi-home-automation
       Utilities:
         style: row
-        columns: 4
+        columns: 3
         icon: mdi-tools
       Puppet:
         icon: si-puppet-#FFAE1A
@@ -175,7 +175,7 @@ data:
         icon: mdi-calendar
       Media:
         style: row
-        columns: 4
+        columns: 3
         icon: mdi-play-network
   widgets.yaml: |
     - search:
