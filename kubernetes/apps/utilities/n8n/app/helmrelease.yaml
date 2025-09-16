@@ -112,6 +112,11 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Automation
+          gethomepage.dev/name: N8N
+          gethomepage.dev/icon: sh-n8n.png
+          gethomepage.dev/description: Node based automation
         className: internal
         hosts:
           - host: &host n8n.${SECRET_DOMAIN}
