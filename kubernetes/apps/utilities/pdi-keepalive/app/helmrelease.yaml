@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: albatrossflavour/pdi-keepalive
-              tag: latest@sha256:2b2d1bfc8ee7de312a28a63342282a450e9eb015149505144c0f941049e864d5
+              tag: latest@sha256:a659d5fa15c5fc59040739f1ce8eb7b219e5f3f2bc90902f0b170fa35a175628
             envFrom:
               - secretRef:
                   name: pdi-keepalive-secret
