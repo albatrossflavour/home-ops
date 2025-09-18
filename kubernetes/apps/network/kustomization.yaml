@@ -10,3 +10,4 @@ resources:
   - ./external-dns/pihole-external/ks.yaml
   - ./ingress-nginx/ks.yaml
   - ./k8s-gateway/ks.yaml
+  - ./nebula-sync/ks.yaml
