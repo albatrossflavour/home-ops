@@ -27,7 +27,7 @@ spec:
         type: cronjob
         cronjob:
           schedule: "0 * * * *"
-          timeZone: &timeZone ${TIMEZONE}
+          timeZone: "Australia/Sydney"
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 1
@@ -37,7 +37,7 @@ spec:
               repository: ghcr.io/lovelaze/nebula-sync
               tag: latest@sha256:e6bb9ac7dbf4471b066cb5db74929c6fa7cfa2251a0682fa85f6da8f687ba4bf
             env:
-              TZ: *timeZone
+              TZ: "Australia/Sydney"
               FULL_SYNC: "true"
             envFrom:
               - secretRef:
