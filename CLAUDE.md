@@ -867,7 +867,8 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ../../../../templates/gatus/external    # For monitoring
+  - ../../../../templates/gatus/external    # For monitoring (external services)
+  - ../../../../templates/gatus/guarded     # For monitoring (internal services)
   - ../../../../templates/volsync           # For backups
 ```
 
@@ -908,7 +909,8 @@ persistence:
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ../../../../templates/gatus/external
+  - ../../../../templates/gatus/external    # For external services
+  - ../../../../templates/gatus/guarded     # For internal services
   - ../../../../templates/volsync
 
 # In ks.yaml
