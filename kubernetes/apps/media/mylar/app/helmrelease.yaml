@@ -33,8 +33,8 @@ spec:
               repository: lscr.io/linuxserver/mylar3
               tag: latest
             env:
-              PUID: "911"
-              PGID: "568"
+              PUID: "1000"
+              PGID: "1000"
               TZ: "${TIMEZONE}"
             envFrom:
               - secretRef:
@@ -60,9 +60,9 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [100]
     service:
