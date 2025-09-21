@@ -33,7 +33,7 @@ spec:
               repository: lscr.io/linuxserver/mylar3
               tag: latest
             env:
-              PUID: "568"
+              PUID: "911"
               PGID: "568"
               TZ: "${TIMEZONE}"
             envFrom:
