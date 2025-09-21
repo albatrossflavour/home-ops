@@ -12,3 +12,4 @@ resources:
   - ./node-red/ks.yaml
   - ./send/ks.yaml
   - ./pdi-keepalive/ks.yaml
+  - ./gotenberg/ks.yaml
