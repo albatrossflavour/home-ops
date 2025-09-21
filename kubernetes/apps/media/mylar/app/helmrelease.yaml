@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: lscr.io/linuxserver/mylar3
-              tag: "v0.7.11@sha256:2c37be4e78b11b4e54c92a1e22ba56c28b94636baecd26b6aaf6b3c3ce6ad3e6"
+              tag: "0.8.3@sha256:63a845037651b8d06db2a86be25ae83855fe429934ac76cafa84bde6d6643351"
             env:
               PUID: "568"
               PGID: "568"
