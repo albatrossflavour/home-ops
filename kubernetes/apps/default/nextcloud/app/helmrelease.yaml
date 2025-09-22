@@ -23,6 +23,9 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           securityContext:
+            runAsUser: 1000
+            runAsGroup: 65542
+            fsGroup: 65542
             supplementalGroups:
               - 65542 # gladius:external-services
 
@@ -142,9 +145,9 @@ spec:
         existingClaim: nextcloud
         globalMounts:
           - path: /var/www/html
-      data:
-        type: nfs
-        server: 192.168.1.22
-        path: /volume2/Backups/nextcloud
-        globalMounts:
-          - path: /var/www/html/data
+#      data:
+#        type: nfs
+#        server: 192.168.1.22
+#        path: /volume2/Backups/nextcloud
+#        globalMounts:
+#          - path: /var/www/html/data
