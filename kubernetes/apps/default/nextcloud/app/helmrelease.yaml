@@ -1,0 +1,150 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nextcloud
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+
+  values:
+    controllers:
+      nextcloud:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            supplementalGroups:
+              - 65542 # gladius:external-services
+
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: "17"
+            envFrom:
+              - secretRef:
+                  name: nextcloud-secret
+
+        containers:
+          app:
+            image:
+              repository: docker.io/nextcloud
+              tag: "30.1.0@sha256:0dbf7cdd1c2fec47ab2b83a0b4996b3b2f1c61b3ea06c7ca6df3a5df654a9db9"
+            env:
+              # Basic configuration
+              NEXTCLOUD_TRUSTED_DOMAINS: nextcloud.${SECRET_DOMAIN}
+              NEXTCLOUD_DATA_DIR: /var/www/html/data
+
+              # Database configuration
+              POSTGRES_HOST: postgres16-rw.database.svc.cluster.local
+              POSTGRES_DB: nextcloud
+              POSTGRES_USER: nextcloud
+              POSTGRES_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: nextcloud-secret
+                    key: NEXTCLOUD_DB_PASSWORD
+
+              # Redis configuration
+              REDIS_HOST: localhost
+              REDIS_HOST_PORT: "6379"
+
+              # Admin user configuration
+              NEXTCLOUD_ADMIN_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: nextcloud-secret
+                    key: NEXTCLOUD_ADMIN_USER
+              NEXTCLOUD_ADMIN_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: nextcloud-secret
+                    key: NEXTCLOUD_ADMIN_PASSWORD
+
+              # Trusted proxy configuration
+              TRUSTED_PROXIES: >-
+                10.96.0.0/16
+                10.69.0.0/16
+                192.168.0.0/16
+                172.16.0.0/12
+
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+
+          redis:
+            image:
+              repository: docker.io/valkey/valkey
+              tag: "8.1.3@sha256:fea8b3e67b15729d4bb70589eb03367bab9ad1ee89c876f54327fc7c6e618571"
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+
+    service:
+      app:
+        controller: nextcloud
+        ports:
+          http:
+            port: 80
+      redis:
+        controller: nextcloud
+        ports:
+          redis:
+            port: 6379
+
+    ingress:
+      app:
+        className: external
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: "Utilities"
+          gethomepage.dev/name: "Nextcloud"
+          gethomepage.dev/icon: "nextcloud.png"
+          gethomepage.dev/description: "Personal cloud storage and collaboration"
+        hosts:
+          - host: nextcloud.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+
+    persistence:
+      config:
+        existingClaim: nextcloud
+        globalMounts:
+          - path: /var/www/html
+      data:
+        type: nfs
+        server: 192.168.1.22
+        path: /volume2/Backups/nextcloud
+        globalMounts:
+          - path: /var/www/html/data
