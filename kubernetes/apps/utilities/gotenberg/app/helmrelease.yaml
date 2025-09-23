@@ -84,7 +84,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Utilities
           gethomepage.dev/name: Gotenberg
-          gethomepage.dev/icon: gotenberg.png
+          gethomepage.dev/icon: mdi-file-pdf-box
           gethomepage.dev/description: PDF generation API service
         hosts:
           - host: gotenberg.${SECRET_DOMAIN}
