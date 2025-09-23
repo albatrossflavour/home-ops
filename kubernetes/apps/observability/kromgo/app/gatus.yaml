@@ -10,7 +10,7 @@ data:
     endpoints:
       - name: "kromgo"
         group: external
-        url: "https://kromgo.${SECRET_DOMAIN}"
+        url: "https://kromgo.${SECRET_DOMAIN}/cluster_nodes"
         interval: 1m
         ui:
           hide-hostname: true
