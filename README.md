@@ -5,7 +5,7 @@
 </div>
 <div align="center">
 
-![Home Lab](https://img.shields.io/endpoint?url=https%3A%2F%2Fhealthchecks.io%2Fb%2F2%2F4bbe1cca-bfde-40dc-a754-1b9c2e046318.shields?color=brightgreeen&label=Home%20Internet&style=for-the-badge&logo=ubiquiti&logoColor=white)](https://status.tholinka.dev)&nbsp;&nbsp;
+[![Home Lab](https://img.shields.io/endpoint?url=https%3A%2F%2Fhealthchecks.io%2Fb%2F2%2F4bbe1cca-bfde-40dc-a754-1b9c2e046318.shields?color=brightgreeen&label=Home%20Lab&style=for-the-badge&logo=ubiquiti&logoColor=white)](https://status.albatrossflavour.com)&nbsp;&nbsp;
 
 </div>
 <div align="center">
