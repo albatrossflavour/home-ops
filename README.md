@@ -7,9 +7,7 @@
 [![Unhealthy-Pods](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fquery%3Fformat%3Dendpoint%26metric%3Dcluster_pods_unhealthy&style=flat-square&label=Unhealthy%20Pods)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
 [![CPU-Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fquery%3Fformat%3Dendpoint%26metric%3Dcluster_cpu_usage&style=flat-square&label=CPU)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
 [![Memory-Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fquery%3Fformat%3Dendpoint%26metric%3Dcluster_memory_usage&style=flat-square&label=Memory)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Storage-Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fquery%3Fformat%3Dendpoint%26metric%3Dcluster_storage_usage&style=flat-square&label=Storage)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Firing-Alerts](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fquery%3Fformat%3Dendpoint%26metric%3Dcluster_alerts_firing&style=flat-square&label=Firing%20Alerts)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Pending-Alerts](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fquery%3Fformat%3Dendpoint%26metric%3Dcluster_alerts_pending&style=flat-square&label=Pending%20Alerts)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
+[![Active-Alerts](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fquery%3Fformat%3Dendpoint%26metric%3Dcluster_alerts_firing&style=flat-square&label=Active%20Alerts)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
 
 </div>
 
@@ -40,6 +38,7 @@ A production-ready Kubernetes homelab built on **Talos Linux** with **Flux GitOp
 - **[Grafana](https://grafana.com/)** - Dashboards and visualization
 - **[AlertManager](https://prometheus.io/docs/alerting/latest/alertmanager/)** - Alert routing and management
 - **[Gatus](https://gatus.io/)** - Uptime monitoring
+- **[Kromgo](https://github.com/kashalls/kromgo)** - Real-time cluster metrics as badges
 
 ### 🎬 Applications
 
