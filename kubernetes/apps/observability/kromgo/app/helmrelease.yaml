@@ -36,7 +36,7 @@ spec:
               PROMETHEUS_URL: "http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090"
               SERVER_HOST: "0.0.0.0"
               SERVER_PORT: &port 8080
-              CONFIG_FILEPATH: "/config/config.yaml"
+              CONFIG_FILEPATH: "/kromgo/config.yaml"
             probes:
               liveness: &probes
                 enabled: true
@@ -72,7 +72,7 @@ spec:
         type: configMap
         name: kromgo-config
         globalMounts:
-          - path: /config
+          - path: /kromgo
             readOnly: true
     service:
       app:

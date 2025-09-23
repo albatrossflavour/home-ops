@@ -1068,3 +1068,4 @@ gh api repos/:owner/:repo/branches/main/protection \
 - **Safe restore**: `task backup:restore` never overwrites existing files
 - **Test recovery**: Periodically verify backups work with `task backup:list`
 - When adding new cluster services, always make sure they're added to homepage if appropriate
+- make sure you validate the tag format for containers
