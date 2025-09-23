@@ -69,7 +69,7 @@ data:
       - name: gatus_services_up
         category: Status
         description: Number of healthy services
-        query: "sum(gatus_results_endpoint_success == 1)"
+        query: "count(max by (key) (gatus_results_endpoint_success == 1) == 1)"
         suffix: ""
         colors:
           - { color: "red", min: 0, max: 25 }
