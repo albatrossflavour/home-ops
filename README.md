@@ -8,7 +8,7 @@
 [![CPU-Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_cpu_usage%3Fformat%3Dendpoint&style=flat-square&label=CPU)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
 [![Memory-Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_memory_usage%3Fformat%3Dendpoint&style=flat-square&label=Memory)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
 [![Active-Alerts](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_alerts_firing%3Fformat%3Dendpoint&style=flat-square&label=Active%20Alerts)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Uptime](https://gatus.albatrossflavour.com/api/v1/endpoints/external_home-assistant/uptimes/7d/badge.svg)](https://gatus.albatrossflavour.com)&nbsp;&nbsp;
+[![Uptime](https://status.albatrossflavour.com/api/v1/endpoints/external_home-assistant/uptimes/7d/badge.svg)](https://status.albatrossflavour.com)&nbsp;&nbsp;
 
 </div>
 
