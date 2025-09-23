@@ -2,13 +2,14 @@
 
 [![wakatime](https://wakatime.com/badge/user/97c75e0e-3119-41db-b612-8c629b4e97f4/project/ef519725-9fe1-48f5-83e1-57bf5545021e.svg)](https://wakatime.com/badge/user/97c75e0e-3119-41db-b612-8c629b4e97f4/project/ef519725-9fe1-48f5-83e1-57bf5545021e)
 
+![Home Lab](https://img.shields.io/endpoint?url=https%3A%2F%2Fhealthchecks.io%2Fbadge%2F30890dcd-7710-42cb-8f5a-d86db4%2FtLgC3O2j-2.shields)
 [![Nodes](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_nodes%3Fformat%3Dendpoint&style=flat-square&label=Nodes)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Running-Pods](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_pods_running%3Fformat%3Dendpoint&style=flat-square&label=Running%20Pods)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Unhealthy-Pods](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_pods_unhealthy%3Fformat%3Dendpoint&style=flat-square&label=Unhealthy%20Pods)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![CPU-Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_cpu_usage%3Fformat%3Dendpoint&style=flat-square&label=CPU)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Memory-Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_memory_usage%3Fformat%3Dendpoint&style=flat-square&label=Memory)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Active-Alerts](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_alerts_firing%3Fformat%3Dendpoint&style=flat-square&label=Active%20Alerts)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
-[![Services-Up](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fgatus_services_up%3Fformat%3Dendpoint&style=flat-square&label=Services%20Up)](https://status.albatrossflavour.com)&nbsp;&nbsp;
+[![Running Pods](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_pods_running%3Fformat%3Dendpoint&style=flat-square&label=Running%20Pods)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
+[![Unhealthy Pods](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_pods_unhealthy%3Fformat%3Dendpoint&style=flat-square&label=Unhealthy%20Pods)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
+[![CPU Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_cpu_usage%3Fformat%3Dendpoint&style=flat-square&label=CPU)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
+[![Memory Usage](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_memory_usage%3Fformat%3Dendpoint&style=flat-square&label=Memory)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
+[![Active Alerts](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fcluster_alerts_firing%3Fformat%3Dendpoint&style=flat-square&label=Active%20Alerts)](https://github.com/kashalls/kromgo)&nbsp;&nbsp;
+[![Services Up](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.albatrossflavour.com%2Fgatus_services_up%3Fformat%3Dendpoint&style=flat-square&label=Services%20Up)](https://status.albatrossflavour.com)&nbsp;&nbsp;
 
 </div>
 
