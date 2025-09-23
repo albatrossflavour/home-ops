@@ -9,8 +9,15 @@ storage:
 metrics: true
 debug: false
 ui:
-  title: Status | Gatus
-  header: Status
+  title: Status | Albatross Flavour
+  header: Albatross Flavour Status
+  logo: "https://www.gravatar.com/avatar/4fce033d079d9cb954f6ac0f2117523f"
+  link: "https://albatrossflavour.com"
+  buttons:
+    - name: "Homepage"
+      link: "https://albatrossflavour.com"
+    - name: "GitHub"
+      link: "https://github.com/albatrossflavour"
 alerting:
   pushover:
     title: Gatus
