@@ -59,7 +59,7 @@ data:
       - name: cluster_alerts_firing
         category: Alerts
         description: Number of active alerts
-        query: "count(ALERTS{alertstate=\"firing\"}) or vector(0)"
+        query: "alertmanager_alerts{state=\"active\"} or vector(0)"
         suffix: ""
         colors:
           - { color: "green", min: 0, max: 0 }
