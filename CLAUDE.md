@@ -381,6 +381,35 @@ data:
 
 ## DNS and Certificate Management
 
+### DNS Target Annotations (CRITICAL)
+
+**All ingresses MUST have a target annotation to prevent DNS conflicts:**
+
+```yaml
+ingress:
+  app:
+    className: internal  # or external
+    annotations:
+      external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}  # or external.${SECRET_DOMAIN}
+```
+
+**Target annotation rules:**
+
+- `external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}` - Service resolves to internal ingress only (192.168.8.21)
+- `external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}` - Service resolves to external ingress only (192.168.8.23)
+- **No annotation = DNS conflict risk** - Service may resolve to both IPs causing authentication issues
+
+**Service type guidelines:**
+
+- **Internal-only**: Homepage, internal dashboards, management interfaces, development tools
+- **External**: Public-facing services, APIs, services requiring external access
+
+**How it works:**
+
+- `external-dns-pihole-internal` only processes ingresses with `internal.${SECRET_DOMAIN}` target
+- `external-dns-pihole-external` processes all other ingresses (external target or no target)
+- This prevents dual DNS records that cause authentication failures
+
 ### External Domain Configuration
 
 For hosting services on external domains (non-${SECRET_DOMAIN}), follow this pattern:
@@ -872,6 +901,28 @@ resources:
   - ../../../../templates/volsync           # For backups
 ```
 
+#### Ingress Configuration (CRITICAL)
+
+**ALWAYS include DNS target annotation to prevent DNS conflicts:**
+
+```yaml
+# In HelmRelease
+ingress:
+  app:
+    className: internal  # or external
+    annotations:
+      external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}  # REQUIRED
+      gethomepage.dev/enabled: "true"  # Optional: for homepage integration
+      gethomepage.dev/group: "Category"
+      gethomepage.dev/name: "Service Name"
+```
+
+**Target selection criteria:**
+
+- **Use `internal.${SECRET_DOMAIN}`**: Internal dashboards, management interfaces, development tools, utilities
+- **Use `external.${SECRET_DOMAIN}`**: Public services, APIs, services requiring external access
+- **NEVER omit the target annotation** - causes DNS conflicts and authentication issues
+
 #### ks.yaml Dependencies and Variables
 
 **CRITICAL**: Most apps only need `external-secrets-stores` dependency. Only add others if specifically needed:
@@ -950,6 +1001,7 @@ When deploying any new application, follow this exact sequence:
 
 **Key patterns**:
 
+- **DNS Target**: ALWAYS include `external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}` or `external.${SECRET_DOMAIN}` in ingress annotations
 - Dependencies: `external-secrets-stores` (standard), `cloudnative-pg-cluster` (if database)
 - Persistence: `existingClaim: APPNAME` + volsync template + `VOLSYNC_CAPACITY`
 - Monitoring: Include gatus template in kustomization
