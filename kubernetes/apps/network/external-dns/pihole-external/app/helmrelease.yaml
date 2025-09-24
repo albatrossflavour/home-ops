@@ -35,7 +35,6 @@ spec:
       - --pihole-server=http://192.168.9.2
       - --pihole-api-version=6
       - --ingress-class=external
-    annotationFilter: "external-dns.alpha.kubernetes.io/target!=internal"
     policy: sync
     sources: ["ingress"]
     triggerLoopOnEvent: true
