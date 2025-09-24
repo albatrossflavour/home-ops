@@ -389,10 +389,10 @@ spec:
         gethomepage.dev/description: Metric Viewer
         gethomepage.dev/widget.type: grafana
         gethomepage.dev/widget.url: https://grafana.${SECRET_DOMAIN}
-        gethomepage.dev/widget.username: "{{HOMEPAGE_VAR_GRAFANA_USERNAME}}"
-        gethomepage.dev/widget.password: "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}"
+        gethomepage.dev/widget.username: "${admin-user}"
+        gethomepage.dev/widget.password: "${admin-password}"
         gethomepage.dev/widget.version: 2
-        # gethomepage.dev/widget.alerts: alertmanager
+        gethomepage.dev/widget.alerts: alertmanager
 
       ingressClassName: external
       hosts: ["grafana.${SECRET_DOMAIN}"]
