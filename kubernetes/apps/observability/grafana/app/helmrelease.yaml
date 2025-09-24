@@ -58,7 +58,7 @@ spec:
         org_role: Viewer
       auth:
         signout_redirect_url: "https://id.albatrossflavour.com/application/o/grafana/end-session/"
-        oauth_auto_login: true
+        oauth_auto_login: false
       auth.generic_oauth:
         name: authentik
         enabled: true
