@@ -389,8 +389,8 @@ spec:
         gethomepage.dev/description: Metric Viewer
         gethomepage.dev/widget.type: grafana
         gethomepage.dev/widget.url: https://grafana.${SECRET_DOMAIN}
-        gethomepage.dev/widget.username: "${admin-user}"
-        gethomepage.dev/widget.password: "${admin-password}"
+        gethomepage.dev/widget.username: "{{.admin-user}}"
+        gethomepage.dev/widget.password: "{{.admin-password}}"
         gethomepage.dev/widget.version: 2
         gethomepage.dev/widget.alerts: alertmanager
 
