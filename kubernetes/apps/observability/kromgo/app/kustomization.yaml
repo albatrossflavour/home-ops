@@ -6,3 +6,4 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./configmap.yaml
+  - ../../../../templates/gatus/external
