@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gatus-rules
+spec:
+  groups:
+    - name: gatus.service.failures
+      rules:
+        - alert: GatusServiceDown
+          annotations:
+            summary: "Service {{ $labels.name }} in group {{ $labels.group }} is down"
+            description: "Service {{ $labels.name }} ({{ $labels.group }}) has been failing health checks for more than 5 minutes"
+            runbook_url: "https://status.albatrossflavour.com"
+          expr: gatus_results_endpoint_success == 0
+          for: 5m
+          labels:
+            severity: warning
+            service: "{{ $labels.name }}"
+            service_group: "{{ $labels.group }}"
+
+        - alert: GatusCriticalServiceDown
+          annotations:
+            summary: "CRITICAL service {{ $labels.name }} is down"
+            description: "Critical service {{ $labels.name }} ({{ $labels.group }}) has been failing health checks for more than 2 minutes"
+            runbook_url: "https://status.albatrossflavour.com"
+          expr: gatus_results_endpoint_success{name=~".*(Pihole|UniFi|Zigbee2MQTT|Luggage|Prometheus|Grafana).*"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: "{{ $labels.name }}"
+            service_group: "{{ $labels.group }}"
+
+        - alert: GatusServiceHighLatency
+          annotations:
+            summary: "Service {{ $labels.name }} has high response times"
+            description: "Service {{ $labels.name }} ({{ $labels.group }}) has response times over 10 seconds for more than 10 minutes"
+            runbook_url: "https://status.albatrossflavour.com"
+          expr: gatus_results_endpoint_duration_seconds > 10
+          for: 10m
+          labels:
+            severity: warning
+            service: "{{ $labels.name }}"
+            service_group: "{{ $labels.group }}"
+
+    - name: gatus.system.health
+      rules:
+        - alert: GatusMultipleServicesDown
+          annotations:
+            summary: "Multiple services are failing"
+            description: "{{ $value }} services are currently failing health checks"
+            runbook_url: "https://status.albatrossflavour.com"
+          expr: count(gatus_results_endpoint_success == 0) >= 3
+          for: 5m
+          labels:
+            severity: critical
+
+        - alert: GatusDown
+          annotations:
+            summary: "Gatus monitoring system is down"
+            description: "Gatus has not reported metrics for more than 5 minutes"
+          expr: up{job="gatus"} == 0
+          for: 5m
+          labels:
+            severity: critical
