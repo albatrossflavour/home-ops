@@ -108,6 +108,7 @@ data:
     mode: cluster
   services.yaml: |
     ---
+    - Monitoring: []
     - Infrastructure:
         - Pihole:
             href: http://192.168.9.2/admin/login.php
@@ -171,6 +172,10 @@ data:
       showSearchSuggestions: true
       hideVisitURL: true
     layout:
+      # Persistent monitoring row - appears on all tabs
+      Monitoring:
+        style: row
+        icon: mdi-monitor-dashboard
       # Home tab - Bookmarks and Calendar
       Puppet:
         tab: Home

@@ -118,7 +118,7 @@ spec:
           #nginx.ingress.kubernetes.io/auth-signin: "https://id.${SECRET_DOMAIN}?rm=$request_method"
           #nginx.ingress.kubernetes.io/auth-response-headers: "Remote-User,Remote-Name,Remote-Groups,Remote-Email"
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Observability
+          gethomepage.dev/group: Monitoring
           gethomepage.dev/name: Gatus
           gethomepage.dev/icon: gatus.png
           gethomepage.dev/description: Status
