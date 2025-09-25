@@ -13,8 +13,10 @@ data:
         group: "Puppet Lab"
         tags: ["puppet", "automation", "critical", "lab"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -24,8 +26,10 @@ data:
         group: "Puppet Lab"
         tags: ["puppet", "cicd", "automation", "lab"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -35,8 +39,10 @@ data:
         group: "Puppet Lab"
         tags: ["puppet", "compliance", "automation", "lab"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -46,8 +52,10 @@ data:
         group: "Puppet Lab"
         tags: ["puppet", "monitoring", "dashboard", "lab"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -57,8 +65,10 @@ data:
         group: "Puppet Lab"
         tags: ["security", "vulnerability", "scanning", "lab"]
         interval: 5m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 10000"
         alerts:
           - type: pagerduty

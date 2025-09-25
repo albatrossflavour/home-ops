@@ -14,7 +14,7 @@ data:
         tags: ["iot", "home-automation", "zigbee", "critical"]
         interval: 1m
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 3000"
         alerts:
           - type: pagerduty
@@ -24,8 +24,10 @@ data:
         group: "Home Infrastructure"
         tags: ["storage", "nas", "synology", "critical"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -35,19 +37,21 @@ data:
         group: "Network Infrastructure"
         tags: ["network", "unifi", "wifi", "critical"]
         interval: 1m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 3000"
         alerts:
           - type: pagerduty
 
       - name: Plex Media Server
-        url: "http://192.168.1.22:32400/"
+        url: "http://192.168.1.22:32400/web"
         group: "Media Services"
         tags: ["media", "streaming", "plex", "entertainment"]
         interval: 2m
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty

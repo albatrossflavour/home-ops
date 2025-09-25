@@ -13,8 +13,10 @@ data:
         group: "Proxmox Hypervisors"
         tags: ["virtualization", "proxmox", "hypervisor", "critical", "lab"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -24,8 +26,10 @@ data:
         group: "Proxmox Hypervisors"
         tags: ["virtualization", "proxmox", "hypervisor", "critical", "lab"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -35,8 +39,10 @@ data:
         group: "Proxmox Hypervisors"
         tags: ["virtualization", "proxmox", "hypervisor", "critical", "lab"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -46,8 +52,10 @@ data:
         group: "Proxmox Hypervisors"
         tags: ["backup", "proxmox", "storage", "critical", "lab"]
         interval: 5m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -57,8 +65,10 @@ data:
         group: "KVM Management"
         tags: ["virtualization", "kvm", "management", "critical"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -68,8 +78,10 @@ data:
         group: "KVM Management"
         tags: ["virtualization", "kvm", "management", "critical"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
@@ -79,8 +91,10 @@ data:
         group: "KVM Management"
         tags: ["virtualization", "kvm", "management", "critical"]
         interval: 2m
+        client:
+          insecure: true
         conditions:
-          - "[STATUS] == 200"
+          - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pagerduty
