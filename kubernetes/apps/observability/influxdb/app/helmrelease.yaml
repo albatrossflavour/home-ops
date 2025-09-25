@@ -27,7 +27,7 @@ spec:
     fullnameOverride: influxdb2
     image:
       repository: influxdb
-      tag: 2.7.12@sha256:59fe0181a3b161d36e9ce53001d7e1678762013ab0a284969ec2ebc517b529cc
+      tag: 2.7.12@sha256:7cef9509aaad441529b985839e18abdf276813f0e96e53a4b588a8982ba1b22b
     podAnnotations:
       secret.reloader.stakater.com/reload: &secret influxdb-secret
     pdb:
