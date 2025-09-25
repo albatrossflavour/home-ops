@@ -11,6 +11,7 @@ data:
       - name: Puppet Enterprise
         url: "https://puppet.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        tags: ["puppet", "automation", "critical", "lab"]
         interval: 2m
         conditions:
           - "[STATUS] == 200"
@@ -21,6 +22,7 @@ data:
       - name: CD4PE
         url: "https://cd4pe.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        tags: ["puppet", "cicd", "automation", "lab"]
         interval: 2m
         conditions:
           - "[STATUS] == 200"
@@ -31,6 +33,7 @@ data:
       - name: SCE
         url: "https://sce.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        tags: ["puppet", "compliance", "automation", "lab"]
         interval: 2m
         conditions:
           - "[STATUS] == 200"
@@ -41,6 +44,7 @@ data:
       - name: Puppet Dashboard
         url: "https://dashboard.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        tags: ["puppet", "monitoring", "dashboard", "lab"]
         interval: 2m
         conditions:
           - "[STATUS] == 200"
@@ -51,6 +55,7 @@ data:
       - name: Nessus
         url: "https://nessus.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        tags: ["security", "vulnerability", "scanning", "lab"]
         interval: 5m
         conditions:
           - "[STATUS] == 200"
