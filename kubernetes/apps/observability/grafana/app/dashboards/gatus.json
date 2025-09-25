@@ -74,20 +74,13 @@
       },
       "id": 1,
       "options": {
-        "displayMode": "table",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "text": {
-          "titleSize": 16,
-          "valueSize": 14
-        }
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Group"
+          }
+        ]
       },
       "pluginVersion": "9.5.2",
       "targets": [
@@ -98,13 +91,37 @@
           },
           "editorMode": "code",
           "expr": "gatus_results_endpoint_success",
-          "legendFormat": "{{group}} - {{name}}",
-          "range": true,
+          "format": "table",
+          "instant": true,
           "refId": "A"
         }
       ],
       "title": "Service Status Overview",
-      "type": "stat"
+      "type": "table",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "instance": true,
+              "job": true,
+              "key": true
+            },
+            "indexByName": {
+              "group": 0,
+              "name": 1,
+              "Value": 2
+            },
+            "renameByName": {
+              "Value": "Status",
+              "group": "Group",
+              "name": "Service"
+            }
+          }
+        }
+      ]
     },
     {
       "datasource": {
@@ -423,7 +440,7 @@
           "expr": "gatus_results_endpoint_success",
           "format": "table",
           "legendFormat": "__auto",
-          "range": true,
+          "instant": true,
           "refId": "A"
         },
         {
@@ -436,7 +453,7 @@
           "format": "table",
           "hide": false,
           "legendFormat": "__auto",
-          "range": true,
+          "instant": true,
           "refId": "B"
         }
       ],
@@ -455,19 +472,22 @@
               "Time": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "key": true
             },
             "indexByName": {
+              "group": 0,
+              "name": 1,
               "Value #A": 2,
               "Value #B": 3,
-              "group": 0,
-              "name": 1
+              "type": 4
             },
             "renameByName": {
               "Value #A": "Status",
               "Value #B": "Response Time (ms)",
               "group": "Group",
-              "name": "Service"
+              "name": "Service",
+              "type": "Type"
             }
           }
         }
