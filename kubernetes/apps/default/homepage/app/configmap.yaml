@@ -175,6 +175,7 @@ data:
       # Persistent monitoring row - appears on all tabs
       Monitoring:
         style: row
+        columns: 3
         icon: mdi-monitor-dashboard
       # Home tab - Bookmarks and Calendar
       Puppet:
