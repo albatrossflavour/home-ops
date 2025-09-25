@@ -11,6 +11,7 @@ data:
       - name: Zigbee2MQTT
         url: "http://10.10.20.173/"
         group: "Home Infrastructure"
+        description: "IoT Gateway"
         tags: ["iot", "home-automation", "zigbee", "critical"]
         interval: 1m
         conditions:
@@ -22,6 +23,7 @@ data:
       - name: Luggage NAS
         url: "https://192.168.1.22"
         group: "Home Infrastructure"
+        description: "Network Storage"
         tags: ["storage", "nas", "synology", "critical"]
         interval: 2m
         client:
@@ -35,6 +37,7 @@ data:
       - name: UniFi Controller
         url: "https://192.168.1.1"
         group: "Network Infrastructure"
+        description: "Network Management"
         tags: ["network", "unifi", "wifi", "critical"]
         interval: 1m
         client:
@@ -48,6 +51,7 @@ data:
       - name: Plex Media Server
         url: "http://192.168.1.22:32400/web"
         group: "Media Services"
+        description: "Media Streaming"
         tags: ["media", "streaming", "plex", "entertainment"]
         interval: 2m
         conditions:

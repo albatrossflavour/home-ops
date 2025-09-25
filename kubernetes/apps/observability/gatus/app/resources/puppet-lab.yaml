@@ -11,6 +11,7 @@ data:
       - name: Puppet Enterprise
         url: "https://puppet.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        description: "Infrastructure Automation"
         tags: ["puppet", "automation", "critical", "lab"]
         interval: 2m
         client:
@@ -24,6 +25,7 @@ data:
       - name: CD4PE
         url: "https://cd4pe.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        description: "Continuous Deployment"
         tags: ["puppet", "cicd", "automation", "lab"]
         interval: 2m
         client:
@@ -37,6 +39,7 @@ data:
       - name: SCE
         url: "https://sce.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        description: "Compliance Engine"
         tags: ["puppet", "compliance", "automation", "lab"]
         interval: 2m
         client:
@@ -50,6 +53,7 @@ data:
       - name: Puppet Dashboard
         url: "https://dashboard.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        description: "Infrastructure Dashboard"
         tags: ["puppet", "monitoring", "dashboard", "lab"]
         interval: 2m
         client:
@@ -63,6 +67,7 @@ data:
       - name: Nessus
         url: "https://nessus.lab.albatrossflavour.com/"
         group: "Puppet Lab"
+        description: "Vulnerability Scanner"
         tags: ["security", "vulnerability", "scanning", "lab"]
         interval: 5m
         client:

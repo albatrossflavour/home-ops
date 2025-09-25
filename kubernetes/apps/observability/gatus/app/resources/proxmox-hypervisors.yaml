@@ -11,6 +11,7 @@ data:
       - name: Ankh Proxmox
         url: "https://ankh.lab.albatrossflavour.com:8006/"
         group: "Proxmox Hypervisors"
+        description: "Hypervisor Management"
         tags: ["virtualization", "proxmox", "hypervisor", "critical", "lab"]
         interval: 2m
         client:
@@ -24,6 +25,7 @@ data:
       - name: Morpork Proxmox
         url: "https://morpork.lab.albatrossflavour.com:8006/"
         group: "Proxmox Hypervisors"
+        description: "Hypervisor Management"
         tags: ["virtualization", "proxmox", "hypervisor", "critical", "lab"]
         interval: 2m
         client:
@@ -37,6 +39,7 @@ data:
       - name: Sto Lat Proxmox
         url: "https://stolat.lab.albatrossflavour.com:8006/"
         group: "Proxmox Hypervisors"
+        description: "Hypervisor Management"
         tags: ["virtualization", "proxmox", "hypervisor", "critical", "lab"]
         interval: 2m
         client:
@@ -50,6 +53,7 @@ data:
       - name: PBS Backup Server
         url: "https://pbs.lab.albatrossflavour.com:8007"
         group: "Proxmox Hypervisors"
+        description: "Backup Storage"
         tags: ["backup", "proxmox", "storage", "critical", "lab"]
         interval: 5m
         client:
@@ -63,6 +67,7 @@ data:
       - name: Ankh KVM
         url: "https://192.168.5.20"
         group: "KVM Management"
+        description: "KVM Host Management"
         tags: ["virtualization", "kvm", "management", "critical"]
         interval: 2m
         client:
@@ -76,6 +81,7 @@ data:
       - name: Morpork KVM
         url: "https://192.168.5.21"
         group: "KVM Management"
+        description: "KVM Host Management"
         tags: ["virtualization", "kvm", "management", "critical"]
         interval: 2m
         client:
@@ -89,6 +95,7 @@ data:
       - name: Sto Lat KVM
         url: "https://192.168.5.22"
         group: "KVM Management"
+        description: "KVM Host Management"
         tags: ["virtualization", "kvm", "management", "critical"]
         interval: 2m
         client:
