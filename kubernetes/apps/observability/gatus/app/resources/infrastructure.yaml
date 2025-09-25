@@ -61,10 +61,10 @@ data:
           - type: pushover
 
       - name: Primary Pihole
-        url: "http://pihole.albatrossflavour.com/admin"
+        url: "http://pihole.albatrossflavour.com/admin/login"
         group: "Network Infrastructure"
-        description: "DNS"
-        tags: ["network", "critical"]
+        description: "DNS Server"
+        tags: ["network", "dns", "pihole", "critical"]
         interval: 2m
         conditions:
           - "[STATUS] < 400"
@@ -73,10 +73,10 @@ data:
           - type: pushover
 
       - name: DR Pihole
-        url: "http://pihole-dr.albatrossflavour.com/admin"
+        url: "http://pihole-dr.albatrossflavour.com:8080/admin/login"
         group: "Network Infrastructure"
-        description: "DNS"
-        tags: ["network", "critical"]
+        description: "DNS Server"
+        tags: ["network", "dns", "pihole", "critical"]
         interval: 2m
         conditions:
           - "[STATUS] < 400"
@@ -85,10 +85,10 @@ data:
           - type: pushover
 
       - name: Secondary Pihole
-        url: "http://pihole2.albatrossflavour.com/admin"
+        url: "http://pihole2.albatrossflavour.com/admin/login"
         group: "Network Infrastructure"
-        description: "DNS"
-        tags: ["network", "critical"]
+        description: "DNS Server"
+        tags: ["network", "dns", "pihole", "critical"]
         interval: 2m
         conditions:
           - "[STATUS] < 400"
@@ -97,10 +97,10 @@ data:
           - type: pushover
 
       - name: Tertiary Pihole
-        url: "http://pihole3.albatrossflavour.com/admin"
+        url: "http://pihole3.albatrossflavour.com/admin/login"
         group: "Network Infrastructure"
-        description: "DNS"
-        tags: ["network", "critical"]
+        description: "DNS Server"
+        tags: ["network", "dns", "pihole", "critical"]
         interval: 2m
         conditions:
           - "[STATUS] < 400"
