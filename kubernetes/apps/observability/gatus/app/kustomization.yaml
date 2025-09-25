@@ -6,6 +6,9 @@ resources:
   - ./externalsecret.yaml
   - ./rbac.yaml
   - ./helmrelease.yaml
+  - ./resources/puppet-lab.yaml
+  - ./resources/infrastructure.yaml
+  - ./resources/proxmox-hypervisors.yaml
   - ../../../../templates/gatus/guarded
 configMapGenerator:
   - name: gatus-configmap

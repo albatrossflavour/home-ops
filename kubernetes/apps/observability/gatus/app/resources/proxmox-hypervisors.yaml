@@ -1,0 +1,79 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatus-proxmox-endpoints
+  labels:
+    gatus.io/enabled: "true"
+data:
+  proxmox-hypervisors.yaml: |
+    endpoints:
+      - name: Ankh Proxmox
+        url: "https://ankh.lab.albatrossflavour.com:8006/"
+        group: "Proxmox Hypervisors"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: Morpork Proxmox
+        url: "https://morpork.lab.albatrossflavour.com:8006/"
+        group: "Proxmox Hypervisors"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: Sto Lat Proxmox
+        url: "https://stolat.lab.albatrossflavour.com:8006/"
+        group: "Proxmox Hypervisors"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: PBS Backup Server
+        url: "https://pbs.lab.albatrossflavour.com:8007"
+        group: "Proxmox Hypervisors"
+        interval: 5m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: Ankh KVM
+        url: "https://192.168.5.20"
+        group: "KVM Management"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: Morpork KVM
+        url: "https://192.168.5.21"
+        group: "KVM Management"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: Sto Lat KVM
+        url: "https://192.168.5.22"
+        group: "KVM Management"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty

@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatus-infrastructure-endpoints
+  labels:
+    gatus.io/enabled: "true"
+data:
+  infrastructure.yaml: |
+    endpoints:
+      - name: Zigbee2MQTT
+        url: "http://10.10.20.173/"
+        group: "Home Infrastructure"
+        interval: 1m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: pagerduty
+
+      - name: Luggage NAS
+        url: "https://192.168.1.22"
+        group: "Home Infrastructure"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: UniFi Controller
+        url: "https://192.168.1.1"
+        group: "Network Infrastructure"
+        interval: 1m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: pagerduty
+
+      - name: Plex Media Server
+        url: "http://192.168.1.22:32400/"
+        group: "Media Services"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty

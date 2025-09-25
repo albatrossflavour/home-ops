@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatus-puppet-lab-endpoints
+  labels:
+    gatus.io/enabled: "true"
+data:
+  puppet-lab.yaml: |
+    endpoints:
+      - name: Puppet Enterprise
+        url: "https://puppet.lab.albatrossflavour.com/"
+        group: "Puppet Lab"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: CD4PE
+        url: "https://cd4pe.lab.albatrossflavour.com/"
+        group: "Puppet Lab"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: SCE
+        url: "https://sce.lab.albatrossflavour.com/"
+        group: "Puppet Lab"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: Puppet Dashboard
+        url: "https://dashboard.lab.albatrossflavour.com/"
+        group: "Puppet Lab"
+        interval: 2m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pagerduty
+
+      - name: Nessus
+        url: "https://nessus.lab.albatrossflavour.com/"
+        group: "Puppet Lab"
+        interval: 5m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 10000"
+        alerts:
+          - type: pagerduty
