@@ -395,6 +395,7 @@ spec:
         gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_GRAFANA_USERNAME}}` }}"
         gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}` }}"
         gethomepage.dev/widget.version: "2"
+        gethomepage.dev/widget.fields: '["totalalerts", "alertstriggered"]'
 
       ingressClassName: external
       hosts: ["grafana.${SECRET_DOMAIN}"]
