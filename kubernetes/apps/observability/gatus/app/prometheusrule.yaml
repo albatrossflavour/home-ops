@@ -37,7 +37,7 @@ spec:
             summary: "Service {{ $labels.name }} has high response times"
             description: "Service {{ $labels.name }} ({{ $labels.group }}) has response times over 10 seconds for more than 10 minutes"
             runbook_url: "https://status.albatrossflavour.com"
-          expr: gatus_results_endpoint_duration_seconds > 10
+          expr: gatus_results_duration_seconds > 10
           for: 10m
           labels:
             severity: warning
