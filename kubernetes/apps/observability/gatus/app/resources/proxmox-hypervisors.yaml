@@ -20,7 +20,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Morpork Proxmox
         url: "https://morpork.lab.albatrossflavour.com:8006/"
@@ -34,7 +34,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Sto Lat Proxmox
         url: "https://stolat.lab.albatrossflavour.com:8006/"
@@ -48,7 +48,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: PBS Backup Server
         url: "https://pbs.lab.albatrossflavour.com:8007"
@@ -62,7 +62,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Ankh KVM
         url: "https://192.168.5.20"
@@ -76,7 +76,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Morpork KVM
         url: "https://192.168.5.21"
@@ -90,7 +90,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Sto Lat KVM
         url: "https://192.168.5.22"
@@ -104,4 +104,4 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover

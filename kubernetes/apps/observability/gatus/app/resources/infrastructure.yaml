@@ -18,7 +18,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 3000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Luggage NAS
         url: "https://192.168.1.22"
@@ -32,7 +32,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: UniFi Controller
         url: "https://192.168.1.1"
@@ -46,7 +46,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 3000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Plex Media Server
         url: "http://192.168.1.22:32400/web"
@@ -58,4 +58,52 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
+
+      - name: Primary Pihole
+        url: "http://pihole.albatrossflavour.com/admin"
+        group: "Network Infrastructure"
+        description: "DNS"
+        tags: ["network", "critical"]
+        interval: 2m
+        conditions:
+          - "[STATUS] < 400"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pushover
+
+      - name: DR Pihole
+        url: "http://pihole-dr.albatrossflavour.com/admin"
+        group: "Network Infrastructure"
+        description: "DNS"
+        tags: ["network", "critical"]
+        interval: 2m
+        conditions:
+          - "[STATUS] < 400"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pushover
+
+      - name: Secondary Pihole
+        url: "http://pihole2.albatrossflavour.com/admin"
+        group: "Network Infrastructure"
+        description: "DNS"
+        tags: ["network", "critical"]
+        interval: 2m
+        conditions:
+          - "[STATUS] < 400"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pushover
+
+      - name: Tertiary Pihole
+        url: "http://pihole3.albatrossflavour.com/admin"
+        group: "Network Infrastructure"
+        description: "DNS"
+        tags: ["network", "critical"]
+        interval: 2m
+        conditions:
+          - "[STATUS] < 400"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pushover

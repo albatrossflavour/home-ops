@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kromgo-gatus-ep
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: Kromgo
+        url: "https://kromgo.albatrossflavour.com/"
+        group: "Observability"
+        description: "Prometheus Badge Generator"
+        tags: ["monitoring", "metrics", "badges", "external"]
+        interval: 2m
+        conditions:
+          - "[STATUS] < 400"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: pagerduty

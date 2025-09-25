@@ -20,7 +20,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: CD4PE
         url: "https://cd4pe.lab.albatrossflavour.com/"
@@ -34,7 +34,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: SCE
         url: "https://sce.lab.albatrossflavour.com/"
@@ -48,7 +48,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Puppet Dashboard
         url: "https://dashboard.lab.albatrossflavour.com/"
@@ -62,7 +62,7 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 5000"
         alerts:
-          - type: pagerduty
+          - type: pushover
 
       - name: Nessus
         url: "https://nessus.lab.albatrossflavour.com/"
@@ -76,4 +76,4 @@ data:
           - "[STATUS] < 400"
           - "[RESPONSE_TIME] < 10000"
         alerts:
-          - type: pagerduty
+          - type: pushover
