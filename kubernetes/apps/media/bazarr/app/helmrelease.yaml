@@ -55,9 +55,9 @@ spec:
               capabilities: {drop: ["ALL"]}
             resources:
               requests:
-                cpu: 10m
+                cpu: 20m
               limits:
-                memory: 1Gi
+                memory: 2Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -99,11 +99,5 @@ spec:
         type: nfs
         server: 192.168.1.22
         path: /volume1/Media
-        advancedMounts:
-          bazarr:
-            app:
-              - path: /media
-                options:
-                  - nfsvers=4
-                  - uid=568
-                  - gid=568
+        globalMounts:
+          - path: /media
