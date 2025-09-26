@@ -99,5 +99,11 @@ spec:
         type: nfs
         server: 192.168.1.22
         path: /volume1/Media
-        globalMounts:
-          - path: /media
+        advancedMounts:
+          bazarr:
+            app:
+              - path: /media
+                options:
+                  - nfsvers=4
+                  - uid=568
+                  - gid=568
