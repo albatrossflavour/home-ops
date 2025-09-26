@@ -14,4 +14,5 @@ resources:
   - ./scrypted/ks.yaml
   - ./paperless/ks.yaml
   - ./paperless-ai/ks.yaml
+  - ./immich/ks.yaml
   # - ./nextcloud/ks.yaml
