@@ -51,6 +51,8 @@ spec:
               REDIS_PORT: "6379"
               # Machine Learning
               IMMICH_MACHINE_LEARNING_URL: http://localhost:3003
+              # Server port
+              IMMICH_PORT: "3001"
             envFrom: *envFrom
             probes:
               liveness: &probes
