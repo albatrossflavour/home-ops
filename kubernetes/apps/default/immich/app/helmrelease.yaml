@@ -49,8 +49,8 @@ spec:
               # Redis
               REDIS_HOSTNAME: dragonfly.database.svc.cluster.local
               REDIS_PORT: "6379"
-              # Machine Learning
-              IMMICH_MACHINE_LEARNING_URL: http://localhost:3003
+              # Machine Learning - disabled to avoid vector extension requirement
+              IMMICH_MACHINE_LEARNING_ENABLED: "false"
             envFrom: *envFrom
             probes:
               liveness: &probes
@@ -65,45 +65,6 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
-            resources:
-              requests:
-                cpu: 100m
-                memory: 512Mi
-              limits:
-                memory: 2Gi
-          machine-learning:
-            image:
-              repository: ghcr.io/immich-app/immich-machine-learning
-              tag: "release@sha256:cc94659771d7e394d6406ebb0664069f2523062fda4f934def31648e903c4de2"
-            env:
-              TRANSFORMERS_CACHE: /cache
-            probes:
-              liveness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /ping
-                    port: 3003
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /ping
-                    port: 3003
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
