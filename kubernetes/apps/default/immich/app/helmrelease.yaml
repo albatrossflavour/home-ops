@@ -83,6 +83,9 @@ spec:
               tag: "release@sha256:cc94659771d7e394d6406ebb0664069f2523062fda4f934def31648e903c4de2"
             env:
               TRANSFORMERS_CACHE: /cache
+              XDG_CACHE_HOME: /cache
+              XDG_CONFIG_HOME: /cache
+              MPLCONFIGDIR: /cache/matplotlib
             probes:
               liveness:
                 enabled: true
