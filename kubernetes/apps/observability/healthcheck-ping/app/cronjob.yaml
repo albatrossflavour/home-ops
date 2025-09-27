@@ -12,7 +12,7 @@ spec:
         spec:
           containers:
             - name: healthcheck-ping
-              image: curlimages/curl:8.11.1@sha256:c1fe1679c34d9784c1b0d1e5f62ac0a79fca01fb6377cdd33e90473c6f9f9a69
+              image: curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
               command:
                 - /bin/sh
                 - -c
