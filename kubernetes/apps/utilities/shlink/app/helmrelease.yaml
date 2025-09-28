@@ -93,7 +93,7 @@ spec:
           web:
             image:
               repository: shlinkio/shlink-web-client
-              tag: "4.2.1"
+              tag: "latest"
             env:
               TZ: Australia/Sydney
               SHLINK_SERVER_URL: "http://localhost:8080"
@@ -127,9 +127,9 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 33
-        runAsGroup: 33
-        fsGroup: 33
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
     service:
