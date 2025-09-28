@@ -42,7 +42,7 @@ spec:
           app:
             image:
               repository: yourls
-              tag: "1.9.2"
+              tag: "1.10.2@sha256:aef3ab607b0c899ff0e0bf520924e918acd53c0f1a82d44992aea5223130df90"
             env:
               TZ: Australia/Sydney
               YOURLS_DB_HOST:
