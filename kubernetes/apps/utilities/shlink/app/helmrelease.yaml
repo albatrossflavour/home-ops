@@ -37,7 +37,7 @@ spec:
           app:
             image:
               repository: shlinkio/shlink
-              tag: "4.2.7"
+              tag: "4.2.4"
             env:
               TZ: Australia/Sydney
               DEFAULT_DOMAIN: short.${SECRET_DOMAIN}
