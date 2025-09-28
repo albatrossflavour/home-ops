@@ -90,40 +90,6 @@ spec:
               capabilities:
                 drop:
                   - ALL
-          web:
-            image:
-              repository: shlinkio/shlink-web-client
-              tag: "latest"
-            env:
-              TZ: Australia/Sydney
-              SHLINK_SERVER_URL: "http://localhost:8080"
-              SHLINK_SERVER_API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: shlink-secret
-                    key: INITIAL_API_KEY
-            probes:
-              liveness:
-                enabled: true
-              readiness:
-                enabled: true
-              startup:
-                enabled: true
-                spec:
-                  failureThreshold: 30
-                  periodSeconds: 5
-            resources:
-              requests:
-                cpu: 5m
-                memory: 64Mi
-              limits:
-                memory: 256Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
-              capabilities:
-                drop:
-                  - ALL
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -137,12 +103,7 @@ spec:
         controller: shlink
         ports:
           http:
-            port: 80
-            targetPort: 80
-            primary: true
-          api:
             port: 8080
-            targetPort: 8080
     ingress:
       app:
         className: external
