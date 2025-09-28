@@ -109,11 +109,6 @@ spec:
         className: external
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Utilities"
-          gethomepage.dev/name: "Shlink"
-          gethomepage.dev/icon: "shlink.png"
-          gethomepage.dev/description: "URL Shortener"
         hosts:
           - host: short.${SECRET_DOMAIN}
             paths:
