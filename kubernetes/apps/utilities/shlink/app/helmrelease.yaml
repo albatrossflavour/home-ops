@@ -195,9 +195,3 @@ spec:
           shlink:
             app:
               - path: /etc/shlink/data
-      nginx-html:
-        type: emptyDir
-        advancedMounts:
-          shlink-web:
-            app:
-              - path: /usr/share/nginx/html
