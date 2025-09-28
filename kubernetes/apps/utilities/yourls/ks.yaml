@@ -21,6 +21,7 @@ spec:
   dependsOn:
     - name: external-secrets-stores
     - name: cloudnative-pg-cluster
+      namespace: flux-system
   postBuild:
     substitute:
       APP: *app
