@@ -32,6 +32,7 @@ spec:
             env:
               TZ: Australia/Sydney
               SHLINK_SERVER_URL: "https://short.${SECRET_DOMAIN}"
+              SHLINK_SERVER_NAME: "Albatross Flavour"
               SHLINK_SERVER_API_KEY:
                 valueFrom:
                   secretKeyRef:
