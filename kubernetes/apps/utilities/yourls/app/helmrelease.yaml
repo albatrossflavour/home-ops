@@ -21,11 +21,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  dependsOn:
-    - name: external-secrets-stores
-      namespace: flux-system
-    - name: cloudnative-pg-cluster
-      namespace: database
   values:
     controllers:
       yourls:
