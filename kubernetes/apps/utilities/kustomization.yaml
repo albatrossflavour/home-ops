@@ -14,3 +14,4 @@ resources:
   - ./pdi-keepalive/ks.yaml
   - ./gotenberg/ks.yaml
   - ./shlink/ks.yaml
+  - ./shlink-web/ks.yaml
