@@ -47,33 +47,6 @@ spec:
                 memory: 64Mi
               limits:
                 memory: 256Mi
-            securityContext:
-              readOnlyRootFilesystem: true
-              runAsNonRoot: false
-              runAsUser: 0
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
-                add:
-                  - NET_BIND_SERVICE
-    persistence:
-      tmp:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
-      var-cache:
-        type: emptyDir
-        globalMounts:
-          - path: /var/cache/nginx
-      var-run:
-        type: emptyDir
-        globalMounts:
-          - path: /var/run
-      var-log:
-        type: emptyDir
-        globalMounts:
-          - path: /var/log/nginx
     service:
       app:
         controller: shlink-web
