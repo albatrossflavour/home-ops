@@ -96,6 +96,7 @@ spec:
               repository: shlinkio/shlink-web-client
               tag: "4.2.0@sha256:c3b693b0e647b5fbb6509c9bafc2bedc52ed6ab7608d31699e74333a7ecc69e3"
             env:
+              UID: "2000"
               TZ: Australia/Sydney
               SHLINK_SERVER_URL: "http://localhost:8081"
               SHLINK_SERVER_NAME: "Albatross Flavour"
@@ -128,12 +129,18 @@ spec:
                 memory: 64Mi
               limits:
                 memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 2000
+        runAsGroup: 2000
+        fsGroup: 2000
         seccompProfile:
           type: RuntimeDefault
     service:
