@@ -1,0 +1,145 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app yourls
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: external-secrets-stores
+      namespace: flux-system
+    - name: cloudnative-pg-cluster
+      namespace: database
+  values:
+    controllers:
+      yourls:
+        strategy: Recreate
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: "17"
+            envFrom:
+              - secretRef:
+                  name: yourls-secret
+        containers:
+          app:
+            image:
+              repository: yourls
+              tag: "1.9.2"
+            env:
+              TZ: Australia/Sydney
+              YOURLS_DB_HOST:
+                valueFrom:
+                  secretKeyRef:
+                    name: yourls-secret
+                    key: YOURLS_DB_HOST
+              YOURLS_DB_NAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: yourls-secret
+                    key: YOURLS_DB_NAME
+              YOURLS_DB_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: yourls-secret
+                    key: YOURLS_DB_USER
+              YOURLS_DB_PASS:
+                valueFrom:
+                  secretKeyRef:
+                    name: yourls-secret
+                    key: YOURLS_DB_PASS
+              YOURLS_SITE:
+                valueFrom:
+                  secretKeyRef:
+                    name: yourls-secret
+                    key: YOURLS_SITE
+              YOURLS_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: yourls-secret
+                    key: YOURLS_USER
+              YOURLS_PASS:
+                valueFrom:
+                  secretKeyRef:
+                    name: yourls-secret
+                    key: YOURLS_PASS
+              YOURLS_COOKIEKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: yourls-secret
+                    key: YOURLS_COOKIEKEY
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 33
+        runAsGroup: 33
+        fsGroup: 33
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: yourls
+        ports:
+          http:
+            port: 80
+    ingress:
+      app:
+        className: external
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: "Utilities"
+          gethomepage.dev/name: "YOURLS"
+          gethomepage.dev/icon: "yourls.png"
+          gethomepage.dev/description: "URL Shortener"
+        hosts:
+          - host: short.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+    persistence:
+      data:
+        existingClaim: yourls
+        globalMounts:
+          - path: /var/www/html
