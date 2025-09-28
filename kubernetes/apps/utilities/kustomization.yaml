@@ -13,4 +13,4 @@ resources:
   - ./send/ks.yaml
   - ./pdi-keepalive/ks.yaml
   - ./gotenberg/ks.yaml
-  - ./yourls/ks.yaml
+  - ./shlink/ks.yaml
