@@ -90,6 +90,11 @@ spec:
               capabilities:
                 drop:
                   - ALL
+        persistence:
+          data:
+            existingClaim: shlink
+            globalMounts:
+              - path: /etc/shlink/data
       shlink-web:
         pod:
           securityContext:
@@ -188,8 +193,3 @@ spec:
                 service:
                   identifier: shlink-web
                   port: http
-    persistence:
-      data:
-        existingClaim: shlink
-        globalMounts:
-          - path: /etc/shlink/data
