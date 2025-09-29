@@ -35,6 +35,7 @@ spec:
               TZ: Australia/Sydney
               DOCKER_ENABLE_SECURITY: "false"
               SYSTEM_ENABLEANALYTICS: "false"
+              SYSTEM_ENABLEURLTOPDF: "true"
               INSTALL_BOOK_AND_ADVANCED_HTML_OPS: "true"
             probes:
               liveness:
@@ -90,6 +91,10 @@ spec:
                   identifier: app
                   port: http
     persistence:
+      configs:
+        type: emptyDir
+        globalMounts:
+          - path: /configs
       logs:
         type: emptyDir
         globalMounts:
