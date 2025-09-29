@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: ghcr.io/stirling-tools/stirling-pdf
-              tag: "0.32.0@sha256:ae74a9f00f374e628c484c2f4bb96c08406a3e8b8cb3825ea821df9dd8a7fdd7"
+              tag: "latest"
             env:
               TZ: Australia/Sydney
               DOCKER_ENABLE_SECURITY: "false"
