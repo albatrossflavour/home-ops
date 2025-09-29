@@ -10,7 +10,7 @@ data:
     endpoints:
       - name: "shlink"
         group: external
-        url: "https://short.${SECRET_DOMAIN}"
+        url: "https://short.${SECRET_DOMAIN}/rest/health"
         interval: 1m
         ui:
           hide-hostname: true
