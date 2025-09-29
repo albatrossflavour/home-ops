@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: frooodle/s-pdf
-              tag: "0.30.0@sha256:92fd6c49b5ec6bf45fdbac2d3e81b3b5e19b7a17cced51caf8f90b4bb1b60e7e"
+              tag: "latest@sha256:ae74a9f00f374e628c484c2f4bb96c08406a3e8b8cb3825ea821df9dd8a7fdd7"
             env:
               TZ: Australia/Sydney
             probes:
@@ -78,7 +78,7 @@ spec:
           gethomepage.dev/icon: "stirling-pdf.png"
           gethomepage.dev/description: "PDF Manipulation Tools"
         hosts:
-          - host: stirling-pdf.${SECRET_DOMAIN}
+          - host: pdf.${SECRET_DOMAIN}
             paths:
               - path: /
                 service:
