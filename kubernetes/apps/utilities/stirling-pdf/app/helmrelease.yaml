@@ -31,6 +31,9 @@ spec:
               tag: "latest"
             env:
               TZ: Australia/Sydney
+              LOGGING_LEVEL_ROOT: WARN
+              LOGGING_LEVEL_STIRLING: INFO
+              LOGGING_FILE: ""
             probes:
               liveness:
                 enabled: true
