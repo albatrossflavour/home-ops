@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: frooodle/s-pdf
-              tag: "latest@sha256:ae74a9f00f374e628c484c2f4bb96c08406a3e8b8cb3825ea821df9dd8a7fdd7"
+              tag: "latest"
             env:
               TZ: Australia/Sydney
             probes:
@@ -48,11 +48,8 @@ spec:
               limits:
                 memory: 1Gi
             securityContext:
-              allowPrivilegeEscalation: false
+              allowPrivilegeEscalation: true
               readOnlyRootFilesystem: false
-              capabilities:
-                drop:
-                  - ALL
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
