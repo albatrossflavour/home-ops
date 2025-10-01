@@ -29,9 +29,11 @@ spec:
         - url: http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push
           tenant_id: homelab
       snippets:
-        extraScrapeConfigs: |
-          # Pod logs with enhanced labels
-          - job_name: kubernetes-pods-enhanced
+        pipelineStages:
+          - cri: {}
+        scrapeConfigs: |
+          # Override default kubernetes-pods job with enhanced labels
+          - job_name: kubernetes-pods
             kubernetes_sd_configs:
               - role: pod
             pipeline_stages:
