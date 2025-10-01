@@ -44,6 +44,8 @@ spec:
         retention_enabled: true
     singleBinary:
       replicas: 1
+      persistence:
+        enabled: false
       extraVolumes:
         - name: loki-data
           nfs:
