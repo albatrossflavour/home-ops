@@ -885,7 +885,7 @@ The cluster includes a comprehensive Loki logging setup for centralized log aggr
 ```yaml
 # Use latest stable version - check for updates
 chart: loki
-version: 6.42.0
+version: 6.41.1
 sourceRef:
   kind: HelmRepository
   name: grafana
