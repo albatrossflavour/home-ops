@@ -366,29 +366,17 @@ spec:
             - { name: VAR_REPLICATIONDESTNAME, value: .*-dst }
       loki:
         loki-logs:
-          # renovate: depName="Loki / Logs"
-          gnetId: 13639
-          revision: 2
-          datasource:
-            - { name: DS_LOKI, value: Loki }
-            - { name: DS_PROMETHEUS, value: Prometheus }
-        loki-operational:
-          # renovate: depName="Loki Operational"
-          gnetId: 15141
+          # renovate: depName="Loki2.0 Global Metrics"
+          gnetId: 13407
           revision: 1
           datasource: Prometheus
         kubernetes-logs:
-          # renovate: depName="Kubernetes Logs"
-          gnetId: 12019
-          revision: 2
+          # renovate: depName="Kubernetes Logs / App"
+          gnetId: 14205
+          revision: 1
           datasource:
             - { name: DS_LOKI, value: Loki }
             - { name: DS_PROMETHEUS, value: Prometheus }
-        log-analysis:
-          # renovate: depName="Log Analysis Dashboard"
-          gnetId: 13186
-          revision: 1
-          datasource: Loki
     sidecar:
       image:
         registry: quay.io
