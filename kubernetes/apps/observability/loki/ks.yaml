@@ -20,6 +20,7 @@ spec:
   timeout: 5m
   dependsOn:
     - name: external-secrets-stores
+    - name: prometheus-operator-crds
   postBuild:
     substitute:
       APP: *app

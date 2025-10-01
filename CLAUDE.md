@@ -859,6 +859,124 @@ Homepage supports widgets for most common homelab services:
 
 See [Homepage Documentation](https://gethomepage.dev/widgets/) for complete widget list and configuration options.
 
+## Loki Logging Integration
+
+### Complete Logging Stack
+
+The cluster includes a comprehensive Loki logging setup for centralized log aggregation and analysis:
+
+#### Loki Components
+
+- **Loki server**: Single Binary mode with NFS storage backend
+- **Promtail DaemonSet**: Automatic log collection from all pods and nodes
+- **Grafana integration**: Loki datasource with dedicated dashboards
+- **AlertManager integration**: Prometheus metrics-based alerting for Loki service health
+
+#### Storage Strategy
+
+- **NFS storage**: Uses cost-effective bulk storage at `192.168.1.22:/volume2/apps/loki`
+- **90-day retention**: With compression for efficient storage utilization
+- **Multi-tenant**: Namespace-based log separation for organization
+
+#### Configuration Highlights
+
+**Loki Helm Chart**:
+
+```yaml
+# Use latest stable version - check for updates
+chart: loki
+version: 6.42.0
+sourceRef:
+  kind: HelmRepository
+  name: grafana
+```
+
+**Storage Configuration**:
+
+```yaml
+# NFS mount for cost-effective log storage
+extraVolumes:
+  - name: loki-data
+    nfs:
+      server: "192.168.1.22"
+      path: "/volume2/apps/loki"
+extraVolumeMounts:
+  - name: loki-data
+    mountPath: /var/loki
+```
+
+**Essential Dependencies**:
+
+```yaml
+dependsOn:
+  - name: external-secrets-stores
+  - name: prometheus-operator-crds  # Required for PrometheusRule
+```
+
+#### Log Collection Features
+
+- **Pod logs**: Automatic collection with Kubernetes metadata enrichment
+- **System logs**: Node-level systemd journal integration
+- **Audit logs**: Kubernetes API audit trail collection
+- **Enhanced parsing**: Container runtime (CRI) log parsing
+- **Label extraction**: Automatic namespace, pod, container labeling
+
+#### Grafana Integration
+
+- **Loki datasource**: Configured at `http://loki-gateway.observability.svc.cluster.local`
+- **Dashboard folder**: Dedicated "Loki" folder in Grafana
+- **Pre-configured dashboards**:
+  - Loki / Logs (general log viewing)
+  - Loki Operational (service health)
+  - Kubernetes Logs (container logs)
+  - Log Analysis (pattern analysis)
+
+#### Monitoring and Alerting
+
+- **PrometheusRule**: Service health monitoring for Loki components
+- **Metrics-based alerts**: Process restarts, request errors, latency spikes
+- **Gatus monitoring**: Health checks for Loki gateway endpoint
+- **ServiceMonitor**: Prometheus metrics collection from Loki and Promtail
+
+#### Common LogQL Queries
+
+```logql
+# Application errors across all namespaces
+{namespace=~".+"} |~ "(?i)(error|exception|fail)"
+
+# Database connection issues
+{namespace=~".+"} |~ "(?i)(connection.*error|database.*error)"
+
+# Authentication failures
+{namespace=~".+"} |~ "(?i)(authentication.*fail|login.*fail|unauthorized)"
+
+# Memory issues
+{namespace=~".+"} |~ "(?i)(out of memory|oom|memory limit)"
+```
+
+#### Deployment Commands
+
+```bash
+# Deploy complete Loki stack
+task flux:apply path=observability/loki
+task flux:apply path=observability/promtail
+
+# Monitor deployment
+kubectl get pods -n observability | grep loki
+kubectl logs -n observability deployment/loki-gateway
+
+# Access Grafana logs
+# Navigate to Grafana → Explore → Loki datasource
+```
+
+#### Loki Deployment Notes
+
+- **PrometheusRules**: Only use Prometheus metrics, not LogQL expressions
+- **Log-based alerting**: Must be configured in Loki ruler, not Prometheus
+- **Promtail deprecation**: Promtail will be LTS-only from Feb 2025, consider Alloy for new deployments
+- **Retention tuning**: Adjust retention period based on storage capacity and compliance needs
+- **1Password secrets**: Store in 'discworld' vault using account 'my.1password.com'
+
 ## Application Deployment Patterns
 
 ### Standard Application Structure
