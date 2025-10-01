@@ -49,7 +49,7 @@ spec:
     - name: loki.logs
       rules:
         - alert: HighErrorRate
-          expr: sum(rate({job=~".+"} |~ "(?i)(error|exception|fail)" [5m])) by (namespace, job) > 10
+          expr: sum(count_over_time({job=~".+"} |~ "(?i)(error|exception|fail)" [5m])) by (namespace, job) > 50
           for: 10m
           labels:
             severity: warning
@@ -58,7 +58,7 @@ spec:
             description: "High error rate detected in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
         - alert: DatabaseConnectionErrors
-          expr: sum(rate({job=~".+"} |~ "(?i)(connection.*error|database.*error|sql.*error)" [5m])) by (namespace, job) > 1
+          expr: sum(count_over_time({job=~".+"} |~ "(?i)(connection.*error|database.*error|sql.*error)" [5m])) by (namespace, job) > 5
           for: 5m
           labels:
             severity: critical
@@ -67,7 +67,7 @@ spec:
             description: "Database connection errors in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
         - alert: OutOfMemoryErrors
-          expr: sum(rate({job=~".+"} |~ "(?i)(out of memory|oom|memory limit)" [5m])) by (namespace, job) > 0
+          expr: sum(count_over_time({job=~".+"} |~ "(?i)(out of memory|oom|memory limit)" [5m])) by (namespace, job) > 0
           for: 2m
           labels:
             severity: critical
@@ -76,7 +76,7 @@ spec:
             description: "Out of memory errors in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
         - alert: AuthenticationFailures
-          expr: sum(rate({job=~".+"} |~ "(?i)(authentication.*fail|login.*fail|unauthorized|forbidden)" [5m])) by (namespace, job) > 5
+          expr: sum(count_over_time({job=~".+"} |~ "(?i)(authentication.*fail|login.*fail|unauthorized|forbidden)" [5m])) by (namespace, job) > 25
           for: 5m
           labels:
             severity: warning
