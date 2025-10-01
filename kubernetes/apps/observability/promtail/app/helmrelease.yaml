@@ -31,7 +31,7 @@ spec:
       snippets:
         extraScrapeConfigs: |
           # Pod logs with enhanced labels
-          - job_name: kubernetes-pods
+          - job_name: kubernetes-pods-enhanced
             kubernetes_sd_configs:
               - role: pod
             pipeline_stages:
