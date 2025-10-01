@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -11,7 +12,7 @@ spec:
     - name: loki.alerts
       rules:
         - alert: LokiProcessTooManyRestarts
-          expr: changes(process_start_time_seconds{job=~"loki"}[15m]) > 2
+          expr: changes(process_start_time_seconds{job=~".*loki.*"}[15m]) > 2
           for: 0m
           labels:
             severity: warning
@@ -45,41 +46,3 @@ spec:
           annotations:
             summary: Loki request latency (instance {{ $labels.instance }})
             description: "The {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf \"%.2f\" $value }}s 99th percentile latency\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-    - name: loki.logs
-      rules:
-        - alert: HighErrorRate
-          expr: sum(count_over_time({job=~".+"} |~ "(?i)(error|exception|fail)" [5m])) by (namespace, job) > 50
-          for: 10m
-          labels:
-            severity: warning
-          annotations:
-            summary: High error rate in logs (namespace {{ $labels.namespace }})
-            description: "High error rate detected in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-        - alert: DatabaseConnectionErrors
-          expr: sum(count_over_time({job=~".+"} |~ "(?i)(connection.*error|database.*error|sql.*error)" [5m])) by (namespace, job) > 5
-          for: 5m
-          labels:
-            severity: critical
-          annotations:
-            summary: Database connection errors detected (namespace {{ $labels.namespace }})
-            description: "Database connection errors in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-        - alert: OutOfMemoryErrors
-          expr: sum(count_over_time({job=~".+"} |~ "(?i)(out of memory|oom|memory limit)" [5m])) by (namespace, job) > 0
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: Out of memory errors detected (namespace {{ $labels.namespace }})
-            description: "Out of memory errors in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-        - alert: AuthenticationFailures
-          expr: sum(count_over_time({job=~".+"} |~ "(?i)(authentication.*fail|login.*fail|unauthorized|forbidden)" [5m])) by (namespace, job) > 25
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: High authentication failure rate (namespace {{ $labels.namespace }})
-            description: "High authentication failure rate in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
