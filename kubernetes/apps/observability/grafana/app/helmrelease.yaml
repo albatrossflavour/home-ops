@@ -379,8 +379,8 @@ spec:
           datasource: Prometheus
         kubernetes-logs:
           # renovate: depName="Kubernetes Logs"
-          gnetId: 15141
-          revision: 1
+          gnetId: 12019
+          revision: 2
           datasource:
             - { name: DS_LOKI, value: Loki }
             - { name: DS_PROMETHEUS, value: Prometheus }
