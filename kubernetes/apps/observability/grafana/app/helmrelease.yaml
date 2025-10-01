@@ -74,7 +74,6 @@ spec:
         apiVersion: 1
         deleteDatasources:
           - { name: Alertmanager, orgId: 1 }
-          - { name: Loki, orgId: 1 }
           - { name: Prometheus, orgId: 1 }
         datasources:
           - name: Prometheus
@@ -89,9 +88,9 @@ spec:
             type: loki
             uid: loki
             access: proxy
-            url: http://loki-headless.observability.svc.cluster.local:3100
+            url: http://loki-gateway.observability.svc.cluster.local
             jsonData:
-              maxLines: 250
+              maxLines: 1000
           - name: Alertmanager
             type: alertmanager
             uid: alertmanager
@@ -151,6 +150,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/nodes
+          - name: loki
+            orgId: 1
+            folder: "Loki"
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/loki
     dashboards:
       media:
         exportarr:
@@ -354,6 +361,31 @@ spec:
           datasource:
             - { name: DS_PROMETHEUS, value: Prometheus }
             - { name: VAR_REPLICATIONDESTNAME, value: .*-dst }
+      loki:
+        loki-logs:
+          # renovate: depName="Loki / Logs"
+          gnetId: 13639
+          revision: 2
+          datasource:
+            - { name: DS_LOKI, value: Loki }
+            - { name: DS_PROMETHEUS, value: Prometheus }
+        loki-operational:
+          # renovate: depName="Loki Operational"
+          gnetId: 15141
+          revision: 1
+          datasource: Prometheus
+        kubernetes-logs:
+          # renovate: depName="Kubernetes Logs"
+          gnetId: 15141
+          revision: 1
+          datasource:
+            - { name: DS_LOKI, value: Loki }
+            - { name: DS_PROMETHEUS, value: Prometheus }
+        log-analysis:
+          # renovate: depName="Log Analysis Dashboard"
+          gnetId: 13186
+          revision: 1
+          datasource: Loki
     sidecar:
       image:
         registry: quay.io

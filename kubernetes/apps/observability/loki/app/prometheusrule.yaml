@@ -1,0 +1,85 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: loki-alerts
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: loki.alerts
+      rules:
+        - alert: LokiProcessTooManyRestarts
+          expr: changes(process_start_time_seconds{job=~"loki"}[15m]) > 2
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: Loki process too many restarts (instance {{ $labels.instance }})
+            description: "A loki process had too many restarts (target {{ $labels.instance }})\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+        - alert: LokiRequestErrors
+          expr: 100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route) / sum(rate(loki_request_duration_seconds_count[1m])) by (namespace, job, route) > 10
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: Loki request errors (instance {{ $labels.instance }})
+            description: "The {{ $labels.job }} and {{ $labels.route }} are experiencing errors\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+        - alert: LokiRequestPanic
+          expr: sum(increase(loki_panic_total[10m])) by (namespace, job) > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Loki request panic (instance {{ $labels.instance }})
+            description: "The {{ $labels.job }} is experiencing {{ printf \"%.2f\" $value }} panic(s)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+        - alert: LokiRequestLatency
+          expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{route!~"(?i).*tail.*"}[5m])) by (le, namespace, job, route)) > 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Loki request latency (instance {{ $labels.instance }})
+            description: "The {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf \"%.2f\" $value }}s 99th percentile latency\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - name: loki.logs
+      rules:
+        - alert: HighErrorRate
+          expr: sum(rate({job=~".+"} |~ "(?i)(error|exception|fail)" [5m])) by (namespace, job) > 10
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: High error rate in logs (namespace {{ $labels.namespace }})
+            description: "High error rate detected in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+        - alert: DatabaseConnectionErrors
+          expr: sum(rate({job=~".+"} |~ "(?i)(connection.*error|database.*error|sql.*error)" [5m])) by (namespace, job) > 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Database connection errors detected (namespace {{ $labels.namespace }})
+            description: "Database connection errors in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+        - alert: OutOfMemoryErrors
+          expr: sum(rate({job=~".+"} |~ "(?i)(out of memory|oom|memory limit)" [5m])) by (namespace, job) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Out of memory errors detected (namespace {{ $labels.namespace }})
+            description: "Out of memory errors in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+        - alert: AuthenticationFailures
+          expr: sum(rate({job=~".+"} |~ "(?i)(authentication.*fail|login.*fail|unauthorized|forbidden)" [5m])) by (namespace, job) > 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: High authentication failure rate (namespace {{ $labels.namespace }})
+            description: "High authentication failure rate in {{ $labels.namespace }}/{{ $labels.job }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
