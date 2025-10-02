@@ -73,9 +73,8 @@
   "panels": [
     {
       "datasource": {
-        "name": "Prometheus",
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "h": 18,
@@ -103,7 +102,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "",
           "instant": false,
@@ -117,7 +116,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "h": 18,
@@ -162,7 +161,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(puppet_infrastructure_config,puppet_server)",
         "hide": 2,
@@ -186,7 +185,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(puppet_infrastructure_config,scm_server)",
         "hide": 2,
@@ -210,7 +209,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(puppet_infrastructure_config,cd4pe_server)",
         "hide": 2,
