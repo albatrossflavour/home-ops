@@ -18,6 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
+  "id": 40,
   "links": [
     {
       "asDropdown": true,
@@ -54,7 +55,7 @@
             "steps": [
               {
                 "color": "red",
-                "value": null
+                "value": 0
               },
               {
                 "color": "orange",
@@ -98,7 +99,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -106,7 +107,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(puppet_cis_data{score_type=\"true\",environment=~\"$environment\"})",
+          "expr": "avg(puppet_cis_compliance_score{score_type=\"base\",environment=~\"$environment\"})",
           "instant": false,
           "legendFormat": "Actual",
           "range": true,
@@ -118,7 +119,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(puppet_cis_data{score_type=\"exceptions\",environment=~\"$environment\"})",
+          "expr": "avg(puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"$environment\"})",
           "hide": false,
           "instant": false,
           "legendFormat": "With exceptions",
@@ -145,7 +146,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "#EAB839",
@@ -184,7 +185,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -192,7 +193,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(puppet_node_count{environment=\"all\"}) - count(puppet_cis_data{score_type=\"true\"})",
+          "expr": "sum(puppet_node_count{environment=\"all\"}) - count(puppet_cis_compliance_score{score_type=\"base\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -226,7 +227,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -289,7 +290,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -298,7 +299,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "label_replace((time() - sort_desc(puppet_cis_scan_time{environment=~\"$environment\"})), \"unit\", \"minutes\", \"\", \"\")",
+          "expr": "sort_desc(puppet_cis_compliance_score{environment=~\"$environment\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -357,7 +358,7 @@
             "steps": [
               {
                 "color": "red",
-                "value": null
+                "value": 0
               },
               {
                 "color": "orange",
@@ -386,6 +387,12 @@
       "id": 2,
       "options": {
         "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 16,
         "minVizWidth": 8,
@@ -402,7 +409,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -411,7 +418,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sort(bottomk(5,puppet_cis_data{scanned_benchmark=~\"$benchmark\",scanned_profile=~\"$level\",score_type=~\"$type\",environment=~\"$environment\"}))",
+          "expr": "sort(bottomk(5,puppet_cis_compliance_score{benchmark=~\"$benchmark\",profile=~\"$level\",score_type=~\"$type\",environment=~\"$environment\"}))",
           "instant": true,
           "interval": "$interval",
           "legendFormat": "{{node}}",
@@ -447,7 +454,7 @@
             "steps": [
               {
                 "color": "red",
-                "value": null
+                "value": 0
               },
               {
                 "color": "orange",
@@ -476,6 +483,12 @@
       "id": 3,
       "options": {
         "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 16,
         "minVizWidth": 8,
@@ -492,7 +505,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -501,7 +514,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(5,puppet_cis_data{scanned_benchmark=~\"$benchmark\",scanned_profile=~\"$level\",score_type=~\"$type\",environment=~\"$environment\"})",
+          "expr": "topk(5,puppet_cis_compliance_score{benchmark=~\"$benchmark\",profile=~\"$level\",score_type=~\"$type\",environment=~\"$environment\"})",
           "instant": true,
           "interval": "$interval",
           "legendFormat": "{{node}}",
@@ -558,7 +571,7 @@
           "color": "rgba(255,0,255,0.7)"
         },
         "filterValues": {
-          "le": 1E-9
+          "le": 1e-9
         },
         "legend": {
           "show": false
@@ -576,7 +589,7 @@
           "reverse": false
         }
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -585,7 +598,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_cis_data{scanned_benchmark=~\"$benchmark\",scanned_profile=~\"$level\",score_type=~\"$type\",environment=~\"$environment\"}",
+          "expr": "puppet_cis_compliance_score{benchmark=~\"$benchmark\",profile=~\"$level\",score_type=~\"$type\",environment=~\"$environment\"}",
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{node}}",
@@ -597,7 +610,8 @@
       "type": "heatmap"
     }
   ],
-  "schemaVersion": 39,
+  "preload": false,
+  "schemaVersion": 41,
   "tags": [
     "puppet"
   ],
@@ -605,20 +619,16 @@
     "list": [
       {
         "current": {
-          "selected": false,
           "text": "Prometheus",
           "value": "Prometheus"
         },
-        "hide": 0,
         "includeAll": false,
         "label": "Data Source",
-        "multi": false,
         "name": "DS_PROMETHEUS",
         "options": [],
         "query": "prometheus",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "type": "datasource"
       },
       {
@@ -626,11 +636,9 @@
         "auto_count": 30,
         "auto_min": "30m",
         "current": {
-          "selected": true,
           "text": "auto",
           "value": "$__auto_interval_interval"
         },
-        "hide": 0,
         "label": "Interval",
         "name": "interval",
         "options": [
@@ -681,14 +689,11 @@
           }
         ],
         "query": "30m,1h,6h,12h,1d,7d,14d,30d",
-        "queryValue": "",
         "refresh": 2,
-        "skipUrlSync": false,
         "type": "interval"
       },
       {
         "current": {
-          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -696,27 +701,23 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(puppet_cis_data,scanned_benchmark)",
-        "hide": 0,
+        "definition": "label_values(puppet_cis_compliance_score,benchmark)",
         "includeAll": true,
         "label": "CIS Benchmark",
-        "multi": false,
         "name": "benchmark",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_cis_data,scanned_benchmark)",
+          "query": "label_values(puppet_cis_compliance_score,benchmark)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 3,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -724,27 +725,23 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(puppet_cis_data,scanned_profile)",
-        "hide": 0,
+        "definition": "label_values(puppet_cis_compliance_score,profile)",
         "includeAll": true,
         "label": "Level",
-        "multi": false,
         "name": "level",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_cis_data,scanned_profile)",
+          "query": "label_values(puppet_cis_compliance_score,profile)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 3,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
           "text": "",
           "value": ""
         },
@@ -756,7 +753,6 @@
         "hide": 2,
         "includeAll": false,
         "label": "Puppet Server",
-        "multi": false,
         "name": "puppetserver",
         "options": [],
         "query": {
@@ -766,13 +762,10 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
           "text": "",
           "value": ""
         },
@@ -784,7 +777,6 @@
         "hide": 2,
         "includeAll": false,
         "label": "SCM Server",
-        "multi": false,
         "name": "scmserver",
         "options": [],
         "query": {
@@ -794,13 +786,10 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
           "text": "exceptions",
           "value": "exceptions"
         },
@@ -808,27 +797,23 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(puppet_cis_data,score_type)",
-        "hide": 0,
+        "definition": "label_values(puppet_cis_compliance_score,score_type)",
         "includeAll": false,
         "label": "Score Type",
-        "multi": false,
         "name": "type",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_cis_data,score_type)",
+          "query": "label_values(puppet_cis_compliance_score,score_type)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       },
       {
         "current": {
-          "selected": true,
           "text": [
             "All"
           ],
@@ -836,8 +821,7 @@
             "$__all"
           ]
         },
-        "definition": "label_values(puppet_cis_data,environment)",
-        "hide": 0,
+        "definition": "label_values(puppet_cis_compliance_score,environment)",
         "includeAll": true,
         "label": "Environment",
         "multi": true,
@@ -845,12 +829,11 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_cis_data,environment)",
+          "query": "label_values(puppet_cis_compliance_score,environment)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       }
@@ -864,6 +847,5 @@
   "timezone": "browser",
   "title": "Puppet CIS Compliance",
   "uid": "ee0hpsalu8ohsf",
-  "version": 1,
-  "weekStart": ""
+  "version": 1
 }
