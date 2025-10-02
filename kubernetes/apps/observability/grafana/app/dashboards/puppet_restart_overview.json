@@ -42,7 +42,7 @@
       "title": "Security Compliance Manager",
       "tooltip": "",
       "type": "link",
-      "url": "https://scm.${domain}"
+      "url": "https://${scmserver}"
     },
     {
       "asDropdown": false,
@@ -54,7 +54,7 @@
       "title": "Continuous Delivery",
       "tooltip": "",
       "type": "link",
-      "url": "https://cd4pe.${domain}"
+      "url": "https://${cd4peserver}"
     },
     {
       "asDropdown": true,
@@ -320,10 +320,14 @@
       {
         "current": {
           "selected": false,
-          "text": "puppet.lab.albatrossflavour.com",
-          "value": "puppet.lab.albatrossflavour.com"
+          "text": "",
+          "value": ""
         },
-        "definition": "label_values(puppet_server_used,instance)",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_infrastructure_config,puppet_server)",
         "hide": 2,
         "includeAll": false,
         "label": "Puppet Server",
@@ -332,11 +336,11 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_server_used,instance)",
+          "query": "label_values(puppet_infrastructure_config,puppet_server)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "/^(.*):.*/",
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
@@ -344,22 +348,55 @@
       {
         "current": {
           "selected": false,
-          "text": "lab.albatrossflavour.com",
-          "value": "lab.albatrossflavour.com"
+          "text": "",
+          "value": ""
         },
-        "definition": "label_values(puppet_server_used,instance)",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_infrastructure_config,scm_server)",
         "hide": 2,
         "includeAll": false,
+        "label": "SCM Server",
         "multi": false,
-        "name": "domain",
+        "name": "scmserver",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_server_used,instance)",
+          "query": "label_values(puppet_infrastructure_config,scm_server)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "/^[a-zA-Z0-9-]+\\.(.*):.*$/",
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_infrastructure_config,cd4pe_server)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "CD4PE Server",
+        "multi": false,
+        "name": "cd4peserver",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config,cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"

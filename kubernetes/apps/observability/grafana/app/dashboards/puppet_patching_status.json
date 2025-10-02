@@ -43,7 +43,7 @@
       "title": "Security Compliance Manager",
       "tooltip": "",
       "type": "link",
-      "url": "https://scm.${domain}"
+      "url": "https://${scmserver}"
     },
     {
       "asDropdown": false,
@@ -55,7 +55,7 @@
       "title": "Continuous Delivery",
       "tooltip": "",
       "type": "link",
-      "url": "https://cd4pe.${domain}"
+      "url": "https://${cd4peserver}"
     },
     {
       "asDropdown": true,
@@ -87,7 +87,7 @@
           "links": [
             {
               "title": "",
-              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+              "url": "https://${grafanaserver}/d/ee0awoi89u5fkc/puppet-patching-detail"
             }
           ],
           "mappings": [],
@@ -172,7 +172,7 @@
           "links": [
             {
               "title": "",
-              "url": "https://grafana.albatrossflavour.com/d/ee0avg8jcjz0gc/puppet-patching-blocked-overview"
+              "url": "https://${grafanaserver}/d/ee0avg8jcjz0gc/puppet-patching-blocked-overview"
             }
           ],
           "mappings": [],
@@ -260,7 +260,7 @@
           "links": [
             {
               "title": "Restart Detail",
-              "url": "https://grafana.albatrossflavour.com/d/ce0arbryermdce/puppet-restart-detail"
+              "url": "https://${grafanaserver}/d/ce0arbryermdce/puppet-restart-detail"
             }
           ],
           "mappings": [],
@@ -429,7 +429,7 @@
           "links": [
             {
               "title": "",
-              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+              "url": "https://${grafanaserver}/d/ee0awoi89u5fkc/puppet-patching-detail"
             }
           ],
           "mappings": [],
@@ -505,7 +505,7 @@
           "links": [
             {
               "title": "",
-              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+              "url": "https://${grafanaserver}/d/ee0awoi89u5fkc/puppet-patching-detail"
             }
           ],
           "mappings": [],
@@ -948,7 +948,7 @@
           "links": [
             {
               "title": "",
-              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+              "url": "https://${grafanaserver}/d/ee0awoi89u5fkc/puppet-patching-detail"
             }
           ],
           "mappings": [],
@@ -1051,7 +1051,7 @@
           "links": [
             {
               "title": "",
-              "url": "https://grafana.albatrossflavour.com/d/ee0awoi89u5fkc/puppet-patching-detail"
+              "url": "https://${grafanaserver}/d/ee0awoi89u5fkc/puppet-patching-detail"
             }
           ],
           "mappings": [],
@@ -1275,8 +1275,8 @@
       },
       {
         "current": {
-          "text": "lab.albatrossflavour.com",
-          "value": "lab.albatrossflavour.com"
+          "text": "",
+          "value": ""
         },
         "datasource": {
           "type": "prometheus",
@@ -1298,14 +1298,14 @@
       },
       {
         "current": {
-          "text": "puppet.lab.albatrossflavour.com",
-          "value": "puppet.lab.albatrossflavour.com"
+          "text": "",
+          "value": ""
         },
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(puppet_server_used,instance)",
+        "definition": "label_values(puppet_infrastructure_config,puppet_server)",
         "hide": 2,
         "includeAll": false,
         "label": "Puppet Server",
@@ -1313,11 +1313,83 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(puppet_server_used,instance)",
+          "query": "label_values(puppet_infrastructure_config,puppet_server)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "/^(.*):.*/",
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_infrastructure_config,scm_server)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "SCM Server",
+        "name": "scmserver",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config,scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_infrastructure_config,cd4pe_server)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "CD4PE Server",
+        "name": "cd4peserver",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config,cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(puppet_infrastructure_config,grafana_server)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Grafana Server",
+        "name": "grafanaserver",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config,grafana_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
         "type": "query"
       }
     ]
