@@ -1,0 +1,400 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: puppet-alerts
+spec:
+  groups:
+    - name: puppet_node_health
+      interval: 60s
+      rules:
+        # CRITICAL: Environment completely down
+        - alert: PuppetEnvironmentDown
+          expr: puppet_node_count{environment!="all"} == 0
+          for: 10m
+          labels:
+            severity: critical
+            component: puppet
+            category: availability
+          annotations:
+            summary: "Puppet environment {{ $labels.environment }} has no active nodes"
+            description: "Environment {{ $labels.environment }} has reported zero nodes for 10 minutes. This indicates a complete environment outage or metrics collection failure."
+            runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/environment_down.md"
+
+        # WARNING: Significant node loss
+        - alert: PuppetNodeCountDropped
+          expr: delta(puppet_node_count{environment!="all"}[1h]) < -5
+          labels:
+            severity: warning
+            component: puppet
+            category: availability
+          annotations:
+            summary: "Environment {{ $labels.environment }} lost {{ $value | humanize }} nodes in the last hour"
+            description: "Detected a drop of {{ $value | humanize }} nodes in {{ $labels.environment }}. This could indicate infrastructure issues, network problems, or mass node failures."
+            runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/node_count_dropped.md"
+
+        # WARNING: Node churn (instability)
+        - alert: PuppetNodeChurn
+          expr: abs(delta(puppet_node_count{environment!="all"}[1h])) > 5
+          for: 30m
+          labels:
+            severity: warning
+            component: puppet
+            category: stability
+          annotations:
+            summary: "Environment {{ $labels.environment }} experiencing node churn ({{ $value | humanize }} changes/hour)"
+            description: "Node count in {{ $labels.environment }} is fluctuating significantly. This indicates infrastructure instability or ephemeral node issues."
+
+    - name: puppet_patching_security
+      interval: 300s
+      rules:
+        # CRITICAL: Security patches pending for extended period
+        - alert: SecurityPatchesCritical
+          expr: puppet_patching_data{type="security"} > 20
+          for: 14d
+          labels:
+            severity: critical
+            component: patching
+            category: security
+          annotations:
+            summary: "Node {{ $labels.node }} has {{ $value }} security patches pending for 14+ days"
+            description: "Critical security patch backlog on {{ $labels.node }} in {{ $labels.environment }}. {{ $value }} security updates have been pending for over 2 weeks, increasing vulnerability exposure."
+            runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/security_patches.md"
+
+        # WARNING: Security patches accumulating
+        - alert: SecurityPatchesPending
+          expr: puppet_patching_data{type="security"} > 10
+          for: 7d
+          labels:
+            severity: warning
+            component: patching
+            category: security
+          annotations:
+            summary: "Node {{ $labels.node }} has {{ $value }} security patches pending for 7+ days"
+            description: "{{ $labels.node }} in {{ $labels.environment }} has {{ $value }} security patches pending. Schedule maintenance to apply updates."
+
+        # WARNING: Patch window overdue
+        - alert: PatchGroupOverdue
+          expr: time() - puppet_patch_run > (30 * 24 * 3600)
+          labels:
+            severity: warning
+            component: patching
+            category: compliance
+          annotations:
+            summary: "Patch group {{ $labels.patch_group }} hasn't run in 30+ days"
+            description: "Patch group {{ $labels.patch_group }} on {{ $labels.node }} last ran {{ $value | humanizeDuration }} ago. Verify patch scheduling and execution."
+
+        # WARNING: Patching blocked for extended period
+        - alert: PatchingBlockedTooLong
+          expr: puppet_patching_blocked == 1
+          for: 30d
+          labels:
+            severity: warning
+            component: patching
+            category: compliance
+          annotations:
+            summary: "Node {{ $labels.node }} blocked from patching for 30+ days"
+            description: "Patching has been blocked on {{ $labels.node }} for over 30 days. Review block reason and determine if it can be cleared."
+
+        # WARNING: Reboot required but pending
+        - alert: RebootRequiredPending
+          expr: puppet_restart_required{type="reboot"} == 1
+          for: 7d
+          labels:
+            severity: warning
+            component: patching
+            category: operations
+          annotations:
+            summary: "Node {{ $labels.node }} requires reboot for 7+ days"
+            description: "{{ $labels.node }} has required a reboot for {{ $value | humanizeDuration }}. Schedule maintenance to complete pending updates."
+
+        # WARNING: Environment-wide patch backlog
+        - alert: EnvironmentPatchBacklog
+          expr: sum(puppet_patching_data{type="all"}) by (environment) / count(puppet_patching_data) by (environment) > 50
+          for: 7d
+          labels:
+            severity: warning
+            component: patching
+            category: capacity
+          annotations:
+            summary: "Environment {{ $labels.environment }} averaging >50 patches per node"
+            description: "{{ $labels.environment }} has an average of {{ $value | humanize }} patches per node. Review patch scheduling and increase patch window frequency."
+
+        # INFO: Patching during business hours
+        - alert: PatchingDuringBusinessHours
+          expr: |
+            changes(puppet_patch_run[5m]) > 0
+            and on() hour() >= 8 < 18
+            and on() day_of_week() >= 1 <= 5
+          labels:
+            severity: info
+            component: patching
+            category: compliance
+          annotations:
+            summary: "Patch run detected during business hours on {{ $labels.node }}"
+            description: "{{ $labels.node }} executed a patch run during business hours (Mon-Fri 8am-6pm). Verify this aligns with change management policies."
+
+    - name: puppet_cis_compliance
+      interval: 300s
+      rules:
+        # CRITICAL: CIS score critically low
+        - alert: CISComplianceCritical
+          expr: puppet_cis_compliance_score{score_type="adjusted"} < 60
+          for: 24h
+          labels:
+            severity: critical
+            component: compliance
+            category: security
+          annotations:
+            summary: "Node {{ $labels.node }} has critical CIS score of {{ $value }}%"
+            description: "{{ $labels.node }} CIS compliance score is {{ $value }}%, below critical threshold of 60%. Immediate remediation required for benchmark {{ $labels.benchmark }}."
+            runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/cis_compliance_low.md"
+
+        # WARNING: CIS score below target
+        - alert: CISComplianceLow
+          expr: puppet_cis_compliance_score{score_type="adjusted"} < 75
+          for: 24h
+          labels:
+            severity: warning
+            component: compliance
+            category: security
+          annotations:
+            summary: "Node {{ $labels.node }} has CIS score of {{ $value }}% (below 75%)"
+            description: "{{ $labels.node }} CIS compliance is at {{ $value }}% for {{ $labels.benchmark }}. Review failed controls and plan remediation."
+
+        # WARNING: CIS score dropped significantly
+        - alert: CISScoreDropped
+          expr: delta(puppet_cis_compliance_score{score_type="adjusted"}[24h]) < -10
+          labels:
+            severity: warning
+            component: compliance
+            category: security
+          annotations:
+            summary: "Node {{ $labels.node }} CIS score dropped {{ $value | humanize }}% in 24h"
+            description: "CIS compliance on {{ $labels.node }} degraded by {{ $value | humanize }}% in the last 24 hours. Investigate recent changes."
+
+        # WARNING: CIS scan stale
+        - alert: CISScanStale
+          expr: time() - puppet_cis_compliance_score > (7 * 24 * 3600)
+          labels:
+            severity: warning
+            component: compliance
+            category: operations
+          annotations:
+            summary: "Node {{ $labels.node }} CIS scan is >7 days old"
+            description: "Last CIS scan on {{ $labels.node }} was {{ $value | humanizeDuration }} ago (timestamp: {{ $labels.scan_timestamp }}). Verify SCM export is running."
+
+        # WARNING: Environment compliance degrading
+        - alert: EnvironmentComplianceDegrading
+          expr: avg(puppet_cis_compliance_score{score_type="adjusted"}) by (environment) < 75
+          for: 24h
+          labels:
+            severity: warning
+            component: compliance
+            category: security
+          annotations:
+            summary: "Environment {{ $labels.environment }} average CIS score below 75%"
+            description: "Average CIS compliance in {{ $labels.environment }} is {{ $value | humanize }}%. Review environment-wide controls and remediation plans."
+
+    - name: puppet_scm_export_health
+      interval: 60s
+      rules:
+        # CRITICAL: SCM export failing
+        - alert: SCMExportFailing
+          expr: puppet_scm_export_success == 0
+          for: 30m
+          labels:
+            severity: critical
+            component: scm
+            category: availability
+          annotations:
+            summary: "SCM CIS score export is failing"
+            description: "SCM export has failed continuously for 30 minutes. CIS scores will become stale. Check logs at /var/log/puppetlabs/puppet_data_connector_enhancer_scm.log"
+            runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/scm_export_failing.md"
+
+        # WARNING: SCM export stale
+        - alert: SCMExportStale
+          expr: time() - puppet_scm_export_last_run_timestamp > 7200
+          for: 10m
+          labels:
+            severity: warning
+            component: scm
+            category: operations
+          annotations:
+            summary: "SCM export hasn't run in {{ $value | humanizeDuration }} (expected every 30-60min)"
+            description: "Last SCM export was {{ $value | humanizeDuration }} ago. Verify systemd timer puppet-scm-export.timer is running."
+
+        # WARNING: SCM export taking too long
+        - alert: SCMExportSlow
+          expr: puppet_scm_export_duration_seconds > 1800
+          labels:
+            severity: warning
+            component: scm
+            category: performance
+          annotations:
+            summary: "SCM export took {{ $value | humanizeDuration }} (>30min)"
+            description: "SCM export duration is {{ $value | humanizeDuration }}. This may indicate API performance issues or large dataset processing."
+
+        # WARNING: SCM node coverage dropped
+        - alert: SCMNodeCoverageDropped
+          expr: delta(puppet_scm_export_nodes_count[1h]) < -10
+          labels:
+            severity: warning
+            component: scm
+            category: availability
+          annotations:
+            summary: "SCM export lost {{ $value | humanize }} nodes in last hour"
+            description: "Node count in SCM exports decreased by {{ $value | humanize }}. Verify SCM scanning coverage and node health."
+
+    - name: puppet_infrastructure_assistant
+      interval: 300s
+      rules:
+        # WARNING: Token usage spike
+        - alert: InfraAssistantTokenSpike
+          expr: rate(puppet_infra_assistant_tokens_total[1h]) > 1000
+          for: 15m
+          labels:
+            severity: warning
+            component: infra_assistant
+            category: capacity
+          annotations:
+            summary: "Infrastructure Assistant token usage spiked to {{ $value | humanize }}/hour"
+            description: "Token consumption for {{ $labels.type }} tokens is {{ $value | humanize }}/hour. Review usage patterns and verify no unexpected automation is running."
+
+        # INFO: Infrastructure Assistant not used
+        - alert: InfraAssistantNotUsed
+          expr: rate(puppet_infra_assistant_tokens_total[24h]) == 0
+          for: 7d
+          labels:
+            severity: info
+            component: infra_assistant
+            category: operations
+          annotations:
+            summary: "No Infrastructure Assistant usage in 7 days"
+            description: "Infrastructure Assistant shows no token usage for {{ $value | humanizeDuration }}. Verify service is available if usage is expected."
+
+    - name: puppet_exporter_health
+      interval: 60s
+      rules:
+        # CRITICAL: Metrics scrape failing
+        - alert: PuppetMetricsScrapeFailure
+          expr: puppet_exporter_scrape_success == 0
+          for: 10m
+          labels:
+            severity: critical
+            component: exporter
+            category: availability
+          annotations:
+            summary: "Puppet metrics exporter failing continuously"
+            description: "Metrics collection has failed for 10 minutes. Dashboards and alerts will be stale. Check systemd service puppet-data-connector-enhancer.timer"
+            runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/scrape_failure.md"
+
+        # WARNING: Collection failures increasing
+        - alert: PuppetMetricsCollectionDegraded
+          expr: rate(puppet_exporter_collection_failed[5m]) > 0.1
+          for: 15m
+          labels:
+            severity: warning
+            component: exporter
+            category: availability
+          annotations:
+            summary: "Metrics collection failing for {{ $labels.collection }}"
+            description: "Collection {{ $labels.collection }} is failing at {{ $value | humanize }} failures/second. Check connectivity to {{ $labels.endpoint }}"
+
+        # WARNING: Scrape duration increasing
+        - alert: PuppetMetricsScrapeSlow
+          expr: puppet_exporter_scrape_duration_seconds > 60
+          for: 5m
+          labels:
+            severity: warning
+            component: exporter
+            category: performance
+          annotations:
+            summary: "Metrics scrape taking {{ $value | humanizeDuration }} (>1min)"
+            description: "Metrics collection is slow ({{ $value | humanizeDuration }}). This may indicate PuppetDB performance issues or large dataset processing."
+
+        # WARNING: Metrics stale
+        - alert: PuppetMetricsScrapeStale
+          expr: time() - puppet_exporter_last_scrape_timestamp > 3600
+          labels:
+            severity: warning
+            component: exporter
+            category: availability
+          annotations:
+            summary: "Puppet metrics haven't been collected in {{ $value | humanizeDuration }}"
+            description: "Last successful metrics collection was {{ $value | humanizeDuration }} ago (expected every 30min). Verify systemd timer is running."
+
+    - name: puppet_os_lifecycle
+      interval: 3600s
+      rules:
+        # WARNING: End-of-life OS detected
+        - alert: UnsupportedOSDetected
+          expr: |
+            puppet_node_os{name=~"CentOS|Scientific"}
+            or puppet_node_os{name="Ubuntu",version=~"^(14|16).*"}
+            or puppet_node_os{name=~"Red Hat.*",version=~"^[1-6].*"}
+            or puppet_node_os{name="Debian",version=~"^[1-9]$"}
+          labels:
+            severity: warning
+            component: lifecycle
+            category: security
+          annotations:
+            summary: "Node {{ $labels.node }} running EOL OS: {{ $labels.name }} {{ $labels.version }}"
+            description: "{{ $labels.node }} is running {{ $labels.name }} {{ $labels.version }} which is end-of-life. Plan migration to supported OS version."
+
+        # INFO: OS fragmentation
+        - alert: OSFragmentation
+          expr: count(count by (name, version) (puppet_node_os)) > 10
+          for: 7d
+          labels:
+            severity: info
+            component: lifecycle
+            category: operations
+          annotations:
+            summary: "Infrastructure has {{ $value }} different OS versions"
+            description: "Environment has {{ $value }} unique OS versions. Consider standardisation to reduce maintenance complexity and security surface."
+
+    - name: puppet_change_management
+      interval: 300s
+      rules:
+        # WARNING: High configuration change rate
+        - alert: HighConfigurationChangeRate
+          expr: rate(changes(puppet_configuration_version[5m])[1h:5m]) > 10
+          labels:
+            severity: warning
+            component: change_management
+            category: stability
+          annotations:
+            summary: "Configuration changing >10 times/hour in {{ $labels.environment }}"
+            description: "Detected {{ $value | humanize }} configuration changes per hour in {{ $labels.environment }}. Verify change management processes are being followed."
+
+    - name: puppet_state_overview
+      interval: 300s
+      rules:
+        # CRITICAL: High failure rate
+        - alert: PuppetRunFailureRateHigh
+          expr: |
+            puppet_state_overview{state="failed"}
+            / on() group_left
+            puppet_node_count{environment="all"} > 0.1
+          for: 30m
+          labels:
+            severity: critical
+            component: puppet
+            category: availability
+          annotations:
+            summary: "Puppet run failure rate is {{ $value | humanizePercentage }}"
+            description: "More than 10% of Puppet runs are failing. Review PuppetDB state overview and node reports for common failure patterns."
+
+        # WARNING: Nodes not reporting
+        - alert: PuppetNodesNotReporting
+          expr: puppet_state_overview{state="unreported"} > 5
+          for: 2h
+          labels:
+            severity: warning
+            component: puppet
+            category: availability
+          annotations:
+            summary: "{{ $value }} nodes not reporting to Puppet"
+            description: "{{ $value }} nodes haven't reported to Puppet for their run interval. Investigate network connectivity and agent status."
