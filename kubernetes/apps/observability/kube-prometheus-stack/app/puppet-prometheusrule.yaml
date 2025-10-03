@@ -247,33 +247,6 @@ spec:
             summary: "SCM export lost {{ $value | humanize }} nodes in last hour"
             description: "Node count in SCM exports decreased by {{ $value | humanize }}. Verify SCM scanning coverage and node health."
 
-    - name: puppet_infrastructure_assistant
-      interval: 300s
-      rules:
-        # WARNING: Token usage spike
-        - alert: InfraAssistantTokenSpike
-          expr: rate(puppet_infra_assistant_tokens_total[1h]) > 1000
-          for: 15m
-          labels:
-            severity: warning
-            component: infra_assistant
-            category: capacity
-          annotations:
-            summary: "Infrastructure Assistant token usage spiked to {{ $value | humanize }}/hour"
-            description: "Token consumption for {{ $labels.type }} tokens is {{ $value | humanize }}/hour. Review usage patterns and verify no unexpected automation is running."
-
-        # INFO: Infrastructure Assistant not used
-        - alert: InfraAssistantNotUsed
-          expr: rate(puppet_infra_assistant_tokens_total[24h]) == 0
-          for: 7d
-          labels:
-            severity: info
-            component: infra_assistant
-            category: operations
-          annotations:
-            summary: "No Infrastructure Assistant usage in 7 days"
-            description: "Infrastructure Assistant shows no token usage for {{ $value | humanizeDuration }}. Verify service is available if usage is expected."
-
     - name: puppet_exporter_health
       interval: 60s
       rules:
