@@ -10,7 +10,7 @@ spec:
       interval: 60s
       rules:
         # CRITICAL: Environment completely down
-        - alert: PuppetEnvironmentDown
+        - alert: Puppet_EnvironmentDown
           expr: puppet_node_count{environment!="all"} == 0
           for: 10m
           labels:
@@ -23,7 +23,7 @@ spec:
             runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/environment_down.md"
 
         # WARNING: Significant node loss
-        - alert: PuppetNodeCountDropped
+        - alert: Puppet_NodeCountDropped
           expr: delta(puppet_node_count{environment!="all"}[1h]) < -5
           labels:
             severity: warning
@@ -35,7 +35,7 @@ spec:
             runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/node_count_dropped.md"
 
         # WARNING: Node churn (instability)
-        - alert: PuppetNodeChurn
+        - alert: Puppet_NodeChurn
           expr: abs(delta(puppet_node_count{environment!="all"}[1h])) > 5
           for: 30m
           labels:
@@ -50,7 +50,7 @@ spec:
       interval: 300s
       rules:
         # CRITICAL: Security patches pending for extended period
-        - alert: SecurityPatchesCritical
+        - alert: Puppet_SecurityPatchesCritical
           expr: puppet_patching_data{type="security"} > 20
           for: 14d
           labels:
@@ -63,7 +63,7 @@ spec:
             runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/security_patches.md"
 
         # WARNING: Security patches accumulating
-        - alert: SecurityPatchesPending
+        - alert: Puppet_SecurityPatchesPending
           expr: puppet_patching_data{type="security"} > 10
           for: 7d
           labels:
@@ -75,7 +75,7 @@ spec:
             description: "{{ $labels.node }} in {{ $labels.environment }} has {{ $value }} security patches pending. Schedule maintenance to apply updates."
 
         # WARNING: Patch window overdue
-        - alert: PatchGroupOverdue
+        - alert: Puppet_PatchGroupOverdue
           expr: time() - puppet_patch_run > (30 * 24 * 3600)
           labels:
             severity: warning
@@ -86,7 +86,7 @@ spec:
             description: "Patch group {{ $labels.patch_group }} on {{ $labels.node }} last ran {{ $value | humanizeDuration }} ago. Verify patch scheduling and execution."
 
         # WARNING: Patching blocked for extended period
-        - alert: PatchingBlockedTooLong
+        - alert: Puppet_PatchingBlockedTooLong
           expr: puppet_patching_blocked == 1
           for: 30d
           labels:
@@ -98,7 +98,7 @@ spec:
             description: "Patching has been blocked on {{ $labels.node }} for over 30 days. Review block reason and determine if it can be cleared."
 
         # WARNING: Reboot required but pending
-        - alert: RebootRequiredPending
+        - alert: Puppet_RebootRequiredPending
           expr: puppet_restart_required{type="reboot"} == 1
           for: 7d
           labels:
@@ -110,7 +110,7 @@ spec:
             description: "{{ $labels.node }} has required a reboot for {{ $value | humanizeDuration }}. Schedule maintenance to complete pending updates."
 
         # WARNING: Environment-wide patch backlog
-        - alert: EnvironmentPatchBacklog
+        - alert: Puppet_EnvironmentPatchBacklog
           expr: sum(puppet_patching_data{type="all"}) by (environment) / count(puppet_patching_data) by (environment) > 50
           for: 7d
           labels:
@@ -122,7 +122,7 @@ spec:
             description: "{{ $labels.environment }} has an average of {{ $value | humanize }} patches per node. Review patch scheduling and increase patch window frequency."
 
         # INFO: Patching during business hours
-        - alert: PatchingDuringBusinessHours
+        - alert: Puppet_PatchingDuringBusinessHours
           expr: |
             changes(puppet_patch_run[5m]) > 0
             and on() hour() >= 8 < 18
@@ -139,7 +139,7 @@ spec:
       interval: 300s
       rules:
         # CRITICAL: CIS score critically low
-        - alert: CISComplianceCritical
+        - alert: Puppet_CISComplianceCritical
           expr: puppet_cis_compliance_score{score_type="adjusted"} < 60
           for: 24h
           labels:
@@ -152,7 +152,7 @@ spec:
             runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/cis_compliance_low.md"
 
         # WARNING: CIS score below target
-        - alert: CISComplianceLow
+        - alert: Puppet_CISComplianceLow
           expr: puppet_cis_compliance_score{score_type="adjusted"} < 75
           for: 24h
           labels:
@@ -164,7 +164,7 @@ spec:
             description: "{{ $labels.node }} CIS compliance is at {{ $value }}% for {{ $labels.benchmark }}. Review failed controls and plan remediation."
 
         # WARNING: CIS score dropped significantly
-        - alert: CISScoreDropped
+        - alert: Puppet_CISScoreDropped
           expr: delta(puppet_cis_compliance_score{score_type="adjusted"}[24h]) < -10
           labels:
             severity: warning
@@ -175,7 +175,7 @@ spec:
             description: "CIS compliance on {{ $labels.node }} degraded by {{ $value | humanize }}% in the last 24 hours. Investigate recent changes."
 
         # WARNING: CIS scan stale
-        - alert: CISScanStale
+        - alert: Puppet_CISScanStale
           expr: time() - puppet_cis_compliance_score > (7 * 24 * 3600)
           labels:
             severity: warning
@@ -186,7 +186,7 @@ spec:
             description: "Last CIS scan on {{ $labels.node }} was {{ $value | humanizeDuration }} ago (timestamp: {{ $labels.scan_timestamp }}). Verify SCM export is running."
 
         # WARNING: Environment compliance degrading
-        - alert: EnvironmentComplianceDegrading
+        - alert: Puppet_EnvironmentComplianceDegrading
           expr: avg(puppet_cis_compliance_score{score_type="adjusted"}) by (environment) < 75
           for: 24h
           labels:
@@ -201,7 +201,7 @@ spec:
       interval: 60s
       rules:
         # CRITICAL: SCM export failing
-        - alert: SCMExportFailing
+        - alert: Puppet_SCMExportFailing
           expr: puppet_scm_export_success == 0
           for: 30m
           labels:
@@ -214,7 +214,7 @@ spec:
             runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/scm_export_failing.md"
 
         # WARNING: SCM export stale
-        - alert: SCMExportStale
+        - alert: Puppet_SCMExportStale
           expr: time() - puppet_scm_export_last_run_timestamp > 7200
           for: 10m
           labels:
@@ -226,7 +226,7 @@ spec:
             description: "Last SCM export was {{ $value | humanizeDuration }} ago. Verify systemd timer puppet-scm-export.timer is running."
 
         # WARNING: SCM export taking too long
-        - alert: SCMExportSlow
+        - alert: Puppet_SCMExportSlow
           expr: puppet_scm_export_duration_seconds > 1800
           labels:
             severity: warning
@@ -237,7 +237,7 @@ spec:
             description: "SCM export duration is {{ $value | humanizeDuration }}. This may indicate API performance issues or large dataset processing."
 
         # WARNING: SCM node coverage dropped
-        - alert: SCMNodeCoverageDropped
+        - alert: Puppet_SCMNodeCoverageDropped
           expr: delta(puppet_scm_export_nodes_count[1h]) < -10
           labels:
             severity: warning
@@ -251,7 +251,7 @@ spec:
       interval: 60s
       rules:
         # CRITICAL: Metrics scrape failing
-        - alert: PuppetMetricsScrapeFailure
+        - alert: Puppet_MetricsScrapeFailure
           expr: puppet_exporter_scrape_success == 0
           for: 10m
           labels:
@@ -264,7 +264,7 @@ spec:
             runbook_url: "https://github.com/albatrossflavour/puppet-puppet_data_connector_enhancer/blob/main/docs/runbooks/scrape_failure.md"
 
         # WARNING: Collection failures increasing
-        - alert: PuppetMetricsCollectionDegraded
+        - alert: Puppet_MetricsCollectionDegraded
           expr: rate(puppet_exporter_collection_failed[5m]) > 0.1
           for: 15m
           labels:
@@ -276,7 +276,7 @@ spec:
             description: "Collection {{ $labels.collection }} is failing at {{ $value | humanize }} failures/second. Check connectivity to {{ $labels.endpoint }}"
 
         # WARNING: Scrape duration increasing
-        - alert: PuppetMetricsScrapeSlow
+        - alert: Puppet_MetricsScrapeSlow
           expr: puppet_exporter_scrape_duration_seconds > 60
           for: 5m
           labels:
@@ -288,7 +288,7 @@ spec:
             description: "Metrics collection is slow ({{ $value | humanizeDuration }}). This may indicate PuppetDB performance issues or large dataset processing."
 
         # WARNING: Metrics stale
-        - alert: PuppetMetricsScrapeStale
+        - alert: Puppet_MetricsScrapeStale
           expr: time() - puppet_exporter_last_scrape_timestamp > 3600
           labels:
             severity: warning
@@ -302,7 +302,7 @@ spec:
       interval: 3600s
       rules:
         # WARNING: End-of-life OS detected
-        - alert: UnsupportedOSDetected
+        - alert: Puppet_UnsupportedOSDetected
           expr: |
             puppet_node_os{name=~"CentOS|Scientific"}
             or puppet_node_os{name="Ubuntu",version=~"^(14|16).*"}
@@ -317,7 +317,7 @@ spec:
             description: "{{ $labels.node }} is running {{ $labels.name }} {{ $labels.version }} which is end-of-life. Plan migration to supported OS version."
 
         # INFO: OS fragmentation
-        - alert: OSFragmentation
+        - alert: Puppet_OSFragmentation
           expr: count(count by (name, version) (puppet_node_os)) > 10
           for: 7d
           labels:
@@ -332,7 +332,7 @@ spec:
       interval: 300s
       rules:
         # WARNING: High configuration change rate
-        - alert: HighConfigurationChangeRate
+        - alert: Puppet_HighConfigurationChangeRate
           expr: rate(changes(puppet_configuration_version[5m])[1h:5m]) > 10
           labels:
             severity: warning
@@ -346,7 +346,7 @@ spec:
       interval: 300s
       rules:
         # CRITICAL: High failure rate
-        - alert: PuppetRunFailureRateHigh
+        - alert: Puppet_RunFailureRateHigh
           expr: |
             puppet_state_overview{state="failed"}
             / on() group_left
@@ -361,7 +361,7 @@ spec:
             description: "More than 10% of Puppet runs are failing. Review PuppetDB state overview and node reports for common failure patterns."
 
         # WARNING: Nodes not reporting
-        - alert: PuppetNodesNotReporting
+        - alert: Puppet_NodesNotReporting
           expr: puppet_state_overview{state="unreported"} > 5
           for: 2h
           labels:
