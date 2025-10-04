@@ -40,7 +40,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-server
-              tag: "release@sha256:a5935f03b93137952c38b14a47148525023f4c36a2db174d8266a9d3b37e7e3b"
+              tag: "release@sha256:8286638680f0a38a7cb380be64ed77d1d1cfe6d0e0b843f64bff92b24289078d"
             env:
               # Database
               DB_HOSTNAME: postgres16-rw.database.svc.cluster.local
