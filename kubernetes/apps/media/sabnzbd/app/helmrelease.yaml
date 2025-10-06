@@ -128,7 +128,6 @@ spec:
         server: "192.168.1.22"
         path: /volume1/Media
       incomplete:
-        enabled: true
-        type: nfs
-        server: "192.168.1.22"
-        path: /volume1/Media/.incomplete
+        type: emptyDir
+        globalMounts:
+          - path: /incomplete
