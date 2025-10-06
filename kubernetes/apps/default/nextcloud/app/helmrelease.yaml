@@ -42,7 +42,7 @@ spec:
           app:
             image:
               repository: docker.io/nextcloud
-              tag: "31.0.9@sha256:875511fe8d307d7b353b9d754080a40cce3291819af1ed03862d541ba4d5c6a6"
+              tag: "32.0.0@sha256:3e70e4dfe882ef44738fdc30d9896fb07c12febb27c4a1177e3d63dc0004a0b4"
             env:
               # Basic configuration
               NEXTCLOUD_TRUSTED_DOMAINS: nextcloud.${SECRET_DOMAIN}
