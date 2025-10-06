@@ -6,6 +6,6 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./prometheusrule.yaml
-  - ./puppet-prometheusrule.yaml
+#  - ./puppet-prometheusrule.yaml
   - ./scrapeconfig.yaml
   - ../../../../templates/gatus/guarded
