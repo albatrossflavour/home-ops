@@ -29,9 +29,6 @@ spec:
     - name: snapshot-controller
       namespace: volsync-system
   values:
-    cephImage:
-      repository: quay.io/ceph/ceph
-      tag: v19.2.3
     monitoring:
       enabled: true
       createPrometheusRules: true
@@ -51,6 +48,8 @@ spec:
       bdev_async_discard = true
       osd_class_update_on_start = false
     cephClusterSpec:
+      cephVersion:
+        image: quay.io/ceph/ceph:v19.2.3
       crashCollector:
         disable: false
       dashboard:
