@@ -19,6 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
+  "id": 42,
   "links": [
     {
       "asDropdown": false,
@@ -94,7 +95,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -127,7 +128,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -168,7 +169,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -204,7 +205,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -233,35 +234,29 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "title": "",
+              "url": "https://${grafanaserver}/d/ce0arbryermdce/puppet-restart-overview?from=now-7d&to=now&var-environment=All&var-patch_group=All&var-type=All&orgId=1"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
           "unit": "bool_yes_no"
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  ""
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": []
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 5,
@@ -269,7 +264,7 @@
         "x": 10,
         "y": 0
       },
-      "id": 17,
+      "id": 20,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -287,7 +282,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -296,14 +291,14 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_noop{host=\"$host\"}",
+          "expr": "puppet_restart_required{type=\"app\",node=\"${host}\"}",
           "instant": true,
-          "legendFormat": "No-Op mode",
+          "legendFormat": "__auto",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "noop Mode",
+      "title": "App Restart Required",
       "type": "stat"
     },
     {
@@ -328,7 +323,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -364,7 +359,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -393,29 +388,35 @@
           "color": {
             "mode": "thresholds"
           },
-          "links": [
-            {
-              "title": "",
-              "url": "https://${grafanaserver}/d/ce0arbryermdce/puppet-restart-overview?from=now-7d&to=now&var-environment=All&var-patch_group=All&var-type=All&orgId=1"
-            }
-          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
+                "value": 0
               }
             ]
           },
           "unit": "bool_yes_no"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  ""
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": []
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -423,7 +424,7 @@
         "x": 16,
         "y": 0
       },
-      "id": 20,
+      "id": 17,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -441,7 +442,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -450,39 +451,106 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_restart_required{type=\"app\",node=\"${host}\"}",
+          "expr": "puppet_noop{host=\"$host\"}",
           "instant": true,
-          "legendFormat": "__auto",
+          "legendFormat": "No-Op mode",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "App Restart Required",
+      "title": "noop Mode",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 70
+              },
+              {
+                "color": "#EAB839",
+                "value": 80
+              },
+              {
+                "color": "dark-green",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 19,
+        "x": 0,
+        "y": 5
+      },
+      "id": 22,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "max by (node,score_type) (puppet_cis_compliance_score{node=\"$host\"})",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "{{score_type}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "CIS Scores",
       "type": "stat"
     },
     {
       "collapsed": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 12
       },
       "id": 13,
       "panels": [],
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "refId": "A"
-        }
-      ],
       "title": "Last Puppet Report",
       "type": "row"
     },
@@ -511,7 +579,7 @@
             "steps": [
               {
                 "color": "rgba(50, 172, 45, 0.97)",
-                "value": null
+                "value": 0
               },
               {
                 "color": "rgba(237, 129, 40, 0.89)",
@@ -531,7 +599,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 6
+        "y": 13
       },
       "id": 1,
       "maxDataPoints": 100,
@@ -552,7 +620,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -606,7 +674,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "rgba(237, 129, 40, 0.89)",
@@ -622,7 +690,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 6
+        "y": 13
       },
       "id": 5,
       "maxDataPoints": 100,
@@ -643,7 +711,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -689,7 +757,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "rgba(245, 54, 54, 0.9)",
@@ -705,7 +773,7 @@
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 6
+        "y": 13
       },
       "id": 7,
       "maxDataPoints": 100,
@@ -726,7 +794,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -770,7 +838,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "blue",
@@ -786,7 +854,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 6
+        "y": 13
       },
       "id": 6,
       "maxDataPoints": 100,
@@ -807,7 +875,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -852,7 +920,7 @@
             "steps": [
               {
                 "color": "text",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -864,7 +932,7 @@
         "h": 4,
         "w": 4,
         "x": 16,
-        "y": 6
+        "y": 13
       },
       "id": 8,
       "maxDataPoints": 100,
@@ -885,7 +953,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -929,7 +997,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "yellow",
@@ -945,7 +1013,7 @@
         "h": 4,
         "w": 4,
         "x": 20,
-        "y": 6
+        "y": 13
       },
       "id": 12,
       "maxDataPoints": 100,
@@ -966,7 +1034,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -990,27 +1058,14 @@
     },
     {
       "collapsed": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 17
       },
       "id": 14,
       "panels": [],
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "refId": "A"
-        }
-      ],
       "title": "Last Puppet Run Metrics",
       "type": "row"
     },
@@ -1058,7 +1113,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -1073,7 +1128,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 11
+        "y": 18
       },
       "hideTimeOverride": false,
       "id": 11,
@@ -1092,12 +1147,14 @@
         "showValue": "auto",
         "stacking": "none",
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         },
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -1174,7 +1231,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -1185,7 +1242,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 11
+        "y": 18
       },
       "id": 9,
       "options": {
@@ -1203,12 +1260,14 @@
         "showValue": "never",
         "stacking": "none",
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         },
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -1242,27 +1301,14 @@
     },
     {
       "collapsed": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 26
       },
       "id": 15,
       "panels": [],
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "refId": "A"
-        }
-      ],
       "title": "Puppet Reports over time",
       "type": "row"
     },
@@ -1282,8 +1328,7 @@
             "scaleDistribution": {
               "type": "linear"
             }
-          },
-          "fieldMinMax": false
+          }
         },
         "overrides": []
       },
@@ -1291,7 +1336,7 @@
         "h": 19,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 27
       },
       "id": 16,
       "interval": "10m",
@@ -1315,7 +1360,7 @@
           "color": "rgba(255,0,255,0.7)"
         },
         "filterValues": {
-          "le": 1E-9
+          "le": 1e-9
         },
         "legend": {
           "show": false
@@ -1335,7 +1380,7 @@
           "unit": "s"
         }
       },
-      "pluginVersion": "11.2.1",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -1404,7 +1449,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -1549,7 +1594,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 27
       },
       "id": 4,
       "options": {
@@ -1563,10 +1608,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "asc"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -1635,7 +1682,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -1772,7 +1819,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 34
       },
       "id": 10,
       "options": {
@@ -1786,10 +1833,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "asc"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -1811,8 +1860,9 @@
       "type": "timeseries"
     }
   ],
+  "preload": false,
   "refresh": false,
-  "schemaVersion": 39,
+  "schemaVersion": 41,
   "tags": [
     "puppet"
   ],
@@ -1820,25 +1870,20 @@
     "list": [
       {
         "current": {
-          "selected": false,
           "text": "Prometheus",
           "value": "Prometheus"
         },
-        "hide": 0,
         "includeAll": false,
         "label": "Data Source",
-        "multi": false,
         "name": "DS_PROMETHEUS",
         "options": [],
         "query": "prometheus",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "type": "datasource"
       },
       {
         "current": {
-          "selected": false,
           "text": "",
           "value": ""
         },
@@ -1847,10 +1892,8 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(puppet_report_timestamp_epoch,host)",
-        "hide": 0,
         "includeAll": false,
         "label": "Server",
-        "multi": false,
         "name": "host",
         "options": [],
         "query": {
@@ -1860,7 +1903,6 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       },
@@ -1869,11 +1911,9 @@
         "auto_count": 30,
         "auto_min": "30m",
         "current": {
-          "selected": true,
           "text": "auto",
           "value": "$__auto_interval_interval"
         },
-        "hide": 0,
         "name": "interval",
         "options": [
           {
@@ -1923,14 +1963,11 @@
           }
         ],
         "query": "30m,1h,6h,12h,1d,7d,14d,30d",
-        "queryValue": "",
         "refresh": 2,
-        "skipUrlSync": false,
         "type": "interval"
       },
       {
         "current": {
-          "selected": false,
           "text": "",
           "value": ""
         },
@@ -1942,7 +1979,6 @@
         "hide": 2,
         "includeAll": false,
         "label": "Puppet Server",
-        "multi": false,
         "name": "puppetserver",
         "options": [],
         "query": {
@@ -1952,13 +1988,10 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
           "text": "",
           "value": ""
         },
@@ -1970,7 +2003,6 @@
         "hide": 2,
         "includeAll": false,
         "label": "SCM Server",
-        "multi": false,
         "name": "scmserver",
         "options": [],
         "query": {
@@ -1980,13 +2012,10 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
           "text": "",
           "value": ""
         },
@@ -1998,7 +2027,6 @@
         "hide": 2,
         "includeAll": false,
         "label": "CD4PE Server",
-        "multi": false,
         "name": "cd4peserver",
         "options": [],
         "query": {
@@ -2008,13 +2036,10 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
           "text": "",
           "value": ""
         },
@@ -2026,7 +2051,6 @@
         "hide": 2,
         "includeAll": false,
         "label": "Grafana Server",
-        "multi": false,
         "name": "grafanaserver",
         "options": [],
         "query": {
@@ -2036,8 +2060,6 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       }
     ]
@@ -2054,17 +2076,6 @@
       "1h",
       "2h",
       "1d"
-    ],
-    "time_options": [
-      "5m",
-      "15m",
-      "1h",
-      "6h",
-      "12h",
-      "24h",
-      "2d",
-      "7d",
-      "30d"
     ]
   },
   "timezone": "browser",
