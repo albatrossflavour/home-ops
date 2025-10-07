@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 40,
+  "id": 39,
   "links": [
     {
       "asDropdown": true,
@@ -598,7 +598,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_cis_compliance_score{benchmark=~\"$benchmark\",profile=~\"$level\",score_type=~\"$type\",environment=~\"$environment\"}",
+          "expr": "max by (node,benchmark,profile,environment,score_type) (\n  puppet_cis_compliance_score{benchmark=~\"$benchmark\",profile=~\"$level\",score_type=~\"$type\",environment=~\"$environment\"}\n)",
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{node}}",
@@ -840,7 +840,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {},
