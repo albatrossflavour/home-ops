@@ -49,6 +49,7 @@ spec:
               DATABASE_URL: "postgresql://resume:$(RESUME_DB_PASSWORD)@postgres16-rw.database.svc.cluster.local:5432/resume"
               MAIL_FROM: "noreply@${SECRET_DOMAIN}"
               STORAGE_PROVIDER: "s3"
+              STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
               STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
               STORAGE_PORT: "9000"
               STORAGE_REGION: "us-east-1"
