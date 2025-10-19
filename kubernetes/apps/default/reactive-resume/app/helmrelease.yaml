@@ -103,6 +103,11 @@ spec:
         className: internal
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Utilities
+          gethomepage.dev/name: Reactive Resume
+          gethomepage.dev/icon: reactive-resume.png
+          gethomepage.dev/description: Resume builder
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
