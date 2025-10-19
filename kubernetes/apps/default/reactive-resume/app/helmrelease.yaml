@@ -50,16 +50,6 @@ spec:
               MAIL_FROM: "noreply@${SECRET_DOMAIN}"
               STORAGE_PROVIDER: "filesystem"
               STORAGE_PATH: "/app/storage"
-              STORAGE_ACCESS_KEY: "dummy" # pragma: allowlist secret
-              STORAGE_SECRET_KEY: "dummy" # pragma: allowlist secret
-              STORAGE_URL: "http://localhost:9000"
-              STORAGE_ENDPOINT: "localhost"
-              STORAGE_PORT: "9000"
-              STORAGE_BUCKET: "dummy"
-              NODE_TLS_REJECT_UNAUTHORIZED: "0"
-              NODE_ENV: "development"
-              LOG_LEVEL: "debug"
-              DEBUG: "*"
               CHROME_URL: "ws://localhost:3001"
             envFrom:
               - secretRef:
