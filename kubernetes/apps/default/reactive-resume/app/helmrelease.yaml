@@ -50,6 +50,12 @@ spec:
               MAIL_FROM: "noreply@${SECRET_DOMAIN}"
               STORAGE_PROVIDER: "filesystem"
               STORAGE_PATH: "/app/storage"
+              STORAGE_URL: "http://dummy"
+              STORAGE_ENDPOINT: "dummy"
+              STORAGE_PORT: "9000"
+              STORAGE_BUCKET: "dummy"
+              STORAGE_ACCESS_KEY: "dummy" # pragma: allowlist secret
+              STORAGE_SECRET_KEY: "dummy" # pragma: allowlist secret
               CHROME_URL: "ws://localhost:3001"
             envFrom:
               - secretRef:
