@@ -1074,7 +1074,7 @@ persistence:
     globalMounts:
       - path: /data
 
-# In app/kustomization.yaml  
+# In app/kustomization.yaml
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
@@ -1086,6 +1086,93 @@ resources:
 postBuild:
   substitute:
     VOLSYNC_CAPACITY: 10Gi  # This creates the PVC
+```
+
+#### Deployment Strategy with PVCs (CRITICAL)
+
+**NEVER use `strategy: RollingUpdate` with services that have PVCs**. This causes multi-attach errors during upgrades.
+
+**The Problem:**
+
+When using `strategy: RollingUpdate` with ReadWriteOnce PVCs:
+
+1. New pod starts BEFORE old pod terminates
+2. Both pods try to attach to the same PVC simultaneously
+3. Ceph block storage can only attach to ONE pod at a time
+4. Result: **Multi-Attach error** - new pod stuck in ContainerCreating
+
+**Safe Options:**
+
+##### Option 1: No strategy (RECOMMENDED)
+
+```yaml
+controllers:
+  appname:
+    # No strategy specified - let Kubernetes choose intelligently
+    containers:
+      app:
+        image: ...
+```
+
+##### Option 2: Explicit Recreate
+
+```yaml
+controllers:
+  appname:
+    strategy: Recreate  # Old pod terminates before new pod starts
+    containers:
+      app:
+        image: ...
+```
+
+**When RollingUpdate is SAFE:**
+
+RollingUpdate can be used for stateless applications without PVCs:
+
+- Services using ConfigMaps only
+- Services using emptyDir volumes
+- Services with no persistence
+- Services with ReadWriteMany (RWX) storage (rare)
+
+**Examples:**
+
+✅ **SAFE - Stateless service:**
+
+```yaml
+controllers:
+  kromgo:
+    strategy: RollingUpdate  # Safe - uses ConfigMap only
+    containers:
+      app: ...
+persistence:
+  config:
+    type: configMap
+```
+
+❌ **UNSAFE - Service with PVC:**
+
+```yaml
+controllers:
+  immich:
+    strategy: RollingUpdate  # NEVER do this with PVCs!
+    containers:
+      app: ...
+persistence:
+  config:
+    existingClaim: immich  # ReadWriteOnce PVC
+```
+
+✅ **SAFE - Service with PVC (no strategy):**
+
+```yaml
+controllers:
+  immich:
+    # No strategy - Kubernetes handles it correctly
+    containers:
+      app: ...
+persistence:
+  config:
+    existingClaim: immich
 ```
 
 #### Namespace Organization
@@ -1120,6 +1207,7 @@ When deploying any new application, follow this exact sequence:
 **Key patterns**:
 
 - **DNS Target**: ALWAYS include `external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}` or `external.${SECRET_DOMAIN}` in ingress annotations
+- **Deployment Strategy**: NEVER use `strategy: RollingUpdate` with PVCs - omit strategy or use `strategy: Recreate`
 - Dependencies: `external-secrets-stores` (standard), `cloudnative-pg-cluster` (if database)
 - Persistence: `existingClaim: APPNAME` + volsync template + `VOLSYNC_CAPACITY`
 - Monitoring: Include gatus template in kustomization
