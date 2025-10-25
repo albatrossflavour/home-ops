@@ -142,11 +142,14 @@ detect-secrets scan --baseline .secrets.baseline
 
 ### Adding New Applications
 
+**See**: `~/.claude/skills/workflows/add-new-service.md` for complete deployment workflow
+
+Quick reference:
+
 1. Create application directory under `kubernetes/apps/<namespace>/`
-2. Add HelmRelease or Kustomization manifests
-3. Create corresponding `ks.yaml` (Kustomization) file
-4. Update namespace kustomization to include new app
-5. Test with `task flux:apply path=<namespace>/<app>`
+2. Create ExternalSecret, HelmRelease, kustomization.yaml, ks.yaml
+3. Update namespace kustomization to include new app
+4. Test with `task flux:apply path=<namespace>/<app>`
 
 ### Secret Management Workflow
 
@@ -186,89 +189,19 @@ Applications are organized by namespace:
 
 ## Storage Architecture
 
-### Storage Strategy: EBS + Ceph + NFS
+**See**: `~/.claude/skills/deployment/storage-selection.md` for complete storage decision guide
 
-This cluster uses a multi-tier storage approach optimized for different workload types:
+### Three-Tier Storage Strategy
 
-#### OpenEBS (EBS)
+- **OpenEBS** (`openebs-hostpath`): Fast local storage for temporary/cache data
+- **Rook-Ceph** (`ceph-block`, `ceph-filesystem`): Replicated storage with backups for persistent data
+- **NFS** (direct mount): High-capacity shared storage for media files and bulk data
 
-- **Use case**: Temporary and stateless workloads, high-performance local storage
-- **Benefits**: High performance local storage, low overhead, fast I/O
-- **Storage class**: `openebs-hostpath`
-- **Examples**: Cache data, temporary processing, application logs
+## Database Provisioning
 
-#### Rook-Ceph
+**See**: `~/.claude/skills/deployment/database-integration.md` for complete PostgreSQL setup
 
-- **Use case**: Persistent data requiring replication and backups
-- **Benefits**: Distributed storage, data redundancy, snapshot capabilities
-- **Storage class**: `ceph-block`, `ceph-filesystem`
-- **Examples**: Application databases, user data, configuration files
-
-#### NFS
-
-- **Use case**: Large shared storage, bulk data, media files
-- **Benefits**: High capacity, shared across multiple pods, cost-effective
-- **Configuration**: `192.168.1.22:/volume2/apps/<appname>`
-- **Examples**: Media files, backups, shared application assets
-
-## Database Provisioning Pattern
-
-### Standard PostgreSQL Setup with CloudNative-PG
-
-For apps requiring PostgreSQL databases, use this standard pattern:
-
-#### ExternalSecret Configuration
-
-```yaml
-apiVersion: external-secrets.io/v1
-kind: ExternalSecret
-metadata:
-  name: appname
-spec:
-  target:
-    name: appname-secret
-    template:
-      engineVersion: v2
-      data:
-        # App-specific variables
-        APPNAME_DB_PASSWORD: &dbPass "{{ .APPNAME_DB_PASSWORD }}"
-
-        # Postgres Init variables
-        INIT_POSTGRES_DBNAME: &dbName appname
-        INIT_POSTGRES_HOST: &dbHost postgres16-rw.database.svc.cluster.local
-        INIT_POSTGRES_USER: &dbUser appname
-        INIT_POSTGRES_PASS: *dbPass
-        INIT_POSTGRES_SUPER_PASS: "{{ .POSTGRES_SUPER_PASS }}"
-  dataFrom:
-    - extract:
-        key: appname
-    - extract:
-        key: cloudnative-pg
-```
-
-#### HelmRelease Init Container
-
-```yaml
-controllers:
-  appname:
-    initContainers:
-      init-db:
-        image:
-          repository: ghcr.io/home-operations/postgres-init
-          tag: "17"
-        envFrom:
-          - secretRef:
-              name: appname-secret
-```
-
-#### Dependencies
-
-```yaml
-# In ks.yaml
-dependsOn:
-  - name: external-secrets-stores
-  - name: cloudnative-pg-cluster
-```
+Standard pattern uses CloudNative-PG with automatic database initialization via init container. Add `cloudnative-pg-cluster` dependency to ks.yaml.
 
 ## Multi-Container Application Patterns
 
@@ -352,63 +285,36 @@ When adding Matter protocol support to Home Assistant:
 4. **Port Configuration**: Exposes WebSocket API on port 5580
 5. **Image**: Use `ghcr.io/home-assistant-libs/python-matter-server:stable` (Renovate will add digest)
 
-## Minio Integration Best Practices
+## Minio S3 Storage Integration
 
-### Standard Configuration
+**See**: `~/.claude/skills/integration/minio-s3-storage.md` for complete S3 integration guide
 
-- **Always reuse existing credentials**: Use `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD` from existing minio 1Password item
-- **Standard endpoint**: `minio.default.svc.cluster.local:9000`
-- **Skip bucket validation**: Set `STORAGE_SKIP_BUCKET_CHECK: "true"` for apps that validate buckets on startup
-- **Create buckets manually**: Use Minio web UI to create required buckets before app deployment
+Key points:
 
-### Environment Variables Pattern
-
-```yaml
-# In HelmRelease
-env:
-  STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
-  STORAGE_PORT: "9000"
-  STORAGE_REGION: "us-east-1"
-  STORAGE_BUCKET: "appname"
-  STORAGE_USE_SSL: "false"
-  STORAGE_SKIP_BUCKET_CHECK: "true"
-
-# In ExternalSecret
-data:
-  STORAGE_ACCESS_KEY: "{{ .MINIO_ROOT_USER }}"
-  STORAGE_SECRET_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
-```
+- Always reuse existing Minio credentials from 1Password
+- Endpoint: `minio.default.svc.cluster.local:9000`
+- Create buckets manually before app deployment
+- Set `STORAGE_SKIP_BUCKET_CHECK: "true"` to prevent startup hangs
 
 ## DNS and Certificate Management
 
+**See**: `~/.claude/skills/networking/ingress-dns-config.md` for complete ingress and DNS configuration
+
 ### DNS Target Annotations (CRITICAL)
 
-**All ingresses MUST have a target annotation to prevent DNS conflicts:**
+All ingresses MUST have a target annotation to prevent DNS conflicts:
 
 ```yaml
 ingress:
   app:
     className: internal  # or external
     annotations:
-      external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}  # or external.${SECRET_DOMAIN}
+      external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}  # REQUIRED
 ```
 
-**Target annotation rules:**
-
-- `external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}` - Service resolves to internal ingress only (192.168.8.21)
-- `external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}` - Service resolves to external ingress only (192.168.8.23)
-- **No annotation = DNS conflict risk** - Service may resolve to both IPs causing authentication issues
-
-**Service type guidelines:**
-
-- **Internal-only**: Homepage, internal dashboards, management interfaces, development tools
-- **External**: Public-facing services, APIs, services requiring external access
-
-**How it works:**
-
-- `external-dns-pihole-internal` only processes ingresses with `internal.${SECRET_DOMAIN}` target
-- `external-dns-pihole-external` processes all other ingresses (external target or no target)
-- This prevents dual DNS records that cause authentication failures
+- `internal.${SECRET_DOMAIN}` - Internal network only (192.168.8.21)
+- `external.${SECRET_DOMAIN}` - External access (192.168.8.23)
+- **No annotation = DNS conflict risk** - causes authentication failures
 
 ### External Domain Configuration
 
@@ -769,11 +675,9 @@ Uses makejinja for Jinja2 templating:
 
 ## Homepage Dashboard Integration
 
-All HTTP-enabled services in the cluster should be configured with homepage annotations for automatic discovery and dashboard integration. This provides a unified interface to access and monitor all homelab services.
+**See**: `~/.claude/skills/integration/homepage-dashboard.md` for complete dashboard configuration
 
-### Homepage Annotation Standards
-
-**Required for all HTTP services with ingress:**
+All HTTP services should include homepage annotations for automatic discovery:
 
 ```yaml
 ingress:
@@ -783,81 +687,9 @@ ingress:
       gethomepage.dev/group: "Category"
       gethomepage.dev/name: "Service Name"
       gethomepage.dev/icon: "service-icon.png"
-      gethomepage.dev/description: "Brief description"
 ```
 
-**Optional widget integration (for supported services):**
-
-```yaml
-      gethomepage.dev/widget.type: "service-type"
-      gethomepage.dev/widget.url: "http://service.${SECRET_DOMAIN}"
-      gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SERVICE_API_KEY}}` }}"
-      # OR for services requiring username/password:
-      gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_SERVICE_USERNAME}}` }}"
-      gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_SERVICE_PASSWORD}}` }}"
-```
-
-### Service Categories
-
-**Automation:**
-
-- Home Assistant, HASS Code Server, Scrypted, Node-RED
-
-**Media:**
-
-- Sonarr, Radarr, Bazarr, Overseerr, Prowlarr, qBittorrent, SABnzbd, Tautulli
-
-**Utilities:**
-
-- n8n, CyberChef, IT Tools, JSONCrack, Send
-
-**Observability:**
-
-- Grafana, Prometheus, AlertManager, Gatus
-
-**Infrastructure:**
-
-- Minio, Pihole, Unifi
-
-**Security:**
-
-- Authentik
-
-**Database:**
-
-- NocoDB, EMQX, Rook Ceph Dashboard
-
-### Widget URL Standards
-
-- Always use the ingress hostname: `http://service.${SECRET_DOMAIN}`
-- Never use internal cluster service names for widgets
-- HTTPS for external ingresses, HTTP for internal ingresses
-- Port numbers only if different from standard HTTP/HTTPS
-
-### API Key Management
-
-All widget API keys are managed through the homepage ExternalSecret:
-
-```yaml
-# In homepage ExternalSecret data section:
-HOMEPAGE_VAR_SERVICE_API_KEY: "{{ .SERVICE_API_KEY }}"
-
-# In homepage ExternalSecret dataFrom section:
-- extract:
-    key: service-name  # 1Password item name
-```
-
-### Supported Widgets
-
-Homepage supports widgets for most common homelab services:
-
-- **Media Stack**: Sonarr, Radarr, Bazarr, Overseerr, Prowlarr, qBittorrent, SABnzbd, Tautulli
-- **Infrastructure**: Minio, Pihole, Unifi
-- **Monitoring**: Grafana, Prometheus, AlertManager, Gatus
-- **Automation**: Home Assistant, n8n
-- **Security**: Authentik
-
-See [Homepage Documentation](https://gethomepage.dev/widgets/) for complete widget list and configuration options.
+Widget integration available for: Sonarr, Radarr, Grafana, Prometheus, Minio, Pihole, Home Assistant, and more.
 
 ## Loki Logging Integration
 
@@ -977,155 +809,28 @@ kubectl logs -n observability deployment/loki-gateway
 - **Retention tuning**: Adjust retention period based on storage capacity and compliance needs
 - **1Password secrets**: Store in 'discworld' vault using account 'my.1password.com'
 
-## Application Deployment Patterns
+## Application Deployment
 
-### Standard Application Structure
+**See**: Complete deployment guides in `~/.claude/skills/`:
 
-When deploying new applications, follow these exact patterns to avoid common issues:
+- **workflows/add-new-service.md** - Master workflow with decision tree and 9-step checklist
+- **deployment/standard-application.md** - Templates for ExternalSecret, HelmRelease, dependencies
+- **deployment/database-integration.md** - PostgreSQL with CloudNative-PG
+- **deployment/storage-selection.md** - OpenEBS vs Ceph vs NFS decision guide
+- **networking/ingress-dns-config.md** - DNS target annotations (CRITICAL)
+- **integration/homepage-dashboard.md** - Dashboard annotations and widgets
+- **integration/minio-s3-storage.md** - S3 storage integration
+- **patterns/backup-volsync.md** - PVC backup/restore with Volsync
 
-#### ExternalSecret Configuration pragma: allowlist secret
+### Quick Reference
 
-Always use the correct API version and structure:
+**Critical patterns**:
 
-```yaml
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
-apiVersion: external-secrets.io/v1  # Always v1, never v1beta1
-kind: ExternalSecret
-metadata:
-  name: appname
-spec:
-  secretStoreRef:
-    kind: ClusterSecretStore
-    name: onepassword-connect
-  target:
-    name: appname-secret
-    template:
-      engineVersion: v2
-```
-
-#### Kustomization.yaml Structure
-
-Use templates instead of hardcoded configurations:
-
-```yaml
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - ./externalsecret.yaml
-  - ./helmrelease.yaml
-  - ../../../../templates/gatus/external    # For monitoring (external services)
-  - ../../../../templates/gatus/guarded     # For monitoring (internal services)
-  - ../../../../templates/volsync           # For backups
-```
-
-#### Ingress Configuration (CRITICAL)
-
-**ALWAYS include DNS target annotation to prevent DNS conflicts:**
-
-```yaml
-# In HelmRelease
-ingress:
-  app:
-    className: internal  # or external
-    annotations:
-      external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}  # REQUIRED
-      gethomepage.dev/enabled: "true"  # Optional: for homepage integration
-      gethomepage.dev/group: "Category"
-      gethomepage.dev/name: "Service Name"
-```
-
-**Target selection criteria:**
-
-- **Use `internal.${SECRET_DOMAIN}`**: Internal dashboards, management interfaces, development tools, utilities
-- **Use `external.${SECRET_DOMAIN}`**: Public services, APIs, services requiring external access
-- **NEVER omit the target annotation** - causes DNS conflicts and authentication issues
-
-#### ks.yaml Dependencies and Variables
-
-**CRITICAL**: Most apps only need `external-secrets-stores` dependency. Only add others if specifically needed:
-
-```yaml
-dependsOn:
-  - name: external-secrets-stores   # Standard for ALL apps
-  - name: cloudnative-pg-cluster    # Only if app needs database
-  - name: rook-ceph-cluster         # Only if app needs ceph storage
-postBuild:
-  substitute:
-    APP: *app                       # Application name
-    GATUS_SUBDOMAIN: app-name      # Monitoring subdomain
-    VOLSYNC_CAPACITY: 20Gi         # Storage size
-```
-
-#### Standard Persistence Pattern
-
-**CRITICAL**: Never create PVCs directly in HelmRelease. Always use volsync template pattern:
-
-1. **HelmRelease persistence**: Use `existingClaim: appname` (NOT size/storageClass)
-2. **Kustomization**: Include `../../../../templates/volsync`
-3. **ks.yaml**: Set `VOLSYNC_CAPACITY` in postBuild.substitute
-4. **Volsync template** automatically creates PVC with backup/restore capabilities
-
-```yaml
-# In HelmRelease
-persistence:
-  data:
-    existingClaim: node-red  # Uses APP variable from ks.yaml
-    globalMounts:
-      - path: /data
-
-# In app/kustomization.yaml  
-resources:
-  - ./externalsecret.yaml
-  - ./helmrelease.yaml
-  - ../../../../templates/gatus/external    # For external services
-  - ../../../../templates/gatus/guarded     # For internal services
-  - ../../../../templates/volsync
-
-# In ks.yaml
-postBuild:
-  substitute:
-    VOLSYNC_CAPACITY: 10Gi  # This creates the PVC
-```
-
-#### Namespace Organization
-
-- `utilities`: Workflow/automation tools (n8n, cyberchef, it-tools)
-- `default`: Core home services (Home Assistant, Minio)
-- `database`: Data services (PostgreSQL, Redis, EMQX)
-- `media`: Media server stack (Sonarr, Radarr, etc.)
-- `observability`: Monitoring and alerting
-- `security`: Authentication and security tools
-
-#### 1Password Integration
-
-- Vault name: `discworld`
-- Use `op cli` for creating items: `op item create --vault="discworld"`
-- Generate secure secrets: `openssl rand -base64 32` # pragma: allowlist secret
-
-### Standard App Deployment Workflow
-
-When deploying any new application, follow this exact sequence:
-
-1. **Create directory structure**: `mkdir -p kubernetes/apps/NAMESPACE/APPNAME/app`
-2. **Create externalsecret.yaml**: Always use `apiVersion: external-secrets.io/v1`
-3. **Create helmrelease.yaml**: Use `existingClaim: APPNAME` for persistence
-4. **Create app/kustomization.yaml**: Include volsync and gatus templates
-5. **Create ks.yaml**: Use only `external-secrets-stores` dependency unless database needed
-6. **Update namespace kustomization.yaml**: Add `- ./APPNAME/ks.yaml`
-7. **Create 1Password item**: `op item create --vault="discworld" --title="APPNAME" --category="Server" FIELD="$(openssl rand -base64 32)"`
-8. **Ensure branch protection**: Main branch must be protected for Renovate to work
-9. **Test with**: `task flux:apply path=NAMESPACE/APPNAME`
-
-**Key patterns**:
-
-- **DNS Target**: ALWAYS include `external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}` or `external.${SECRET_DOMAIN}` in ingress annotations
-- Dependencies: `external-secrets-stores` (standard), `cloudnative-pg-cluster` (if database)
-- Persistence: `existingClaim: APPNAME` + volsync template + `VOLSYNC_CAPACITY`
-- Monitoring: Include gatus template in kustomization
-- Secrets: Always use 1Password via ExternalSecret, create item with secure random values
-- 1Password fields: Use descriptive names (e.g. `APPNAME_PASSWORD`, `APPNAME_API_KEY`)
-- **Images: Always use `tag: version@sha256:digest` format for Renovate compatibility and security**
+- DNS target annotation required on all ingresses
+- Use `existingClaim` + volsync template (not direct PVC creation)
+- Most apps only need `external-secrets-stores` dependency
+- Images must use `tag: "version@sha256:digest"` format (quoted)
+- Secrets stored in 1Password `discworld` vault
 
 ### Renovate Image Management
 
