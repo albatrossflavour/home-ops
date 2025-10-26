@@ -30,3 +30,4 @@ resources:
   - ./descheduler.yaml
   - ./intel.yaml
   - ./node-feature-discovery.yaml
+  - ./penpot.yaml

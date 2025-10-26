@@ -1,0 +1,98 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app penpot
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: penpot
+      version: 0.28.0
+      sourceRef:
+        kind: HelmRepository
+        name: penpot
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    global:
+      postgresqlEnabled: false
+      redisEnabled: false
+      valkeyEnabled: false
+
+    config:
+      publicUri: "https://penpot.${SECRET_DOMAIN}"
+      flags: "enable-registration enable-login-with-password disable-email-verification"
+
+    backend:
+      replicaCount: 1
+      image:
+        repository: penpotapp/backend
+        tag: 2.3.4
+
+      env:
+        - name: PENPOT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: penpot-secret
+              key: PENPOT_SECRET_KEY
+        - name: PENPOT_DATABASE_URI
+          valueFrom:
+            secretKeyRef:
+              name: penpot-secret
+              key: PENPOT_DATABASE_URI
+        - name: PENPOT_DATABASE_USERNAME
+          value: "penpot"
+        - name: PENPOT_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: penpot-secret
+              key: INIT_POSTGRES_PASS
+
+      initContainers:
+        init-db:
+          image: ghcr.io/home-operations/postgres-init:17
+          envFrom:
+            - secretRef:
+                name: penpot-secret
+
+    frontend:
+      replicaCount: 1
+      image:
+        repository: penpotapp/frontend
+        tag: 2.3.4
+
+    exporter:
+      replicaCount: 1
+      image:
+        repository: penpotapp/exporter
+        tag: 2.3.4
+
+    persistence:
+      assets:
+        enabled: true
+        existingClaim: penpot-assets
+
+    ingress:
+      enabled: true
+      className: internal
+      annotations:
+        external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Design
+        gethomepage.dev/name: Penpot
+        gethomepage.dev/icon: penpot.png
+        gethomepage.dev/description: Open Source Design Platform
+      hosts:
+        - host: "penpot.${SECRET_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
