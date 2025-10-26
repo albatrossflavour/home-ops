@@ -70,7 +70,8 @@ spec:
     persistence:
       assets:
         enabled: true
-        existingClaim: penpot-assets
+        storageClass: ceph-block
+        size: 20Gi
 
     ingress:
       enabled: true
