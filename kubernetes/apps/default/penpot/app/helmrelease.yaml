@@ -34,9 +34,6 @@ spec:
 
     backend:
       replicaCount: 1
-      image:
-        repository: penpotapp/backend
-        tag: 2.3.4
 
       env:
         - name: PENPOT_SECRET_KEY
@@ -66,15 +63,9 @@ spec:
 
     frontend:
       replicaCount: 1
-      image:
-        repository: penpotapp/frontend
-        tag: 2.3.4
 
     exporter:
       replicaCount: 1
-      image:
-        repository: penpotapp/exporter
-        tag: 2.3.4
 
     persistence:
       assets:
