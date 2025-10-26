@@ -39,7 +39,7 @@ spec:
             dependsOn: init-db
             image:
               repository: ghcr.io/kiwigrid/k8s-sidecar
-              tag: 1.30.10@sha256:835d79d8fbae62e42d8a86929d4e3c5eec2e869255dd37756b5a3166c2f22309
+              tag: 1.30.11@sha256:91b49e5b6d2fb03e7a9014f8b072d0de199987845b02d96ce458dd9f14e753f5
             env:
               FOLDER: /config
               LABEL: gatus.io/enabled
@@ -52,12 +52,12 @@ spec:
               requests:
                 cpu: 10m
               limits:
-                memory: 256Mi
+                memory: 512Mi
         containers:
           app:
             image:
               repository: ghcr.io/twin/gatus
-              tag: v5.25.2@sha256:9ff09fe5eb5e96b7f2126dc95b375a87a7bc16380d5cb9d798af4e0ef36f0049
+              tag: v5.27.2@sha256:fc9deba937f25f21973f3245217a4d8499339bf9b5f20be83ccdcf1789184901
             env:
               TZ: "${TZ}"
               GATUS_CONFIG_PATH: /config
