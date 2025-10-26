@@ -92,7 +92,4 @@ spec:
         gethomepage.dev/icon: penpot.png
         gethomepage.dev/description: Open Source Design Platform
       hosts:
-        - host: "penpot.${SECRET_DOMAIN}"
-          paths:
-            - path: /
-              pathType: Prefix
+        - "penpot.${SECRET_DOMAIN}"
