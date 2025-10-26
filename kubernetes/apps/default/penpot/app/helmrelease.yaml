@@ -68,7 +68,7 @@ spec:
       replicaCount: 1
       image:
         repository: penpotapp/frontend
-        tag: 2.3.4
+        tag: 2.10.1@sha256:c016a77555da6f004cf16d0640b71f1ffdde11908fa6037562a977b83d24c3da
 
     exporter:
       replicaCount: 1
