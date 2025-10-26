@@ -74,7 +74,7 @@ spec:
       replicaCount: 1
       image:
         repository: penpotapp/exporter
-        tag: 2.3.4
+        tag: 2.10.1@sha256:79d8f979764f3cf73da16e6b65f5a3113a6936343a5146d650cdebf070474a7a
 
     persistence:
       assets:
