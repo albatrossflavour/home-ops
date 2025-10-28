@@ -229,6 +229,10 @@ data:
         tab: Automation
         style: column
         icon: mdi-tools
+      # Misc tab
+      Links:
+        tab: Misc
+        style: column
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]
