@@ -82,7 +82,7 @@ spec:
       annotations:
         external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Design
+        gethomepage.dev/group: Automation
         gethomepage.dev/name: Penpot
         gethomepage.dev/icon: penpot.png
         gethomepage.dev/description: Open Source Design Platform
