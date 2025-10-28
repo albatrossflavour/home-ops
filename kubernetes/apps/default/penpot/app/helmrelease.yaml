@@ -54,7 +54,7 @@ spec:
               key: PENPOT_SECRET_KEY
 
       initContainers:
-        init-db:
+        - name: init-db
           image: ghcr.io/home-operations/postgres-init:17
           envFrom:
             - secretRef:
