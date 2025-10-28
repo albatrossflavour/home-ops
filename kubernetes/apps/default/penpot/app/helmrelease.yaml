@@ -43,6 +43,11 @@ spec:
           passwordKey: INIT_POSTGRES_PASS  # pragma: allowlist secret
           postgresqlUriKey: PENPOT_DATABASE_URI
 
+      redis:
+        host: penpot-valkey-primary
+        port: 6379
+        database: "0"
+
     backend:
       replicaCount: 1
 
