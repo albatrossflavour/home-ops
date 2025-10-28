@@ -28,6 +28,16 @@ spec:
       redisEnabled: false
       valkeyEnabled: false
 
+    postgresql:
+      host: postgres16-rw.database.svc.cluster.local
+      port: 5432
+      username: penpot
+      database: penpot
+      existingSecret: penpot-secret
+      secretKeys:
+        usernameKey: INIT_POSTGRES_USER
+        passwordKey: INIT_POSTGRES_PASS  # pragma: allowlist secret
+
     config:
       publicUri: "https://penpot.${SECRET_DOMAIN}"
       flags: "enable-registration enable-login-with-password disable-email-verification"
@@ -70,8 +80,7 @@ spec:
     persistence:
       assets:
         enabled: true
-        storageClass: ceph-block
-        size: 20Gi
+        existingClaim: penpot
 
     ingress:
       enabled: true
