@@ -51,18 +51,6 @@ spec:
             secretKeyRef:
               name: penpot-secret
               key: PENPOT_SECRET_KEY
-        - name: PENPOT_DATABASE_URI
-          valueFrom:
-            secretKeyRef:
-              name: penpot-secret
-              key: PENPOT_DATABASE_URI
-        - name: PENPOT_DATABASE_USERNAME
-          value: "penpot"
-        - name: PENPOT_DATABASE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: penpot-secret
-              key: INIT_POSTGRES_PASS
 
       initContainers:
         init-db:
