@@ -26,7 +26,7 @@ spec:
     global:
       postgresqlEnabled: false
       redisEnabled: false
-      valkeyEnabled: false
+      valkeyEnabled: true
 
     config:
       publicUri: "https://penpot.${SECRET_DOMAIN}"
