@@ -15,4 +15,5 @@ resources:
   - ./paperless/ks.yaml
   - ./paperless-ai/ks.yaml
   - ./immich/ks.yaml
+  - ./penpot/ks.yaml
   # - ./nextcloud/ks.yaml
