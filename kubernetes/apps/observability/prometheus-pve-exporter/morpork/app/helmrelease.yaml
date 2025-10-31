@@ -32,13 +32,9 @@ spec:
               tag: "3.4.2@sha256:68e20394912b822b50126b4e918107ac3070cd6d4d55f355e33e3639bef60f45"
             env:
               TZ: "${TIMEZONE:=Etc/UTC}"
-              PVE_VERIFY_SSL: "false"
             envFrom:
               - secretRef:
                   name: prometheus-pve-exporter-morpork
-            command:
-              - pve_exporter
-              - morpork.lab.albatrossflavour.com:8006
             probes:
               liveness:
                 enabled: true
@@ -50,6 +46,14 @@ spec:
                 memory: 50Mi
               limits:
                 memory: 200Mi
+    persistence:
+      config:
+        type: secret
+        name: prometheus-pve-exporter-morpork
+        globalMounts:
+          - path: /etc/prometheus/pve.yml
+            subPath: pve.yml
+            readOnly: true
     service:
       app:
         controller: prometheus-pve-exporter-morpork
@@ -64,6 +68,9 @@ spec:
           - port: metrics
             scheme: http
             path: /pve
+            params:
+              target:
+                - morpork.lab.albatrossflavour.com:8006
             interval: 60s
             scrapeTimeout: 30s
             metricRelabelings:
