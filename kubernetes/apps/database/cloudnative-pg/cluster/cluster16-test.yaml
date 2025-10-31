@@ -28,17 +28,31 @@ spec:
       memory: 2Gi
   monitoring:
     enablePodMonitor: true
-  # Bootstrap from production backup
+  backup:
+    retentionPolicy: 10d
+    barmanObjectStore: &barmanObjectStore
+      data:
+        compression: bzip2
+      wal:
+        compression: bzip2
+        maxParallel: 8
+      destinationPath: s3://cloudnative-pg/
+      endpointURL: http://minio.default.svc.cluster.local:9000
+      serverName: &currentCluster postgres16-test-v1
+      s3Credentials:
+        accessKeyId:
+          name: cloudnative-pg-secret
+          key: aws-access-key-id
+        secretAccessKey:
+          name: cloudnative-pg-secret
+          key: aws-secret-access-key
+  # Bootstrap from S3 backup of production cluster
   bootstrap:
-    pg_basebackup:
-      source: postgres16-prod
-  # External cluster reference to production
+    recovery:
+      source: &previousCluster postgres16-v6
+  # External cluster reference to production S3 backups
   externalClusters:
-    - name: postgres16-prod
-      connectionParameters:
-        host: postgres16-rw.database.svc.cluster.local
-        user: postgres
-        dbname: postgres
-      password:
-        name: cloudnative-pg-secret
-        key: password
+    - name: *previousCluster
+      barmanObjectStore:
+        <<: *barmanObjectStore
+        serverName: *previousCluster
