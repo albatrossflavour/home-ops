@@ -70,31 +70,35 @@ spec:
             component: proxmox
             alert_group: storage
 
-        # Critical: VM unexpectedly down
-#       - alert: ProxmoxVMDown
-#         annotations:
-#           summary: "Proxmox VM {{ $labels.id }} is DOWN on {{ $labels.instance }}"
-#           description: "Virtual machine {{ $labels.id }} on {{ $labels.instance }} has stopped running."
-#         expr: |
-#           pve_up{id=~"qemu/.*"} == 0
-#         for: 5m
-#         labels:
-#           severity: warning
-#           component: proxmox
-#           alert_group: virtualization
+        # Critical: HA-managed VM is down
+        - alert: ProxmoxHAVMDown
+          annotations:
+            summary: "HA-managed VM {{ $labels.id }} is DOWN"
+            description: "High-availability virtual machine {{ $labels.id }} has stopped running (HA state: {{ $labels.hastate }}). Last seen on {{ $labels.instance }}."
+          expr: |
+            (pve_up{id=~"qemu/.*"} == 0)
+            and on(id)
+            (pve_ha_state > 0)
+          for: 3m
+          labels:
+            severity: critical
+            component: proxmox
+            alert_group: virtualization
 
-        # Critical: Container unexpectedly down
-#       - alert: ProxmoxLXCDown
-#         annotations:
-#           summary: "Proxmox LXC container {{ $labels.id }} is DOWN on {{ $labels.instance }}"
-#           description: "LXC container {{ $labels.id }} on {{ $labels.instance }} has stopped running."
-#         expr: |
-#           pve_up{id=~"lxc/.*"} == 0
-#         for: 5m
-#         labels:
-#           severity: warning
-#           component: proxmox
-#           alert_group: virtualization
+        # Critical: HA-managed container is down
+        - alert: ProxmoxHALXCDown
+          annotations:
+            summary: "HA-managed LXC {{ $labels.id }} is DOWN"
+            description: "High-availability container {{ $labels.id }} has stopped running (HA state: {{ $labels.hastate }}). Last seen on {{ $labels.instance }}."
+          expr: |
+            (pve_up{id=~"lxc/.*"} == 0)
+            and on(id)
+            (pve_ha_state > 0)
+          for: 3m
+          labels:
+            severity: critical
+            component: proxmox
+            alert_group: virtualization
 
 #       # Warning: Node memory critically high
 #       - alert: ProxmoxNodeMemoryCritical
