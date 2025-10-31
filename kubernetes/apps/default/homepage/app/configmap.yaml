@@ -43,15 +43,19 @@ data:
         - SMH:
             - href: https://smh.com.au
               icon: mdi-newspaper
+              description: ""
         - Material Design Icons:
             - href: https://pictogrammers.com/library/mdi/
               icon: mdi-material-design
+              description: ""
         - Self Hosted Icons:
             - href: https://selfh.st/icons/
               icon: sh-selfh-st
+              description: ""
         - Simple Icons:
             - href: https://simpleicons.org
               icon: si-simpleicons
+              description: ""
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
@@ -90,6 +94,7 @@ data:
         - Forge:
             - icon: si-puppet-#BCBDAC
               href: 'https://forge.puppet.com'
+              description: ""
     - Git:
         - home-ops:
             - icon: si-github-#BCBDAC
