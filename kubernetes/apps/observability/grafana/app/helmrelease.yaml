@@ -234,7 +234,9 @@ spec:
         promethes-exporter:
           gnetId: 10347
           revision: 5
-          datasource: Prometheus
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
         windows-exporter:
           gnetId: 14694
           revision: 2
