@@ -42,6 +42,10 @@ data:
     - Links:
         - SMH:
             - href: https://smh.com.au
+              icon: mdi-newspaper
+        - Material Design Icons:
+            - href: https://pictogrammers.com/library/mdi/
+              icon: mdi-material-design
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
@@ -77,6 +81,9 @@ data:
             - icon: si-github-#BCBDAC
               href: 'https://github.com/albatrossflavour/control-repo'
               description: ""
+        - Forge:
+            - icon: si-puppet-#BCBDAC
+              href: 'https://forge.puppet.com'
     - Git:
         - home-ops:
             - icon: si-github-#BCBDAC
