@@ -45,9 +45,13 @@ data:
               icon: mdi-newspaper
         - Material Design Icons:
             - href: https://pictogrammers.com/library/mdi/
+              icon: mdi-material-design
         - Self Hosted Icons:
             - href: https://selfh.st/icons/
               icon: sh-selfh-st
+        - Simple Icons:
+            - href: https://simpleicons.org
+              icon: si-simpleicons
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
