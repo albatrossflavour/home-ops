@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres16-test
+spec:
+  instances: 1  # Start with single instance for testing
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.4-2  # Match production version first
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 20Gi
+    storageClass: ceph-block  # TEST: Using ceph-block instead of openebs-hostpath
+  superuserSecret:
+    name: cloudnative-pg-secret
+  enableSuperuserAccess: true
+  postgresql:
+    parameters:
+      max_connections: "400"
+      shared_buffers: 256MB
+  nodeMaintenanceWindow:
+    inProgress: false
+    reusePVC: true
+  resources:
+    requests:
+      cpu: 500m
+    limits:
+      memory: 2Gi
+  monitoring:
+    enablePodMonitor: true
+  # Bootstrap from production backup
+  bootstrap:
+    pg_basebackup:
+      source: postgres16-prod
+  # External cluster reference to production
+  externalClusters:
+    - name: postgres16-prod
+      connectionParameters:
+        host: postgres16-rw.database.svc.cluster.local
+        user: postgres
+        dbname: postgres
+      password:
+        name: cloudnative-pg-secret
+        key: password
