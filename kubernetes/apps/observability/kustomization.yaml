@@ -24,3 +24,7 @@ resources:
   #- ./overseerr-exporter/ks.yaml
   - ./prowlarr-exporter/ks.yaml
   #- ./influxdb/ks.yaml
+  - ./prometheus-pve-exporter/ks.yaml
+  - ./prometheus-pve-exporter/ankh/ks.yaml
+  - ./prometheus-pve-exporter/morpork/ks.yaml
+  - ./prometheus-pve-exporter/stolat/ks.yaml

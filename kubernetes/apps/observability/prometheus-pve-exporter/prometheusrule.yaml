@@ -1,0 +1,141 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: prometheus-pve-exporter-rules
+  namespace: observability
+spec:
+  groups:
+    - name: proxmox-critical.rules
+      interval: 60s
+      rules:
+        # Critical: Proxmox node offline
+        - alert: ProxmoxNodeDown
+          annotations:
+            summary: "Proxmox node {{ $labels.id }} is DOWN"
+            description: "Proxmox hypervisor {{ $labels.instance }} is not responding. All VMs on this node may be affected."
+          expr: |
+            pve_up{id=~"node/.*"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: proxmox
+            alert_group: infrastructure
+
+        # Critical: LVM storage offline (the issue you want to catch!)
+        - alert: ProxmoxStorageDown
+          annotations:
+            summary: "Proxmox storage {{ $labels.id }} is OFFLINE on {{ $labels.instance }}"
+            description: "Storage volume {{ $labels.id }} on {{ $labels.instance }} is not accessible. VMs using this storage may fail silently."
+          expr: |
+            pve_up{id=~"storage/.*/.*"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: proxmox
+            alert_group: storage
+
+        # Critical: Storage critically full (>95%)
+        - alert: ProxmoxStorageCriticallyFull
+          annotations:
+            summary: "Proxmox storage {{ $labels.id }} is critically full ({{ $value | humanizePercentage }})"
+            description: "Storage {{ $labels.id }} on {{ $labels.instance }} is over 95% full. Immediate action required."
+          expr: |
+            (
+              pve_disk_usage_bytes{id=~"storage/.*/.*"}
+              /
+              pve_disk_size_bytes{id=~"storage/.*/.*"}
+            ) > 0.95
+          for: 5m
+          labels:
+            severity: critical
+            component: proxmox
+            alert_group: storage
+
+        # Warning: Storage getting full (>85%)
+        - alert: ProxmoxStorageAlmostFull
+          annotations:
+            summary: "Proxmox storage {{ $labels.id }} is almost full ({{ $value | humanizePercentage }})"
+            description: "Storage {{ $labels.id }} on {{ $labels.instance }} is over 85% full."
+          expr: |
+            (
+              pve_disk_usage_bytes{id=~"storage/.*/.*"}
+              /
+              pve_disk_size_bytes{id=~"storage/.*/.*"}
+            ) > 0.85
+          for: 15m
+          labels:
+            severity: warning
+            component: proxmox
+            alert_group: storage
+
+        # Critical: VM unexpectedly down
+        - alert: ProxmoxVMDown
+          annotations:
+            summary: "Proxmox VM {{ $labels.id }} is DOWN on {{ $labels.instance }}"
+            description: "Virtual machine {{ $labels.id }} on {{ $labels.instance }} has stopped running."
+          expr: |
+            pve_up{id=~"qemu/.*"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            component: proxmox
+            alert_group: virtualization
+
+        # Critical: Container unexpectedly down
+        - alert: ProxmoxLXCDown
+          annotations:
+            summary: "Proxmox LXC container {{ $labels.id }} is DOWN on {{ $labels.instance }}"
+            description: "LXC container {{ $labels.id }} on {{ $labels.instance }} has stopped running."
+          expr: |
+            pve_up{id=~"lxc/.*"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            component: proxmox
+            alert_group: virtualization
+
+        # Warning: Node memory critically high
+        - alert: ProxmoxNodeMemoryCritical
+          annotations:
+            summary: "Proxmox node {{ $labels.instance }} memory usage is critical ({{ $value | humanizePercentage }})"
+            description: "Node {{ $labels.instance }} is using over 95% of available memory."
+          expr: |
+            (
+              pve_memory_usage_bytes{id=~"node/.*"}
+              /
+              pve_memory_size_bytes{id=~"node/.*"}
+            ) > 0.95
+          for: 10m
+          labels:
+            severity: warning
+            component: proxmox
+            alert_group: resources
+
+        # Critical: Proxmox exporter scrape failing
+        - alert: ProxmoxExporterDown
+          annotations:
+            summary: "Proxmox exporter for {{ $labels.instance }} is not responding"
+            description: "Cannot scrape metrics from Proxmox exporter monitoring {{ $labels.instance }}. Monitoring is blind."
+          expr: |
+            up{job=~"prometheus-pve-exporter-.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: monitoring
+            alert_group: infrastructure
+
+        # Info: Track storage that was recently offline (recovered)
+        - alert: ProxmoxStorageRecovered
+          annotations:
+            summary: "Proxmox storage {{ $labels.id }} has recovered on {{ $labels.instance }}"
+            description: "Storage {{ $labels.id }} was offline but is now back online."
+          expr: |
+            (pve_up{id=~"storage/.*/.*"} == 1)
+            and
+            (pve_up{id=~"storage/.*/.*"} offset 5m == 0)
+          labels:
+            severity: info
+            component: proxmox
+            alert_group: storage
