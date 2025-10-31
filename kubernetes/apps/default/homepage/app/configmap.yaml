@@ -45,7 +45,6 @@ data:
               icon: mdi-newspaper
         - Material Design Icons:
             - href: https://pictogrammers.com/library/mdi/
-              icon: mdi-material-design
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
