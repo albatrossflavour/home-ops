@@ -71,47 +71,47 @@ spec:
             alert_group: storage
 
         # Critical: VM unexpectedly down
-        - alert: ProxmoxVMDown
-          annotations:
-            summary: "Proxmox VM {{ $labels.id }} is DOWN on {{ $labels.instance }}"
-            description: "Virtual machine {{ $labels.id }} on {{ $labels.instance }} has stopped running."
-          expr: |
-            pve_up{id=~"qemu/.*"} == 0
-          for: 5m
-          labels:
-            severity: warning
-            component: proxmox
-            alert_group: virtualization
+#       - alert: ProxmoxVMDown
+#         annotations:
+#           summary: "Proxmox VM {{ $labels.id }} is DOWN on {{ $labels.instance }}"
+#           description: "Virtual machine {{ $labels.id }} on {{ $labels.instance }} has stopped running."
+#         expr: |
+#           pve_up{id=~"qemu/.*"} == 0
+#         for: 5m
+#         labels:
+#           severity: warning
+#           component: proxmox
+#           alert_group: virtualization
 
         # Critical: Container unexpectedly down
-        - alert: ProxmoxLXCDown
-          annotations:
-            summary: "Proxmox LXC container {{ $labels.id }} is DOWN on {{ $labels.instance }}"
-            description: "LXC container {{ $labels.id }} on {{ $labels.instance }} has stopped running."
-          expr: |
-            pve_up{id=~"lxc/.*"} == 0
-          for: 5m
-          labels:
-            severity: warning
-            component: proxmox
-            alert_group: virtualization
+#       - alert: ProxmoxLXCDown
+#         annotations:
+#           summary: "Proxmox LXC container {{ $labels.id }} is DOWN on {{ $labels.instance }}"
+#           description: "LXC container {{ $labels.id }} on {{ $labels.instance }} has stopped running."
+#         expr: |
+#           pve_up{id=~"lxc/.*"} == 0
+#         for: 5m
+#         labels:
+#           severity: warning
+#           component: proxmox
+#           alert_group: virtualization
 
-        # Warning: Node memory critically high
-        - alert: ProxmoxNodeMemoryCritical
-          annotations:
-            summary: "Proxmox node {{ $labels.instance }} memory usage is critical ({{ $value | humanizePercentage }})"
-            description: "Node {{ $labels.instance }} is using over 95% of available memory."
-          expr: |
-            (
-              pve_memory_usage_bytes{id=~"node/.*"}
-              /
-              pve_memory_size_bytes{id=~"node/.*"}
-            ) > 0.95
-          for: 10m
-          labels:
-            severity: warning
-            component: proxmox
-            alert_group: resources
+#       # Warning: Node memory critically high
+#       - alert: ProxmoxNodeMemoryCritical
+#         annotations:
+#           summary: "Proxmox node {{ $labels.instance }} memory usage is critical ({{ $value | humanizePercentage }})"
+#           description: "Node {{ $labels.instance }} is using over 95% of available memory."
+#         expr: |
+#           (
+#             pve_memory_usage_bytes{id=~"node/.*"}
+#             /
+#             pve_memory_size_bytes{id=~"node/.*"}
+#           ) > 0.95
+#         for: 10m
+#         labels:
+#           severity: warning
+#           component: proxmox
+#           alert_group: resources
 
         # Critical: Proxmox exporter scrape failing
         - alert: ProxmoxExporterDown
