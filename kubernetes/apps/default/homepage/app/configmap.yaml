@@ -39,6 +39,9 @@ data:
             - href: https://192.168.5.22/login/
               icon: si-raspberrypi-#E57000
               description: ""
+    - Links:
+        - SMH:
+            - href: https://smh.com.au
     - Puppet:
         - Puppet Enterprise:
             - icon: si-puppet-#FFAE1A
@@ -226,7 +229,7 @@ data:
         style: column
         icon: mdi-home-automation
       Utilities:
-        tab: Automation
+        tab: Misc
         style: column
         icon: mdi-tools
       # Misc tab
