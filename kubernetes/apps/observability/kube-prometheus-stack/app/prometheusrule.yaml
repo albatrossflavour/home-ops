@@ -32,3 +32,80 @@ spec:
           for: 15m
           labels:
             severity: critical
+    - name: storage
+      rules:
+        - alert: PersistentVolumeClaimAlmostFull
+          annotations:
+            summary: PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full
+            description: PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is at {{ $value | humanizePercentage }} capacity. Consider increasing size or cleaning up data.
+          expr: |-
+            (
+              kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes
+            ) > 0.75
+          for: 5m
+          labels:
+            severity: warning
+        - alert: PersistentVolumeClaimCriticallyFull
+          annotations:
+            summary: PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full
+            description: PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is at {{ $value | humanizePercentage }} capacity. Immediate action required to prevent service disruption.
+          expr: |-
+            (
+              kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes
+            ) > 0.85
+          for: 5m
+          labels:
+            severity: critical
+        - alert: PersistentVolumeClaimFillingSoon
+          annotations:
+            summary: PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} will be full in 4 days
+            description: Based on current usage trends, PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} will fill up in approximately 4 days.
+          expr: |-
+            (
+              kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes
+            ) < 0.15
+            and
+            predict_linear(kubelet_volume_stats_available_bytes[6h], 4 * 24 * 3600) < 0
+          for: 1h
+          labels:
+            severity: warning
+        - alert: CephClusterHealthError
+          annotations:
+            summary: Ceph cluster is in error state
+            description: Ceph cluster health status is HEALTH_ERR. Check cluster status immediately.
+          expr: ceph_health_status == 2
+          for: 5m
+          labels:
+            severity: critical
+        - alert: CephClusterHealthWarning
+          annotations:
+            summary: Ceph cluster is in warning state
+            description: Ceph cluster health status is HEALTH_WARN. Investigation may be needed.
+          expr: ceph_health_status == 1
+          for: 15m
+          labels:
+            severity: warning
+        - alert: CephOSDDown
+          annotations:
+            summary: Ceph OSD {{ $labels.ceph_daemon }} is down
+            description: Ceph OSD {{ $labels.ceph_daemon }} has been down for more than 5 minutes.
+          expr: ceph_osd_up == 0
+          for: 5m
+          labels:
+            severity: critical
+        - alert: VolsyncReplicationFailure
+          annotations:
+            summary: Volsync replication {{ $labels.namespace }}/{{ $labels.obj }} has failed
+            description: Volsync replication {{ $labels.namespace }}/{{ $labels.obj }} last sync failed. Backups may be incomplete.
+          expr: volsync_missed_intervals_total > 0
+          for: 15m
+          labels:
+            severity: warning
+        - alert: VolsyncReplicationStale
+          annotations:
+            summary: Volsync replication {{ $labels.namespace }}/{{ $labels.obj }} is stale
+            description: Volsync replication {{ $labels.namespace }}/{{ $labels.obj }} has not completed successfully in over 48 hours.
+          expr: (time() - volsync_last_sync_time_seconds) > (48 * 3600)
+          for: 1h
+          labels:
+            severity: warning
