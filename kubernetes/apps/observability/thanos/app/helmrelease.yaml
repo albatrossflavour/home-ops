@@ -68,14 +68,8 @@ spec:
           gethomepage.dev/name: "Thanos Query"
           gethomepage.dev/icon: thanos.png
           gethomepage.dev/description: "Long-term metrics storage"
-        hosts:
-          - host: &host thanos.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                pathType: Prefix
-        tls:
-          - hosts:
-              - *host
+        hostname: thanos.${SECRET_DOMAIN}
+        tls: true
 
     # Bucket Web - Browse object storage via web UI
     bucketweb:
