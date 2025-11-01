@@ -12,6 +12,7 @@ resources:
   - ./healthcheck-ping/ks.yaml
   - ./kromgo/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
+  - ./thanos/repositories/ks.yaml
   - ./thanos/ks.yaml
   - ./unpoller/ks.yaml
   #  - ./smartctl-exporter/ks.yaml
