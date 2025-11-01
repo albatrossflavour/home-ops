@@ -9,6 +9,6 @@ spec:
   interval: 5m
   url: oci://registry-1.docker.io/bitnamicharts/nginx
   ref:
-    tag: 22.2.1@sha256:449e1b8f6b5fffc44a1594ab439a12b18bd0730fe2aa5b19c155bb724b87a644
+    tag: 22.2.3@sha256:a3ab2e63008fc71eee33deff8a286f9d18ea78dddf33712c4243c12f62775001
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
