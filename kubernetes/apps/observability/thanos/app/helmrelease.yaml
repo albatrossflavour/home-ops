@@ -7,14 +7,10 @@ metadata:
 spec:
   interval: 30m
   timeout: 15m
-  chart:
-    spec:
-      chart: thanos
-      version: 17.3.1
-      sourceRef:
-        kind: HelmRepository
-        name: bitnami
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: thanos
+    namespace: flux-system
   install:
     remediation:
       retries: 3
