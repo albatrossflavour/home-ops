@@ -106,6 +106,15 @@ spec:
           - auto-gomemlimit
           - memory-snapshot-on-shutdown
           - new-service-discovery-manager
+        # Thanos sidecar configuration
+        thanos:
+          image: quay.io/thanos/thanos:v0.40.1
+          objectStorageConfig:
+            existingSecret:
+              name: thanos-objstore-secret
+              key: objstore.yml
+        externalLabels:
+          cluster: home-ops
         retention: 2000d
         retentionSize: 200GB
         resources:
