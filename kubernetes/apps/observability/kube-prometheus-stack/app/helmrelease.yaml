@@ -113,6 +113,9 @@ spec:
             existingSecret:
               name: thanos-objstore-secret
               key: objstore.yml
+          # Enable uploading of already-compacted blocks for faster historical data migration
+          additionalArgs:
+            - name: shipper.upload-compacted
         thanosService:
           enabled: true
         thanosServiceMonitor:
