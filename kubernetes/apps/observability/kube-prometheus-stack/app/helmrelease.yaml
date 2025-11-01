@@ -113,6 +113,10 @@ spec:
             existingSecret:
               name: thanos-objstore-secret
               key: objstore.yml
+        thanosService:
+          enabled: true
+        thanosServiceMonitor:
+          enabled: true
         externalLabels:
           cluster: home-ops
         retention: 2000d
