@@ -20,6 +20,11 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    # Allow using official upstream Thanos images instead of Bitnami images
+    global:
+      security:
+        allowInsecureImages: true
+
     # Use official upstream Thanos images, not Bitnami
     image:
       registry: quay.io
