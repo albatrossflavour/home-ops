@@ -44,7 +44,7 @@ spec:
       replicaCount: 1
       replicaLabel: ["__replica__"]
       dnsDiscovery:
-        sidecarsService: kube-prometheus-stack-thanos-discovery
+        sidecarsService: prometheus-operated
         sidecarsNamespace: observability
       resources:
         requests:
