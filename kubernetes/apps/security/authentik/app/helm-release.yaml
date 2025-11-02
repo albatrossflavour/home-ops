@@ -27,7 +27,7 @@ spec:
     global:
       deploymentAnnotations:
         secret.reloader.stakater.com/reload: "authentik-secret"
-      storageClass: openebs-hostpath
+      storageClass: ceph-block
       envFrom:
         - secretRef:
             name: authentik-secret
@@ -48,6 +48,17 @@ spec:
       redis:
         host: "dragonfly.database.svc.cluster.local"
     server:
+      replicas: 3
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: authentik
+                    app.kubernetes.io/component: server
+                topologyKey: kubernetes.io/hostname
       initContainers:
         - name: init-db
           image: ghcr.io/home-operations/postgres-init:17
