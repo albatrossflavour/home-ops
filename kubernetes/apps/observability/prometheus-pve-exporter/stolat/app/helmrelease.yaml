@@ -29,7 +29,7 @@ spec:
           app:
             image:
               repository: prompve/prometheus-pve-exporter
-              tag: "3.4.2@sha256:a01cb7220b16a764ede2a39a99fa3532d04f16c213499afbb2bda3540a661f80"
+              tag: "3.5.5@sha256:79a5598906697b1a5a006d09f0200528a77c6ff1568faf018539ac65824454df"
             env:
               TZ: "${TIMEZONE:=Etc/UTC}"
             envFrom:
