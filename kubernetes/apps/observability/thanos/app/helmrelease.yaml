@@ -105,9 +105,9 @@ spec:
     # Compactor - Downsamples and compacts object storage data
     compactor:
       enabled: true
-      retentionResolutionRaw: 14d    # Keep raw data for 14 days
-      retentionResolution5m: 30d     # Keep 5m downsampled for 30 days
-      retentionResolution1h: 90d     # Keep 1h downsampled for 90 days
+      retentionResolutionRaw: 14d
+      retentionResolution5m: 180d
+      retentionResolution1h: 5y
       persistence:
         enabled: true
         storageClass: openebs-hostpath
