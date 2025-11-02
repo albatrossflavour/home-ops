@@ -24,6 +24,18 @@ spec:
   values:
     fullnameOverride: ingress-nginx-internal
     controller:
+      replicaCount: 2
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: ingress-nginx
+                    app.kubernetes.io/instance: ingress-nginx-internal
+                    app.kubernetes.io/component: controller
+                topologyKey: kubernetes.io/hostname
       service:
         annotations:
           io.cilium/lb-ipam-ips: "192.168.8.21"
