@@ -148,18 +148,6 @@ endpoints:
     alerts:
       - type: pushover
 
-  - name: Kromgo
-    url: "https://kromgo.${SECRET_DOMAIN}"
-    group: "Observability"
-    description: "Badge Service"
-    tags: ["monitoring", "badges"]
-    interval: 5m
-    client:
-      dns-resolver: tcp://1.1.1.1:53
-    conditions:
-      - "[STATUS] < 400"
-      - "[RESPONSE_TIME] < 3000"
-
   # Utilities
   - name: Send
     url: "https://send.${SECRET_DOMAIN}"
@@ -175,35 +163,7 @@ endpoints:
     alerts:
       - type: pushover
 
-  - name: Shlink
-    url: "https://short.${SECRET_DOMAIN}"
-    group: "Utilities"
-    description: "URL Shortener"
-    tags: ["utilities", "url-shortener"]
-    interval: 2m
-    client:
-      dns-resolver: tcp://1.1.1.1:53
-    conditions:
-      - "[STATUS] < 400"
-      - "[RESPONSE_TIME] < 3000"
-    alerts:
-      - type: pushover
-
   # Static Websites
-  - name: Kalooma.org
-    url: "https://kalooma.org"
-    group: "Websites"
-    description: "Static Website"
-    tags: ["website", "static"]
-    interval: 5m
-    client:
-      dns-resolver: tcp://1.1.1.1:53
-    conditions:
-      - "[STATUS] < 400"
-      - "[RESPONSE_TIME] < 3000"
-    alerts:
-      - type: pushover
-
   - name: PDLF.net
     url: "https://pdlf.net"
     group: "Websites"
