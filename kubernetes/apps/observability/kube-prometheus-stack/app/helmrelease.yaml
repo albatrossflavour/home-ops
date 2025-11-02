@@ -122,7 +122,7 @@ spec:
           enabled: true
         externalLabels:
           cluster: home-ops
-        retention: 30d
+        retention: 2d
         retentionSize: 200GB
         resources:
           requests:
