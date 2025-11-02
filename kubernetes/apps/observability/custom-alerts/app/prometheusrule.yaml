@@ -1,0 +1,80 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: critical-ha-alerts
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: homelab.critical-ha
+      rules:
+        - alert: PodRestartLoop
+          expr: rate(kube_pod_container_status_restarts_total[10m]) > 0.5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is restart looping"
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted {{ $value | humanize }} times in the last 10 minutes"
+
+        - alert: PVCStorageNearlyFull
+          expr: |
+            (
+              kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes
+            ) > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
+            description: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full (threshold: 85%)"
+
+        - alert: CertificateExpiresSoon
+          expr: |
+            (
+              certmanager_certificate_expiration_timestamp_seconds - time()
+            ) / 86400 < 7
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Certificate {{ $labels.namespace }}/{{ $labels.name }} expires in {{ $value | humanizeDuration }}"
+            description: "Certificate {{ $labels.namespace }}/{{ $labels.name }} will expire in {{ $value | humanizeDuration }}"
+
+        - alert: AuthentikServiceDown
+          expr: |
+            up{job="authentik-server-metrics"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Authentik identity provider is down"
+            description: "Authentik service has been down for more than 5 minutes. Authentication may be unavailable."
+
+        - alert: IngressControllerLowReplicas
+          expr: |
+            (
+              kube_deployment_status_replicas_available{deployment=~"ingress-nginx-.*-controller"}
+              < 2
+            )
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Ingress controller {{ $labels.deployment }} has only {{ $value }} replicas"
+            description: "Ingress controller {{ $labels.deployment }} has {{ $value }} replicas (expected: 2+)"
+
+        - alert: AuthentikLowReplicas
+          expr: |
+            (
+              kube_deployment_status_replicas_available{deployment="authentik-server"}
+              < 2
+            )
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Authentik has only {{ $value }} replicas available"
+            description: "Authentik server has {{ $value }} replicas available (expected: 3)"
