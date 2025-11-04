@@ -26,10 +26,6 @@ spec:
     loki:
       commonConfig:
         replication_factor: 1
-        path_prefix: /var/loki
-        storage:
-          filesystem:
-            rules_directory: /rules
       rulerConfig:
         enable_api: true
         enable_alertmanager_v2: true
@@ -40,16 +36,6 @@ spec:
         ring:
           kvstore:
             store: inmemory
-      structuredConfig:
-        common:
-          storage:
-            filesystem:
-              rules_directory: /rules
-        ruler:
-          storage:
-            type: local
-            local:
-              directory: /rules
       schemaConfig:
         configs:
           - from: "2024-04-01"
