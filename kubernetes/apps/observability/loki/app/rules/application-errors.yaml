@@ -16,7 +16,7 @@ data:
           - alert: HighApplicationErrorRate
             expr: |
               sum by (namespace, pod) (
-                rate({namespace=~".+"} |~ "(?i)(error|exception|fatal)" [5m])
+                rate({namespace=~".+", pod!~"scrypted.*"} |~ "(?i)(error|exception|fatal)" [5m])
               ) > 1
             for: 15m
             labels:
@@ -58,7 +58,7 @@ data:
           - alert: ExternalServiceConnectionErrors
             expr: |
               sum by (namespace, pod) (
-                rate({namespace=~".+"} |~ "(?i)(ECONNREFUSED|connection refused|connect.*failed|timeout)" [5m])
+                rate({namespace=~".+", pod!~"scrypted.*"} |~ "(?i)(ECONNREFUSED|connection refused|connect.*failed|timeout)" [5m])
               ) > 0.5
             for: 15m
             labels:
