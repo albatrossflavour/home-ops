@@ -4,6 +4,8 @@ kind: ConfigMap
 metadata:
   name: loki-application-rules
   namespace: observability
+  labels:
+    loki_rule: "true"
 data:
   application-errors.yaml: |
     groups:

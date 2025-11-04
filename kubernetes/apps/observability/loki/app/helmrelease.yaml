@@ -33,7 +33,7 @@ spec:
         storage:
           type: local
           local:
-            directory: /var/loki/rules
+            directory: /rules
         rule_path: /tmp/loki/scratch
         ring:
           kvstore:
@@ -72,14 +72,9 @@ spec:
           nfs:
             server: "192.168.1.22"
             path: "/volume2/apps/loki"
-        - name: rules
-          configMap:
-            name: loki-application-rules
       extraVolumeMounts:
         - name: loki-data
           mountPath: /var/loki
-        - name: rules
-          mountPath: /var/loki/rules
       resources:
         requests:
           cpu: 100m
