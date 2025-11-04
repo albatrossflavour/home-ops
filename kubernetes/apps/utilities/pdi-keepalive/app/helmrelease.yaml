@@ -32,6 +32,7 @@ spec:
           successfulJobsHistory: 1
           failedJobsHistory: 1
           backoffLimit: 1
+          ttlSecondsAfterFinished: 3600
         containers:
           app:
             image:
