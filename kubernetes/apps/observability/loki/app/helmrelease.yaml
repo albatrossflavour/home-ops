@@ -79,6 +79,15 @@ spec:
       replicas: 1
       persistence:
         enabled: false
+      initContainers:
+        - name: setup-rules-symlink
+          image: busybox:latest
+          command: ['sh', '-c', 'ln -sfn /rules /var/loki/rules']
+          volumeMounts:
+            - name: loki-data
+              mountPath: /var/loki
+            - name: sc-rules-volume
+              mountPath: /rules
       extraVolumes:
         - name: loki-data
           nfs:
