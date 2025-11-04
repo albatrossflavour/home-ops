@@ -26,6 +26,10 @@ spec:
     loki:
       commonConfig:
         replication_factor: 1
+        path_prefix: /var/loki
+        storage:
+          filesystem:
+            rules_directory: /rules
       rulerConfig:
         enable_api: true
         enable_alertmanager_v2: true
