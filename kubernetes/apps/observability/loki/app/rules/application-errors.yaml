@@ -6,8 +6,6 @@ metadata:
   namespace: observability
   labels:
     loki_rule: "true"
-  annotations:
-    k8s-sidecar-target-directory: "/rules/homelab"
 data:
   application-errors.yaml: |
     groups:
