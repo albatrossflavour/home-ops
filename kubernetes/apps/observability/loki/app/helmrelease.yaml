@@ -41,6 +41,10 @@ spec:
           kvstore:
             store: inmemory
       structuredConfig:
+        common:
+          storage:
+            filesystem:
+              rules_directory: /rules
         ruler:
           storage:
             type: local
