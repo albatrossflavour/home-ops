@@ -26,6 +26,18 @@ spec:
     loki:
       commonConfig:
         replication_factor: 1
+      rulerConfig:
+        enable_api: true
+        enable_alertmanager_v2: true
+        alertmanager_url: http://alertmanager-kube-prometheus-stack.observability.svc.cluster.local:9093
+        storage:
+          type: local
+          local:
+            directory: /var/loki/rules
+        rule_path: /tmp/loki/scratch
+        ring:
+          kvstore:
+            store: inmemory
       schemaConfig:
         configs:
           - from: "2024-04-01"
@@ -60,9 +72,14 @@ spec:
           nfs:
             server: "192.168.1.22"
             path: "/volume2/apps/loki"
+        - name: rules
+          configMap:
+            name: loki-application-rules
       extraVolumeMounts:
         - name: loki-data
           mountPath: /var/loki
+        - name: rules
+          mountPath: /var/loki/rules
       resources:
         requests:
           cpu: 100m

@@ -5,4 +5,5 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./prometheusrule.yaml
+  - ./rules/application-errors.yaml
   - ../../../../templates/gatus/guarded
