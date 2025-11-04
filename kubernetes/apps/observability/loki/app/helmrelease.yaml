@@ -61,6 +61,9 @@ spec:
               period: 24h
       storage:
         type: filesystem
+        bucketNames:
+          chunks: chunks
+          ruler: ruler
         filesystem:
           chunks_directory: /var/loki/chunks
           rules_directory: /var/loki/rules
