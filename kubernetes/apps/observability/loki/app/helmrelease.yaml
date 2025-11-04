@@ -82,6 +82,15 @@ spec:
       replicas: 1
       persistence:
         enabled: false
+      initContainers:
+        - name: copy-rules
+          image: busybox:latest
+          command: ['sh', '-c', 'mkdir -p /var/loki/rules && cp -r /rules/* /var/loki/rules/ 2>/dev/null || true']
+          volumeMounts:
+            - name: loki-data
+              mountPath: /var/loki
+            - name: sc-rules-volume
+              mountPath: /rules
       extraVolumes:
         - name: loki-data
           nfs:
@@ -139,14 +148,6 @@ spec:
         enabled: false
         grafanaAgent:
           installOperator: false
-    sidecar:
-      rules:
-        enabled: true
-        folder: /var/loki/rules
-        searchNamespace: observability
-        extraVolumeMounts:
-          - name: loki-data
-            mountPath: /var/loki
     gateway:
       enabled: true
       replicas: 1
