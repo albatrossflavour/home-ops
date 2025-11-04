@@ -42,7 +42,10 @@ data:
           - alert: DatabaseConnectionErrors
             expr: |
               sum by (namespace, pod) (
-                rate({namespace=~".+"} |~ "(?i)(connection.*refused|database.*error|could not connect|connection.*failed)" [5m])
+                rate({namespace=~".+"}
+                  |~ "(?i)(connection.*refused|database connection error|could not connect|connection.*failed)"
+                  !~ "(?i)(success=true|evaluating rule|executing query|poddisruptionbudget)"
+                [5m])
               ) > 0
             for: 10m
             labels:
