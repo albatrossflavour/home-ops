@@ -53,6 +53,7 @@ spec:
       osd_memory_target = 3221225472
       osd_op_history_slow_op_threshold = 30
       osd_op_history_slow_op_size = 20
+      osd_op_complaint_time = 60
     cephClusterSpec:
       crashCollector:
         disable: false
