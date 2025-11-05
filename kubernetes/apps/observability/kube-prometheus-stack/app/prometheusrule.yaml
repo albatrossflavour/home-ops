@@ -77,11 +77,24 @@ spec:
           for: 5m
           labels:
             severity: critical
-        - alert: CephClusterHealthWarning
+        - alert: CephClusterHealthWarningSustained
           annotations:
-            summary: Ceph cluster is in warning state
-            description: Ceph cluster health status is HEALTH_WARN. Investigation may be needed.
+            summary: Ceph cluster HEALTH_WARN persists for over 1 hour
+            description: |
+              Ceph cluster health status has been HEALTH_WARN for over 1 hour.
+              This indicates a sustained issue beyond transient BlueStore compaction.
+              Check 'ceph health detail' for root cause.
           expr: ceph_health_status == 1
+          for: 1h
+          labels:
+            severity: warning
+        - alert: CephDaemonSlowOps
+          annotations:
+            summary: Ceph daemon {{ $labels.ceph_daemon }} has {{ $value }} slow operations
+            description: |
+              Ceph daemon {{ $labels.ceph_daemon }} is reporting slow operations.
+              This indicates sustained performance issues rather than transient compaction.
+          expr: ceph_daemon_health_metrics{type="SLOW_OPS"} > 10
           for: 15m
           labels:
             severity: warning
@@ -107,5 +120,17 @@ spec:
             description: Volsync replication {{ $labels.namespace }}/{{ $labels.obj }} has not completed successfully in over 48 hours.
           expr: (time() - volsync_last_sync_time_seconds) > (48 * 3600)
           for: 1h
+          labels:
+            severity: warning
+    - name: node-disk
+      rules:
+        - alert: NodeDiskIOSaturation
+          annotations:
+            description: |
+              Disk IO queue (aqu-sq) is high on {{ $labels.device }} at {{ $labels.instance }}, has been above 20 for the last 30 minutes, is currently at {{ printf "%.2f" $value }}.
+              This symptom might indicate disk saturation.
+            summary: Disk IO queue is high.
+          expr: rate(node_disk_io_time_weighted_seconds_total{job="node-exporter", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)"}[5m]) > 20
+          for: 30m
           labels:
             severity: warning
