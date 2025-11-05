@@ -8,7 +8,7 @@ metadata:
 data:
   kubernetes-services.yaml: |
     endpoints:
-      # External Services
+      # External Services (no dedicated ConfigMaps)
       - name: Puppet Forge API
         url: "https://forgeapi.puppet.com/v3/modules"
         group: "External Services"
@@ -26,138 +26,9 @@ data:
         alerts:
           - type: pushover
 
-      # Authentication & Security
-      - name: Authentik
-        url: "https://id.${SECRET_DOMAIN}"
-        group: "Authentication"
-        description: "Identity Provider (SSO)"
-        tags: ["security", "authentication", "sso", "critical"]
-        interval: 1m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 3000"
-        alerts:
-          - type: pushover
-
-      # Core Applications
-      - name: Home Assistant
-        url: "https://home-assistant.${SECRET_DOMAIN}"
-        group: "Smart Home"
-        description: "Home Automation Platform"
-        tags: ["automation", "smart-home", "iot", "critical"]
-        interval: 1m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 3000"
-        alerts:
-          - type: pushover
-
-      - name: NocoDB
-        url: "https://nocodb.${SECRET_DOMAIN}"
-        group: "Database"
-        description: "Database Interface"
-        tags: ["database", "nocode", "productivity"]
-        interval: 2m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 5000"
-        alerts:
-          - type: pushover
-
-      # Media Services
-      - name: Overseerr
-        url: "https://requests.${SECRET_DOMAIN}"
-        group: "Media Services"
-        description: "Media Request Manager"
-        tags: ["media", "requests", "entertainment"]
-        interval: 2m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 5000"
-        alerts:
-          - type: pushover
-
-      # Observability
-      - name: Grafana
-        url: "https://grafana.${SECRET_DOMAIN}"
-        group: "Observability"
-        description: "Metrics Visualization"
-        tags: ["monitoring", "metrics", "dashboards", "critical"]
-        interval: 2m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 5000"
-        alerts:
-          - type: pushover
-
-      - name: Kromgo
-        url: "https://kromgo.${SECRET_DOMAIN}"
-        group: "Observability"
-        description: "Badge Service"
-        tags: ["monitoring", "badges"]
-        interval: 5m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 3000"
-
-      # Utilities
-      - name: Send
-        url: "https://send.${SECRET_DOMAIN}"
-        group: "Utilities"
-        description: "File Sharing Service"
-        tags: ["file-sharing", "utilities"]
-        interval: 2m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 5000"
-        alerts:
-          - type: pushover
-
-      - name: Shlink
-        url: "https://short.${SECRET_DOMAIN}"
-        group: "Utilities"
-        description: "URL Shortener"
-        tags: ["utilities", "url-shortener"]
-        interval: 2m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 3000"
-        alerts:
-          - type: pushover
-
-      # Static Websites
+      # Static Websites (no dedicated ConfigMaps)
       - name: Kalooma.org
         url: "https://kalooma.org"
-        group: "Websites"
-        description: "Static Website"
-        tags: ["website", "static"]
-        interval: 5m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 3000"
-        alerts:
-          - type: pushover
-
-      - name: PDLF.net
-        url: "https://pdlf.net"
         group: "Websites"
         description: "Static Website"
         tags: ["website", "static"]
