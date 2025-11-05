@@ -29,7 +29,10 @@ data:
           - alert: RedisConnectionErrors
             expr: |
               sum by (namespace, pod) (
-                rate({namespace=~".+"} |~ "(?i)(READONLY|redis.*error|redis.*connection)" [5m])
+                rate({namespace=~".+"}
+                  |~ "(?i)(READONLY|redis.*error|redis.*connection)"
+                  !~ "(?i)(ruler|evaluating)"
+                [5m])
               ) > 0
             for: 10m
             labels:
@@ -44,7 +47,7 @@ data:
               sum by (namespace, pod) (
                 rate({namespace=~".+"}
                   |~ "(?i)(connection.*refused|database connection error|could not connect|connection.*failed)"
-                  !~ "(?i)(success=true|evaluating rule|executing query|poddisruptionbudget)"
+                  !~ "(?i)(success=true|evaluating rule|executing query|poddisruptionbudget|ruler)"
                 [5m])
               ) > 0
             for: 10m
