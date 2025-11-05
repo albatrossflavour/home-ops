@@ -70,15 +70,6 @@ spec:
         enabled: false
       containerSecurityContext:
         readOnlyRootFilesystem: false
-      initContainers:
-        - name: copy-rules
-          image: busybox:latest
-          command: ['sh', '-c', 'mkdir -p /var/loki/rules && cp -r /rules/* /var/loki/rules/ 2>/dev/null || true']
-          volumeMounts:
-            - name: loki-data
-              mountPath: /var/loki
-            - name: sc-rules-volume
-              mountPath: /rules
       extraVolumes:
         - name: loki-data
           nfs:
@@ -93,6 +84,13 @@ spec:
           memory: 256Mi
         limits:
           memory: 1Gi
+    sidecar:
+      rules:
+        enabled: true
+        folder: /var/loki/rules/fake
+        extraVolumeMounts:
+          - name: loki-data
+            mountPath: /var/loki
     # Explicitly disable all other deployment modes
     read:
       replicas: 0
