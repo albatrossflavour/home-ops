@@ -37,7 +37,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - betty.albatrossflavour.com
+#        - betty.albatrossflavour.com
         - dotty.albatrossflavour.com
   metricsPath: /metrics
   relabelings:
@@ -86,7 +86,7 @@ spec:
   staticConfigs:
     - targets:
         - dotty.albatrossflavour.com:9100
-        - betty.albatrossflavour.com:9100
+#        - betty.albatrossflavour.com:9100
         - hex.home.albatrossflavour.com:9100
         - luggage.lab.albatrossflavour.com:9100
         - ankh.lab.albatrossflavour.com:9100
