@@ -25,18 +25,3 @@ data:
           - "[BODY] != pat(.*(unauthorized|forbidden|expired).*)i"
         alerts:
           - type: pushover
-
-      # Static Websites (no dedicated ConfigMaps)
-      - name: Kalooma.org
-        url: "https://kalooma.org"
-        group: "Websites"
-        description: "Static Website"
-        tags: ["website", "static"]
-        interval: 5m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 3000"
-        alerts:
-          - type: pushover
