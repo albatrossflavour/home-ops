@@ -97,7 +97,7 @@ spec:
           annotations:
             summary: Volsync replication {{ $labels.namespace }}/{{ $labels.obj }} has failed
             description: Volsync replication {{ $labels.namespace }}/{{ $labels.obj }} last sync failed. Backups may be incomplete.
-          expr: volsync_missed_intervals_total > 0
+          expr: increase(volsync_missed_intervals_total[1h]) > 0
           for: 15m
           labels:
             severity: warning
