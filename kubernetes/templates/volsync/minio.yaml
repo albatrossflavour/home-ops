@@ -52,6 +52,32 @@ spec:
       weekly: 5
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
+#
+# CRITICAL WARNING: ReplicationDestination Auto-Restore Behavior
+#
+# This ReplicationDestination is configured with trigger.manual: restore-once
+# which means it will execute IMMEDIATELY when the resource is created.
+#
+# DANGER: If the resource is recreated (e.g., due to PVC name change), it will:
+# 1. Attempt to connect to the restic repository at RESTIC_REPOSITORY path
+# 2. If repository ID doesn't match or connection fails, it may INITIALIZE A NEW REPOSITORY
+# 3. This ORPHANS all existing snapshots, making them inaccessible
+# 4. The restore will fall back to any available VolumeSnapshot (likely stale data)
+#
+# November 19, 2024 Incident: A PVC rename from ${APP}-volsync to ${APP} caused
+# Kubernetes to DELETE and RECREATE this resource, triggering repository reinitialization.
+# Three apps (overseerr, qbittorrent, sabnzbd) lost weeks of backup history.
+#
+# To prevent this:
+# - NEVER rename PVCs in apps using this template
+# - NEVER modify the APP variable for deployed applications
+# - If you must recreate resources, manually backup repository metadata first
+# - Consider changing trigger to a unique value per deployment to prevent auto-restore
+#
+# For intentional restores, change the trigger value to force re-execution:
+#   trigger:
+#     manual: restore-2025-11-06  # Use timestamp or unique identifier
+#
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:

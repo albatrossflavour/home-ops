@@ -828,9 +828,39 @@ kubectl logs -n observability deployment/loki-gateway
 
 - DNS target annotation required on all ingresses
 - Use `existingClaim` + volsync template (not direct PVC creation)
+- **CRITICAL**: Volsync PVC names are IMMUTABLE - renaming triggers repository reinitialization and data loss
 - Most apps only need `external-secrets-stores` dependency
 - Images must use `tag: "version@sha256:digest"` format (quoted)
 - Secrets stored in 1Password `discworld` vault
+
+### Volsync PVC Immutability (CRITICAL WARNING)
+
+**WARNING**: PVC names in Volsync-enabled applications are IMMUTABLE once backups begin.
+
+**What happened**: November 19, 2024 - A template change renamed PVCs from `${APP}-volsync` to `${APP}`. This caused Kubernetes to delete and recreate Volsync resources, triggering restic repository reinitialization that orphaned all historical snapshots. Three applications (overseerr, qbittorrent, sabnzbd) lost weeks of backup history and were restored from stale VolumeSnapshots.
+
+**Why PVC renames are dangerous**:
+
+1. Kubernetes treats PVC name change as DELETE + CREATE
+2. All Volsync resources (ReplicationSource, ReplicationDestination) are recreated
+3. ReplicationDestination executes immediately with `restore-once` trigger
+4. Restic initializes a NEW repository at the same S3 path
+5. Old snapshots become inaccessible (orphaned with different repository ID)
+6. PVC falls back to stale VolumeSnapshot data
+
+**Safe PVC rename procedure** (only if absolutely necessary):
+
+1. Suspend Flux Kustomization for the application
+2. Manually backup restic repository metadata from Minio: `s3:http://minio.default.svc.cluster.local:9000/volsync/{app}/config`
+3. Document the original repository ID: `restic cat config -r s3:...`
+4. Rename PVC in Git and commit
+5. Resume Flux reconciliation
+6. **Do NOT allow ReplicationDestination to restore** - delete it before it executes
+7. Manually recreate repository connection with original repository ID
+8. Verify backups are accessible: `restic snapshots -r s3:...`
+9. Only then allow ReplicationDestination to restore
+
+**Best practice**: Never rename PVCs in Volsync-enabled apps. If you must change something, add a new app with new name and migrate data manually.
 
 ### Renovate Image Management
 

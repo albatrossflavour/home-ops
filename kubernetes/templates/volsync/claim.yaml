@@ -1,4 +1,30 @@
 ---
+#
+# CRITICAL WARNING: PVC Name Immutability with Volsync
+#
+# This PVC uses dataSourceRef to automatically restore from a ReplicationDestination.
+# The PVC name (${APP}) is IMMUTABLE once backups begin.
+#
+# Why: Changing the PVC name causes Kubernetes to treat this as a new resource,
+# triggering DELETE of the old PVC and CREATE of a new one. This cascades to:
+# 1. All Volsync resources (ReplicationSource, ReplicationDestination) are recreated
+# 2. ReplicationDestination executes immediately due to trigger: restore-once
+# 3. Restic may initialize a NEW repository, orphaning all historical snapshots
+# 4. You lose all backup history and restore from stale VolumeSnapshot
+#
+# November 19, 2024 Incident: Renaming from ${APP}-volsync to ${APP} caused
+# three applications to lose weeks of backup history.
+#
+# NEVER:
+# - Rename this PVC (name: "${APP}")
+# - Change the APP variable for deployed applications
+# - Modify this template in ways that affect existing deployments
+#
+# If you must rename:
+# 1. Follow the safe procedure documented in CLAUDE.md under "Volsync PVC Immutability"
+# 2. Manually backup restic repository metadata before making changes
+# 3. Suspend Flux reconciliation during the migration
+#
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
