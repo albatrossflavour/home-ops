@@ -9,5 +9,8 @@ configMapGenerator:
   - name: pdlf-website-webroot
     files:
       - webroot/index.html
+  - name: pdlf-website-nginx-config
+    files:
+      - nginx-config/nginx.conf
 generatorOptions:
   disableNameSuffixHash: true

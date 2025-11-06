@@ -63,3 +63,9 @@ spec:
         name: pdlf-website-webroot
         globalMounts:
           - path: /usr/share/nginx/html
+      nginx-config:
+        type: configMap
+        name: pdlf-website-nginx-config
+        globalMounts:
+          - path: /etc/nginx/conf.d/default.conf
+            subPath: nginx.conf
