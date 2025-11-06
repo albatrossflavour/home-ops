@@ -11,7 +11,7 @@ data:
       # External Services (no dedicated ConfigMaps)
       - name: Puppet Forge API
         url: "https://forgeapi.puppet.com/v3/modules"
-        group: "External Services"
+        group: "Puppet Lab"
         description: "Puppet Forge API Availability"
         tags: ["puppet", "api", "infrastructure", "critical"]
         interval: 5m
