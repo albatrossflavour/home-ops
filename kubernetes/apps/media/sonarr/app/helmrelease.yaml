@@ -50,6 +50,7 @@ spec:
               SONARR__LOG__LEVEL: info
               SONARR__SERVER__PORT: &port 80
               SONARR__UPDATE__BRANCH: develop
+              SONARR__THEME__CUSTOMCSSURL: "http://theme-park.default.svc.cluster.local/css/base/sonarr/nord.css"
               TZ: "${TIMEZONE}"
             envFrom: *envFrom
             probes:
