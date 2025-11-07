@@ -103,6 +103,8 @@ spec:
           gethomepage.dev/widget.url: http://sonarr.media
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SONARR_TOKEN}}` }}"
           nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_set_header Accept-Encoding "";
+            sub_filter_types *;
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="http://theme-park.default.svc.cluster.local/css/base/sonarr/nord.css"></head>';
             sub_filter_once on;
         className: internal
