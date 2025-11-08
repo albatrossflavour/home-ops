@@ -26,6 +26,7 @@ spec:
   values:
     fullnameOverride: ingress-nginx-external
     controller:
+      allowSnippetAnnotations: true
       replicaCount: 2
       affinity:
         podAntiAffinity:
@@ -55,6 +56,7 @@ spec:
               operator: In
               values: ["external"]
       config:
+        annotations-risk-level: Critical
         client-body-buffer-size: 100M
         client-body-timeout: 120
         client-header-timeout: 120
