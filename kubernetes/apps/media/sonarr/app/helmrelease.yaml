@@ -108,7 +108,7 @@ spec:
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
             sub_filter_types text/html;
-            sub_filter '</body>' '<link rel="stylesheet" type="text/css" href="http://theme-park.default.svc.cluster.local:8080/css/base/sonarr/aquamarine.css"></body>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="http://theme-park.default.svc.cluster.local:8080/css/base/sonarr/aquamarine.css"></head>';
             sub_filter_once on;
         className: internal
         hosts:
