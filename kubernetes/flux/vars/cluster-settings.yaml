@@ -7,7 +7,3 @@ metadata:
 data:
   SETTING_EXAMPLE: Global settings for your cluster go in this file, this file is NOT encrypted
   THEME_PARK_THEME: aquamarine
-  THEME_PARK_SNIPPET: |
-    proxy_set_header Accept-Encoding "";
-    sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="http://themepark.${SECRET_DOMAIN}/css/base/{{ .Release.Name }}/${THEME_PARK_THEME}.css"></head>';
-    sub_filter_once on;
