@@ -100,6 +100,15 @@ spec:
           gethomepage.dev/widget.type: sabnzbd
           gethomepage.dev/widget.url: http://sab.${SECRET_DOMAIN}
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SABNZBD_TOKEN}}` }}"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_set_header Accept-Encoding "";
+            sub_filter_types text/html;
+            sub_filter '</body>' '<link rel="stylesheet" type="text/css" href="/css/base/sabnzbd/${THEME_PARK_THEME}.css"></body>';
+            sub_filter_once on;
+          nginx.ingress.kubernetes.io/server-snippet: |
+            location /css {
+              proxy_pass http://theme-park.default.svc.cluster.local:8080;
+            }
         className: internal
         hosts:
           - host: "sab.${SECRET_DOMAIN}"
