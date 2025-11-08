@@ -109,15 +109,6 @@ spec:
           gethomepage.dev/widget.url: http://qbittorrent.media
           gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}` }}"
           gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}` }}"
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_set_header Accept-Encoding "";
-            sub_filter_types text/html;
-            sub_filter '</body>' '<link rel="stylesheet" type="text/css" href="/css/base/qbittorrent/${THEME_PARK_THEME}.css"></body>';
-            sub_filter_once on;
-          nginx.ingress.kubernetes.io/server-snippet: |
-            location /css {
-              proxy_pass http://theme-park.default.svc.cluster.local:8080;
-            }
         className: internal
         hosts:
           - host: qb.${SECRET_DOMAIN}
