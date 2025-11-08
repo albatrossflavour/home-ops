@@ -94,6 +94,15 @@ spec:
           gethomepage.dev/widget.url: http://tautulli.${SECRET_DOMAIN}
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_TAUTULLI_TOKEN}}` }}"
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_set_header Accept-Encoding "";
+            sub_filter_types text/html;
+            sub_filter '</body>' '<link rel="stylesheet" type="text/css" href="/tp-css/base/tautulli/${THEME_PARK_THEME}.css"></body>';
+            sub_filter_once on;
+          nginx.ingress.kubernetes.io/server-snippet: |
+            location /tp-css {
+              proxy_pass http://theme-park.default.svc.cluster.local:8080/css;
+            }
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
