@@ -53,9 +53,9 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Services
+          gethomepage.dev/group: Utilities
           gethomepage.dev/name: Theme Park
-          gethomepage.dev/icon: theme-park.png
+          gethomepage.dev/icon: sh-theme-park.png
           gethomepage.dev/description: CSS Theme Server
         hosts:
           - host: "themepark.${SECRET_DOMAIN}"
