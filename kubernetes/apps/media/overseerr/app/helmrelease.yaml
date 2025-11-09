@@ -94,7 +94,7 @@ spec:
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
             sub_filter_types text/html;
-            sub_filter '</body>' '<link rel="stylesheet" type="text/css" href="/tp-css/base/overseerr/${THEME_PARK_THEME}.css"></body>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="/tp-css/base/overseerr/${THEME_PARK_THEME}.css"></head>';
             sub_filter_once on;
           nginx.ingress.kubernetes.io/server-snippet: |
             location /tp-css {
