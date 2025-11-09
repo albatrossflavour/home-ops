@@ -53,6 +53,14 @@ spec:
               # SMTP configuration - using cluster smtp-relay
               SMTP_HOST: smtp-relay.default.svc.cluster.local
               SMTP_PORT: "25"
+              # Security: Disable public sign-ups
+              SIGN_UP_DISABLED: "true"
+              # Security: Require authentication for uploads
+              UPLOAD_AUTH_REQUIRED: "true"
+              # Default visibility for recordings
+              DEFAULT_RECORDING_VISIBILITY: private
+              # Contact email for support
+              CONTACT_EMAIL_ADDRESS: tgreen@albatrossflavour.com
             envFrom:
               - secretRef:
                   name: asciinema-secret
