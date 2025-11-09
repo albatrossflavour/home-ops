@@ -109,8 +109,8 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Utilities
           gethomepage.dev/name: Asciinema
-          gethomepage.dev/icon: mdi-movie-play-outline
-          gethomepage.dev/description: Terminal Session Recordings
+          gethomepage.dev/icon: sh-asciinema.png
+          gethomepage.dev/description: Terminal Session Replay
         hosts:
           - host: &host replay.${SECRET_DOMAIN}
             paths:
