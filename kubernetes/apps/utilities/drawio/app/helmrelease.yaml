@@ -75,7 +75,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: "Utilities"
           gethomepage.dev/name: "Draw.io"
-          gethomepage.dev/icon: "sh-drawio.png"
+          gethomepage.dev/icon: "sh-draw-io.png"
           gethomepage.dev/description: "Technical Diagramming Tool"
         hosts:
           - host: drawio.${SECRET_DOMAIN}
