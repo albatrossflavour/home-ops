@@ -78,3 +78,23 @@ spec:
           annotations:
             summary: "Authentik has only {{ $value }} replicas available"
             description: "Authentik server has {{ $value }} replicas available (expected: 3)"
+
+        - alert: PiholeHighLoad
+          expr: |
+            node_load1{instance=~"pihole.*:9100"} > 10
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pi-hole {{ $labels.instance }} has high load"
+            description: "Pi-hole {{ $labels.instance }} has load average of {{ $value | humanize }} (threshold: 10)"
+
+        - alert: PiholeHighLoad
+          expr: |
+            node_load1{instance=~"pihole.*:9100"} > 20
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pi-hole {{ $labels.instance }} has critically high load"
+            description: "Pi-hole {{ $labels.instance }} has load average of {{ $value | humanize }} (threshold: 20). This may cause cluster-wide DNS failures."
