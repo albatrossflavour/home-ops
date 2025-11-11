@@ -17,4 +17,5 @@ resources:
   - ./immich/ks.yaml
   - ./penpot/ks.yaml
   - ./theme-park/ks.yaml
+  - ./zigbee2mqtt/ks.yaml
   # - ./nextcloud/ks.yaml
