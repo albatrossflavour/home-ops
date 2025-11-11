@@ -44,6 +44,10 @@ data:
             - href: https://smh.com.au
               icon: mdi-newspaper
               description: ""
+        - Amazon:
+            - href: https://amazon.com.au
+              icon: sh-amazon
+              description: ""
         - Material Design Icons:
             - href: https://pictogrammers.com/library/mdi/
               icon: mdi-material-design
