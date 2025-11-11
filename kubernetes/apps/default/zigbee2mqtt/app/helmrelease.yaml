@@ -38,14 +38,19 @@ spec:
               ZIGBEE2MQTT_CONFIG_SERIAL_RTSCTS: "false"
               ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: info
               ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: &port 8080
+              ZIGBEE2MQTT_CONFIG_FRONTEND_URL: https://zigbee2mqtt.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: zigbee2mqtt-secret
             probes:
               liveness:
                 enabled: true
+                initialDelaySeconds: 60
+                periodSeconds: 30
               readiness:
                 enabled: true
+                initialDelaySeconds: 60
+                periodSeconds: 30
             resources:
               requests:
                 cpu: 10m
