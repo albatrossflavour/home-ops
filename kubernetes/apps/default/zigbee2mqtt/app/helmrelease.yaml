@@ -45,12 +45,18 @@ spec:
             probes:
               liveness:
                 enabled: true
-                initialDelaySeconds: 60
-                periodSeconds: 30
               readiness:
                 enabled: true
-                initialDelaySeconds: 60
-                periodSeconds: 30
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 5
+                  timeoutSeconds: 1
+                  failureThreshold: 30
             resources:
               requests:
                 cpu: 10m
