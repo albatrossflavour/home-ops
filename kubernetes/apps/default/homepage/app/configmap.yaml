@@ -46,7 +46,7 @@ data:
               description: ""
         - Amazon:
             - href: https://amazon.com.au
-              icon: sh-amazon
+              icon: sh-amazon-light
               description: ""
         - Material Design Icons:
             - href: https://pictogrammers.com/library/mdi/
