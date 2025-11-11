@@ -37,7 +37,6 @@ spec:
               ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: ember
               ZIGBEE2MQTT_CONFIG_SERIAL_RTSCTS: "false"
               ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: info
-              ZIGBEE2MQTT_CONFIG_FRONTEND: "true"
               ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: &port 8080
             envFrom:
               - secretRef:
