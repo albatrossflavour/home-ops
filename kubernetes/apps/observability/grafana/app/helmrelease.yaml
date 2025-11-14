@@ -398,7 +398,7 @@ spec:
       image:
         registry: quay.io
         repository: kiwigrid/k8s-sidecar
-        tag: 1.30.10@sha256:835d79d8fbae62e42d8a86929d4e3c5eec2e869255dd37756b5a3166c2f22309
+        tag: 2.1.2@sha256:8b875915be0869624cf5dfd48a1dfbfb627e778793cc1612d00fb281a8805c63
       dashboards:
         enabled: true
         searchNamespace: ALL
