@@ -94,39 +94,41 @@ spec:
       targetLabel: room
       replacement: "$1"
 
-    # Step 10: Generic fallback - extract first word as room (for unknown sensor types)
+    # Step 10: Handle specific door sensors (no suffix to remove)
     - action: replace
       sourceLabels: [topic]
-      regex: "zigbee2mqtt_([^ ]+).*"
+      regex: "zigbee2mqtt_(.*door)"
       targetLabel: room
       replacement: "$1"
+
+    #############################################
+    # Floor mapping: outside
+    # Note: Must come BEFORE ground floor to catch "front door" before "garage"
+    #############################################
+    - action: replace
+      sourceLabels: [room]
+      regex: ".*(garden|front door|back door)"
+      targetLabel: floor
+      replacement: outside
+
+    #############################################
+    # Floor mapping: first floor rooms
+    # Note: Must come BEFORE ground floor to prevent "bedroom" from matching "harri bedroom"
+    #############################################
+    - action: replace
+      sourceLabels: [room]
+      regex: "(harri bedroom|edward bedroom|studio|master)"
+      targetLabel: floor
+      replacement: first
 
     #############################################
     # Floor mapping: ground floor rooms
     #############################################
     - action: replace
       sourceLabels: [room]
-      regex: "(study|garage|kitchen|lounge|bedroom)"
+      regex: ".*(study|garage|kitchen|lounge)"
       targetLabel: floor
       replacement: ground
-
-    #############################################
-    # Floor mapping: outside
-    #############################################
-    - action: replace
-      sourceLabels: [room]
-      regex: "(.*garden|front|back)"
-      targetLabel: floor
-      replacement: outside
-
-    #############################################
-    # Floor mapping: first floor rooms
-    #############################################
-    - action: replace
-      sourceLabels: [room]
-      regex: "(harri bedroom|studio|master)"
-      targetLabel: floor
-      replacement: first
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
 apiVersion: monitoring.coreos.com/v1alpha1
