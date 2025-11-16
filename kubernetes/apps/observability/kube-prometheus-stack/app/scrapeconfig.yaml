@@ -28,6 +28,7 @@ spec:
     - action: replace
       targetLabel: job
       replacement: *name
+  metricRelabelings:
     #############################################
     # Extract room name from topic by removing sensor type suffixes
     # Examples:
@@ -65,28 +66,35 @@ spec:
       targetLabel: room
       replacement: "$1"
 
-    # Step 5: Remove " light switch" suffix (2 words)
+    # Step 5: Remove " tap" suffix
+    - action: replace
+      sourceLabels: [topic]
+      regex: "zigbee2mqtt_(.+) tap"
+      targetLabel: room
+      replacement: "$1"
+
+    # Step 7: Remove " light switch" suffix (2 words)
     - action: replace
       sourceLabels: [topic]
       regex: "zigbee2mqtt_(.+) light switch"
       targetLabel: room
       replacement: "$1"
 
-    # Step 6: Remove " cabinet lights" suffix (2 words)
+    # Step 8: Remove " cabinet lights" suffix (2 words)
     - action: replace
       sourceLabels: [topic]
       regex: "zigbee2mqtt_(.+) cabinet lights"
       targetLabel: room
       replacement: "$1"
 
-    # Step 7: Remove " blind middle" suffix (2 words)
+    # Step 9: Remove " blind middle" suffix (2 words)
     - action: replace
       sourceLabels: [topic]
       regex: "zigbee2mqtt_(.+) blind .*"
       targetLabel: room
       replacement: "$1"
 
-    # Step 8: Generic fallback - extract first word as room (for unknown sensor types)
+    # Step 10: Generic fallback - extract first word as room (for unknown sensor types)
     - action: replace
       sourceLabels: [topic]
       regex: "zigbee2mqtt_([^ ]+).*"
@@ -107,7 +115,7 @@ spec:
     #############################################
     - action: replace
       sourceLabels: [room]
-      regex: "(garden|front)"
+      regex: "(.*garden|front|back)"
       targetLabel: floor
       replacement: outside
 
