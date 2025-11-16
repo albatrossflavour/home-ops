@@ -107,7 +107,7 @@ spec:
     #############################################
     - action: replace
       sourceLabels: [room]
-      regex: ".*(garden|front door|back door)"
+      regex: ".*(front garden|back garden)"
       targetLabel: floor
       replacement: outside
 
@@ -117,7 +117,7 @@ spec:
     #############################################
     - action: replace
       sourceLabels: [room]
-      regex: "(harri bedroom|edward bedroom|studio|master)"
+      regex: "(harri bedroom|edward bedroom|studio|bedroom|games room)"
       targetLabel: floor
       replacement: first
 
@@ -126,7 +126,7 @@ spec:
     #############################################
     - action: replace
       sourceLabels: [room]
-      regex: ".*(study|garage|kitchen|lounge)"
+      regex: ".*(study|garage|kitchen|lounge|dining room)"
       targetLabel: floor
       replacement: ground
 ---
