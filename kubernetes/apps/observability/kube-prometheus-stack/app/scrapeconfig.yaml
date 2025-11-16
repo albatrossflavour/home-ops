@@ -29,17 +29,72 @@ spec:
       targetLabel: job
       replacement: *name
     #############################################
-    # Extract room name from topic
-    # zigbee2mqtt_study env → study
+    # Extract room name from topic by removing sensor type suffixes
+    # Examples:
+    # - zigbee2mqtt_study env → study
+    # - zigbee2mqtt_garage presence → garage
+    # - zigbee2mqtt_garage light switch → garage
+    # - zigbee2mqtt_harri bedroom env → harri bedroom
     #############################################
+
+    # Step 1: Remove " env" suffix
     - action: replace
       sourceLabels: [topic]
-      regex: zigbee2mqtt_(.+) env
+      regex: "zigbee2mqtt_(.+) env"
+      targetLabel: room
+      replacement: "$1"
+
+    # Step 2: Remove " presence" suffix
+    - action: replace
+      sourceLabels: [topic]
+      regex: "zigbee2mqtt_(.+) presence"
+      targetLabel: room
+      replacement: "$1"
+
+    # Step 3: Remove " remote" suffix
+    - action: replace
+      sourceLabels: [topic]
+      regex: "zigbee2mqtt_(.+) remote"
+      targetLabel: room
+      replacement: "$1"
+
+    # Step 4: Remove " button" suffix
+    - action: replace
+      sourceLabels: [topic]
+      regex: "zigbee2mqtt_(.+) button"
+      targetLabel: room
+      replacement: "$1"
+
+    # Step 5: Remove " light switch" suffix (2 words)
+    - action: replace
+      sourceLabels: [topic]
+      regex: "zigbee2mqtt_(.+) light switch"
+      targetLabel: room
+      replacement: "$1"
+
+    # Step 6: Remove " cabinet lights" suffix (2 words)
+    - action: replace
+      sourceLabels: [topic]
+      regex: "zigbee2mqtt_(.+) cabinet lights"
+      targetLabel: room
+      replacement: "$1"
+
+    # Step 7: Remove " blind middle" suffix (2 words)
+    - action: replace
+      sourceLabels: [topic]
+      regex: "zigbee2mqtt_(.+) blind .*"
+      targetLabel: room
+      replacement: "$1"
+
+    # Step 8: Generic fallback - extract first word as room (for unknown sensor types)
+    - action: replace
+      sourceLabels: [topic]
+      regex: "zigbee2mqtt_([^ ]+).*"
       targetLabel: room
       replacement: "$1"
 
     #############################################
-    # Floor mapping: downstairs rooms
+    # Floor mapping: ground floor rooms
     #############################################
     - action: replace
       sourceLabels: [room]
@@ -52,18 +107,18 @@ spec:
     #############################################
     - action: replace
       sourceLabels: [room]
-      regex: "(garden)"
+      regex: "(garden|front)"
       targetLabel: floor
       replacement: outside
 
     #############################################
-    # Floor mapping: upstairs rooms
+    # Floor mapping: first floor rooms
     #############################################
     - action: replace
       sourceLabels: [room]
       regex: "(harri bedroom|studio|master)"
       targetLabel: floor
-      replacement: upper
+      replacement: first
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
 apiVersion: monitoring.coreos.com/v1alpha1
