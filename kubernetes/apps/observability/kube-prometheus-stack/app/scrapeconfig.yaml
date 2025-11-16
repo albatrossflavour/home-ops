@@ -28,6 +28,42 @@ spec:
     - action: replace
       targetLabel: job
       replacement: *name
+    #############################################
+    # Extract room name from topic
+    # zigbee2mqtt_study env → study
+    #############################################
+    - action: replace
+      sourceLabels: [topic]
+      regex: zigbee2mqtt_(.+) env
+      targetLabel: room
+      replacement: "$1"
+
+    #############################################
+    # Floor mapping: downstairs rooms
+    #############################################
+    - action: replace
+      sourceLabels: [room]
+      regex: "(study|garage|kitchen|lounge|bedroom)"
+      targetLabel: floor
+      replacement: ground
+
+    #############################################
+    # Floor mapping: outside
+    #############################################
+    - action: replace
+      sourceLabels: [room]
+      regex: "(garden)"
+      targetLabel: floor
+      replacement: outside
+
+    #############################################
+    # Floor mapping: upstairs rooms
+    #############################################
+    - action: replace
+      sourceLabels: [room]
+      regex: "(harri bedroom|studio|master)"
+      targetLabel: floor
+      replacement: upper
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
 apiVersion: monitoring.coreos.com/v1alpha1
