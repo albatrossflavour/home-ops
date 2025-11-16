@@ -29,7 +29,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: "17"
+              tag: "18@sha256:866f15038ed5185a2b8118821f470bb7ca0df8c4231b8e277446e681ebb1ed84"
             envFrom:
               - secretRef:
                   name: shlink-secret
@@ -97,7 +97,7 @@ spec:
           web:
             image:
               repository: shlinkio/shlink-web-client
-              tag: "4.5.1@sha256:0e695130f19307dd89c5a2b9b3486106b2445319da88b3af489af162a8f05ee4"
+              tag: "4.6.1@sha256:8355ba0c58c0f7e99eab658433fd2a4ee349370fee1b7e8a5e27ebadb5cea3d4"
             env:
               UID: "2000"
               TZ: Australia/Sydney

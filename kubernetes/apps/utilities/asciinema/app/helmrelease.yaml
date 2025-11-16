@@ -36,7 +36,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: "17@sha256:86a1992d46273c58fd4ad95b626081dfaabfe16bd56944675169e406d1a660dd"
+              tag: "18@sha256:866f15038ed5185a2b8118821f470bb7ca0df8c4231b8e277446e681ebb1ed84"
             envFrom:
               - secretRef:
                   name: asciinema-secret
@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: ghcr.io/asciinema/asciinema-server
-              tag: "20251013@sha256:fad89accd5cedb366cd9213ed90e02c4f3c069458771122a9065bc7ffb2e93e1"
+              tag: "20251114@sha256:ce1dcd55850219d2b4fa729e5f6c64efbb0af1b05d94bd150334770231762507"
             env:
               TZ: "${TZ}"
               # URL configuration
