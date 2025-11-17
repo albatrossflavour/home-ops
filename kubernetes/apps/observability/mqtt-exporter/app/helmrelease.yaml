@@ -75,3 +75,67 @@ spec:
               - action: replace
                 sourceLabels: ["service"]
                 targetLabel: instance
+              # Extract room name from topic by removing sensor type suffixes
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.+) env"
+                targetLabel: room
+                replacement: "$1"
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.+) presence"
+                targetLabel: room
+                replacement: "$1"
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.+) remote"
+                targetLabel: room
+                replacement: "$1"
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.+) button"
+                targetLabel: room
+                replacement: "$1"
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.+) tap"
+                targetLabel: room
+                replacement: "$1"
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.+) light switch"
+                targetLabel: room
+                replacement: "$1"
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.+) cabinet lights"
+                targetLabel: room
+                replacement: "$1"
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.+) blind .*"
+                targetLabel: room
+                replacement: "$1"
+              - action: replace
+                sourceLabels: [topic]
+                regex: "zigbee2mqtt_(.*door)"
+                targetLabel: room
+                replacement: "$1"
+              # Floor mapping: outside
+              - action: replace
+                sourceLabels: [room]
+                regex: ".*(front garden|back garden)"
+                targetLabel: floor
+                replacement: outside
+              # Floor mapping: first floor rooms
+              - action: replace
+                sourceLabels: [room]
+                regex: "(harri bedroom|edward bedroom|studio|bedroom|games room)"
+                targetLabel: floor
+                replacement: first
+              # Floor mapping: ground floor rooms
+              - action: replace
+                sourceLabels: [room]
+                regex: ".*(study|garage|kitchen|lounge|dining room)"
+                targetLabel: floor
+                replacement: ground
