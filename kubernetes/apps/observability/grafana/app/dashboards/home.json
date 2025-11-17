@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 5,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -134,7 +134,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "mqtt_temperature{floor=~\"$Floor\"}",
+          "expr": "mqtt_temperature{floor=~\"$Floor\", job=\"mqtt-exporter\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -269,7 +269,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "mqtt_humidity{floor=~\"$Floor\"}",
+          "expr": "mqtt_humidity{floor=~\"$Floor\", job=\"mqtt-exporter\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
