@@ -40,6 +40,14 @@ spec:
               PROMETHEUS_PORT: &port 3321
               # PROMETHEUS_PREFIX: "mqtt_"
               ZIGBEE2MQTT_AVAILABILITY: "True"
+              # Filter out bridge metadata topics to prevent metric limit exhaustion
+              MQTT_IGNORED_TOPICS: >-
+                zigbee2mqtt/bridge/definitions,
+                zigbee2mqtt/bridge/logging,
+                zigbee2mqtt/bridge/info,
+                zigbee2mqtt/bridge/event
+              # Modest safety buffer for metric limit
+              MQTT_METRICS_MAX: "3000"
             envFrom:
               - secretRef:
                   name: mqtt-exporter
