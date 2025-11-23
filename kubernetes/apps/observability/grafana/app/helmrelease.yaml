@@ -396,9 +396,9 @@ spec:
             - { name: DS_PROMETHEUS, value: Prometheus }
     sidecar:
       image:
-        registry: quay.io
+        registry: ghcr.io
         repository: kiwigrid/k8s-sidecar
-        tag: 2.1.2@sha256:8b875915be0869624cf5dfd48a1dfbfb627e778793cc1612d00fb281a8805c63
+        tag: 2.1.2@sha256:5304aa2ecb91fa1c9da31cf54aa92f9bc0ec26db5b12c9c53d5bfa50ca2d8abb
       dashboards:
         enabled: true
         searchNamespace: ALL
