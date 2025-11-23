@@ -49,9 +49,9 @@ restore_bootstrap_directory() {
     local title="homeops-bootstrap-templates"
     local archive="bootstrap-restore.tar.gz"
 
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📥 Restoring bootstrap/ directory..."
-        op document get "$title" --vault="$VAULT" --output="$archive"
+        op document get "$title" --vault="$VAULT" --account="$ACCOUNT" --output="$archive"
         tar -xzf "$archive"
         rm -f "$archive"
         echo "✅ bootstrap/ directory restored"
@@ -68,12 +68,12 @@ if ! command -v op >/dev/null 2>&1; then
     exit 1
 fi
 
-if ! op vault list >/dev/null 2>&1; then
-    echo "❌ Not authenticated with 1Password CLI. Run: op signin"
+if ! op vault list --account="$ACCOUNT" >/dev/null 2>&1; then
+    echo "❌ Not authenticated with 1Password CLI. Run: op signin --account $ACCOUNT"
     exit 1
 fi
 
-if ! op vault list | grep -q "$VAULT"; then
+if ! op vault list --account="$ACCOUNT" | grep -q "$VAULT"; then
     echo "❌ Vault '$VAULT' not found or not accessible"
     exit 1
 fi
@@ -84,7 +84,7 @@ echo ""
 # Check what's available
 available_items=()
 for item in "homeops-age-key-backup" "homeops-cluster-config" "homeops-bootstrap-templates" "homeops-kubeconfig" "homeops-talosconfig"; do
-    if op item get "$item" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$item" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         available_items+=("$item")
         echo "✅ $item available"
     else
