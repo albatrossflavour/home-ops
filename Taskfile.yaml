@@ -107,12 +107,12 @@ tasks:
       Shows all homeops backup items currently stored in the 1Password vault.
       Useful for verifying backups exist before attempting restore.
     cmds:
-      - op item list --vault="discworld" | grep "homeops-" || echo "No backup items found"
+      - op item list --vault="discworld" --account="thegreens.1password.com" | grep "homeops-" || echo "No backup items found"
     preconditions:
       - msg: 1Password CLI not found - install from https://developer.1password.com/docs/cli/get-started/
         sh: command -v op
       - msg: Not authenticated with 1Password CLI - run 'op signin'
-        sh: op vault list >/dev/null 2>&1
+        sh: op vault list --account="thegreens.1password.com" >/dev/null 2>&1
 
   .template:
     internal: true
