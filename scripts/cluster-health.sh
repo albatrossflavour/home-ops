@@ -58,8 +58,9 @@ done
 print_header() {
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "${BLUE}╔══════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║${NC}           Cluster Health Check - ${timestamp}            ${BLUE}║${NC}"
+    echo -e "${BLUE}════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BLUE}  Cluster Health Check - ${timestamp}${NC}"
+    echo -e "${BLUE}════════════════════════════════════════════════════════════════════${NC}"
 }
 
 print_footer() {
@@ -71,8 +72,9 @@ print_footer() {
     else
         status_text="${GREEN}✓ All Systems Healthy${NC}"
     fi
-    echo -e "${BLUE}║${NC}  Status: ${status_text}"
-    echo -e "${BLUE}╚══════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "  Status: ${status_text}"
+    echo -e "${BLUE}════════════════════════════════════════════════════════════════════${NC}"
 }
 
 increment_critical() {
@@ -382,9 +384,26 @@ main() {
             sleep "$INTERVAL"
         done
     else
-        print_header
-        run_health_check
-        print_footer
+        # Capture output to a variable for pagination
+        local output
+        output=$(
+            print_header
+            run_health_check
+            print_footer
+        )
+
+        # Count lines in output
+        local line_count
+        line_count=$(echo "$output" | wc -l)
+        local term_height
+        term_height=$(tput lines 2>/dev/null || echo 24)
+
+        # If output is larger than terminal, use less for pagination
+        if [[ $line_count -gt $((term_height - 2)) ]]; then
+            echo "$output" | less -R
+        else
+            echo "$output"
+        fi
 
         # Exit with proper code
         if [[ $CRITICAL_COUNT -gt 0 ]]; then
