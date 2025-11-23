@@ -5,6 +5,7 @@
 set -euo pipefail
 
 VAULT="discworld"
+ACCOUNT="thegreens.1password.com"
 DATE=$(date +%Y%m%d)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -22,7 +23,7 @@ validate_backup() {
     local title="$1"
     local description="$2"
 
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "✅ $description backup verified"
         ((BACKUP_SUCCESS++))
         return 0
@@ -45,9 +46,9 @@ backup_file_as_document() {
     fi
 
     # Check if item exists (suppress error output)
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📝 Updating existing $title..."
-        if cat "$file" | op document edit "$title" --vault="$VAULT" >/dev/null 2>&1; then
+        if cat "$file" | op document edit "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
             echo "✅ $file updated successfully"
         else
             echo "❌ Failed to update $file"
@@ -55,7 +56,7 @@ backup_file_as_document() {
         fi
     else
         echo "📝 Creating new $title..."
-        if op document create "$file" --vault="$VAULT" --title="$title" >/dev/null 2>&1; then
+        if op document create "$file" --vault="$VAULT" --account="$ACCOUNT" --title="$title" >/dev/null 2>&1; then
             echo "✅ $file created successfully"
         else
             echo "❌ Failed to create $file"
@@ -78,10 +79,10 @@ backup_age_key() {
     fi
 
     # Check if item exists (suppress error output)
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📝 Updating existing age key backup..."
         AGE_KEY_CONTENT=$(cat age.key)
-        if op item edit "$title" --vault="$VAULT" notesPlain="$AGE_KEY_CONTENT" >/dev/null 2>&1; then
+        if op item edit "$title" --vault="$VAULT" --account="$ACCOUNT" notesPlain="$AGE_KEY_CONTENT" >/dev/null 2>&1; then
             echo "✅ age.key updated successfully"
         else
             echo "❌ Failed to update age.key"
@@ -106,7 +107,7 @@ EOF
         AGE_KEY_CONTENT=$(cat age.key)
         if command -v jq >/dev/null 2>&1; then
             jq --arg content "$AGE_KEY_CONTENT" '.fields[0].value = $content' /tmp/age_key_item.json > /tmp/age_key_final.json
-            if op item create --vault="$VAULT" --template=/tmp/age_key_final.json >/dev/null 2>&1; then
+            if op item create --vault="$VAULT" --account="$ACCOUNT" --template=/tmp/age_key_final.json >/dev/null 2>&1; then
                 echo "✅ age.key created successfully"
             else
                 echo "❌ Failed to create age.key"
@@ -143,9 +144,9 @@ backup_bootstrap_directory() {
     fi
 
     # Check if document exists (suppress error output)
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📝 Updating existing bootstrap backup..."
-        if cat "$archive" | op document edit "$title" --vault="$VAULT" >/dev/null 2>&1; then
+        if cat "$archive" | op document edit "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
             echo "✅ bootstrap/ updated successfully"
         else
             echo "❌ Failed to update bootstrap/"
@@ -154,7 +155,7 @@ backup_bootstrap_directory() {
         fi
     else
         echo "📝 Creating new bootstrap backup..."
-        if op document create "$archive" --vault="$VAULT" --title="$title" >/dev/null 2>&1; then
+        if op document create "$archive" --vault="$VAULT" --account="$ACCOUNT" --title="$title" >/dev/null 2>&1; then
             echo "✅ bootstrap/ created successfully"
         else
             echo "❌ Failed to create bootstrap/"
@@ -178,15 +179,15 @@ if ! command -v op >/dev/null 2>&1; then
     exit 1
 fi
 
-if ! op vault list >/dev/null 2>&1; then
-    echo "❌ Not authenticated with 1Password CLI. Run: op signin"
+if ! op vault list --account="$ACCOUNT" >/dev/null 2>&1; then
+    echo "❌ Not authenticated with 1Password CLI. Run: op signin --account $ACCOUNT"
     exit 1
 fi
 
-if ! op vault get "$VAULT" >/dev/null 2>&1; then
+if ! op vault get "$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
     echo "❌ Vault '$VAULT' not found or not accessible"
     echo "Available vaults:"
-    op vault list
+    op vault list --account="$ACCOUNT"
     exit 1
 fi
 

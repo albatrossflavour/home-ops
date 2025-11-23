@@ -5,6 +5,7 @@
 set -euo pipefail
 
 VAULT="discworld"
+ACCOUNT="thegreens.1password.com"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RESTORE_DIR="$REPO_ROOT/restored-$(date +%Y%m%d-%H%M%S)"
@@ -20,9 +21,9 @@ restore_document() {
     local title="$1"
     local output_file="$2"
 
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📥 Restoring $title to $output_file..."
-        op document get "$title" --vault="$VAULT" --output="$output_file"
+        op document get "$title" --vault="$VAULT" --account="$ACCOUNT" --output="$output_file"
         echo "✅ $output_file restored"
     else
         echo "❌ $title not found in 1Password vault"
@@ -33,9 +34,9 @@ restore_document() {
 restore_age_key() {
     local title="homeops-age-key-backup"
 
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📥 Restoring age.key from secure note..."
-        op item get "$title" --vault="$VAULT" --field="notesPlain" > age.key
+        op item get "$title" --vault="$VAULT" --account="$ACCOUNT" --field="notesPlain" > age.key
         chmod 600 age.key
         echo "✅ age.key restored with proper permissions"
     else
