@@ -17,6 +17,7 @@ readonly NC='\033[0m' # No Color
 # Configuration
 KUBECONFIG_PATH="${KUBECONFIG:-kubeconfig}"
 WATCH_MODE=false
+SHOW_WARNINGS=false
 INTERVAL=30
 KUBECTL="kubectl --kubeconfig ${KUBECONFIG_PATH}"
 
@@ -31,13 +32,18 @@ while [[ $# -gt 0 ]]; do
             WATCH_MODE=true
             shift
             ;;
+        --warnings)
+            SHOW_WARNINGS=true
+            shift
+            ;;
         -i|--interval)
             INTERVAL="$2"
             shift 2
             ;;
         -h|--help)
-            echo "Usage: $0 [-w|--watch] [-i|--interval SECONDS]"
+            echo "Usage: $0 [-w|--watch] [--warnings] [-i|--interval SECONDS]"
             echo "  -w, --watch     Run in watch mode (continuous monitoring)"
+            echo "  --warnings      Show warnings in addition to critical issues"
             echo "  -i, --interval  Refresh interval in seconds (default: 30)"
             exit 0
             ;;
@@ -172,10 +178,15 @@ check_pods() {
         ((($now | tonumber) - (.lastState.terminated.finishedAt | fromdateiso8601)) < 600)) |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.containerStatuses[0].restartCount) restarts (last: \(.status.containerStatuses[0].lastState.terminated.reason // "Unknown"))"' 2>/dev/null)
 
-    if [[ -n "$recent_restarts" ]]; then
+    if [[ -n "$recent_restarts" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
         echo -e "\n${YELLOW}⚠ WARNING: Pods with Recent Restarts (< 10 minutes)${NC}"
         echo "$recent_restarts" | while IFS= read -r line; do
             echo -e "  ${YELLOW}└─${NC} $line"
+            increment_warning
+        done
+    elif [[ -n "$recent_restarts" ]]; then
+        # Still count warnings even if not displayed
+        echo "$recent_restarts" | while IFS= read -r line; do
             increment_warning
         done
     fi
@@ -211,10 +222,15 @@ check_ceph() {
                 echo -e "  ${RED}└─${NC} $line"
                 increment_critical
             done
-        else
+        elif [[ "$SHOW_WARNINGS" == true ]]; then
             echo -e "\n${YELLOW}⚠ WARNING: Ceph Cluster Health Warning${NC}"
             echo "$ceph_status" | while IFS= read -r line; do
                 echo -e "  ${YELLOW}└─${NC} $line"
+                increment_warning
+            done
+        else
+            # Still count warnings even if not displayed
+            echo "$ceph_status" | while IFS= read -r line; do
                 increment_warning
             done
         fi
@@ -245,10 +261,15 @@ check_nodes() {
         select(.status == "True") |
         "\(.type) on node"' 2>/dev/null)
 
-    if [[ -n "$nodes_pressure" ]]; then
+    if [[ -n "$nodes_pressure" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
         echo -e "\n${YELLOW}⚠ WARNING: Node Pressure Conditions${NC}"
         echo "$nodes_pressure" | while IFS= read -r line; do
             echo -e "  ${YELLOW}└─${NC} $line"
+            increment_warning
+        done
+    elif [[ -n "$nodes_pressure" ]]; then
+        # Still count warnings even if not displayed
+        echo "$nodes_pressure" | while IFS= read -r line; do
             increment_warning
         done
     fi
@@ -266,10 +287,15 @@ check_certificates() {
         select(.status.notAfter < $threshold) |
         "\(.metadata.namespace)/\(.metadata.name): expires \(.status.notAfter)"' 2>/dev/null)
 
-    if [[ -n "$expiring_certs" ]]; then
+    if [[ -n "$expiring_certs" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
         echo -e "\n${YELLOW}⚠ WARNING: Certificates Expiring Soon (< 7 days)${NC}"
         echo "$expiring_certs" | while IFS= read -r line; do
             echo -e "  ${YELLOW}└─${NC} $line"
+            increment_warning
+        done
+    elif [[ -n "$expiring_certs" ]]; then
+        # Still count warnings even if not displayed
+        echo "$expiring_certs" | while IFS= read -r line; do
             increment_warning
         done
     fi
@@ -286,10 +312,15 @@ check_volsync() {
         select(.status.lastSyncDuration == null or .status.lastSyncDuration == "0s") |
         "\(.metadata.namespace)/\(.metadata.name): Last sync may have failed"' 2>/dev/null)
 
-    if [[ -n "$failed_replications" ]]; then
+    if [[ -n "$failed_replications" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
         echo -e "\n${YELLOW}⚠ WARNING: Volsync Replication Issues${NC}"
         echo "$failed_replications" | while IFS= read -r line; do
             echo -e "  ${YELLOW}└─${NC} $line"
+            increment_warning
+        done
+    elif [[ -n "$failed_replications" ]]; then
+        # Still count warnings even if not displayed
+        echo "$failed_replications" | while IFS= read -r line; do
             increment_warning
         done
     fi
@@ -306,10 +337,15 @@ check_events() {
         "\(.involvedObject.namespace // "cluster")/\(.involvedObject.name): \(.message)"' 2>/dev/null | \
         head -10)
 
-    if [[ -n "$warning_events" ]]; then
+    if [[ -n "$warning_events" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
         echo -e "\n${YELLOW}⚠ Recent Warning Events (last 10 minutes)${NC}"
         echo "$warning_events" | while IFS= read -r line; do
             echo -e "  ${YELLOW}└─${NC} $line"
+            increment_warning
+        done
+    elif [[ -n "$warning_events" ]]; then
+        # Still count warnings even if not displayed
+        echo "$warning_events" | while IFS= read -r line; do
             increment_warning
         done
     fi
