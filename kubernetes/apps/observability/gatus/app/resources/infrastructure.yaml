@@ -8,18 +8,6 @@ metadata:
 data:
   infrastructure.yaml: |
     endpoints:
-      - name: Zigbee2MQTT
-        url: "http://10.10.20.173/"
-        group: "Home Infrastructure"
-        description: "IoT Gateway"
-        tags: ["iot", "home-automation", "zigbee", "critical"]
-        interval: 1m
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 3000"
-        alerts:
-          - type: pushover
-
       - name: Luggage NAS
         url: "https://192.168.1.22"
         group: "Home Infrastructure"
@@ -62,18 +50,6 @@ data:
 
       - name: Primary Pihole
         url: "http://pihole.albatrossflavour.com/admin/login"
-        group: "Network Infrastructure"
-        description: "DNS Server"
-        tags: ["network", "dns", "pihole", "critical"]
-        interval: 2m
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 5000"
-        alerts:
-          - type: pushover
-
-      - name: DR Pihole
-        url: "http://pihole-dr.albatrossflavour.com:8080/admin/login"
         group: "Network Infrastructure"
         description: "DNS Server"
         tags: ["network", "dns", "pihole", "critical"]
