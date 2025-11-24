@@ -5,6 +5,7 @@
 set -euo pipefail
 
 VAULT="discworld"
+ACCOUNT="thegreens.1password.com"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RESTORE_DIR="$REPO_ROOT/restored-$(date +%Y%m%d-%H%M%S)"
@@ -20,9 +21,9 @@ restore_document() {
     local title="$1"
     local output_file="$2"
 
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📥 Restoring $title to $output_file..."
-        op document get "$title" --vault="$VAULT" --output="$output_file"
+        op document get "$title" --vault="$VAULT" --account="$ACCOUNT" --output="$output_file"
         echo "✅ $output_file restored"
     else
         echo "❌ $title not found in 1Password vault"
@@ -33,9 +34,9 @@ restore_document() {
 restore_age_key() {
     local title="homeops-age-key-backup"
 
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📥 Restoring age.key from secure note..."
-        op item get "$title" --vault="$VAULT" --field="notesPlain" > age.key
+        op item get "$title" --vault="$VAULT" --account="$ACCOUNT" --field="notesPlain" > age.key
         chmod 600 age.key
         echo "✅ age.key restored with proper permissions"
     else
@@ -48,9 +49,9 @@ restore_bootstrap_directory() {
     local title="homeops-bootstrap-templates"
     local archive="bootstrap-restore.tar.gz"
 
-    if op item get "$title" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$title" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         echo "📥 Restoring bootstrap/ directory..."
-        op document get "$title" --vault="$VAULT" --output="$archive"
+        op document get "$title" --vault="$VAULT" --account="$ACCOUNT" --output="$archive"
         tar -xzf "$archive"
         rm -f "$archive"
         echo "✅ bootstrap/ directory restored"
@@ -67,12 +68,12 @@ if ! command -v op >/dev/null 2>&1; then
     exit 1
 fi
 
-if ! op vault list >/dev/null 2>&1; then
-    echo "❌ Not authenticated with 1Password CLI. Run: op signin"
+if ! op vault list --account="$ACCOUNT" >/dev/null 2>&1; then
+    echo "❌ Not authenticated with 1Password CLI. Run: op signin --account $ACCOUNT"
     exit 1
 fi
 
-if ! op vault list | grep -q "$VAULT"; then
+if ! op vault list --account="$ACCOUNT" | grep -q "$VAULT"; then
     echo "❌ Vault '$VAULT' not found or not accessible"
     exit 1
 fi
@@ -83,7 +84,7 @@ echo ""
 # Check what's available
 available_items=()
 for item in "homeops-age-key-backup" "homeops-cluster-config" "homeops-bootstrap-templates" "homeops-kubeconfig" "homeops-talosconfig"; do
-    if op item get "$item" --vault="$VAULT" >/dev/null 2>&1; then
+    if op item get "$item" --vault="$VAULT" --account="$ACCOUNT" >/dev/null 2>&1; then
         available_items+=("$item")
         echo "✅ $item available"
     else
