@@ -53,9 +53,9 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - 10.10.20.173:9617
-        - 10.10.20.173:9618
-        - 10.10.20.173:9619
+        - pihole.albatrossflavour.com:9617
+        - pihole2.albatrossflavour.com:9617
+        - pihole3.albatrossflavour.com:9617
   metricsPath: /metrics
   relabelings:
     - action: replace
