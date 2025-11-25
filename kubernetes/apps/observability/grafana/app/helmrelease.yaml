@@ -43,6 +43,13 @@ spec:
       GF_SMTP_FROM_NAME: grafana
     envFromSecrets:
       - name: grafana-admin-secret
+    rbac:
+      create: true
+      pspEnabled: false
+      namespaced: false
+    serviceAccount:
+      create: true
+      automountServiceAccountToken: true
     grafana.ini:
       security:
         cookie_secure: true
