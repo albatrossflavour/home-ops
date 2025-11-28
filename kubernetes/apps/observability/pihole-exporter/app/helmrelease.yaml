@@ -75,5 +75,5 @@ spec:
         serviceName: *app
         endpoints:
           - port: metrics
-            interval: 20m
-            scrapeTimeout: 1m
+            interval: 5m
+            scrapeTimeout: 30s
