@@ -30,7 +30,7 @@ spec:
             description: "Storage volume {{ $labels.id }} on {{ $labels.instance }} is not accessible. VMs using this storage may fail silently."
           expr: |
             pve_up{id=~"storage/.*/.*"} == 0
-          for: 2m
+          for: 5m
           labels:
             severity: critical
             component: proxmox
@@ -129,17 +129,3 @@ spec:
             severity: critical
             component: monitoring
             alert_group: infrastructure
-
-        # Info: Track storage that was recently offline (recovered)
-        - alert: ProxmoxStorageRecovered
-          annotations:
-            summary: "Proxmox storage {{ $labels.id }} has recovered on {{ $labels.instance }}"
-            description: "Storage {{ $labels.id }} was offline but is now back online."
-          expr: |
-            (pve_up{id=~"storage/.*/.*"} == 1)
-            and
-            (pve_up{id=~"storage/.*/.*"} offset 5m == 0)
-          labels:
-            severity: info
-            component: proxmox
-            alert_group: storage
