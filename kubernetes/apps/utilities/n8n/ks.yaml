@@ -28,3 +28,4 @@ spec:
       APP: *app
       GATUS_SUBDOMAIN: n8n
       VOLSYNC_CAPACITY: 20Gi
+      VOLSYNC_SCHEDULE: "15 * * * *"
