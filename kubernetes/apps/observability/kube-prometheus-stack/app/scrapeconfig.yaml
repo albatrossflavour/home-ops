@@ -148,7 +148,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - 192.168.2.143:9199
+        - 192.168.5.50:9199
   metricsPath: /ups_metrics
   relabelings:
     - action: replace
