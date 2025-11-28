@@ -29,7 +29,7 @@ spec:
           app:
             image:
               repository: ekofr/pihole-exporter
-              tag: "v0.4.0@sha256:848640194fe1378b263f6c06d5bd33c84b5d52f9c697cbb373ed9e4a180e34f1"
+              tag: "v0.4.0"
             env:
               TZ: "${TIMEZONE}"
               PIHOLE_PROTOCOL: "http,http,http"
