@@ -102,14 +102,14 @@ spec:
         - alert: UPSOnBattery
           expr: |
             network_ups_tools_ups_status{flag="OL"} == 0
-          for: 2m
+          for: 1m
           labels:
             severity: critical
             component: infrastructure
             alert_group: power
           annotations:
             summary: "UPS is running on battery power"
-            description: "UPS has lost mains power and is running on battery. Mains power has been offline for more than 2 minutes."
+            description: "UPS has lost mains power and is running on battery. Mains power has been offline for more than 1 minute."
 
         - alert: UPSBatteryLow
           expr: |
