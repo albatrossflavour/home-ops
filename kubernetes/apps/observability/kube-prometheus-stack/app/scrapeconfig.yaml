@@ -51,6 +51,7 @@ kind: ScrapeConfig
 metadata:
   name: &name piholes
 spec:
+  scrapeInterval: 20m
   staticConfigs:
     - targets:
         - pihole.albatrossflavour.com:9617
