@@ -63,6 +63,22 @@
   packageRules: [
     {
       description: [
+        'Disable digest pinning for OCIRepository resources - they do not support digests',
+      ],
+      matchManagers: [
+        'flux',
+      ],
+      matchDatasources: [
+        'docker',
+      ],
+      matchFileNames: [
+        '**/ocirepository.yaml',
+        '**/flux.yaml',
+      ],
+      pinDigests: false,
+    },
+    {
+      description: [
         'Auto merge Github Actions',
       ],
       matchManagers: [
