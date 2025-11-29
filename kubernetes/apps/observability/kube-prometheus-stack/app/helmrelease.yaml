@@ -42,6 +42,7 @@ spec:
       # Disable specific rules that we override with custom thresholds
       disabled:
         NodeDiskIOSaturation: true  # Custom rule with threshold of 20 instead of 10
+        TargetDown: true  # Replace with per-instance alerts and clean exclusions
     alertmanager:
       ingress:
         enabled: true

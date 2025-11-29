@@ -122,6 +122,17 @@ spec:
           for: 1h
           labels:
             severity: warning
+    - name: target-monitoring
+      rules:
+        - alert: NodeExporterDown
+          annotations:
+            summary: Node exporter on {{ $labels.instance }} is unreachable
+            description: Node exporter metrics from {{ $labels.instance }} have been unavailable for more than 5 minutes.
+            runbook_url: https://runbooks.prometheus-operator.dev/runbooks/general/targetdown
+          expr: up{job="node-exporter",instance!~"dotty\\.albatrossflavour\\.com.*"} == 0
+          for: 5m
+          labels:
+            severity: warning
     - name: node-disk
       rules:
         - alert: NodeDiskIOSaturation
