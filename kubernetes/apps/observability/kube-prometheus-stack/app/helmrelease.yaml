@@ -43,6 +43,7 @@ spec:
       disabled:
         NodeDiskIOSaturation: true  # Custom rule with threshold of 20 instead of 10
         TargetDown: true  # Replace with per-instance alerts and clean exclusions
+        CephNodeDiskspaceWarning: true  # Fix false positives from predict_linear on decreasing usage
     alertmanager:
       ingress:
         enabled: true
