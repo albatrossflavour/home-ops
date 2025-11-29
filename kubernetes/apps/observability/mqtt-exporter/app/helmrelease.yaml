@@ -46,8 +46,8 @@ spec:
                 zigbee2mqtt/bridge/logging,
                 zigbee2mqtt/bridge/info,
                 zigbee2mqtt/bridge/event
-              # Modest safety buffer for metric limit
-              MQTT_METRICS_MAX: "3000"
+              # Metric limit - using correct variable name MAX_METRICS (not MQTT_METRICS_MAX)
+              MAX_METRICS: "5000"
             envFrom:
               - secretRef:
                   name: mqtt-exporter
