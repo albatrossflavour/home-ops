@@ -37,7 +37,7 @@ spec:
               PIHOLE_PORT: "80,80,80"
               PIHOLE_ADMIN_CONTEXT: ""  # PiHole v6 uses /api instead of /admin/api
               PORT: &port "9617"
-              INTERVAL: "10s"
+              INTERVAL: "5m"  # Match Prometheus scrape interval to reduce Pi-hole API load
             envFrom:
               - secretRef:
                   name: pihole-exporter
