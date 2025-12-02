@@ -141,14 +141,14 @@ spec:
               Current usage: {{ printf "%.2f" $value }}%
           expr: |
             (
-              predict_linear(node_filesystem_avail_bytes{device=~"/dev/.*",fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"}[6h], 5 * 24 * 3600) < 0
+              predict_linear(node_filesystem_avail_bytes{device=~"/dev/.*",fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"}[6h], 5 * 24 * 3600) < 0
             and
-              node_filesystem_avail_bytes{device=~"/dev/.*",fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"} / node_filesystem_size_bytes{device=~"/dev/.*",fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"} < 0.4
+              node_filesystem_avail_bytes{device=~"/dev/.*",fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} / node_filesystem_size_bytes{device=~"/dev/.*",fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} < 0.4
             and
-              rate(node_filesystem_avail_bytes{device=~"/dev/.*",fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"}[6h]) < 0
+              rate(node_filesystem_avail_bytes{device=~"/dev/.*",fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"}[6h]) < 0
             )
             * on(instance, device) group_left(nodename)
-            node_uname_info
+            node_uname_info{instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"}
           for: 1h
           labels:
             severity: warning
@@ -160,7 +160,7 @@ spec:
               Disk IO queue (aqu-sq) is high on {{ $labels.device }} at {{ $labels.instance }}, has been above 20 for the last 30 minutes, is currently at {{ printf "%.2f" $value }}.
               This symptom might indicate disk saturation.
             summary: Disk IO queue is high.
-          expr: rate(node_disk_io_time_weighted_seconds_total{job="node-exporter", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)"}[5m]) > 20
+          expr: rate(node_disk_io_time_weighted_seconds_total{job="node-exporter", device=~"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|md.+|dasd.+)",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"}[5m]) > 20
           for: 30m
           labels:
             severity: warning
