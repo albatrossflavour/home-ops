@@ -152,6 +152,40 @@ spec:
           for: 1h
           labels:
             severity: warning
+        - alert: NodeFilesystemAlmostOutOfSpace
+          annotations:
+            summary: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has less than 5% space left
+            description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left.
+          expr: |
+            (
+              node_filesystem_avail_bytes{job="node-exporter",fstype!="",mountpoint!="",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} / node_filesystem_size_bytes{job="node-exporter",fstype!="",mountpoint!="",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} * 100 < 5
+            and
+              node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!="",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} == 0
+            )
+          for: 30m
+          labels:
+            severity: warning
+        - alert: NodeFilesystemAlmostOutOfSpace
+          annotations:
+            summary: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has less than 3% space left
+            description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left.
+          expr: |
+            (
+              node_filesystem_avail_bytes{job="node-exporter",fstype!="",mountpoint!="",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} / node_filesystem_size_bytes{job="node-exporter",fstype!="",mountpoint!="",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} * 100 < 3
+            and
+              node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!="",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} == 0
+            )
+          for: 30m
+          labels:
+            severity: critical
+        - alert: CephNodeRootFilesystemFull
+          annotations:
+            summary: Root filesystem on {{ $labels.instance }} is dangerously full
+            description: 'Root volume on {{ $labels.instance }} is dangerously full: {{ $value | humanize }}% free.'
+          expr: node_filesystem_avail_bytes{mountpoint="/",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} / node_filesystem_size_bytes{mountpoint="/",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} * 100 < 5
+          for: 5m
+          labels:
+            severity: critical
     - name: node-disk
       rules:
         - alert: NodeDiskIOSaturation
