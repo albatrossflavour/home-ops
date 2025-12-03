@@ -44,6 +44,8 @@ spec:
         NodeDiskIOSaturation: true  # Custom rule with threshold of 20 instead of 10
         TargetDown: true  # Replace with per-instance alerts and clean exclusions
         CephNodeDiskspaceWarning: true  # Fix false positives from predict_linear on decreasing usage
+        NodeFilesystemAlmostOutOfSpace: true  # Fires on hex/dotty, using custom NodeFilesystemSpaceFillingUp instead
+        CephNodeRootFilesystemFull: true  # Fires on hex/dotty, Ceph nodes use custom rules
     alertmanager:
       ingress:
         enabled: true
