@@ -636,8 +636,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "mqtt_temperature{topic=\"zigbee2mqtt_rack env\"}",
+          "editorMode": "code",
+          "expr": "mqtt_temperature{topic=~\".*(rack|snake).*\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -648,20 +648,20 @@
           "useBackend": false
         }
       ],
-      "title": "Rack",
+      "title": "Rack and Jeff Temperature",
       "transformations": [
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "/zigbee2mqtt_(.*) env/",
-            "renamePattern": "$1"
+            "regex": "/zigbee2mqtt_rack env/",
+            "renamePattern": "Rack"
           }
         },
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "zigbee2mqtt_air quality",
-            "renamePattern": "studio"
+            "regex": "zigbee2mqtt_snake tank",
+            "renamePattern": "Jeff"
           }
         }
       ],
@@ -773,8 +773,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "mqtt_temperature{topic=\"zigbee2mqtt_snake tank\"}",
+          "editorMode": "code",
+          "expr": "mqtt_humidity{topic=~\".*(rack|snake).*\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -785,20 +785,20 @@
           "useBackend": false
         }
       ],
-      "title": "Jeff",
+      "title": "Rack and Jeff Humidity",
       "transformations": [
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "/zigbee2mqtt_(.*) env/",
-            "renamePattern": "$1"
+            "regex": "/zigbee2mqtt_rack env/",
+            "renamePattern": "Rack"
           }
         },
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "zigbee2mqtt_air quality",
-            "renamePattern": "studio"
+            "regex": "zigbee2mqtt_snake tank",
+            "renamePattern": "Jeff"
           }
         }
       ],
