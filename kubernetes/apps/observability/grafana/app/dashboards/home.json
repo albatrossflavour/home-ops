@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 2,
+  "id": 4,
   "links": [],
   "panels": [
     {
@@ -737,7 +737,7 @@
               }
             ]
           },
-          "unit": "celsius"
+          "unit": "humidity"
         },
         "overrides": []
       },
