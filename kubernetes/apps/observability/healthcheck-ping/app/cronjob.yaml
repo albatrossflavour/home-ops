@@ -18,17 +18,17 @@ spec:
                 - -c
                 - "curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/2f23b93d-19d4-4e9e-8325-59e4facd4576"
               resources:
-              requests:
-                cpu: 10m
-                memory: 16Mi
-              limits:
-                cpu: 100m
-                memory: 32Mi
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  cpu: 100m
+                  memory: 32Mi
               securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop: ["ALL"]
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
           restartPolicy: OnFailure
           securityContext:
             runAsNonRoot: true
