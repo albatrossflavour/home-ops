@@ -63,6 +63,11 @@ spec:
       # Similarly for stalled reads - these can happen during compaction
       bdev_stalled_read_warn_threshold = 20
       bdev_stalled_read_warn_lifetime = 3600
+      # Recovery settings (enable PG remapping to complete)
+      # Conservative values to avoid impacting cluster performance
+      osd_recovery_max_active = 3
+      osd_recovery_max_single_start = 1
+      osd_max_backfills = 1
     cephClusterSpec:
       crashCollector:
         disable: false
