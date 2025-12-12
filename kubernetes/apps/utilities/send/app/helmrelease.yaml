@@ -43,9 +43,9 @@ spec:
               MAX_EXPIRE_SECONDS: 2630000
               DEFAULT_DOWNLOADS: 50
               EXPIRE_TIMES_SECONDS: 3600,86400,604800,2592000,31536000
-            # envFrom:
-            #   - secretRef:
-            #       name: send-secret
+            envFrom:
+              - secretRef:
+                  name: send-secret
     defaultPodOptions:
       securityContext:
         # runAsNonRoot: true
