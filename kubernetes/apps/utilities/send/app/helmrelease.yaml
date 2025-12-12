@@ -35,7 +35,7 @@ spec:
               tag: v3.4.27@sha256:b950a557f0f4eb7d2114a9126aea5df984ffe868385a3fb6b327d9f770bec0ae
             env:
               TZ: "${TZ}"
-              BASE_URL: "send.${SECRET_DOMAIN}"
+              BASE_URL: "https://send.${SECRET_DOMAIN}"
               REDIS_HOST: dragonfly.database.svc.cluster.local
               REDIS_PORT: 6379
               FILE_DIR: /uploads
