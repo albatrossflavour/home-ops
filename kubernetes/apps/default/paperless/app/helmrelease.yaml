@@ -61,6 +61,7 @@ spec:
               # Configure user permissions
               USERMAP_GID: "65542" # gladius:external-services
               PAPERLESS_IGNORE_PERMISSIONS: "true"
+              PAPERLESS_SKIP_CHOWN: "true"
               # Configure admin user
               PAPERLESS_ADMIN_USER:
                 valueFrom:
