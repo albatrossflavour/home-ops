@@ -472,7 +472,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "100 * (\n  (\n    node_memory_internal_bytes{instance=\"$instance\"}\n  -\n    node_memory_purgeable_bytes{instance=\"$instance\"}\n  +\n    node_memory_wired_bytes{instance=\"$instance\"}\n  +\n    node_memory_compressed_bytes{instance=\"$instance\"}\n  ) / node_memory_internal_bytes{instance=\"$instance\"}\n)\n",
+          "expr": "100 * (\n  (\n    node_memory_internal_bytes{instance=\"$instance\"}\n  -\n    node_memory_purgeable_bytes{instance=\"$instance\"}\n  +\n    node_memory_wired_bytes{instance=\"$instance\"}\n  +\n    node_memory_compressed_bytes{instance=\"$instance\"}\n  ) / node_memory_total_bytes{instance=\"$instance\"}\n)\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
