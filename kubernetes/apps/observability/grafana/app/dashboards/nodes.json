@@ -1105,9 +1105,9 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "192.168.1.22:9100",
-          "value": "192.168.1.22:9100"
+          "selected": true,
+          "text": "hex.home.albatrossflavour.com:9100",
+          "value": "hex.home.albatrossflavour.com:9100"
         },
         "datasource": {
           "type": "prometheus",
