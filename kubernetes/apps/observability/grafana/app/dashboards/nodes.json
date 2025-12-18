@@ -99,17 +99,17 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "(\n  (1 - sum without (mode) (rate(node_cpu_seconds_total{mode=~\"idle|iowait|steal\", instance=\"$instance\"}[$__rate_interval])))\n/ ignoring(cpu) group_left\n  count without (cpu, mode) (node_cpu_seconds_total{mode=\"idle\", instance=\"$instance\"})\n)\n",
+          "expr": "avg(\n  (1 - sum without (mode) (rate(node_cpu_seconds_total{mode=~\"idle|iowait|steal\", instance=\"$instance\"}[$__rate_interval])))\n/ ignoring(cpu) group_left\n  count without (cpu, mode) (node_cpu_seconds_total{mode=\"idle\", instance=\"$instance\"})\n)\n",
           "format": "time_series",
           "intervalFactor": 5,
-          "legendFormat": "{{cpu}}",
+          "legendFormat": "avg cpu usage",
           "refId": "A"
         }
       ],
