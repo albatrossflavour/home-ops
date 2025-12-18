@@ -340,5 +340,19 @@
       ],
       datasourceTemplate: '{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}',
     },
+    {
+      customType: 'regex',
+      description: [
+        'Process Grafana dashboards with gnetId',
+      ],
+      managerFilePatterns: [
+        '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
+      ],
+      matchStrings: [
+        '# renovate: depName="(?<depName>[^"]+)"\\s+gnetId:\\s+(?<packageName>\\d+)\\s+revision:\\s+(?<currentValue>\\d+)',
+      ],
+      datasourceTemplate: 'grafana-dashboards',
+      versioningTemplate: 'regex:^(?<major>\\d+)$',
+    },
   ],
 }
