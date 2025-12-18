@@ -246,6 +246,9 @@ spec:
             - name: DS_PROMETHEUS
               value: Prometheus
       nodes:
+        node-exporter-macos:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/nodes.json
+          datasource: Prometheus
         promethes-exporter:
           gnetId: 10347
           revision: 5
