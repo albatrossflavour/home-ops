@@ -346,7 +346,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "(\n  node_memory_MemTotal_bytes{instance=\"$instance\"}\n-\n  node_memory_MemFree_bytes{instance=\"$instance\"}\n-\n  node_memory_Buffers_bytes{instance=\"$instance\"}\n-\n  node_memory_Cached_bytes{instance=\"$instance\"}\n)\n",
+          "expr": "(\n  node_memory_internal_bytes{instance=\"$instance\"}\n-\n  node_memory_purgeable_bytes{instance=\"$instance\"}\n+\n  node_memory_wired_bytes{instance=\"$instance\"}\n+\n  node_memory_compressed_bytes{instance=\"$instance\"}\n)\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "memory used",
@@ -356,27 +356,27 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "node_memory_Buffers_bytes{instance=\"$instance\"}",
+          "expr": "node_memory_compressed_bytes{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "memory buffers",
+          "legendFormat": "memory compressed",
           "refId": "B"
         },
         {
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "node_memory_Cached_bytes{instance=\"$instance\"}",
+          "expr": "node_memory_purgeable_bytes{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "memory cached",
+          "legendFormat": "memory purgeable",
           "refId": "C"
         },
         {
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "node_memory_MemFree_bytes{instance=\"$instance\"}",
+          "expr": "node_memory_free_bytes{instance=\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "memory free",
@@ -472,7 +472,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "100 -\n(\n  avg(node_memory_MemAvailable_bytes{instance=\"$instance\"}) /\n  avg(node_memory_MemTotal_bytes{instance=\"$instance\"})\n* 100\n)\n",
+          "expr": "100 * (\n  (\n    node_memory_internal_bytes{instance=\"$instance\"}\n  -\n    node_memory_purgeable_bytes{instance=\"$instance\"}\n  +\n    node_memory_wired_bytes{instance=\"$instance\"}\n  +\n    node_memory_compressed_bytes{instance=\"$instance\"}\n  ) / node_memory_internal_bytes{instance=\"$instance\"}\n)\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -570,7 +570,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "rate(node_disk_read_bytes_total{instance=\"$instance\", device=~\"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+)\"}[$__rate_interval])",
+          "expr": "rate(node_disk_read_bytes_total{instance=\"$instance\", device=~\"disk[0-9]+\"}[$__rate_interval])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{device}} read",
@@ -582,7 +582,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "rate(node_disk_written_bytes_total{instance=\"$instance\", device=~\"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+)\"}[$__rate_interval])",
+          "expr": "rate(node_disk_written_bytes_total{instance=\"$instance\", device=~\"disk[0-9]+\"}[$__rate_interval])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{device}} written",
@@ -594,7 +594,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "rate(node_disk_io_time_seconds_total{instance=\"$instance\", device=~\"(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+)\"}[$__rate_interval])",
+          "expr": "rate(node_disk_io_time_seconds_total{instance=\"$instance\", device=~\"disk[0-9]+\"}[$__rate_interval])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{device}} io time",
@@ -764,7 +764,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "max by (mountpoint) (node_filesystem_size_bytes{instance=\"$instance\", fstype!=\"\"})\n",
+          "expr": "max by (mountpoint) (node_filesystem_size_bytes{instance=\"$instance\", fstype=\"apfs\", mountpoint!~\".*\\\\.timemachine.*|.*Backups\\\\.backupdb.*|/System/Volumes/.*\"})\n",
           "format": "table",
           "instant": true,
           "intervalFactor": 2,
@@ -775,7 +775,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "max by (mountpoint) (node_filesystem_avail_bytes{instance=\"$instance\", fstype!=\"\"})\n",
+          "expr": "max by (mountpoint) (node_filesystem_avail_bytes{instance=\"$instance\", fstype=\"apfs\", mountpoint!~\".*\\\\.timemachine.*|.*Backups\\\\.backupdb.*|/System/Volumes/.*\"})\n",
           "format": "table",
           "instant": true,
           "intervalFactor": 2,
@@ -1165,7 +1165,7 @@
     ]
   },
   "timezone": "utc",
-  "title": "Node Exporter / Non K8S Nodes",
+  "title": "Node Exporter / macOS",
   "uid": "wwJGXxGVk",
   "version": 1,
   "weekStart": ""
