@@ -13,6 +13,7 @@ resources:
   - ./pdlf-website/ks.yaml
   - ./scrypted/ks.yaml
   - ./paperless/ks.yaml
+  - ./paperless-ai/ks.yaml
   - ./immich/ks.yaml
   #- ./penpot/ks.yaml
   - ./theme-park/ks.yaml
