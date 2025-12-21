@@ -87,9 +87,10 @@ spec:
 
             resources:
               requests:
-                cpu: 25m
+                cpu: 500m
                 memory: 2Gi
               limits:
+                cpu: 2000m
                 memory: 6Gi
 
           redis:
