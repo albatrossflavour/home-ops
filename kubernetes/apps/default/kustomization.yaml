@@ -12,7 +12,6 @@ resources:
   - ./reactive-resume/ks.yaml
   - ./pdlf-website/ks.yaml
   - ./scrypted/ks.yaml
-  - ./paperless/ks.yaml
   - ./paperless-ai/ks.yaml
   - ./immich/ks.yaml
   #- ./penpot/ks.yaml
