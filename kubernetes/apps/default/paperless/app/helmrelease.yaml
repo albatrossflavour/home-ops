@@ -1,0 +1,144 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: paperless
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+
+  values:
+    controllers:
+      paperless:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            supplementalGroups:
+              - 65542 # gladius:external-services
+
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: "18@sha256:866f15038ed5185a2b8118821f470bb7ca0df8c4231b8e277446e681ebb1ed84"
+            envFrom:
+              - secretRef:
+                  name: paperless-secret
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/paperless-ngx/paperless-ngx
+              tag: "2.20.3@sha256:57ad9565bff3bdf2378ab1dcc21ea649dfd68ee58e0eeca2bfba0120a26563e8"
+            env:
+              # Application configuration
+              PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
+              PAPERLESS_PORT: "8000"
+              PAPERLESS_TIME_ZONE: "Australia/Sydney"
+              PAPERLESS_WEBSERVER_WORKERS: "2"
+              PAPERLESS_TASK_WORKERS: "4"
+
+              # Storage paths - split between Ceph (data) and NFS (media)
+              PAPERLESS_DATA_DIR: /data/local
+              PAPERLESS_MEDIA_ROOT: /data/nas/media
+              PAPERLESS_CONSUMPTION_DIR: /data/nas/incoming
+              PAPERLESS_EXPORT_DIR: /data/nas/export
+
+              # Folder importer configuration
+              PAPERLESS_CONSUMER_POLLING: "60"
+              PAPERLESS_CONSUMER_RECURSIVE: "true"
+              PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
+
+              # OCR configuration
+              PAPERLESS_OCR_LANGUAGES: eng
+              PAPERLESS_OCR_LANGUAGE: eng
+              PAPERLESS_OCR_USER_ARGS: '{"invalidate_digital_signatures": true}'
+
+              # Redis integration
+              PAPERLESS_REDIS: redis://localhost:6379
+
+              # User permissions for NFS storage
+              USERMAP_GID: "65542" # gladius:external-services
+
+            envFrom:
+              - secretRef:
+                  name: paperless-secret
+
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+
+            resources:
+              requests:
+                cpu: 25m
+                memory: 2Gi
+              limits:
+                memory: 6Gi
+
+          redis:
+            image:
+              repository: docker.io/valkey/valkey
+              tag: "9.0.1@sha256:fb8d272e529ea567b9bf1302245796f21a2672b8368ca3fcb938ac334e613c8f"
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+
+    service:
+      app:
+        controller: paperless
+        ports:
+          http:
+            port: 8000
+
+    ingress:
+      app:
+        className: "internal"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: "Utilities"
+          gethomepage.dev/name: "Paperless NGX"
+          gethomepage.dev/icon: "paperless.png"
+          gethomepage.dev/description: "Document management system"
+        hosts:
+          - host: paperless.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+
+    persistence:
+      # Ceph block storage for database data, search index, logs
+      data:
+        existingClaim: paperless
+        globalMounts:
+          - path: /data/local
+
+      # NFS storage for media files (documents, thumbnails, incoming, export)
+      nas:
+        type: nfs
+        server: 192.168.1.22
+        path: /volume2/apps/paperless
+        globalMounts:
+          - path: /data/nas
