@@ -79,23 +79,24 @@ spec:
             severity: critical
         - alert: CephClusterHealthWarningSustained
           annotations:
-            summary: Ceph cluster HEALTH_WARN persists for over 1 hour
+            summary: Ceph cluster HEALTH_WARN persists for over 2 hours
             description: |
-              Ceph cluster health status has been HEALTH_WARN for over 1 hour.
-              This indicates a sustained issue beyond transient BlueStore compaction.
-              Check 'ceph health detail' for root cause.
+              Ceph cluster health status has been HEALTH_WARN for over 2 hours.
+              This indicates a sustained issue beyond transient BlueStore compaction
+              or hypervisor storage variance. Check 'ceph health detail' for root cause.
           expr: ceph_health_status == 1
-          for: 1h
+          for: 2h
           labels:
             severity: warning
         - alert: CephDaemonSlowOps
           annotations:
             summary: Ceph daemon {{ $labels.ceph_daemon }} has {{ $value }} slow operations
             description: |
-              Ceph daemon {{ $labels.ceph_daemon }} is reporting slow operations.
-              This indicates sustained performance issues rather than transient compaction.
-          expr: ceph_daemon_health_metrics{type="SLOW_OPS"} > 10
-          for: 15m
+              Ceph daemon {{ $labels.ceph_daemon }} is reporting sustained slow operations.
+              This may indicate performance issues beyond normal hypervisor storage variance.
+              Check hypervisor storage backend and I/O contention.
+          expr: ceph_daemon_health_metrics{type="SLOW_OPS"} > 50
+          for: 30m
           labels:
             severity: warning
         - alert: CephOSDDown
