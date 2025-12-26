@@ -12,6 +12,11 @@ vars:
 env:
   TALOSCONFIG: "{{.TALOSCONFIG_FILE}}"
 
+includes:
+  maintenance:
+    taskfile: ./Maintenance.yaml
+    dir: "{{.ROOT_DIR}}"
+
 tasks:
 
   bootstrap:

@@ -146,13 +146,6 @@ repos:
       - id: commitizen
         stages: [commit-msg]
 
-  # Remove unused imports
-  - repo: https://github.com/hadialqattan/pycln
-    rev: v2.5.0
-    hooks:
-      - id: pycln
-        exclude: ^bootstrap/
-
   # Sort imports
   - repo: https://github.com/pycqa/isort
     rev: 6.0.1

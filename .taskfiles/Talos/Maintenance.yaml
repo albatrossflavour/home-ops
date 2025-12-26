@@ -1,0 +1,392 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  SCHEMATIC: "2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757"
+  TALOSCONFIG: "{{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig/talosconfig"
+  KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
+
+tasks:
+  pre-flight:
+    desc: Run pre-flight checks before maintenance
+    summary: |
+      Verifies cluster health before performing maintenance operations.
+      Checks:
+      - All nodes Ready
+      - Ceph cluster health
+      - Current versions
+      - No ongoing operations
+    cmds:
+      - echo "=== Node Status ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} get nodes -o wide
+      - echo ""
+      - echo "=== Talos Versions ==="
+      - |
+        talosctl --talosconfig {{.TALOSCONFIG}} version \
+          --nodes 192.168.8.10,192.168.8.11,192.168.8.12,192.168.8.13,192.168.8.14,192.168.8.15
+      - echo ""
+      - echo "=== Ceph Health ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph status
+      - echo ""
+      - echo "=== Ceph OSD Tree ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd tree
+      - echo ""
+      - echo "=== Flux Status ==="
+      - flux get kustomizations | grep -v "True.*True"
+      - echo ""
+      - echo "[OK] Pre-flight checks complete"
+
+  ceph-maintenance-start:
+    desc: Enable Ceph maintenance mode
+    summary: |
+      Sets Ceph cluster flags to prevent rebalancing during maintenance:
+      - noout: Prevents OSDs from being marked out during downtime
+      - norebalance: Prevents unnecessary data movement
+    cmds:
+      - echo "Setting Ceph maintenance flags..."
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd set noout
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd set norebalance
+      - echo "[OK] Ceph maintenance mode enabled"
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd status | grep flags
+
+  ceph-maintenance-end:
+    desc: Disable Ceph maintenance mode
+    summary: |
+      Removes Ceph cluster maintenance flags after operations complete.
+      Allows cluster to resume normal rebalancing and recovery operations.
+    cmds:
+      - echo "Removing Ceph maintenance flags..."
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd unset noout
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd unset norebalance
+      - echo "[OK] Ceph maintenance mode disabled"
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph status
+
+  upgrade-node:
+    desc: Upgrade single Talos node
+    summary: |
+      Upgrades a single Talos node to specified version.
+
+      Usage:
+        task talos:maintenance:upgrade-node node=192.168.8.11 version=v1.9.5
+
+      Parameters:
+        node: Node IP address
+        version: Target Talos version (e.g., v1.9.5)
+
+      The task will:
+      1. Validate parameters
+      2. Perform upgrade with --preserve and --wait flags
+      3. Verify node comes back Ready
+    vars:
+      NODE: '{{.node | default ""}}'
+      VERSION: '{{.version | default ""}}'
+      IMAGE: "factory.talos.dev/installer/{{.SCHEMATIC}}:{{.VERSION}}"
+    preconditions:
+      - sh: '[ -n "{{.NODE}}" ]'
+        msg: "node parameter required (e.g., node=192.168.8.11)"
+      - sh: '[ -n "{{.VERSION}}" ]'
+        msg: "version parameter required (e.g., version=v1.9.5)"
+    cmds:
+      - echo "Upgrading node {{.NODE}} to {{.VERSION}}"
+      - echo 'Using image{{":"}} {{.IMAGE}}'
+      - |
+        talosctl --talosconfig {{.TALOSCONFIG}} \
+          upgrade \
+          --nodes {{.NODE}} \
+          --image {{.IMAGE}} \
+          --preserve \
+          --wait
+      - echo "Waiting for node to become Ready..."
+      - kubectl --kubeconfig {{.KUBECONFIG}} wait --for=condition=Ready node --all --timeout=10m
+      - echo "[OK] Node {{.NODE}} upgraded successfully"
+
+  upgrade-workers:
+    desc: Upgrade all worker nodes
+    summary: |
+      Upgrades all worker nodes to specified version in sequence.
+
+      Usage:
+        task talos:maintenance:upgrade-workers version=v1.9.5
+
+      Upgrades in this order:
+      1. wuffles (192.168.8.13)
+      2. aching (192.168.8.14)
+      3. greebo (192.168.8.15)
+
+      Each node is upgraded one at a time with verification between.
+    vars:
+      VERSION: '{{.version | default ""}}'
+    preconditions:
+      - sh: '[ -n "{{.VERSION}}" ]'
+        msg: "version parameter required (e.g., version=v1.9.5)"
+    cmds:
+      - task: upgrade-node
+        vars:
+          node: "192.168.8.13"
+          version: "{{.VERSION}}"
+      - task: upgrade-node
+        vars:
+          node: "192.168.8.14"
+          version: "{{.VERSION}}"
+      - task: upgrade-node
+        vars:
+          node: "192.168.8.15"
+          version: "{{.VERSION}}"
+      - echo "[OK] All worker nodes upgraded"
+
+  upgrade-control-plane:
+    desc: Upgrade all control-plane nodes
+    summary: |
+      Upgrades all control-plane nodes to specified version in sequence.
+
+      Usage:
+        task talos:maintenance:upgrade-control-plane version=v1.9.5
+
+      Upgrades in this order:
+      1. weatherwax (192.168.8.10) - No Ceph OSD
+      2. ogg (192.168.8.11) - Has Ceph OSD
+      3. magrat (192.168.8.12) - Has Ceph OSD
+
+      IMPORTANT: Automatically enables Ceph maintenance mode before starting.
+    vars:
+      VERSION: '{{.version | default ""}}'
+    preconditions:
+      - sh: '[ -n "{{.VERSION}}" ]'
+        msg: "version parameter required (e.g., version=v1.9.5)"
+    cmds:
+      - task: ceph-maintenance-start
+      - task: upgrade-node
+        vars:
+          node: "192.168.8.10"
+          version: "{{.VERSION}}"
+      - task: upgrade-node
+        vars:
+          node: "192.168.8.11"
+          version: "{{.VERSION}}"
+      - echo "Waiting for Ceph OSD to recover..."
+      - sleep 30
+      - task: upgrade-node
+        vars:
+          node: "192.168.8.12"
+          version: "{{.VERSION}}"
+      - echo "Waiting for Ceph cluster to stabilize..."
+      - sleep 60
+      - task: ceph-maintenance-end
+      - echo "[OK] All control-plane nodes upgraded"
+
+  upgrade-cluster:
+    desc: Upgrade entire cluster
+    summary: |
+      Upgrades all nodes in the cluster to specified version.
+
+      Usage:
+        task talos:maintenance:upgrade-cluster version=v1.9.5
+
+      Upgrade order:
+      1. All worker nodes (parallel-safe)
+      2. Control-plane nodes (one at a time, with Ceph awareness)
+
+      Automatically handles:
+      - Ceph maintenance mode
+      - Node sequencing for quorum
+      - Post-upgrade verification
+    vars:
+      VERSION: '{{.version | default ""}}'
+    preconditions:
+      - sh: '[ -n "{{.VERSION}}" ]'
+        msg: "version parameter required (e.g., version=v1.9.5)"
+    cmds:
+      - echo "=== Pre-flight checks ==="
+      - task: pre-flight
+      - echo ""
+      - echo "=== Upgrading workers ==="
+      - task: upgrade-workers
+        vars:
+          version: "{{.VERSION}}"
+      - echo ""
+      - echo "=== Upgrading control-plane ==="
+      - task: upgrade-control-plane
+        vars:
+          version: "{{.VERSION}}"
+      - echo ""
+      - echo "=== Post-upgrade verification ==="
+      - task: verify
+      - echo "[OK] Cluster upgrade complete"
+
+  apply-config:
+    desc: Apply Talos config to node
+    summary: |
+      Applies Talos configuration to a node.
+
+      Usage:
+        task talos:maintenance:apply-config node=ogg ip=192.168.8.11 [insecure=true]
+
+      Parameters:
+        node: Node hostname (e.g., ogg)
+        ip: Node IP address (e.g., 192.168.8.11)
+        insecure: Use --insecure flag for fresh installs (default: false)
+
+      Use insecure=true for fresh installs or nodes with certificate issues.
+    vars:
+      NODE_NAME: '{{.node | default ""}}'
+      NODE_IP: '{{.ip | default ""}}'
+      INSECURE: '{{.insecure | default "false"}}'
+      CONFIG_FILE: "{{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig/witches-{{.NODE_NAME}}.yaml"
+      INSECURE_FLAG: '{{if eq .INSECURE "true"}}--insecure{{end}}'
+    preconditions:
+      - sh: '[ -n "{{.NODE_NAME}}" ]'
+        msg: "node parameter required (e.g., node=ogg)"
+      - sh: '[ -n "{{.NODE_IP}}" ]'
+        msg: "ip parameter required (e.g., ip=192.168.8.11)"
+      - sh: '[ -f "{{.CONFIG_FILE}}" ]'
+        msg: "Config file not found: {{.CONFIG_FILE}}"
+    cmds:
+      - echo "Applying config to {{.NODE_NAME}} ({{.NODE_IP}})"
+      - echo 'Config file{{":"}} {{.CONFIG_FILE}}'
+      - echo 'Insecure mode{{":"}} {{.INSECURE}}'
+      - |
+        talosctl --talosconfig {{.TALOSCONFIG}} \
+          apply-config \
+          {{.INSECURE_FLAG}} \
+          --nodes {{.NODE_IP}} \
+          --file {{.CONFIG_FILE}}
+      - echo "Waiting for node to apply config..."
+      - sleep 60
+      - kubectl --kubeconfig {{.KUBECONFIG}} wait --for=condition=Ready node/{{.NODE_NAME}} --timeout=10m
+      - echo "[OK] Config applied successfully"
+
+  fix-stuck-cilium:
+    desc: Fix stuck Cilium pod on node
+    summary: |
+      Deletes stuck Cilium pod on a node to force recreation.
+
+      Usage:
+        task talos:maintenance:fix-stuck-cilium node=ogg
+
+      Common after node reboots when Cilium pod is caught during shutdown.
+      Removes node taint: node.cilium.io/agent-not-ready
+    vars:
+      NODE_NAME: '{{.node | default ""}}'
+    preconditions:
+      - sh: '[ -n "{{.NODE_NAME}}" ]'
+        msg: "node parameter required (e.g., node=ogg)"
+    cmds:
+      - echo "Checking for stuck Cilium pod on {{.NODE_NAME}}"
+      - kubectl --kubeconfig {{.KUBECONFIG}} get pod -n kube-system -l k8s-app=cilium --field-selector spec.nodeName={{.NODE_NAME}}
+      - echo "Deleting Cilium pod..."
+      - kubectl --kubeconfig {{.KUBECONFIG}} delete pod -n kube-system -l k8s-app=cilium --field-selector spec.nodeName={{.NODE_NAME}}
+      - echo "Waiting for new Cilium pod to be Ready..."
+      - sleep 10
+      - kubectl --kubeconfig {{.KUBECONFIG}} wait --for=condition=Ready pod -l k8s-app=cilium --field-selector spec.nodeName={{.NODE_NAME}} -n kube-system --timeout=5m
+      - echo "[OK] Cilium pod recovered"
+      - kubectl --kubeconfig {{.KUBECONFIG}} describe node {{.NODE_NAME}} | grep -A 2 Taint
+
+  verify:
+    desc: Verify cluster health after maintenance
+    summary: |
+      Comprehensive post-maintenance verification.
+
+      Checks:
+      - All nodes Ready
+      - No unexpected taints
+      - System pods Running
+      - Ceph cluster HEALTH_OK
+      - All OSDs up
+      - All PGs active+clean
+      - Flux reconciliation
+      - Version consistency
+    cmds:
+      - echo "=== Node Health ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} get nodes
+      - echo ""
+      - echo "=== Node Taints ==="
+      - |
+        kubectl --kubeconfig {{.KUBECONFIG}} get nodes -o json | jq -r '.items[] | select(.spec.taints != null) | "\(.metadata.name): \(.spec.taints)"'
+      - echo ""
+      - echo "=== System Pods ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} get pods -n kube-system | grep -v Running || echo "All system pods Running"
+      - echo ""
+      - echo "=== Ceph Health ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph status
+      - echo ""
+      - echo "=== Ceph OSDs ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd tree
+      - echo ""
+      - echo "=== Ceph PG Status ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph pg stat
+      - echo ""
+      - echo "=== Failed Pods ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} get pods --all-namespaces | grep -v Running | grep -v Completed || echo "No failed pods"
+      - echo ""
+      - echo "=== Flux Status ==="
+      - flux get kustomizations | grep -v "True.*True" || echo "All kustomizations reconciled"
+      - echo ""
+      - echo "=== Version Consistency ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} get nodes -o custom-columns=NAME:.metadata.name,TALOS:.status.nodeInfo.osImage,K8S:.status.nodeInfo.kubeletVersion
+      - echo ""
+      - echo "[OK] Verification complete"
+
+  get-factory-image:
+    desc: Get factory image URL for current cluster version
+    summary: |
+      Displays the correct factory image URL for rebuilding nodes.
+
+      Usage:
+        task talos:maintenance:get-factory-image
+
+      Outputs both the ISO URL for Proxmox and the installer URL for upgrades.
+    cmds:
+      - |
+        CURRENT_VERSION=$(kubectl --kubeconfig {{.KUBECONFIG}} get node weatherwax -o jsonpath='{.status.nodeInfo.osImage}' | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')
+        echo "Current cluster version - ${CURRENT_VERSION}"
+        echo ""
+        echo "Factory Image URLs"
+        echo "=================="
+        echo ""
+        echo "ISO URL (for Proxmox)"
+        echo "https://factory.talos.dev/image/{{.SCHEMATIC}}/${CURRENT_VERSION}/metal-amd64.iso"
+        echo ""
+        echo "Installer URL (for upgrades)"
+        echo "factory.talos.dev/installer/{{.SCHEMATIC}}:${CURRENT_VERSION}"
+        echo ""
+        echo "Schematic ID - {{.SCHEMATIC}}"
+
+  drain-node:
+    desc: Gracefully drain node before maintenance
+    summary: |
+      Drains a node in preparation for maintenance.
+
+      Usage:
+        task talos:maintenance:drain-node node=ogg
+
+      Safely evicts pods with:
+      - Ignore DaemonSets
+      - Delete EmptyDir data
+      - Respect PodDisruptionBudgets
+    vars:
+      NODE_NAME: '{{.node | default ""}}'
+    preconditions:
+      - sh: '[ -n "{{.NODE_NAME}}" ]'
+        msg: "node parameter required (e.g., node=ogg)"
+    cmds:
+      - echo "Draining node {{.NODE_NAME}}..."
+      - kubectl --kubeconfig {{.KUBECONFIG}} drain {{.NODE_NAME}} --ignore-daemonsets --delete-emptydir-data
+      - echo "[OK] Node drained"
+
+  uncordon-node:
+    desc: Uncordon node after maintenance
+    summary: |
+      Marks node as schedulable after maintenance.
+
+      Usage:
+        task talos:maintenance:uncordon-node node=ogg
+    vars:
+      NODE_NAME: '{{.node | default ""}}'
+    preconditions:
+      - sh: '[ -n "{{.NODE_NAME}}" ]'
+        msg: "node parameter required (e.g., node=ogg)"
+    cmds:
+      - echo "Uncordoning node {{.NODE_NAME}}..."
+      - kubectl --kubeconfig {{.KUBECONFIG}} uncordon {{.NODE_NAME}}
+      - echo "[OK] Node uncordoned and schedulable"
