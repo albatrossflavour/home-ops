@@ -42,9 +42,9 @@ spec:
             summary: "Proxmox storage {{ $labels.id }} is critically full ({{ $value | humanizePercentage }})"
             description: "Storage {{ $labels.id }} on {{ $labels.instance }} is over 95% full. Immediate action required."
           expr: |
-            (
+            sum by (id, instance) (
               pve_disk_usage_bytes{id=~"storage/.*/.*"}
-              /
+              / on(id, instance)
               pve_disk_size_bytes{id=~"storage/.*/.*"}
             ) > 0.95
           for: 5m
@@ -59,9 +59,9 @@ spec:
             summary: "Proxmox storage {{ $labels.id }} is almost full ({{ $value | humanizePercentage }})"
             description: "Storage {{ $labels.id }} on {{ $labels.instance }} is over 85% full."
           expr: |
-            (
+            sum by (id, instance) (
               pve_disk_usage_bytes{id=~"storage/.*/.*"}
-              /
+              / on(id, instance)
               pve_disk_size_bytes{id=~"storage/.*/.*"}
             ) > 0.85
           for: 15m

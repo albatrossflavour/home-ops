@@ -133,6 +133,52 @@ spec:
           for: 5m
           labels:
             severity: warning
+        - alert: NodeFilesystemAlmostOutOfSpace
+          annotations:
+            summary: Filesystem {{ $labels.mountpoint }} on {{ $labels.instance }} has only {{ $value | humanizePercentage }} space left
+            description: |
+              Filesystem {{ $labels.mountpoint }} ({{ $labels.device }}) on {{ $labels.instance }} has only {{ $value | humanizePercentage }} available space remaining.
+              Immediate cleanup required.
+          expr: |
+            (
+              node_filesystem_avail_bytes{
+                fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",
+                mountpoint!~"/boot.*|/var/lib/kubelet.*|/run.*|/etc/(hostname|hosts|resolv\\.conf)|.*\\.timemachine.*|.*\\.backup|/System/.*|/Volumes/Local Time Machine",
+                instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"
+              }
+              /
+              node_filesystem_size_bytes{
+                fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",
+                mountpoint!~"/boot.*|/var/lib/kubelet.*|/run.*|/etc/(hostname|hosts|resolv\\.conf)|.*\\.timemachine.*|.*\\.backup|/System/.*|/Volumes/Local Time Machine",
+                instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"
+              }
+            ) < 0.05
+          for: 15m
+          labels:
+            severity: warning
+        - alert: NodeFilesystemCriticallyLowSpace
+          annotations:
+            summary: Filesystem {{ $labels.mountpoint }} on {{ $labels.instance }} critically low on space
+            description: |
+              Filesystem {{ $labels.mountpoint }} ({{ $labels.device }}) on {{ $labels.instance }} has only {{ $value | humanizePercentage }} available space remaining.
+              CRITICAL - Service disruption imminent!
+          expr: |
+            (
+              node_filesystem_avail_bytes{
+                fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",
+                mountpoint!~"/boot.*|/var/lib/kubelet.*|/run.*|/etc/(hostname|hosts|resolv\\.conf)|.*\\.timemachine.*|.*\\.backup|/System/.*|/Volumes/Local Time Machine",
+                instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"
+              }
+              /
+              node_filesystem_size_bytes{
+                fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",
+                mountpoint!~"/boot.*|/var/lib/kubelet.*|/run.*|/etc/(hostname|hosts|resolv\\.conf)|.*\\.timemachine.*|.*\\.backup|/System/.*|/Volumes/Local Time Machine",
+                instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"
+              }
+            ) < 0.03
+          for: 5m
+          labels:
+            severity: critical
         - alert: NodeFilesystemSpaceFillingUp
           annotations:
             summary: Filesystem on {{ $labels.device }} at {{ $labels.instance }} is filling up
