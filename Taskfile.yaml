@@ -31,7 +31,6 @@ includes:
   talos: .taskfiles/Talos
   sops: .taskfiles/Sops
   workstation: .taskfiles/Workstation
-  security: .taskfiles/Security
   user:
     taskfile: .taskfiles/User
     optional: true
