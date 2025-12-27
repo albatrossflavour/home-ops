@@ -31,3 +31,4 @@ resources:
   - ./intel.yaml
   - ./node-feature-discovery.yaml
   - ./penpot.yaml
+  - ./aquasecurity.yaml
