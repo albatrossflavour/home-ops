@@ -236,10 +236,13 @@ tasks:
         task talos:maintenance:upgrade-cluster version=v1.9.5
 
       Upgrade order:
-      1. All worker nodes (parallel-safe)
-      2. Control-plane nodes (one at a time, with Ceph awareness)
+      1. Pre-flight validation (MANDATORY - fails if issues found)
+      2. All worker nodes (parallel-safe)
+      3. Control-plane nodes (one at a time, with Ceph awareness)
+      4. Post-upgrade verification
 
       Automatically handles:
+      - Pre-flight validation (blocks upgrade if checks fail)
       - Ceph maintenance mode
       - Node sequencing for quorum
       - Post-upgrade verification
@@ -248,9 +251,20 @@ tasks:
     preconditions:
       - sh: '[ -n "{{.VERSION}}" ]'
         msg: "version parameter required (e.g., version=v1.9.5)"
+      - sh: |
+          echo "Running mandatory pre-flight checks..."
+          kubectl --kubeconfig {{.KUBECONFIG}} get nodes >/dev/null 2>&1
+        msg: "Cannot connect to cluster - check kubeconfig"
     cmds:
-      - echo "=== Pre-flight checks ==="
+      - echo "=== MANDATORY Pre-flight Validation ==="
+      - echo "Checking cluster health and backup status..."
       - task: pre-flight
+      - task: backup-health
+      - echo ""
+      - echo "✓ Pre-flight checks passed - proceeding with upgrade"
+      - echo ""
+      - echo "Press Ctrl+C within 10 seconds to abort..."
+      - sleep 10
       - echo ""
       - echo "=== Upgrading workers ==="
       - task: upgrade-workers

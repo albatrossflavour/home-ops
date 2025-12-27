@@ -212,3 +212,10 @@ repos:
         language: system
         files: kubernetes/.*helmrelease\.ya?ml$
         pass_filenames: true
+      - id: volsync-change-validation
+        name: Validate Volsync configuration changes
+        description: Blocks dangerous Volsync changes (PVC renames, trigger modifications)
+        entry: scripts/validate-volsync-change.sh
+        language: system
+        pass_filenames: false
+        stages: [commit]

@@ -83,8 +83,18 @@ tasks:
 
   upgrade-k8s:
     desc: Upgrade Kubernetes across the cluster
+    summary: |
+      Upgrades Kubernetes to specified version with mandatory pre-flight validation.
+
+      Usage:
+        task talos:upgrade-k8s controller=192.168.8.10 to=v1.32.0
+
+      IMPORTANT: Runs pre-flight checks automatically. Upgrade will be blocked if:
+      - Cluster health issues detected
+      - Backups are stale (>48h)
+      - Failed pods exist
+      - Ceph unhealthy
     dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
-    cmd: talosctl --nodes {{.controller}} upgrade-k8s --to {{.to}}
     requires:
       vars: ["controller", "to"]
     preconditions:
@@ -94,6 +104,21 @@ tasks:
         sh: talosctl config info >/dev/null 2>&1
       - msg: Node not found
         sh: talosctl --nodes {{.controller}} get machineconfig >/dev/null 2>&1
+    cmds:
+      - echo "=== MANDATORY Pre-flight Validation ==="
+      - task: maintenance:pre-flight
+      - task: maintenance:backup-health
+      - echo ""
+      - echo "✓ Pre-flight checks passed - proceeding with Kubernetes upgrade to {{.to}}"
+      - echo ""
+      - echo "Press Ctrl+C within 10 seconds to abort..."
+      - sleep 10
+      - echo ""
+      - echo "=== Starting Kubernetes Upgrade ==="
+      - talosctl --nodes {{.controller}} upgrade-k8s --to {{.to}}
+      - echo ""
+      - echo "=== Post-upgrade Verification ==="
+      - task: maintenance:verify
 
   nuke:
     desc: Resets nodes back to maintenance mode

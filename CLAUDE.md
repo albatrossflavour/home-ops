@@ -10,6 +10,8 @@ This is a Kubernetes home operations repository based on the onedr0p cluster tem
 
 **CRITICAL**: Required before backup/restore operations. Failure = permanent data loss.
 
+**Enforcement**: Multi-layer protection ensures procedures are followed. See `~/.claude/skills/operations/enforcement-mechanisms.md` for complete details on technical blocking, process requirements, and user approval mechanisms.
+
 ### Backup & Recovery Operations
 
 **Complete procedure**: `~/.claude/skills/recovery/volsync-restore.md`
