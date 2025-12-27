@@ -63,8 +63,11 @@ check_cluster_minio() {
     CHECKS_TOTAL=$((CHECKS_TOTAL + 1))
     log_info "Checking cluster Minio health..."
 
-    # Check Minio pod is running
-    if kubectl --kubeconfig "$KUBECONFIG" get pod -n default -l app.kubernetes.io/name=minio -o jsonpath='{.items[0].status.phase}' 2>/dev/null | grep -q "Running"; then
+    # Check Minio pod is running (filter out Completed/Succeeded pods)
+    local RUNNING_PODS
+    RUNNING_PODS=$(kubectl --kubeconfig "$KUBECONFIG" get pod -n default -l app.kubernetes.io/name=minio --field-selector=status.phase=Running -o json 2>/dev/null | jq -r '.items | length')
+
+    if [ "$RUNNING_PODS" -gt 0 ]; then
         log_success "Cluster Minio pod is Running"
     else
         log_error "Cluster Minio pod is not Running"
