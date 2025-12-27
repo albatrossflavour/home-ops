@@ -35,93 +35,36 @@ flux get kustomizations | grep -v "True.*True"
 
 ## 🆕 New Features to Consider (v1.31-v1.33)
 
-### HIGH PRIORITY
+### COMPLETED ✅
 
 #### 1. Native Sidecar Containers (v1.33 Stable) ⭐
 
-**Impact**: Home Assistant Matter server, code-server sidecars
-**Benefit**: Proper lifecycle management, probes support, better ordering
+**Status**: ✅ Completed December 27, 2025
 
-**Current setup** (multi-container pattern):
+**Applied to**: Home Assistant (matter-server, code-server sidecars)
 
-```yaml
-# kubernetes/apps/default/home-assistant/app/helmrelease.yaml
-controllers:
-  home-assistant:
-    containers:
-      app: # main HA
-      matter-server: # sidecar
-      code-server: # sidecar
-```
-
-**New sidecar pattern**:
-
-```yaml
-controllers:
-  home-assistant:
-    initContainers:
-      matter-server:
-        image: ghcr.io/home-assistant-libs/python-matter-server:stable
-        restartPolicy: Always  # Makes it a sidecar
-        ports:
-          - name: websocket
-            containerPort: 5580
-        readinessProbe:
-          tcpSocket:
-            port: 5580
-          initialDelaySeconds: 5
-      code-server:
-        image: ghcr.io/coder/code-server:latest
-        restartPolicy: Always
-        ports:
-          - name: http
-            containerPort: 8080
-    containers:
-      app:
-        image: ghcr.io/home-assistant/home-assistant:latest
-```
-
-**Files to update**:
-
-- `kubernetes/apps/default/home-assistant/app/helmrelease.yaml`
-
-**Advantages**:
-
-- Probes work properly (readiness/liveness)
-- Better startup ordering (sidecars start before main app)
-- Cleaner termination (sidecars automatically stop after main container)
+**Result**: Better lifecycle management, proper probes support, cleaner termination
 
 ---
 
-#### 2. nftables kube-proxy Backend (v1.33 Stable) 🚀
+#### 2. Cilium eBPF kube-proxy Replacement (Better than nftables!)
 
-**Impact**: Cluster-wide networking performance
-**Benefit**: Better performance and scalability than iptables
+**Status**: ✅ Already implemented
 
-**How to enable**: Update Talos configuration
+**Configuration**:
 
-**File to check**: `kubernetes/bootstrap/talos/talconfig.yaml`
+- Talos: `cluster.proxy.disabled: true`
+- Cilium: `kubeProxyReplacement: true`, `routingMode: native`
 
-**Add to cluster config**:
+**Result**: eBPF-based packet processing (faster than both iptables and nftables)
 
-```yaml
-cluster:
-  proxy:
-    mode: nftables  # Instead of iptables (default)
-```
-
-**Steps**:
-
-1. Update `talconfig.yaml` with nftables mode
-2. Regenerate Talos configs: `talhelper genconfig`
-3. Apply to nodes one at a time: `task talos:maintenance:apply-config node=weatherwax ip=192.168.8.10`
-4. Monitor for any service connectivity issues
-
-**Prerequisites**: ✅ Kernel 5.13+ (you have 6.6+ via Talos v1.10.6)
+**Note**: The nftables recommendation is for clusters using traditional kube-proxy. This cluster uses Cilium eBPF which provides superior performance.
 
 ---
 
-#### 3. StatefulSet PVC Auto-Deletion (v1.32 Stable)
+### HIGH PRIORITY
+
+#### 1. StatefulSet PVC Auto-Deletion (v1.32 Stable)
 
 **Impact**: PostgreSQL, Immich, Paperless, Redis, EMQX
 **Benefit**: Automatic PVC cleanup when StatefulSets scale down or are deleted
@@ -152,7 +95,7 @@ spec:
 
 ### MEDIUM PRIORITY
 
-#### 4. Topology-Aware Routing (v1.33 Stable)
+#### 1. Topology-Aware Routing (v1.33 Stable)
 
 **Impact**: Multi-zone services
 **Benefit**: Lower latency, reduced cross-zone traffic costs
@@ -181,36 +124,7 @@ spec:
 
 ---
 
-#### 5. In-Place Pod Resource Resize (v1.33 Beta, enabled by default)
-
-**Impact**: All deployments
-**Benefit**: Resize CPU/memory without pod restart
-
-**How to use**:
-
-```bash
-# Resize deployment without downtime
-kubectl set resources deployment/paperless -n default --limits=cpu=2,memory=4Gi
-
-# Pod resizes in-place (no restart!)
-```
-
-**Use cases**:
-
-- Scale up database memory during high load
-- Scale down idle services to save resources
-- Dynamic resource adjustment based on metrics
-
-**Best candidates in your cluster**:
-
-- `paperless` - varies with document processing load
-- `immich` - varies with photo processing
-- `n8n` - varies with workflow execution
-- Media apps (sonarr, radarr) - peak during downloads
-
----
-
-#### 6. Memory Manager (v1.32 Stable)
+#### 2. Memory Manager (v1.32 Stable)
 
 **Impact**: Databases, Ceph OSDs
 **Benefit**: Guaranteed memory allocation at NUMA node level
@@ -360,18 +274,17 @@ kubectl exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd perf
 2. ✅ Check Ceph health
 3. ✅ Monitor for pod issues
 4. ✅ Review Flux reconciliation
+5. ✅ Migrate Home Assistant to native sidecars
 
 ### Short Term (Week 2-4)
 
-1. **Migrate Home Assistant to native sidecars** (highest value, low risk)
-2. **Test in-place pod resize** on non-critical workload (e.g., echo-server)
-3. **Review StatefulSet PVC retention policies** for databases
+1. **Review StatefulSet PVC retention policies** for databases
+2. **Consider topology-aware routing** for high-traffic services
 
 ### Medium Term (Month 2-3)
 
-1. **Enable nftables kube-proxy backend** (test on single node first)
-2. **Add topology-aware routing** to high-traffic services
-3. **Implement Memory Manager** for PostgreSQL/Redis
+1. **Implement Memory Manager** for PostgreSQL/Redis (guaranteed QoS)
+2. **Explore volume populators** for backup workflows
 
 ### Long Term (Optional)
 
@@ -385,8 +298,8 @@ kubectl exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd perf
 
 ### High Priority
 
-- [ ] `kubernetes/apps/default/home-assistant/app/helmrelease.yaml` - Native sidecars
-- [ ] `kubernetes/bootstrap/talos/talconfig.yaml` - nftables backend
+- [x] `kubernetes/apps/default/home-assistant/app/helmrelease.yaml` - Native sidecars ✅
+- [x] Cilium eBPF kube-proxy replacement (already configured) ✅
 - [ ] `kubernetes/apps/database/cloudnative-pg/cluster/cluster16.yaml` - PVC retention
 
 ### Medium Priority

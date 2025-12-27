@@ -246,13 +246,80 @@ kubectl -n media get hpa
 
 ### Resource Adjustments
 
+#### Standard Method (GitOps - Preferred)
+
 ```bash
 # Check current resource requests/limits
 kubectl -n media describe deployment sonarr | grep -A5 -B5 "Requests\|Limits"
 
 # Update resources via GitOps (edit kubernetes manifests)
-# Then apply changes through git commit/push cycle
+# 1. Edit kubernetes/apps/media/sonarr/app/helmrelease.yaml
+# 2. Commit and push changes
+# 3. Flux will reconcile and update the deployment
 ```
+
+#### In-Place Pod Resource Resize (Kubernetes v1.33+)
+
+**Available Since**: Kubernetes v1.33 (Beta, enabled by default in this cluster)
+
+**Use Case**: Temporary resource adjustments without pod restart or GitOps workflow
+
+**How it works**: Pods resize CPU/memory limits in-place without restarting
+
+**Important Notes**:
+
+- Changes are **temporary** - will revert on next pod restart or Flux reconciliation
+- For permanent changes, always update GitOps manifests
+- Best for: emergency scaling, testing resource requirements, temporary load spikes
+
+**Examples**:
+
+```bash
+# Increase memory limit for paperless during large document processing
+kubectl -n default set resources deployment/paperless --limits=memory=4Gi
+
+# Scale up CPU for immich during photo processing batch
+kubectl -n default set resources deployment/immich --limits=cpu=2
+
+# Reduce resources for idle service to save capacity
+kubectl -n media set resources deployment/bazarr --limits=cpu=100m,memory=512Mi
+
+# View the change (pod resizes without restart!)
+kubectl -n default get pods -l app.kubernetes.io/name=paperless -w
+
+# Verify new resource allocation
+kubectl -n default describe pod <pod-name> | grep -A5 "Limits\|Requests"
+```
+
+**Best Candidates for In-Place Resize**:
+
+- `paperless` - varies with document processing load
+- `immich` - varies with photo processing batches
+- `n8n` - varies with workflow execution
+- Media apps (sonarr, radarr) - peak during downloads
+
+**Limitations**:
+
+- Only works for CPU and memory (not ephemeral storage)
+- Requires QoS class to remain the same (Guaranteed → Guaranteed, Burstable → Burstable)
+- Some containers may need restart if they cache resource values at startup
+
+**Permanent Resource Changes**:
+
+For production adjustments, always use GitOps:
+
+```yaml
+# kubernetes/apps/default/paperless/app/helmrelease.yaml
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: 2
+    memory: 4Gi
+```
+
+Then commit, push, and let Flux apply the change.
 
 ## 🔄 Application Lifecycle
 
