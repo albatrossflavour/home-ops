@@ -218,4 +218,4 @@ repos:
         entry: scripts/validate-volsync-change.sh
         language: system
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
