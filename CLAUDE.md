@@ -6,6 +6,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Kubernetes home operations repository based on the onedr0p cluster template. It uses Talos Linux as the operating system and Flux for GitOps-based cluster management. The repository contains Infrastructure as Code (IaC) configurations for a complete Kubernetes homelab setup with Cloudflare integration.
 
+## 🚨 MANDATORY SAFETY PROCEDURES
+
+**CRITICAL**: Required before backup/restore operations. Failure = permanent data loss.
+
+### Backup & Recovery Operations
+
+**Complete procedure**: `~/.claude/skills/recovery/volsync-restore.md`
+
+**4-Step Requirement (NO EXCEPTIONS):**
+
+1. **Sequential Thinking**: Use `mcp__sequential-thinking__sequentialthinking` - analyze risks, read `kubernetes/templates/volsync/minio.yaml:56-80`
+2. **Read-Only Verification**: List ALL backup sources (NAS/cluster Minio, VolumeSnapshots) - verify before acting
+3. **Present Options**: Show user all recovery options with data loss windows and risk levels
+4. **Get Approval**: User chooses option - no assumed consent
+
+### Destructive Operations Approval
+
+**MUST ask approval before:** PVC deletion, Volsync modifications, backup config changes, force pod deletion
+
+**Approval format:**
+
+```text
+I need to [OPERATION] which could cause [RISK].
+Backups verified: [YES/NO]
+Recovery plan: [DESCRIPTION]
+Should I proceed? (Respond "yes, proceed" to confirm)
+```
+
+### Critical Volsync DON'Ts
+
+❌ **NEVER modify ReplicationDestination triggers** (Dec 27, 2024: wiped hourly backups)
+❌ **NEVER rename PVCs in Volsync apps** (Nov 19, 2024: lost weeks of backups)
+❌ **NEVER assume cluster/NAS Minio are same** (cluster: `minio.default:9000`, NAS: `192.168.1.22:9000`)
+❌ **NEVER delete PVCs without Phase 1 verification**
+❌ **NEVER use trigger-based restoration** (use manual restore jobs)
+
+### Sequential Thinking Use Cases
+
+Required for: **Backup/restore ops (MANDATORY)**, complex troubleshooting, multi-step problems, deployment failures
+
 ## Architecture
 
 ### Core Components
@@ -835,9 +875,24 @@ kubectl logs -n observability deployment/loki-gateway
 
 ### Volsync PVC Immutability (CRITICAL WARNING)
 
+**See**: `~/.claude/skills/recovery/volsync-restore.md` for complete recovery procedures and safety requirements
+
 **WARNING**: PVC names in Volsync-enabled applications are IMMUTABLE once backups begin.
 
-**What happened**: November 19, 2024 - A template change renamed PVCs from `${APP}-volsync` to `${APP}`. This caused Kubernetes to delete and recreate Volsync resources, triggering restic repository reinitialization that orphaned all historical snapshots. Three applications (overseerr, qbittorrent, sabnzbd) lost weeks of backup history and were restored from stale VolumeSnapshots.
+**MANDATORY SAFETY PROCEDURES**: Before ANY Volsync operation:
+
+1. Use Sequential Thinking tool to analyze risks
+2. Perform read-only verification of backups
+3. Present options to user with risk assessment
+4. Get explicit approval before proceeding
+
+See "MANDATORY SAFETY PROCEDURES" section above for complete requirements.
+
+**Historical Incidents:**
+
+**November 19, 2024** - A template change renamed PVCs from `${APP}-volsync` to `${APP}`. This caused Kubernetes to delete and recreate Volsync resources, triggering restic repository reinitialization that orphaned all historical snapshots. Three applications (overseerr, qbittorrent, sabnzbd) lost weeks of backup history and were restored from stale VolumeSnapshots.
+
+**December 27, 2024** - During Overseerr recovery, changing ReplicationDestination trigger value to force restore caused cluster Minio repository reinitialization, wiping all hourly backups. Recovery succeeded using NAS Minio daily backup (8.5 hours data loss). Incident led to creation of mandatory safety procedures.
 
 **Why PVC renames are dangerous**:
 

@@ -16,6 +16,8 @@ tasks:
       - All nodes Ready
       - Ceph cluster health
       - Current versions
+      - Recent backups completed
+      - No failed pods
       - No ongoing operations
     cmds:
       - echo "=== Node Status ==="
@@ -26,14 +28,64 @@ tasks:
         talosctl --talosconfig {{.TALOSCONFIG}} version \
           --nodes 192.168.8.10,192.168.8.11,192.168.8.12,192.168.8.13,192.168.8.14,192.168.8.15
       - echo ""
+      - echo "=== Kubernetes Versions ==="
+      - kubectl --kubeconfig {{.KUBECONFIG}} get nodes -o custom-columns=NAME:.metadata.name,VERSION:.status.nodeInfo.kubeletVersion
+      - echo ""
       - echo "=== Ceph Health ==="
       - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph status
       - echo ""
       - echo "=== Ceph OSD Tree ==="
       - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd tree
       - echo ""
+      - echo "=== Failed Pods Check ==="
+      - |
+        FAILED_PODS=$(kubectl --kubeconfig {{.KUBECONFIG}} get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded | grep -v NAMESPACE | wc -l)
+        if [ "$FAILED_PODS" -gt 0 ]; then
+          echo "⚠️  WARNING: Found $FAILED_PODS failed pods"
+          kubectl --kubeconfig {{.KUBECONFIG}} get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded
+        else
+          echo "✓ All pods Running or Succeeded"
+        fi
+      - echo ""
+      - echo "=== Backup Health Check ==="
+      - |
+        echo "Checking recent Volsync backups..."
+        BACKUP_ISSUES=0
+        for ns in default media database; do
+          echo "Namespace: $ns"
+          SOURCES=$(kubectl --kubeconfig {{.KUBECONFIG}} get replicationsource -n $ns -o json 2>/dev/null | jq -r '.items[] | "\(.metadata.name)|\(.status.lastSyncTime // "never")|\(.status.latestMoverStatus.result // "unknown")"')
+          if [ -n "$SOURCES" ]; then
+            echo "$SOURCES" | while IFS='|' read -r name time status; do
+              if [ "$time" = "never" ] || [ "$status" != "Successful" ]; then
+                echo "  ⚠️  $name: last sync $time, status $status"
+                BACKUP_ISSUES=$((BACKUP_ISSUES + 1))
+              else
+                # Check if backup is recent (within 48h)
+                LAST_BACKUP=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$time" +%s 2>/dev/null || echo "0")
+                NOW=$(date +%s)
+                AGE_HOURS=$(( (NOW - LAST_BACKUP) / 3600 ))
+                if [ "$AGE_HOURS" -gt 48 ]; then
+                  echo "  ⚠️  $name: last successful backup ${AGE_HOURS}h ago"
+                else
+                  echo "  ✓ $name: last backup ${AGE_HOURS}h ago"
+                fi
+              fi
+            done
+          fi
+        done
+        if [ "$BACKUP_ISSUES" -gt 0 ]; then
+          echo "⚠️  WARNING: Some backups may be stale or failed"
+        fi
+      - echo ""
       - echo "=== Flux Status ==="
-      - flux get kustomizations | grep -v "True.*True"
+      - |
+        FLUX_ISSUES=$(flux get kustomizations 2>/dev/null | grep -v "True.*True" | grep -v NAMESPACE | wc -l)
+        if [ "$FLUX_ISSUES" -gt 0 ]; then
+          echo "⚠️  WARNING: Found Flux reconciliation issues"
+          flux get kustomizations | grep -v "True.*True"
+        else
+          echo "✓ All Flux kustomizations reconciled"
+        fi
       - echo ""
       - echo "[OK] Pre-flight checks complete"
 
@@ -281,6 +333,22 @@ tasks:
       - kubectl --kubeconfig {{.KUBECONFIG}} wait --for=condition=Ready pod -l k8s-app=cilium --field-selector spec.nodeName={{.NODE_NAME}} -n kube-system --timeout=5m
       - echo "[OK] Cilium pod recovered"
       - kubectl --kubeconfig {{.KUBECONFIG}} describe node {{.NODE_NAME}} | grep -A 2 Taint
+
+  backup-health:
+    desc: Check Volsync backup health
+    summary: |
+      Verifies backup systems are functional and recent backups completed.
+
+      Checks:
+      - Cluster Minio (hourly backups) is running
+      - NAS Minio (daily backups) is accessible
+      - Recent backups completed for all apps
+      - Critical apps have backups within 48h
+
+      Usage:
+        task talos:maintenance:backup-health
+    cmds:
+      - "{{.ROOT_DIR}}/scripts/backup-health-check.sh"
 
   verify:
     desc: Verify cluster health after maintenance
