@@ -48,7 +48,7 @@ spec:
       image:
         registry: ghcr.io
         repository: aquasecurity/trivy
-        tag: "0.58.1"  # Renovate will add digest automatically
+        tag: "0.68.2@sha256:05d0126976bdedcd0782a0336f77832dbea1c81b9cc5e4b3a5ea5d2ec863aca7"  # Renovate will add digest automatically
 
       # Severity levels to report
       severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
