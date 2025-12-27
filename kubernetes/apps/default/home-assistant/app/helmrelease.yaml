@@ -34,6 +34,41 @@ spec:
           hostNetwork: true
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          code-server:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.107.0@sha256:4b622c4cd1b0f559fec0df67fcf09042d63e9ce84c575102066afd9511695627
+            restartPolicy: Always
+            args: [
+              "--auth", "none",
+              "--user-data-dir", "/config/.vscode",
+              "--extensions-dir", "/config/.vscode",
+              "--port", "12321",
+              "/config"
+            ]
+            probes:
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 12321
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 12321
+                  initialDelaySeconds: 15
+                  periodSeconds: 20
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
         containers:
           app:
             image:
@@ -57,22 +92,6 @@ spec:
                 cpu: 10m
               limits:
                 memory: 3Gi
-          code-server:
-            image:
-              repository: ghcr.io/coder/code-server
-              tag: 4.107.0@sha256:4b622c4cd1b0f559fec0df67fcf09042d63e9ce84c575102066afd9511695627
-            args: [
-              "--auth", "none",
-              "--user-data-dir", "/config/.vscode",
-              "--extensions-dir", "/config/.vscode",
-              "--port", "12321",
-              "/config"
-            ]
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
