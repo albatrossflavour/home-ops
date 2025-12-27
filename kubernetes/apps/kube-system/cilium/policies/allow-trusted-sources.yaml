@@ -18,10 +18,10 @@ spec:
       toPorts:
         - ports:
             - port: "1"
-              endPort: "65535"
+              endPort: 65535
               protocol: TCP
             - port: "1"
-              endPort: "65535"
+              endPort: 65535
               protocol: UDP
 
     # ALWAYS allow Cloudflare IPs (for tunnel traffic)
