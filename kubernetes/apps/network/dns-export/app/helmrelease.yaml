@@ -118,6 +118,9 @@ spec:
     service:
       webserver:
         controller: webserver
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: "192.168.8.21"
         ports:
           http:
             port: 80
