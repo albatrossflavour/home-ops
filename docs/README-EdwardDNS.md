@@ -114,4 +114,4 @@ Look for the section between:
 
 ## Need Help?
 
-Ask Dad (Tom) if something isn't working!
+Ask Dad if something isn't working!
