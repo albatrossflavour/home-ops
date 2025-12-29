@@ -37,7 +37,6 @@ spec:
             runAsUser: 1000
             runAsGroup: 1000
             fsGroup: 1000
-          serviceAccount: dns-export
 
         containers:
           app:
@@ -168,3 +167,7 @@ spec:
                 }
               }
             }
+
+    serviceAccount:
+      create: false
+      name: dns-export
