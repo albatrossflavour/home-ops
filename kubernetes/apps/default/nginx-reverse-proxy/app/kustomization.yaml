@@ -6,4 +6,5 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./ingress.yaml
+  - ./plex-ingress.yaml
   - ../../../../templates/gatus/guarded

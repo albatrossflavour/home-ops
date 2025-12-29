@@ -226,10 +226,6 @@ spec:
             paths:
               - path: /
                 pathType: Prefix
-          - host: plex.albatrossflavour.com
-            paths:
-              - path: /
-                pathType: Prefix
 
     persistence:
       data:

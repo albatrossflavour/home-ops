@@ -122,13 +122,3 @@ spec:
                   number: 8080
             path: /
             pathType: Prefix
-    - host: plex.albatrossflavour.com
-      http:
-        paths:
-          - backend:
-              service:
-                name: nginx-reverse-proxy
-                port:
-                  number: 8080
-            path: /
-            pathType: Prefix
