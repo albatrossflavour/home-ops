@@ -93,19 +93,17 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /dns-entries.json
+                  tcpSocket:
                     port: 80
-                  initialDelaySeconds: 10
+                  initialDelaySeconds: 5
                   periodSeconds: 30
               readiness:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /dns-entries.json
+                  tcpSocket:
                     port: 80
-                  initialDelaySeconds: 5
+                  initialDelaySeconds: 3
                   periodSeconds: 10
 
             resources:
