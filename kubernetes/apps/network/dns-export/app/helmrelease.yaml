@@ -115,15 +115,6 @@ spec:
               limits:
                 memory: 64Mi
 
-    service:
-      webserver:
-        controller: webserver
-        type: NodePort
-        ports:
-          http:
-            port: 80
-            nodePort: 30880
-
     persistence:
       # Shared storage for JSON file
       data:

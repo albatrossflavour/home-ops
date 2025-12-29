@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/service.json
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dns-export
+  namespace: network
+  labels:
+    app.kubernetes.io/name: dns-export
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/component: webserver
+    app.kubernetes.io/instance: dns-export
+    app.kubernetes.io/name: dns-export
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30880
