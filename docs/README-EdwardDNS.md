@@ -43,6 +43,30 @@ cd C:\Path\To\Script
 .\Sync-ClusterDNS.ps1 -DryRun
 ```
 
+#### Option 4: Create Chrome Bookmarks
+
+```powershell
+.\Sync-ClusterDNS.ps1 -CreateBookmarks
+```
+
+This creates a bookmarks file in your Downloads folder that you can import into Chrome. It includes the most useful services with descriptions:
+
+- **Plex** - Stream movies, TV shows, and music
+- **Sonarr** - TV show management
+- **Radarr** - Movie management
+- **Overseerr** - Request new media
+- And more!
+
+To import the bookmarks into Chrome:
+
+1. Open Chrome
+2. Press `Ctrl+Shift+O` to open Bookmarks Manager
+3. Click the three dots (⋮) in the top right
+4. Select "Import bookmarks"
+5. Choose the file from your Downloads folder: `ClusterServices-Bookmarks.html`
+
+The bookmarks will appear in a "Cluster Services" folder.
+
 ### Set Up Automatic Sync (Optional)
 
 To have it update automatically every day:
@@ -65,12 +89,16 @@ Register-ScheduledTask -TaskName "Sync Cluster DNS" -Action $action -Trigger $tr
 
 After running the script, you can access these services in your browser:
 
-- **Sonarr**: http://sonarr.albatrossflavour.com
-- **Radarr**: http://radarr.albatrossflavour.com
-- **Homepage**: http://homepage.albatrossflavour.com
+- **Plex**: https://plex.albatrossflavour.com - Stream movies, TV shows, and music
+- **Sonarr**: https://sonarr.albatrossflavour.com - Manage TV shows
+- **Radarr**: https://radarr.albatrossflavour.com - Manage movies
+- **Overseerr**: https://overseerr.albatrossflavour.com - Request new media
+- **Homepage**: https://homepage.albatrossflavour.com - Service dashboard
 - **And 50+ other services!**
 
 The script will show you the first 5 services when it completes.
+
+**Tip**: Use the `-CreateBookmarks` option to generate a Chrome bookmarks file with all the useful services and their descriptions!
 
 ## Troubleshooting
 
