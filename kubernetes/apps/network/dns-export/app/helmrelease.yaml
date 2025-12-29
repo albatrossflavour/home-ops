@@ -41,31 +41,32 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/kubectl
-              tag: "1.32.0"
+              repository: alpine
+              tag: "3.21"
 
             command:
               - /bin/sh
               - -c
               - |
+                # Install kubectl and jq
+                apk add --no-cache curl jq
+                curl -LO "https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubectl"
+                chmod +x kubectl
+                mv kubectl /usr/local/bin/
+
                 echo "Generating DNS entries JSON..."
 
                 # Query all ingresses and generate JSON
                 kubectl get ingress -A -o json | jq -r '
                   [.items[] |
-                    select(.spec.rules[]?.host | test("albatrossflavour\\.com|pdlf\\.net")) |
-                    .spec.rules[] |
+                    .spec.rules[]? |
+                    select(.host | test("albatrossflavour\\.com|pdlf\\.net")) |
                     {
                       hostname: .host,
-                      ip: (
-                        if ($parent.metadata.annotations["external-dns.alpha.kubernetes.io/target"] // "" | test("external")) or $parent.spec.ingressClassName == "external"
-                        then "192.168.8.23"
-                        else "192.168.8.21"
-                        end
-                      )
+                      ip: "192.168.8.21"
                     }
                   ] | unique_by(.hostname) | sort_by(.hostname)
-                ' --argjson parent '{}' > /data/dns-entries.json
+                ' > /data/dns-entries.json
 
                 echo "Generated $(cat /data/dns-entries.json | jq 'length') DNS entries"
                 cat /data/dns-entries.json | jq -r '.[] | "\(.hostname) -> \(.ip)"' | head -10
