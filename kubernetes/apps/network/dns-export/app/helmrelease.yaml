@@ -1,0 +1,170 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dns-export
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.6.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      # CronJob that generates DNS JSON every 15 minutes
+      generator:
+        type: cronjob
+        cronjob:
+          schedule: "*/15 * * * *"
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+
+        pod:
+          serviceAccountName: dns-export
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+
+        containers:
+          app:
+            image:
+              repository: bitnami/kubectl
+              tag: "1.31"
+
+            command:
+              - /bin/sh
+              - -c
+              - |
+                echo "Generating DNS entries JSON..."
+
+                # Query all ingresses and generate JSON
+                kubectl get ingress -A -o json | jq -r '
+                  [.items[] |
+                    select(.spec.rules[]?.host | test("albatrossflavour\\.com|pdlf\\.net")) |
+                    .spec.rules[] |
+                    {
+                      hostname: .host,
+                      ip: (
+                        if ($parent.metadata.annotations["external-dns.alpha.kubernetes.io/target"] // "" | test("external")) or $parent.spec.ingressClassName == "external"
+                        then "192.168.8.23"
+                        else "192.168.8.21"
+                        end
+                      )
+                    }
+                  ] | unique_by(.hostname) | sort_by(.hostname)
+                ' --argjson parent '{}' > /data/dns-entries.json
+
+                echo "Generated $(cat /data/dns-entries.json | jq 'length') DNS entries"
+                cat /data/dns-entries.json | jq -r '.[] | "\(.hostname) -> \(.ip)"' | head -10
+
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+
+      # Nginx webserver to serve the JSON file
+      webserver:
+        containers:
+          app:
+            image:
+              repository: nginx
+              tag: "1.27-alpine"
+
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /dns-entries.json
+                    port: 80
+                  initialDelaySeconds: 10
+                  periodSeconds: 30
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /dns-entries.json
+                    port: 80
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
+
+    service:
+      webserver:
+        controller: webserver
+        ports:
+          http:
+            port: 80
+
+    persistence:
+      # Shared storage for JSON file
+      data:
+        type: persistentVolumeClaim
+        size: 100Mi
+        storageClass: openebs-hostpath
+        accessMode: ReadWriteOnce
+        globalMounts:
+          - path: /data
+
+      # Nginx configuration to serve JSON with CORS
+      nginx-config:
+        type: configMap
+        name: dns-export-nginx-config
+        advancedMounts:
+          webserver:
+            app:
+              - path: /etc/nginx/nginx.conf
+                subPath: nginx.conf
+                readOnly: true
+
+    configMaps:
+      nginx-config:
+        data:
+          nginx.conf: |
+            events {
+              worker_connections 1024;
+            }
+            http {
+              server {
+                listen 80;
+
+                location / {
+                  root /data;
+                  add_header Access-Control-Allow-Origin *;
+                  add_header Content-Type application/json;
+                  add_header Cache-Control "no-cache, no-store, must-revalidate";
+                }
+              }
+            }
