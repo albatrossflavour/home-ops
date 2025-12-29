@@ -33,11 +33,11 @@ spec:
           failedJobsHistory: 1
 
         pod:
-          serviceAccountName: dns-export
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
             fsGroup: 1000
+          serviceAccount: dns-export
 
         containers:
           app:
