@@ -55,7 +55,7 @@ spec:
               PAPERLESS_EXPORT_DIR: /data/nas/export
 
               # Export filename format
-              PAPERLESS_FILENAME_FORMAT: "{{ created_year }}-{{ created_month }}-{{ created_day }}_{{ correspondent }}_{{ title }}"
+              PAPERLESS_FILENAME_FORMAT: "{{ `{{ created_year }}-{{ created_month }}-{{ created_day }}_{{ correspondent }}_{{ title }}` }}"
 
               # Folder importer configuration
               PAPERLESS_CONSUMER_POLLING: "60"
