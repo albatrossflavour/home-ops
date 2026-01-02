@@ -32,7 +32,7 @@ spec:
       tag: v0.40.1
 
     # Object storage configuration
-    existingObjstoreSecret: thanos-objstore-secret  # pragma: allowlist secret
+    existingObjstoreSecret: thanos-objstore-secret # pragma: allowlist secret
     objstoreConfig:
       type: s3
       config:
@@ -51,7 +51,7 @@ spec:
           cpu: 10m
           memory: 128Mi
         limits:
-          memory: 1Gi
+          memory: 2Gi
 
     # Query Frontend - Caching layer for queries (Grafana connects here)
     queryFrontend:
