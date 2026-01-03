@@ -32,6 +32,7 @@ spec:
 
                   echo "Installing Python requirements..."
                   pip install --no-cache-dir -r requirements.txt
+                  pip install --no-cache-dir icecream
 
                   echo "Copying configuration..."
                   cp /config/config.yaml /app/config/config.yaml
