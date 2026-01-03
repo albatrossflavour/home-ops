@@ -7,7 +7,7 @@ UNIFI:
     "default": "Home"
 
 NETBOX:
-  URL: https://netbox.network.svc.cluster.local
+  URL: http://netbox.network.svc.cluster.local
   ROLES:
     WIRELESS: Wireless AP
     LAN: Switch
