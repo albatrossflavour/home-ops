@@ -52,6 +52,11 @@ spec:
                     secretKeyRef:
                       name: unifi2netbox-secret
                       key: UNIFI_PASSWORD
+                - name: UNIFI_MFA_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: unifi2netbox-secret
+                      key: UNIFI_MFA_SECRET
                 - name: NETBOX_TOKEN
                   valueFrom:
                     secretKeyRef:
