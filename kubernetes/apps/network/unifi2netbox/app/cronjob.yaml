@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch/cronjob_v1.json
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: unifi2netbox
+spec:
+  schedule: "0 2 * * *"  # Daily at 2am
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400  # Clean up after 24 hours
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: unifi2netbox
+              image: python:3.11-slim@sha256:2ec5a4a5c3e919570f57675471f081d6299668d909feabd8d4803c6c61af666c
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  echo "Installing dependencies..."
+                  apt-get update && apt-get install -y git && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+                  echo "Cloning unifi2netbox repository..."
+                  git clone https://github.com/mrzepa/unifi2netbox.git /app
+                  cd /app
+
+                  echo "Installing Python requirements..."
+                  pip install --no-cache-dir -r requirements.txt
+
+                  echo "Copying configuration..."
+                  cp /config/config.yaml /app/config/config.yaml
+
+                  echo "Running unifi2netbox sync..."
+                  python main.py -v
+
+                  echo "Sync completed successfully"
+              env:
+                - name: UNIFI_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: unifi2netbox-secret
+                      key: UNIFI_USER
+                - name: UNIFI_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: unifi2netbox-secret
+                      key: UNIFI_PASSWORD
+                - name: NETBOX_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: unifi2netbox-secret
+                      key: NETBOX_API_TOKEN
+              volumeMounts:
+                - name: config
+                  mountPath: /config
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          volumes:
+            - name: config
+              configMap:
+                name: unifi2netbox-config

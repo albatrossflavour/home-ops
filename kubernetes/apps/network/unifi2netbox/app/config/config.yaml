@@ -1,0 +1,14 @@
+UNIFI:
+  URLS:
+    - https://192.168.1.1:8443
+  # Map UniFi site "default" to NetBox site "Home"
+  USE_SITE_MAPPING: false
+  SITE_MAPPINGS:
+    "default": "Home"
+
+NETBOX:
+  URL: https://netbox.network.svc.cluster.local
+  ROLES:
+    WIRELESS: Wireless AP
+    LAN: Switch
+  TENANT: Home Network
