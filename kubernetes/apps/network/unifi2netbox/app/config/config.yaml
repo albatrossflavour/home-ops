@@ -9,6 +9,6 @@ UNIFI:
 NETBOX:
   URL: http://netbox.network.svc.cluster.local
   ROLES:
-    WIRELESS: Wireless AP
-    LAN: Switch
+    WIRELESS: wireless-ap
+    LAN: switch
   TENANT: Home Network
