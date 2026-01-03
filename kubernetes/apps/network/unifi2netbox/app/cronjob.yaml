@@ -30,6 +30,9 @@ spec:
                   git clone https://github.com/mrzepa/unifi2netbox.git /app
                   cd /app
 
+                  echo "Patching UniFi API endpoint for Network Application 9.1.118+..."
+                  find /app -type f -name "*.py" -exec sed -i 's|/api/login|/api/auth/login|g' {} +
+
                   echo "Installing Python requirements..."
                   pip install --no-cache-dir -r requirements.txt
                   pip install --no-cache-dir icecream
