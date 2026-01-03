@@ -6,5 +6,6 @@ namespace: network
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./valkey-secret.yaml
   - ../../../../templates/gatus/guarded
   - ../../../../templates/volsync
