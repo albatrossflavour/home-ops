@@ -75,7 +75,9 @@ spec:
       sentinel:
         enabled: false
       auth:
-        enabled: false
+        enabled: true
+        password: ""  # Empty password for no auth
+        sentinel: false
 
     # Worker for background jobs
     worker:
