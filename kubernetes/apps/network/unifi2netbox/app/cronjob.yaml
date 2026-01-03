@@ -17,7 +17,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: unifi2netbox
-              image: python:3.11-slim@sha256:2ec5a4a5c3e919570f57675471f081d6299668d909feabd8d4803c6c61af666c
+              image: python:3.11-slim@sha256:1dd3dca85e22886e44fcad1bb7ccab6691dfa83db52214cf9e20696e095f3e36
               command:
                 - /bin/bash
                 - -c
