@@ -75,9 +75,13 @@ spec:
       sentinel:
         enabled: false
       auth:
-        enabled: true
-        password: ""  # Empty password for no auth
-        sentinel: false
+        enabled: false
+
+    # Configure tasks and caching databases (no password needed)
+    tasksDatabase:
+      password: ""
+    cachingDatabase:
+      password: ""
 
     # Worker for background jobs
     worker:
