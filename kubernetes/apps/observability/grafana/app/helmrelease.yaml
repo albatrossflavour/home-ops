@@ -113,7 +113,7 @@ spec:
             type: tempo
             uid: tempo
             access: proxy
-            url: http://tempo-gateway.observability.svc.cluster.local
+            url: http://tempo.observability.svc.cluster.local:3200
             jsonData:
               httpMethod: GET
               tracesToLogsV2:
