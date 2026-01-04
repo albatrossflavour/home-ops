@@ -17,7 +17,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: unifi-netbox-sync
-              image: python:3.11-slim@sha256:2ec5a4a5c3e919570f57675471f081d6299668d909feabd8d4803c6c61af666c
+              image: python:3.14-slim@sha256:3955a7dd66ccf92b68d0232f7f86d892eaf75255511dc7e98961bdc990dc6c9b
               command:
                 - /bin/bash
                 - -c
