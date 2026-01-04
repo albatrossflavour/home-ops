@@ -109,6 +109,29 @@ spec:
               httpHeaderName1: "X-Scope-OrgID"
             secureJsonData:
               httpHeaderValue1: "homelab"
+          - name: Tempo
+            type: tempo
+            uid: tempo
+            access: proxy
+            url: http://tempo-gateway.observability.svc.cluster.local
+            jsonData:
+              httpMethod: GET
+              tracesToLogsV2:
+                datasourceUid: loki
+                spanStartTimeShift: -1h
+                spanEndTimeShift: 1h
+                filterByTraceID: true
+                filterBySpanID: false
+              tracesToMetrics:
+                datasourceUid: prometheus
+              serviceMap:
+                datasourceUid: prometheus
+              search:
+                hide: false
+              nodeGraph:
+                enabled: true
+              lokiSearch:
+                datasourceUid: loki
           - name: Alertmanager
             type: alertmanager
             uid: alertmanager

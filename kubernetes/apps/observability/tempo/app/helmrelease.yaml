@@ -1,0 +1,124 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app tempo
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: tempo
+      version: 1.24.1
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # Monolithic/single binary deployment
+    replicas: 1
+
+    tempo:
+      # Memory ballast for performance
+      memBallastSizeMbs: 1024
+
+      # Disable multi-tenancy for homelab
+      multitenancyEnabled: false
+
+      # Storage configuration - local filesystem with NFS backing
+      storage:
+        trace:
+          backend: local
+          local:
+            path: /var/tempo/traces
+          wal:
+            path: /var/tempo/wal
+
+      # Retention configuration (similar to Loki's 90 days)
+      retention: 720h  # 30 days
+
+      # Receivers for trace ingestion
+      receivers:
+        # OTLP (OpenTelemetry Protocol) - industry standard
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+        # Jaeger compatibility
+        jaeger:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:14250
+            thrift_http:
+              endpoint: 0.0.0.0:14268
+        # Zipkin compatibility
+        zipkin:
+          endpoint: 0.0.0.0:9411
+
+    # Use NFS for persistent storage (same pattern as Loki)
+    persistence:
+      enabled: false  # Disable built-in PVC, using extraVolumes instead
+
+    # NFS mount for trace storage
+    extraVolumes:
+      - name: tempo-data
+        nfs:
+          server: "192.168.1.22"
+          path: "/volume2/apps/tempo"
+
+    extraVolumeMounts:
+      - name: tempo-data
+        mountPath: /var/tempo
+
+    # Resource limits
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
+
+    # Service monitor for Prometheus metrics
+    serviceMonitor:
+      enabled: true
+      labels:
+        prometheus.io/service-monitor: "true"
+
+    # Gateway/Query Frontend for Grafana integration
+    gateway:
+      enabled: true
+      replicas: 1
+      service:
+        type: ClusterIP
+        port: 80
+      ingress:
+        enabled: true
+        ingressClassName: internal
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: "Observability"
+          gethomepage.dev/name: "Tempo"
+          gethomepage.dev/icon: "tempo.png"
+          gethomepage.dev/description: "Distributed tracing system"
+        hosts:
+          - host: tempo.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
