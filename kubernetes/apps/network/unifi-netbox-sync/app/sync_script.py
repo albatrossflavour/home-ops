@@ -69,6 +69,8 @@ class UniFiNetBoxSync:
                 site="default",
                 cert=None,  # Disable cert pinning for self-signed certs
             )
+            # Disable SSL verification for self-signed certs
+            self.unifi._session.verify = False
             LOG.info("Successfully connected to UniFi")
         except Exception as e:
             LOG.error(f"Failed to connect to UniFi: {e}")
