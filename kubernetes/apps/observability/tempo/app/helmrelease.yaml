@@ -48,14 +48,25 @@ spec:
       # Metrics generator - converts traces to Prometheus metrics for RED dashboards
       metricsGenerator:
         enabled: true
-        # Push metrics to Prometheus via remote write
-        remoteWriteUrl: http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090/api/v1/write
+        # Enable metrics generation with registry for service discovery
+        registry:
+          collection_interval: 15s
+          stale_duration: 15m
+        # Storage and remote write configuration
+        storage:
+          path: /tmp/tempo/generator/wal
+          remote_write:
+            - url: http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090/api/v1/write
+              send_exemplars: true
+        # Processor configuration
         processor:
-          # Generate service graph metrics (request rates between services)
           service_graphs:
+            # Enable service graph metrics
+            enable_client_server_prefix: true
             dimensions: ["http.method", "http.status_code"]
-          # Generate span metrics (RED metrics: Rate, Errors, Duration)
           span_metrics:
+            # Enable span metrics (RED metrics: Rate, Errors, Duration)
+            enable_target_info: true
             dimensions: ["http.method", "http.status_code"]
 
       # Receivers for trace ingestion
