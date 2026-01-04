@@ -80,6 +80,9 @@ spec:
               HASS_HTTP_TRUSTED_PROXY_2: 10.96.0.0/16
               HASS_HTTP_TRUSTED_PROXY_3: 10.69.0.0/16
               ENABLE_AVAHI: "1"
+              # OpenTelemetry tracing for Grafana Tempo
+              OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo.observability.svc.cluster.local:4317
+              OTEL_SERVICE_NAME: home-assistant
             envFrom:
               - secretRef:
                   name: home-assistant-secret
