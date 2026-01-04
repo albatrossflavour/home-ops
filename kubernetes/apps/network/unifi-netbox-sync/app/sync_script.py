@@ -64,7 +64,6 @@ class UniFiNetBoxSync:
                 password=self.unifi_password,
                 port=self.unifi_port,
                 site="default",
-                verify_ssl=self.unifi_verify_ssl,
                 is_udm_pro=self.is_udm_pro,
             )
             LOG.info("Successfully connected to UniFi")
