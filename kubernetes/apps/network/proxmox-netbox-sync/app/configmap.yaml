@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/configmap.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxmox-netbox-sync-config
+data:
+  # Proxmox connection
+  PVE_HOST: "192.168.1.22"
+  PVE_VERIFY_SSL: "false"
+
+  # NetBox connection
+  NB_URL: "http://netbox.network.svc.cluster.local"
+  NB_VERIFY_SSL: "false"
+
+  # NetBox cluster configuration
+  NB_CLUSTER_SLUG: "proxmox-home"
+
+  # NetBox site/device configuration for Proxmox nodes
+  NB_SITE_SLUG: "home"
+  NB_DEVICE_ROLE_SLUG: "hypervisor"
+  NB_DEVICE_TYPE_SLUG: "proxmox-node"
+
+  # VM pool custom field
+  NB_VM_POOL_CF: "pool"
+
+  # Sync mode: 1/safe = no deletions, 2/full = delete missing VMs
+  PVE_NB_SYNC_MODE: "1"

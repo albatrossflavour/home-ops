@@ -13,4 +13,5 @@ resources:
   - ./k8s-gateway/ks.yaml
   - ./nebula-sync/ks.yaml
   - ./netbox/ks.yaml
+  - ./proxmox-netbox-sync/ks.yaml
   - ./unifi2netbox/ks.yaml
