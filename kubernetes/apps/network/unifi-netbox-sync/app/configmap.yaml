@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/configmap.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unifi-netbox-sync-config
+data:
+  # UniFi connection
+  UNIFI_HOST: "ankh.lab.albatrossflavour.com"
+  UNIFI_PORT: "8006"
+  UNIFI_VERIFY_SSL: "false"
+  UNIFI_IS_UDM_PRO: "true"
+
+  # NetBox connection
+  NETBOX_URL: "http://netbox.network.svc.cluster.local"
+  NETBOX_VERIFY_SSL: "false"
+
+  # NetBox configuration
+  NETBOX_SITE_SLUG: "home"
+  NETBOX_MANUFACTURER: "Ubiquiti"
+  SYNC_TAG: "unifi-sync"

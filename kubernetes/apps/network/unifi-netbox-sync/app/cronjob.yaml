@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch/cronjob_v1.json
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: unifi-netbox-sync
+spec:
+  schedule: "*/30 * * * *"  # Every 30 minutes
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400  # Clean up after 24 hours
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: unifi-netbox-sync
+              image: python:3.11-slim@sha256:2ec5a4a5c3e919570f57675471f081d6299668d909feabd8d4803c6c61af666c
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  echo "Installing Python dependencies..."
+                  pip install --no-cache-dir pynetbox unificontrol
+
+                  echo "Copying sync script..."
+                  cp /scripts/sync_script.py /app/sync.py
+                  chmod +x /app/sync.py
+
+                  echo "Running UniFi to NetBox sync..."
+                  python3 /app/sync.py
+
+                  echo "Sync completed successfully"
+              envFrom:
+                - configMapRef:
+                    name: unifi-netbox-sync-config
+                - secretRef:
+                    name: unifi-netbox-sync-secret
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          volumes:
+            - name: scripts
+              configMap:
+                name: unifi-netbox-sync-scripts

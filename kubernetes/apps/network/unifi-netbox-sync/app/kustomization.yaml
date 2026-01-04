@@ -4,10 +4,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: network
 resources:
+  - ./configmap.yaml
   - ./externalsecret.yaml
   - ./cronjob.yaml
 
 configMapGenerator:
-  - name: unifi2netbox-config
+  - name: unifi-netbox-sync-scripts
     files:
-      - config/config.yaml
+      - sync_script.py
