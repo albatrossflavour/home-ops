@@ -45,6 +45,19 @@ spec:
       # Retention configuration (similar to Loki's 90 days)
       retention: 720h  # 30 days
 
+      # Metrics generator - converts traces to Prometheus metrics for RED dashboards
+      metricsGenerator:
+        enabled: true
+        # Push metrics to Prometheus via remote write
+        remoteWriteUrl: http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090/api/v1/write
+        processor:
+          # Generate service graph metrics (request rates between services)
+          service_graphs:
+            dimensions: ["http.method", "http.status_code"]
+          # Generate span metrics (RED metrics: Rate, Errors, Duration)
+          span_metrics:
+            dimensions: ["http.method", "http.status_code"]
+
       # Receivers for trace ingestion
       receivers:
         # OTLP (OpenTelemetry Protocol) - industry standard
