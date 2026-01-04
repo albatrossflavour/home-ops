@@ -258,7 +258,7 @@ spec:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/home.json
           datasource: Prometheus
         synology:
-          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/synlology-nfs.json
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/synology-nfs.json
           datasource: Prometheus
         kilns:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/kilns.json
