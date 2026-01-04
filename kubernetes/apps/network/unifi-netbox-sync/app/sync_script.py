@@ -62,6 +62,7 @@ class UniFiNetBoxSync:
                 password=self.unifi_password,
                 port=self.unifi_port,
                 site="default",
+                cert=False,  # Disable SSL cert verification for self-signed certs
             )
             LOG.info("Successfully connected to UniFi")
         except Exception as e:
@@ -312,7 +313,8 @@ class UniFiNetBoxSync:
         """Sync UniFi networks to NetBox VLANs"""
         try:
             LOG.info("Syncing UniFi networks to NetBox VLANs")
-            networks = self.unifi.list_networks()
+            # Access networks as property
+            networks = self.unifi.networks if hasattr(self.unifi, "networks") else []
 
             for network in networks:
                 try:
@@ -366,7 +368,8 @@ class UniFiNetBoxSync:
 
             # Get all devices from UniFi
             LOG.info("Fetching devices from UniFi")
-            devices = self.unifi.list_devices()
+            # Access devices as property
+            devices = list(self.unifi.devices) if hasattr(self.unifi, "devices") else []
             LOG.info(f"Found {len(devices)} UniFi devices")
 
             # Sync each device
