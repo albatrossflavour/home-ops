@@ -6,8 +6,8 @@ metadata:
   name: unifi-netbox-sync-config
 data:
   # UniFi connection
-  UNIFI_HOST: "ankh.lab.albatrossflavour.com"
-  UNIFI_PORT: "8006"
+  UNIFI_HOST: "192.168.1.1"
+  UNIFI_PORT: "443"
   UNIFI_VERIFY_SSL: "false"
   UNIFI_IS_UDM_PRO: "true"
 
