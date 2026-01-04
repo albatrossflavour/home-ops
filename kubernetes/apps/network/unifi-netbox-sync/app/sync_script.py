@@ -56,13 +56,17 @@ class UniFiNetBoxSync:
         """Establish connections to UniFi and NetBox"""
         LOG.info(f"Connecting to UniFi at {self.unifi_host}:{self.unifi_port}")
         try:
+            # Disable SSL warnings for self-signed certs
+            import urllib3
+
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
             self.unifi = UnifiClient(
                 host=self.unifi_host,
                 username=self.unifi_username,
                 password=self.unifi_password,
                 port=self.unifi_port,
                 site="default",
-                cert=False,  # Disable SSL cert verification for self-signed certs
             )
             LOG.info("Successfully connected to UniFi")
         except Exception as e:
