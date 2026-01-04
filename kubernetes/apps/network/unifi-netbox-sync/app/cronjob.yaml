@@ -27,6 +27,7 @@ spec:
                   pip install --no-cache-dir pynetbox unificontrol
 
                   echo "Copying sync script..."
+                  mkdir -p /app
                   cp /scripts/sync_script.py /app/sync.py
                   chmod +x /app/sync.py
 
