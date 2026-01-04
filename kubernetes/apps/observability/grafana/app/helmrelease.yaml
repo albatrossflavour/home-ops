@@ -446,11 +446,6 @@ spec:
           gnetId: 23242
           revision: 1
           datasource: Prometheus
-        nginx-ingress-controller:
-          # renovate: depName="NGINX Ingress controller"
-          gnetId: 9614
-          revision: 1
-          datasource: Prometheus
     sidecar:
       image:
         registry: ghcr.io
