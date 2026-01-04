@@ -67,6 +67,7 @@ class UniFiNetBoxSync:
                 password=self.unifi_password,
                 port=self.unifi_port,
                 site="default",
+                cert=None,  # Disable cert pinning for self-signed certs
             )
             LOG.info("Successfully connected to UniFi")
         except Exception as e:
