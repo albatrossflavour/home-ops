@@ -317,8 +317,7 @@ class UniFiNetBoxSync:
         """Sync UniFi networks to NetBox VLANs"""
         try:
             LOG.info("Syncing UniFi networks to NetBox VLANs")
-            # Access networks as property
-            networks = self.unifi.networks if hasattr(self.unifi, "networks") else []
+            networks = self.unifi.list_networkconf()
 
             for network in networks:
                 try:
@@ -372,8 +371,7 @@ class UniFiNetBoxSync:
 
             # Get all devices from UniFi
             LOG.info("Fetching devices from UniFi")
-            # Access devices as property
-            devices = list(self.unifi.devices) if hasattr(self.unifi, "devices") else []
+            devices = self.unifi.list_devices()
             LOG.info(f"Found {len(devices)} UniFi devices")
 
             # Sync each device
