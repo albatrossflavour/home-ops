@@ -61,6 +61,7 @@ class UniFiNetBoxSync:
 
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+            LOG.info(f"Using credentials: username={self.unifi_username}")
             self.unifi = UnifiClient(
                 host=self.unifi_host,
                 username=self.unifi_username,
