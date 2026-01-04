@@ -54,9 +54,7 @@ class UniFiNetBoxSync:
 
     def connect(self):
         """Establish connections to UniFi and NetBox"""
-        LOG.info(
-            f"Connecting to UniFi at {self.unifi_host} (UDM Pro: {self.is_udm_pro})"
-        )
+        LOG.info(f"Connecting to UniFi at {self.unifi_host}:{self.unifi_port}")
         try:
             self.unifi = UnifiClient(
                 host=self.unifi_host,
@@ -64,7 +62,6 @@ class UniFiNetBoxSync:
                 password=self.unifi_password,
                 port=self.unifi_port,
                 site="default",
-                is_udm_pro=self.is_udm_pro,
             )
             LOG.info("Successfully connected to UniFi")
         except Exception as e:
