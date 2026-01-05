@@ -26,4 +26,4 @@ spec:
       APP: *app
       GATUS_SUBDOMAIN: short
       VOLSYNC_CAPACITY: 2Gi
-      VOLSYNC_SCHEDULE: "15 * * * *"
+      VOLSYNC_SCHEDULE: "45 */4 * * *"

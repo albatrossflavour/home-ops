@@ -15,6 +15,7 @@ spec:
       APP: paperless
       GATUS_SUBDOMAIN: paperless
       VOLSYNC_CAPACITY: 5Gi
+      VOLSYNC_SCHEDULE: "30 */4 * * *"
     substituteFrom:
       - kind: ConfigMap
         name: cluster-settings
