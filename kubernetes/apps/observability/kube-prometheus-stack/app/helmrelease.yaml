@@ -41,7 +41,7 @@ spec:
         nodeExporterRecording: true
       # Disable specific rules that we override with custom thresholds
       disabled:
-        NodeDiskIOSaturation: true  # Custom rule with threshold of 20 instead of 10
+        NodeDiskIOSaturation: true  # Custom rule with threshold of 100 instead of 10
         TargetDown: true  # Replace with per-instance alerts and clean exclusions
         CephNodeDiskspaceWarning: true  # Fix false positives from predict_linear on decreasing usage
         NodeFilesystemAlmostOutOfSpace: true  # Custom rule with better exclusions for non-critical filesystems
