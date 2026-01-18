@@ -1,7 +1,14 @@
 machine:
   kubelet:
     extraArgs:
-      rotate-server-certificates: true
+      rotate-server-certificates: "true"
+      # Eviction thresholds - when to evict pods (% available)
+      eviction-hard: "nodefs.available<5%,nodefs.inodesFree<5%,imagefs.available<5%,imagefs.inodesFree<5%,memory.available<500Mi,pid.available<5%"
+      eviction-soft: "nodefs.available<10%,nodefs.inodesFree<10%,imagefs.available<10%,imagefs.inodesFree<10%,memory.available<1Gi,pid.available<10%"
+      eviction-soft-grace-period: "nodefs.available=2m,nodefs.inodesFree=2m,imagefs.available=2m,imagefs.inodesFree=2m,memory.available=2m,pid.available=2m"
+      # Image GC - clean old images (% disk used - triggers well before eviction @ 95% used)
+      image-gc-high-threshold: "70"  # Start cleaning at 70% disk used
+      image-gc-low-threshold: "60"   # Stop cleaning at 60% disk used
     nodeIP:
       validSubnets:
         - 192.168.8.0/24
