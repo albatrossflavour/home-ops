@@ -4,7 +4,7 @@
 # Comprehensive monitoring for Kubernetes cluster health
 # Shows only problems, stays silent when everything is healthy
 
-set -euo pipefail
+set -uo pipefail
 
 # Colors
 readonly RED='\033[0;31m'
@@ -21,7 +21,7 @@ SHOW_WARNINGS=false
 INTERVAL=30
 KUBECTL="kubectl --kubeconfig ${KUBECONFIG_PATH}"
 
-# Issue counters
+# Issue counters - using global scope properly
 CRITICAL_COUNT=0
 WARNING_COUNT=0
 
@@ -77,79 +77,191 @@ print_footer() {
     echo -e "${BLUE}════════════════════════════════════════════════════════════════════${NC}"
 }
 
-increment_critical() {
-    ((CRITICAL_COUNT++)) || true
-}
+# Check etcd Health
+check_etcd() {
+    # Only run on clusters with accessible etcd (control plane)
+    local etcd_health
+    etcd_health=$($KUBECTL get pods -n kube-system -l component=etcd -o json 2>/dev/null | \
+        jq -r '.items[] | select(.status.phase != "Running") |
+        "\(.metadata.name): \(.status.phase)"' 2>/dev/null)
 
-increment_warning() {
-    ((WARNING_COUNT++)) || true
+    if [[ -n "$etcd_health" ]]; then
+        echo -e "\n${RED}❌ CRITICAL: etcd Pods Not Running${NC}"
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            echo -e "  ${RED}└─${NC} $line"
+            ((count++))
+        done <<< "$etcd_health"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
+    fi
 }
 
 # Check Flux HelmReleases
 check_helm_releases() {
     local issues
-    issues=$($KUBECTL get helmreleases -A -o json | \
+    issues=$($KUBECTL get helmreleases -A -o json 2>/dev/null | \
         jq -r '.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status!="True")) |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.conditions[] | select(.type=="Ready") | .message)"' 2>/dev/null)
 
     if [[ -n "$issues" ]]; then
         echo -e "\n${RED}❌ CRITICAL: HelmReleases Not Ready${NC}"
-        echo "$issues" | while IFS= read -r line; do
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
             echo -e "  ${RED}└─${NC} $line"
-            increment_critical
-        done
+            ((count++))
+        done <<< "$issues"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
     fi
 }
 
 # Check Flux Kustomizations
 check_kustomizations() {
     local issues
-    issues=$($KUBECTL get kustomizations -A -o json | \
+    issues=$($KUBECTL get kustomizations -A -o json 2>/dev/null | \
         jq -r '.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status!="True")) |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.conditions[] | select(.type=="Ready") | .message)"' 2>/dev/null)
 
     if [[ -n "$issues" ]]; then
         echo -e "\n${RED}❌ CRITICAL: Kustomizations Not Ready${NC}"
-        echo "$issues" | while IFS= read -r line; do
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
             echo -e "  ${RED}└─${NC} $line"
-            increment_critical
-        done
+            ((count++))
+        done <<< "$issues"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
     fi
 }
 
 # Check Flux Source Repositories
 check_flux_sources() {
-    local git_issues oci_issues helm_issues
+    local git_issues oci_issues helm_issues total_count
 
     # GitRepositories
-    git_issues=$($KUBECTL get gitrepositories -A -o json | \
+    git_issues=$($KUBECTL get gitrepositories -A -o json 2>/dev/null | \
         jq -r '.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status!="True")) |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.conditions[] | select(.type=="Ready") | .message)"' 2>/dev/null)
 
     # OCIRepositories
-    oci_issues=$($KUBECTL get ocirepositories -A -o json | \
+    oci_issues=$($KUBECTL get ocirepositories -A -o json 2>/dev/null | \
         jq -r '.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status!="True")) |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.conditions[] | select(.type=="Ready") | .message)"' 2>/dev/null)
 
     # HelmRepositories
-    helm_issues=$($KUBECTL get helmrepositories -A -o json | \
+    helm_issues=$($KUBECTL get helmrepositories -A -o json 2>/dev/null | \
         jq -r '.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status!="True")) |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.conditions[] | select(.type=="Ready") | .message)"' 2>/dev/null)
 
     if [[ -n "$git_issues" ]] || [[ -n "$oci_issues" ]] || [[ -n "$helm_issues" ]]; then
         echo -e "\n${RED}❌ CRITICAL: Flux Source Repositories Not Ready${NC}"
-        [[ -n "$git_issues" ]] && echo "$git_issues" | while IFS= read -r line; do
-            echo -e "  ${RED}└─ [Git]${NC} $line"
-            increment_critical
-        done
-        [[ -n "$oci_issues" ]] && echo "$oci_issues" | while IFS= read -r line; do
-            echo -e "  ${RED}└─ [OCI]${NC} $line"
-            increment_critical
-        done
-        [[ -n "$helm_issues" ]] && echo "$helm_issues" | while IFS= read -r line; do
-            echo -e "  ${RED}└─ [Helm]${NC} $line"
-            increment_critical
-        done
+        total_count=0
+
+        if [[ -n "$git_issues" ]]; then
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                echo -e "  ${RED}└─ [Git]${NC} $line"
+                ((total_count++))
+            done <<< "$git_issues"
+        fi
+
+        if [[ -n "$oci_issues" ]]; then
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                echo -e "  ${RED}└─ [OCI]${NC} $line"
+                ((total_count++))
+            done <<< "$oci_issues"
+        fi
+
+        if [[ -n "$helm_issues" ]]; then
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                echo -e "  ${RED}└─ [Helm]${NC} $line"
+                ((total_count++))
+            done <<< "$helm_issues"
+        fi
+
+        CRITICAL_COUNT=$((CRITICAL_COUNT + total_count))
+    fi
+}
+
+# Check External Secrets
+check_external_secrets() {
+    local store_issues
+    store_issues=$($KUBECTL get clustersecretstores -o json 2>/dev/null | \
+        jq -r '.items[] | select(.status.conditions[]? | select(.type=="Ready" and .status!="True")) |
+        "\(.metadata.name): \(.status.conditions[] | select(.type=="Ready") | .message)"' 2>/dev/null)
+
+    if [[ -n "$store_issues" ]]; then
+        echo -e "\n${RED}❌ CRITICAL: ClusterSecretStores Not Ready${NC}"
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            echo -e "  ${RED}└─${NC} $line"
+            ((count++))
+        done <<< "$store_issues"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
+    fi
+}
+
+# Check CloudNative-PG Clusters
+check_databases() {
+    local db_issues
+    db_issues=$($KUBECTL get clusters.postgresql.cnpg.io -A -o json 2>/dev/null | \
+        jq -r '.items[] | select(.status.phase != "Cluster in healthy state") |
+        "\(.metadata.namespace)/\(.metadata.name): \(.status.phase)"' 2>/dev/null)
+
+    if [[ -n "$db_issues" ]]; then
+        echo -e "\n${RED}❌ CRITICAL: PostgreSQL Clusters Not Healthy${NC}"
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            echo -e "  ${RED}└─${NC} $line"
+            ((count++))
+        done <<< "$db_issues"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
+    fi
+}
+
+# Check Ingress Controllers
+check_ingress() {
+    local ingress_issues
+    ingress_issues=$($KUBECTL get pods -n network -l app.kubernetes.io/component=controller -o json 2>/dev/null | \
+        jq -r '.items[] | select(.status.phase != "Running") |
+        "\(.metadata.name): \(.status.phase)"' 2>/dev/null)
+
+    if [[ -n "$ingress_issues" ]]; then
+        echo -e "\n${RED}❌ CRITICAL: Ingress Controllers Not Running${NC}"
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            echo -e "  ${RED}└─${NC} $line"
+            ((count++))
+        done <<< "$ingress_issues"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
+    fi
+}
+
+# Check Node Disk Usage
+check_disk_usage() {
+    # Check /var filesystem usage - alert if > 75% (above GC threshold)
+    local disk_issues
+    disk_issues=$($KUBECTL get --raw /api/v1/nodes 2>/dev/null | \
+        jq -r '.items[] |
+        .status.conditions[] |
+        select(.type == "DiskPressure" and .status == "True") |
+        .message' 2>/dev/null)
+
+    if [[ -n "$disk_issues" ]]; then
+        echo -e "\n${RED}❌ CRITICAL: Node Disk Pressure Detected${NC}"
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            echo -e "  ${RED}└─${NC} $line"
+            ((count++))
+        done <<< "$disk_issues"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
     fi
 }
 
@@ -158,55 +270,66 @@ check_pods() {
     local problem_pods recent_restarts
 
     # Pods in bad states (not Running, not Completed, not Succeeded)
-    problem_pods=$($KUBECTL get pods -A -o json | \
+    problem_pods=$($KUBECTL get pods -A -o json 2>/dev/null | \
         jq -r '.items[] | select(.status.phase != "Running" and .status.phase != "Succeeded") |
         select(.status.phase != "Completed") |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.phase) - \(.status.conditions[]? | select(.type=="Ready") | .message // "No message")"' 2>/dev/null)
 
     if [[ -n "$problem_pods" ]]; then
         echo -e "\n${RED}❌ CRITICAL: Pods Not Running${NC}"
-        echo "$problem_pods" | while IFS= read -r line; do
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
             echo -e "  ${RED}└─${NC} $line"
-            increment_critical
-        done
+            ((count++))
+        done <<< "$problem_pods"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
     fi
 
     # Pods with recent restarts (within last 10 minutes)
-    recent_restarts=$($KUBECTL get pods -A -o json | \
-        jq -r --arg now "$(date -u +%s)" '.items[] |
+    local current_time
+    current_time=$(date -u +%s 2>/dev/null)
+    recent_restarts=$($KUBECTL get pods -A -o json 2>/dev/null | \
+        jq -r --arg now "$current_time" '.items[] |
         select(.status.containerStatuses[]? |
         (.restartCount > 0) and
         (.lastState.terminated.finishedAt != null) and
         ((($now | tonumber) - (.lastState.terminated.finishedAt | fromdateiso8601)) < 600)) |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.containerStatuses[0].restartCount) restarts (last: \(.status.containerStatuses[0].lastState.terminated.reason // "Unknown"))"' 2>/dev/null)
 
-    if [[ -n "$recent_restarts" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
-        echo -e "\n${YELLOW}⚠ WARNING: Pods with Recent Restarts (< 10 minutes)${NC}"
-        echo "$recent_restarts" | while IFS= read -r line; do
-            echo -e "  ${YELLOW}└─${NC} $line"
-            increment_warning
-        done
-    elif [[ -n "$recent_restarts" ]]; then
-        # Still count warnings even if not displayed
-        echo "$recent_restarts" | while IFS= read -r line; do
-            increment_warning
-        done
+    if [[ -n "$recent_restarts" ]]; then
+        if [[ "$SHOW_WARNINGS" == true ]]; then
+            echo -e "\n${YELLOW}⚠ WARNING: Pods with Recent Restarts (< 10 minutes)${NC}"
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                echo -e "  ${YELLOW}└─${NC} $line"
+            done <<< "$recent_restarts"
+        fi
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            ((count++))
+        done <<< "$recent_restarts"
+        WARNING_COUNT=$((WARNING_COUNT + count))
     fi
 }
 
 # Check PVCs
 check_pvcs() {
     local unbound_pvcs
-    unbound_pvcs=$($KUBECTL get pvc -A -o json | \
+    unbound_pvcs=$($KUBECTL get pvc -A -o json 2>/dev/null | \
         jq -r '.items[] | select(.status.phase != "Bound") |
         "\(.metadata.namespace)/\(.metadata.name): \(.status.phase)"' 2>/dev/null)
 
     if [[ -n "$unbound_pvcs" ]]; then
         echo -e "\n${RED}❌ CRITICAL: PVCs Not Bound${NC}"
-        echo "$unbound_pvcs" | while IFS= read -r line; do
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
             echo -e "  ${RED}└─${NC} $line"
-            increment_critical
-        done
+            ((count++))
+        done <<< "$unbound_pvcs"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
     fi
 }
 
@@ -220,21 +343,27 @@ check_ceph() {
     if [[ -n "$ceph_status" ]]; then
         if echo "$ceph_status" | grep -q "HEALTH_ERR"; then
             echo -e "\n${RED}❌ CRITICAL: Ceph Cluster Health Error${NC}"
-            echo "$ceph_status" | while IFS= read -r line; do
+            local count=0
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
                 echo -e "  ${RED}└─${NC} $line"
-                increment_critical
-            done
-        elif [[ "$SHOW_WARNINGS" == true ]]; then
-            echo -e "\n${YELLOW}⚠ WARNING: Ceph Cluster Health Warning${NC}"
-            echo "$ceph_status" | while IFS= read -r line; do
-                echo -e "  ${YELLOW}└─${NC} $line"
-                increment_warning
-            done
+                ((count++))
+            done <<< "$ceph_status"
+            CRITICAL_COUNT=$((CRITICAL_COUNT + count))
         else
-            # Still count warnings even if not displayed
-            echo "$ceph_status" | while IFS= read -r line; do
-                increment_warning
-            done
+            if [[ "$SHOW_WARNINGS" == true ]]; then
+                echo -e "\n${YELLOW}⚠ WARNING: Ceph Cluster Health Warning${NC}"
+                while IFS= read -r line; do
+                    [[ -z "$line" ]] && continue
+                    echo -e "  ${YELLOW}└─${NC} $line"
+                done <<< "$ceph_status"
+            fi
+            local count=0
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                ((count++))
+            done <<< "$ceph_status"
+            WARNING_COUNT=$((WARNING_COUNT + count))
         fi
     fi
 }
@@ -244,62 +373,79 @@ check_nodes() {
     local not_ready nodes_pressure
 
     # Nodes not ready
-    not_ready=$($KUBECTL get nodes -o json | \
+    not_ready=$($KUBECTL get nodes -o json 2>/dev/null | \
         jq -r '.items[] | select(.status.conditions[] | select(.type=="Ready" and .status!="True")) |
         "\(.metadata.name): NotReady - \(.status.conditions[] | select(.type=="Ready") | .message)"' 2>/dev/null)
 
     if [[ -n "$not_ready" ]]; then
         echo -e "\n${RED}❌ CRITICAL: Nodes Not Ready${NC}"
-        echo "$not_ready" | while IFS= read -r line; do
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
             echo -e "  ${RED}└─${NC} $line"
-            increment_critical
-        done
+            ((count++))
+        done <<< "$not_ready"
+        CRITICAL_COUNT=$((CRITICAL_COUNT + count))
     fi
 
-    # Nodes with pressure conditions
-    nodes_pressure=$($KUBECTL get nodes -o json | \
+    # Nodes with pressure conditions - FIXED: include node name
+    nodes_pressure=$($KUBECTL get nodes -o json 2>/dev/null | \
         jq -r '.items[] |
+        . as $node |
         .status.conditions[] | select(.type == "DiskPressure" or .type == "MemoryPressure" or .type == "PIDPressure") |
         select(.status == "True") |
-        "\(.type) on node"' 2>/dev/null)
+        "\($node.metadata.name): \(.type)"' 2>/dev/null)
 
-    if [[ -n "$nodes_pressure" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
-        echo -e "\n${YELLOW}⚠ WARNING: Node Pressure Conditions${NC}"
-        echo "$nodes_pressure" | while IFS= read -r line; do
-            echo -e "  ${YELLOW}└─${NC} $line"
-            increment_warning
-        done
-    elif [[ -n "$nodes_pressure" ]]; then
-        # Still count warnings even if not displayed
-        echo "$nodes_pressure" | while IFS= read -r line; do
-            increment_warning
-        done
+    if [[ -n "$nodes_pressure" ]]; then
+        if [[ "$SHOW_WARNINGS" == true ]]; then
+            echo -e "\n${YELLOW}⚠ WARNING: Node Pressure Conditions${NC}"
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                echo -e "  ${YELLOW}└─${NC} $line"
+            done <<< "$nodes_pressure"
+        fi
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            ((count++))
+        done <<< "$nodes_pressure"
+        WARNING_COUNT=$((WARNING_COUNT + count))
     fi
 }
 
 # Check Certificates
 check_certificates() {
-    local expiring_certs
-    local seven_days_future
-    seven_days_future=$(date -u -v+7d '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null)
+    local expiring_certs seven_days_future
 
-    expiring_certs=$($KUBECTL get certificates -A -o json | \
+    # Portable date calculation
+    if date -v+7d > /dev/null 2>&1; then
+        # BSD/macOS
+        seven_days_future=$(date -u -v+7d '+%Y-%m-%dT%H:%M:%SZ')
+    else
+        # GNU/Linux
+        seven_days_future=$(date -u -d '+7 days' '+%Y-%m-%dT%H:%M:%SZ')
+    fi
+
+    expiring_certs=$($KUBECTL get certificates -A -o json 2>/dev/null | \
         jq -r --arg threshold "$seven_days_future" '.items[] |
         select(.status.notAfter != null) |
         select(.status.notAfter < $threshold) |
         "\(.metadata.namespace)/\(.metadata.name): expires \(.status.notAfter)"' 2>/dev/null)
 
-    if [[ -n "$expiring_certs" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
-        echo -e "\n${YELLOW}⚠ WARNING: Certificates Expiring Soon (< 7 days)${NC}"
-        echo "$expiring_certs" | while IFS= read -r line; do
-            echo -e "  ${YELLOW}└─${NC} $line"
-            increment_warning
-        done
-    elif [[ -n "$expiring_certs" ]]; then
-        # Still count warnings even if not displayed
-        echo "$expiring_certs" | while IFS= read -r line; do
-            increment_warning
-        done
+    if [[ -n "$expiring_certs" ]]; then
+        if [[ "$SHOW_WARNINGS" == true ]]; then
+            echo -e "\n${YELLOW}⚠ WARNING: Certificates Expiring Soon (< 7 days)${NC}"
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                echo -e "  ${YELLOW}└─${NC} $line"
+            done <<< "$expiring_certs"
+        fi
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            ((count++))
+        done <<< "$expiring_certs"
+        WARNING_COUNT=$((WARNING_COUNT + count))
     fi
 }
 
@@ -314,42 +460,57 @@ check_volsync() {
         select(.status.lastSyncDuration == null or .status.lastSyncDuration == "0s") |
         "\(.metadata.namespace)/\(.metadata.name): Last sync may have failed"' 2>/dev/null)
 
-    if [[ -n "$failed_replications" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
-        echo -e "\n${YELLOW}⚠ WARNING: Volsync Replication Issues${NC}"
-        echo "$failed_replications" | while IFS= read -r line; do
-            echo -e "  ${YELLOW}└─${NC} $line"
-            increment_warning
-        done
-    elif [[ -n "$failed_replications" ]]; then
-        # Still count warnings even if not displayed
-        echo "$failed_replications" | while IFS= read -r line; do
-            increment_warning
-        done
+    if [[ -n "$failed_replications" ]]; then
+        if [[ "$SHOW_WARNINGS" == true ]]; then
+            echo -e "\n${YELLOW}⚠ WARNING: Volsync Replication Issues${NC}"
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                echo -e "  ${YELLOW}└─${NC} $line"
+            done <<< "$failed_replications"
+        fi
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            ((count++))
+        done <<< "$failed_replications"
+        WARNING_COUNT=$((WARNING_COUNT + count))
     fi
 }
 
 # Check Recent Events
 check_events() {
-    local warning_events
+    local warning_events ten_min_ago
+
+    # Portable date calculation
+    if date -v-10M > /dev/null 2>&1; then
+        # BSD/macOS
+        ten_min_ago=$(date -u -v-10M '+%Y-%m-%dT%H:%M:%SZ')
+    else
+        # GNU/Linux
+        ten_min_ago=$(date -u -d '10 minutes ago' '+%Y-%m-%dT%H:%M:%SZ')
+    fi
 
     # Get events from last 10 minutes with Warning type
-    warning_events=$($KUBECTL get events -A --field-selector type=Warning -o json | \
-        jq -r --arg cutoff "$(date -u -v-10M '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -d '10 minutes ago' '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null)" \
+    warning_events=$($KUBECTL get events -A --field-selector type=Warning -o json 2>/dev/null | \
+        jq -r --arg cutoff "$ten_min_ago" \
         '.items[] | select(.lastTimestamp > $cutoff) |
         "\(.involvedObject.namespace // "cluster")/\(.involvedObject.name): \(.message)"' 2>/dev/null | \
         head -10)
 
-    if [[ -n "$warning_events" ]] && [[ "$SHOW_WARNINGS" == true ]]; then
-        echo -e "\n${YELLOW}⚠ Recent Warning Events (last 10 minutes)${NC}"
-        echo "$warning_events" | while IFS= read -r line; do
-            echo -e "  ${YELLOW}└─${NC} $line"
-            increment_warning
-        done
-    elif [[ -n "$warning_events" ]]; then
-        # Still count warnings even if not displayed
-        echo "$warning_events" | while IFS= read -r line; do
-            increment_warning
-        done
+    if [[ -n "$warning_events" ]]; then
+        if [[ "$SHOW_WARNINGS" == true ]]; then
+            echo -e "\n${YELLOW}⚠ Recent Warning Events (last 10 minutes)${NC}"
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                echo -e "  ${YELLOW}└─${NC} $line"
+            done <<< "$warning_events"
+        fi
+        local count=0
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            ((count++))
+        done <<< "$warning_events"
+        WARNING_COUNT=$((WARNING_COUNT + count))
     fi
 }
 
@@ -360,13 +521,18 @@ run_health_check() {
     WARNING_COUNT=0
 
     # Run all checks
+    check_etcd
+    check_nodes
+    check_disk_usage
+    check_external_secrets
+    check_databases
+    check_ingress
     check_helm_releases
     check_kustomizations
     check_flux_sources
     check_pods
     check_pvcs
     check_ceph
-    check_nodes
     check_certificates
     check_volsync
     check_events
@@ -384,28 +550,12 @@ main() {
             sleep "$INTERVAL"
         done
     else
-        # Capture output to a variable for pagination
-        local output
-        output=$(
-            print_header
-            run_health_check
-            print_footer
-        )
+        # Run directly without capturing output (fixes exit code bug)
+        print_header
+        run_health_check
+        print_footer
 
-        # Count lines in output
-        local line_count
-        line_count=$(echo "$output" | wc -l)
-        local term_height
-        term_height=$(tput lines 2>/dev/null || echo 24)
-
-        # If output is larger than terminal, use less for pagination
-        if [[ $line_count -gt $((term_height - 2)) ]]; then
-            echo "$output" | less -R
-        else
-            echo "$output"
-        fi
-
-        # Exit with proper code
+        # Exit with proper code based on issues found
         if [[ $CRITICAL_COUNT -gt 0 ]]; then
             exit 1
         fi
