@@ -88,7 +88,7 @@ spec:
           app:
             image:
               repository: nginx
-              tag: "1.29-alpine@sha256:ce611bb6e76a1da3576e3875f78acb1064a4624dbf45abcbf14fd152cfb7a943"
+              tag: "1.29-alpine@sha256:b0f7830b6bfaa1258f45d94c240ab668ced1b3651c8a222aefe6683447c7bf55"
 
             probes:
               liveness:
