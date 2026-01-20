@@ -82,8 +82,6 @@ spec:
 
       # Nginx webserver to serve the JSON file
       webserver:
-        pod:
-          hostUsers: false
         containers:
           app:
             image:
