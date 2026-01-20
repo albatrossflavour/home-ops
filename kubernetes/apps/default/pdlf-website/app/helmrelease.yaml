@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: nginx
-              tag: "1.29.4@sha256:7272239bd21472f311aa3e86a85fdca0f1ad648995f983ab6e5e7dea665cd233"
+              tag: "1.29-alpine@sha256:b0f7830b6bfaa1258f45d94c240ab668ced1b3651c8a222aefe6683447c7bf55"
             resources:
               requests:
                 cpu: 10m
