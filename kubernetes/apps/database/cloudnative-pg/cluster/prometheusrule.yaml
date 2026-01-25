@@ -61,6 +61,7 @@ spec:
             summary: Checks the last time archiving failed. Will be < 0 when it has not failed.
           expr: |-
             (cnpg_pg_stat_archiver_last_failed_time - cnpg_pg_stat_archiver_last_archived_time) > 1
+            and on(pod) cnpg_pg_replication_in_recovery == 0
           for: 1m
           labels:
             severity: warning
