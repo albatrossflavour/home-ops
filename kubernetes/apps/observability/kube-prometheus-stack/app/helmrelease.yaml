@@ -119,7 +119,8 @@ spec:
           - new-service-discovery-manager
           - remote-write-receiver
         additionalArgs:
-          - --storage.tsdb.out-of-order-time-window=168h  # Accept samples up to 1 week old for shitbox offline sync
+          - name: storage.tsdb.out-of-order-time-window
+            value: 168h  # Accept samples up to 1 week old for shitbox offline sync
         # Thanos sidecar configuration
         thanos:
           image: quay.io/thanos/thanos:v0.40.1
