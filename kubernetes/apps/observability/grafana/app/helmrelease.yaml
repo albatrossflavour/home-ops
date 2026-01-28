@@ -51,6 +51,8 @@ spec:
       create: true
       automountServiceAccountToken: true
     grafana.ini:
+      feature_toggles:
+        enable: publicDashboards
       security:
         cookie_secure: true
         cookie_samesite: none

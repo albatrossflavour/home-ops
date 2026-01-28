@@ -118,6 +118,8 @@ spec:
           - memory-snapshot-on-shutdown
           - new-service-discovery-manager
           - remote-write-receiver
+        tsdb:
+          outOfOrderTimeWindow: 168h  # Accept samples up to 1 week old for shitbox offline sync
         # Thanos sidecar configuration
         thanos:
           image: quay.io/thanos/thanos:v0.40.1
