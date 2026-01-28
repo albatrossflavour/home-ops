@@ -38,7 +38,7 @@ spec:
               MQTT_TOPIC: "shitbox/#"
               MQTT_V5_PROTOCOL: "true"
               PROMETHEUS_PORT: &port 3321
-              # PROMETHEUS_PREFIX: "mqtt_"
+              PROMETHEUS_PREFIX: "shitbox_"
               ZIGBEE2MQTT_AVAILABILITY: "False"
               # Filter out bridge metadata topics to prevent metric limit exhaustion
               MQTT_IGNORED_TOPICS: >-
