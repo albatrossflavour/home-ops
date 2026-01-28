@@ -71,7 +71,7 @@ spec:
             port: *port
         type: LoadBalancer
         annotations:
-          io.cilium/lb-ipam-ips: 192.168.8.123
+          io.cilium/lb-ipam-ips: 192.168.8.124
     serviceMonitor:
       app:
         serviceName: *app
