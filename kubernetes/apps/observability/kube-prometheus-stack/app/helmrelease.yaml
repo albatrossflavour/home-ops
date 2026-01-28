@@ -105,6 +105,8 @@ spec:
         pathType: Prefix
       prometheusSpec:
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
+        tsdb:
+          out_of_order_time_window: 24h
         enableRemoteWriteReceiver: true
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
