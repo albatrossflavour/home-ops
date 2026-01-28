@@ -231,6 +231,9 @@ spec:
         home:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/home.json
           datasource: Prometheus
+        shitbox:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/shitbox-telemetry.json
+          datasource: Prometheus
         synology:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/synology-nfs.json
           datasource: Prometheus

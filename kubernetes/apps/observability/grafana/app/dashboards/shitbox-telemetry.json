@@ -1,0 +1,305 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 2,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Speed",
+      "gridPos": { "h": 4, "w": 3, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "velocitykmh",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 80 },
+              { "color": "red", "value": 120 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [{ "expr": "shitbox_spd", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Max Speed",
+      "gridPos": { "h": 4, "w": 3, "x": 3, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "velocitykmh",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "orange", "value": null }]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": { "calcs": ["max"], "fields": "", "values": false }
+      },
+      "targets": [{ "expr": "shitbox_spd", "refId": "A" }]
+    },
+    {
+      "type": "gauge",
+      "title": "G-Force",
+      "gridPos": { "h": 4, "w": 3, "x": 6, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accG",
+          "min": 0,
+          "max": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1.5 },
+              { "color": "red", "value": 2.5 }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "showThresholdLabels": false, "showThresholdMarkers": true },
+      "targets": [{ "expr": "sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2)", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Peak G",
+      "gridPos": { "h": 4, "w": 2, "x": 9, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accG",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "red", "value": null }]
+          }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "none", "reduceOptions": { "calcs": ["max"] } },
+      "targets": [{ "expr": "sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2)", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Altitude",
+      "gridPos": { "h": 4, "w": 3, "x": 11, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthm",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "shitbox_alt", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Sats",
+      "gridPos": { "h": 4, "w": 2, "x": 14, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 4 },
+              { "color": "green", "value": 8 }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "shitbox_sat", "refId": "A" }]
+    },
+    {
+      "type": "geomap",
+      "title": "Route",
+      "gridPos": { "h": 12, "w": 10, "x": 0, "y": 4 },
+      "options": {
+        "view": { "id": "fit", "lat": 0, "lon": 0, "zoom": 15, "padding": 50, "allLayers": true },
+        "basemap": { "type": "osm-standard" },
+        "layers": [
+          {
+            "type": "markers",
+            "name": "Position",
+            "config": {
+              "style": {
+                "size": { "fixed": 8 },
+                "color": { "fixed": "red" },
+                "symbol": { "fixed": "circle" }
+              },
+              "showLegend": false
+            },
+            "location": {
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
+            }
+          }
+        ]
+      },
+      "targets": [
+        { "expr": "shitbox_lat", "refId": "A", "legendFormat": "latitude" },
+        { "expr": "shitbox_lon", "refId": "B", "legendFormat": "longitude" }
+      ],
+      "transformations": [
+        { "id": "joinByField", "options": { "byField": "Time", "mode": "outer" } }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Lateral vs Longitudinal G",
+      "description": "For G-G diagram: manually change to XY Chart, set X=Lateral, Y=Longitudinal",
+      "gridPos": { "h": 12, "w": 6, "x": 10, "y": 4 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accG",
+          "min": -2.5,
+          "max": 2.5,
+          "custom": { "fillOpacity": 0, "lineWidth": 2, "spanNulls": true }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Lateral (Y)" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Longitudinal (X)" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        { "expr": "shitbox_ay", "refId": "A", "legendFormat": "Lateral (Y)" },
+        { "expr": "shitbox_ax", "refId": "B", "legendFormat": "Longitudinal (X)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Speed Profile",
+      "gridPos": { "h": 6, "w": 16, "x": 0, "y": 16 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "velocitykmh",
+          "custom": { "fillOpacity": 20, "lineWidth": 2, "spanNulls": true, "gradientMode": "scheme" },
+          "color": { "mode": "continuous-BlYlRd" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 40 },
+              { "color": "yellow", "value": 80 },
+              { "color": "red", "value": 120 }
+            ]
+          }
+        }
+      },
+      "options": { "legend": { "displayMode": "hidden" }, "tooltip": { "mode": "single" } },
+      "targets": [{ "expr": "shitbox_spd", "legendFormat": "Speed", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "G-Force (Combined)",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 22 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accG",
+          "custom": { "fillOpacity": 30, "lineWidth": 1, "spanNulls": true },
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1.5 },
+              { "color": "red", "value": 2.5 }
+            ]
+          }
+        }
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        { "expr": "sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2)", "legendFormat": "Total G", "refId": "A" },
+        { "expr": "abs(shitbox_ax)", "legendFormat": "Longitudinal", "refId": "B" },
+        { "expr": "abs(shitbox_ay)", "legendFormat": "Lateral", "refId": "C" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Accelerometer (Raw)",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 22 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accG",
+          "custom": { "fillOpacity": 0, "lineWidth": 1, "spanNulls": true },
+          "min": -3,
+          "max": 3
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "X (Longitudinal)" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Y (Lateral)" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Z (Vertical)" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        { "expr": "shitbox_ax", "legendFormat": "X (Longitudinal)", "refId": "A" },
+        { "expr": "shitbox_ay", "legendFormat": "Y (Lateral)", "refId": "B" },
+        { "expr": "shitbox_az", "legendFormat": "Z (Vertical)", "refId": "C" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Gyroscope (Rotation Rates)",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 28 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rotdps",
+          "custom": { "fillOpacity": 0, "lineWidth": 1, "spanNulls": true },
+          "min": -250,
+          "max": 250
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Roll" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Pitch" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Yaw" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        { "expr": "shitbox_gx", "legendFormat": "Roll", "refId": "A" },
+        { "expr": "shitbox_gy", "legendFormat": "Pitch", "refId": "B" },
+        { "expr": "shitbox_gz", "legendFormat": "Yaw", "refId": "C" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Altitude Profile",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 28 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthm",
+          "custom": { "fillOpacity": 30, "lineWidth": 2, "spanNulls": true, "gradientMode": "opacity" },
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        }
+      },
+      "options": { "legend": { "displayMode": "hidden" } },
+      "targets": [{ "expr": "shitbox_alt", "legendFormat": "Altitude", "refId": "A" }]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["shitbox", "rally", "telemetry"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
+  },
+  "timezone": "browser",
+  "title": "Shitbox Rally Telemetry",
+  "uid": "shitbox-telemetry",
+  "version": 4
+}
