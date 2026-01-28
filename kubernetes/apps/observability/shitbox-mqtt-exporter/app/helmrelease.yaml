@@ -39,7 +39,7 @@ spec:
               MQTT_V5_PROTOCOL: "true"
               PROMETHEUS_PORT: &port 3321
               # PROMETHEUS_PREFIX: "mqtt_"
-              ZIGBEE2MQTT_AVAILABILITY: "True"
+              ZIGBEE2MQTT_AVAILABILITY: "False"
               # Filter out bridge metadata topics to prevent metric limit exhaustion
               MQTT_IGNORED_TOPICS: >-
                 zigbee2mqtt/bridge/definitions,
