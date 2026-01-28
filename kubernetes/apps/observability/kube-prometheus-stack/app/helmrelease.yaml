@@ -104,6 +104,9 @@ spec:
         hosts: ["prometheus.${SECRET_DOMAIN}"]
         pathType: Prefix
       prometheusSpec:
+        additionalArgs:
+          - name: storage.tsdb.out-of-order-time-window
+            value: "24h"
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
         enableRemoteWriteReceiver: true
         ruleSelectorNilUsesHelmValues: false
