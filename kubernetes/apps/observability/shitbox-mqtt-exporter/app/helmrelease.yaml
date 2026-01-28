@@ -1,0 +1,82 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app shitbox-mqtt-exporter
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      shitbox-mqtt-exporter:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/kpetremann/mqtt-exporter
+              tag: 1.9.0@sha256:c9b5074f23daadbbe2fdf008e440378cd4cffac024bcedf2d1c8f29ddaa9ab5c
+            env:
+              TZ: "${TIMEZONE:=Etc/UTC}"
+              # LOG_LEVEL: DEBUG
+              # LOG_MQTT_MESSAGE: "true"
+              MQTT_ADDRESS: emqx-listeners.database.svc.cluster.local
+              MQTT_TOPIC: "shitbox/#"
+              MQTT_V5_PROTOCOL: "true"
+              PROMETHEUS_PORT: &port 3321
+              # PROMETHEUS_PREFIX: "mqtt_"
+              ZIGBEE2MQTT_AVAILABILITY: "True"
+              # Filter out bridge metadata topics to prevent metric limit exhaustion
+              MQTT_IGNORED_TOPICS: >-
+                zigbee2mqtt/bridge/definitions,
+                zigbee2mqtt/bridge/logging,
+                zigbee2mqtt/bridge/info,
+                zigbee2mqtt/bridge/event
+              # Metric limit - using correct variable name MAX_METRICS (not MQTT_METRICS_MAX)
+              MAX_METRICS: "5000"
+            envFrom:
+              - secretRef:
+                  name: shitbox-mqtt-exporter
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+            resources:
+              requests:
+                cpu: 10m
+                memory: 50Mi
+              limits:
+                memory: 200Mi
+    service:
+      app:
+        controller: shitbox-mqtt-exporter
+        ports:
+          metrics:
+            protocol: HTTP
+            port: *port
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: 192.168.8.123
+    serviceMonitor:
+      app:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            metricRelabelings:
+              - action: labeldrop
+                regex: (pod)
