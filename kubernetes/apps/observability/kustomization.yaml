@@ -17,7 +17,7 @@ resources:
   - ./unpoller/ks.yaml
   #  - ./smartctl-exporter/ks.yaml
   - ./mqtt-exporter/ks.yaml
-  - ./shitbox-mqtt-exporter/ks.yaml
+  #- ./shitbox-mqtt-exporter/ks.yaml
   - ./pihole-exporter/ks.yaml
   - ./speedtest-exporter/ks.yaml
   - ./sabnzbd-exporter/ks.yaml
