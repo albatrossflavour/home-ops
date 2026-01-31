@@ -40,7 +40,7 @@ spec:
           app:
             image:
               repository: amruthpillai/reactive-resume
-              tag: "v5.0.3@sha256:4e1f37f61d120846fdef664ae3e473234d763cc86e8a00b09d40e0304b38c6b2"
+              tag: "v5.0.5@sha256:a45d52250cc1d754cfbf56bae6e3be1ac0c045bea852aa29bfe47023178f1e9a"
             env:
               TZ: ${TIMEZONE}
               PORT: "3000"
