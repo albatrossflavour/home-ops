@@ -429,6 +429,7 @@ spec:
         provider:
           disableDelete: true
           foldersFromFilesStructure: true
+          path: /tmp/dashboards
       datasources:
         enabled: true
         searchNamespace: ALL
