@@ -464,3 +464,71 @@ spec:
       enabled: false
     testFramework:
       enabled: false
+    extraContainers: |
+      - name: set-folder-permissions
+        image: nicolaka/netshoot:v0.13
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 65534
+          runAsGroup: 65534
+          seccompProfile:
+            type: RuntimeDefault
+        command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Waiting for Grafana to be ready..."
+            until curl -sf http://localhost:3000/api/health > /dev/null 2>&1; do
+              sleep 5
+            done
+            echo "Grafana is ready, setting folder permissions..."
+
+            folders=$(curl -sf -u "$GRAFANA_ADMIN_USERNAME:$GRAFANA_ADMIN_PASSWORD" "http://localhost:3000/api/folders")
+            if [ -z "$folders" ] || [ "$folders" = "[]" ]; then
+              echo "No folders found"
+            else
+              echo "$folders" | jq -c '.[]' | while read -r folder; do
+                folder_uid=$(echo "$folder" | jq -r '.uid')
+                folder_title=$(echo "$folder" | jq -r '.title')
+                echo "Processing folder: $folder_title"
+
+                if [ "$folder_title" = "Puppet" ]; then
+                  echo "  -> Keeping Viewer access"
+                  payload='{"items":[{"role":"Editor","permission":2},{"role":"Viewer","permission":1}]}'
+                else
+                  echo "  -> Removing Viewer access"
+                  payload='{"items":[{"role":"Editor","permission":2}]}'
+                fi
+
+                curl -sf -X POST -u "$GRAFANA_ADMIN_USERNAME:$GRAFANA_ADMIN_PASSWORD" \
+                  -H "Content-Type: application/json" -d "$payload" \
+                  "http://localhost:3000/api/folders/$folder_uid/permissions" > /dev/null && \
+                  echo "  -> Done" || echo "  -> Failed"
+              done
+            fi
+
+            echo "Folder permissions configured. Sleeping..."
+            sleep infinity
+        env:
+          - name: GRAFANA_ADMIN_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: grafana-admin-secret
+                key: admin-user
+          - name: GRAFANA_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: grafana-admin-secret
+                key: admin-password
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
