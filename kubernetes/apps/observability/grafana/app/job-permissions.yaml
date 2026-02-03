@@ -1,0 +1,62 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: grafana-set-folder-permissions
+  namespace: observability
+spec:
+  # Run every 6 hours to ensure permissions stay correct
+  # Also handles new folders created by sidecar dashboards
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 300
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: grafana-permissions-job
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: set-permissions
+              image: alpine:3.21
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  apk add --no-cache curl jq
+                  chmod +x /scripts/set-folder-permissions.sh
+                  /scripts/set-folder-permissions.sh
+              env:
+                - name: GRAFANA_URL
+                  value: "http://grafana.observability.svc.cluster.local"
+                - name: GRAFANA_ADMIN_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-admin-secret
+                      key: admin-user
+                - name: GRAFANA_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-admin-secret
+                      key: admin-password
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+          volumes:
+            - name: scripts
+              configMap:
+                name: grafana-permissions-script
+                defaultMode: 0755

@@ -1,0 +1,116 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-permissions-script
+  namespace: observability
+data:
+  set-folder-permissions.sh: |
+    #!/bin/sh
+    # Script to configure Grafana folder permissions
+    # Removes Viewer access from all folders except "Puppet"
+
+    set -e
+
+    GRAFANA_URL="${GRAFANA_URL:-http://grafana.observability.svc.cluster.local}"
+    GRAFANA_USER="${GRAFANA_ADMIN_USERNAME}"
+    GRAFANA_PASS="${GRAFANA_ADMIN_PASSWORD}"
+
+    # Folders that should KEEP Viewer access
+    VIEWER_ALLOWED_FOLDERS="Puppet"
+
+    echo "Starting Grafana folder permissions configuration..."
+    echo "Grafana URL: ${GRAFANA_URL}"
+
+    # Wait for Grafana to be ready
+    echo "Waiting for Grafana to be ready..."
+    max_attempts=30
+    attempt=0
+    while [ $attempt -lt $max_attempts ]; do
+        if curl -sf "${GRAFANA_URL}/api/health" > /dev/null 2>&1; then
+            echo "Grafana is ready!"
+            break
+        fi
+        attempt=$((attempt + 1))
+        echo "Attempt ${attempt}/${max_attempts}: Grafana not ready, waiting..."
+        sleep 10
+    done
+
+    if [ $attempt -eq $max_attempts ]; then
+        echo "ERROR: Grafana did not become ready in time"
+        exit 1
+    fi
+
+    # Get all folders
+    echo "Fetching folder list..."
+    folders=$(curl -sf -u "${GRAFANA_USER}:${GRAFANA_PASS}" "${GRAFANA_URL}/api/folders")
+
+    if [ -z "$folders" ] || [ "$folders" = "[]" ]; then
+        echo "No folders found or unable to fetch folders"
+        exit 0
+    fi
+
+    echo "Found folders: $folders"
+
+    # Process each folder
+    echo "$folders" | jq -c '.[]' | while read -r folder; do
+        folder_uid=$(echo "$folder" | jq -r '.uid')
+        folder_title=$(echo "$folder" | jq -r '.title')
+
+        echo ""
+        echo "Processing folder: ${folder_title} (UID: ${folder_uid})"
+
+        # Check if this folder should keep Viewer access
+        keep_viewer=false
+        for allowed in $VIEWER_ALLOWED_FOLDERS; do
+            if [ "$folder_title" = "$allowed" ]; then
+                keep_viewer=true
+                break
+            fi
+        done
+
+        if [ "$keep_viewer" = "true" ]; then
+            echo "  -> Keeping Viewer access for folder: ${folder_title}"
+            # Set permissions: Editor=Edit, Viewer=View
+            permissions_payload='{
+                "items": [
+                    {"role": "Editor", "permission": 2},
+                    {"role": "Viewer", "permission": 1}
+                ]
+            }'
+        else
+            echo "  -> Removing Viewer access for folder: ${folder_title}"
+            # Set permissions: Editor=Edit, no Viewer access
+            permissions_payload='{
+                "items": [
+                    {"role": "Editor", "permission": 2}
+                ]
+            }'
+        fi
+
+        # Apply permissions
+        response=$(curl -sf -X POST \
+            -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
+            -H "Content-Type: application/json" \
+            -d "$permissions_payload" \
+            "${GRAFANA_URL}/api/folders/${folder_uid}/permissions" 2>&1) || {
+            echo "  WARNING: Failed to set permissions for folder ${folder_title}: $response"
+            continue
+        }
+
+        echo "  -> Permissions updated successfully"
+    done
+
+    # Also handle the "General" folder (root level dashboards with no folder)
+    echo ""
+    echo "Setting permissions for General (root) folder..."
+    response=$(curl -sf -X POST \
+        -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
+        -H "Content-Type: application/json" \
+        -d '{"items": [{"role": "Editor", "permission": 2}]}' \
+        "${GRAFANA_URL}/api/folders/general/permissions" 2>&1) || {
+        echo "  Note: Could not set General folder permissions (may not exist as explicit folder)"
+    }
+
+    echo ""
+    echo "Folder permissions configuration complete!"
