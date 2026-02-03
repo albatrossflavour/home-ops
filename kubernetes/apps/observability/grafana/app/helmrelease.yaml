@@ -424,8 +424,8 @@ spec:
         enabled: true
         searchNamespace: ALL
         label: grafana_dashboard
-        folder: Kubernetes
         folderAnnotation: grafana_folder
+        defaultFolderName: Kubernetes
         provider:
           disableDelete: true
           foldersFromFilesStructure: true
