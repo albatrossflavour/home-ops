@@ -29,19 +29,18 @@ spec:
               type: RuntimeDefault
           containers:
             - name: set-permissions
-              image: alpine:3.21
+              image: nicolaka/netshoot:v0.13
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
                   drop:
                     - ALL
-                readOnlyRootFilesystem: false
+                readOnlyRootFilesystem: true
               command:
                 - /bin/sh
                 - -c
                 - |
                   set -e
-                  apk add --no-cache curl jq
 
                   GRAFANA_URL="http://grafana.observability.svc.cluster.local"
                   VIEWER_ALLOWED_FOLDERS="Puppet"
