@@ -35,7 +35,7 @@ spec:
                 capabilities:
                   drop:
                     - ALL
-                readOnlyRootFilesystem: true
+                readOnlyRootFilesystem: false
               command:
                 - /bin/sh
                 - -c
