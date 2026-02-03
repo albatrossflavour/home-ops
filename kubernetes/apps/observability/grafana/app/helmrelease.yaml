@@ -424,12 +424,10 @@ spec:
         enabled: true
         searchNamespace: ALL
         label: grafana_dashboard
-        folderAnnotation: grafana_folder
-        defaultFolderName: Kubernetes
         provider:
           disableDelete: true
-          foldersFromFilesStructure: true
-          path: /tmp/dashboards
+          foldersFromFilesStructure: false
+          folder: Kubernetes
       datasources:
         enabled: true
         searchNamespace: ALL
