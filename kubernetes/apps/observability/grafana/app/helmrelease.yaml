@@ -129,7 +129,7 @@ spec:
         providers:
           - name: default
             orgId: 1
-            folder: ""
+            folder: "Home"
             type: file
             disableDeletion: false
             editable: true
@@ -424,6 +424,7 @@ spec:
         enabled: true
         searchNamespace: ALL
         label: grafana_dashboard
+        folder: Kubernetes
         folderAnnotation: grafana_folder
         provider:
           disableDelete: true
