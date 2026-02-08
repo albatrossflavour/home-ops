@@ -13,6 +13,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
+  timeout: 15m
   install:
     remediation:
       retries: 3
@@ -37,7 +38,7 @@ spec:
           app:
             image:
               repository: shlinkio/shlink
-              tag: "5.0.0"
+              tag: "5.0.0@sha256:5bbedb6913b951f23428a61b581e7a22e33bdda0446455dfb4a598e57f15ff73"
             env:
               TZ: Australia/Sydney
               DEFAULT_DOMAIN: short.${SECRET_DOMAIN}
