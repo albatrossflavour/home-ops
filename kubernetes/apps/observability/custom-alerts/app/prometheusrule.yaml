@@ -122,3 +122,40 @@ spec:
           annotations:
             summary: "UPS battery charge is low at {{ $value }}%"
             description: "UPS battery charge is at {{ $value | humanize }}% (threshold: 50%). System shutdown may occur soon if mains power is not restored."
+
+    - name: flux
+      rules:
+        - alert: HelmReleaseNotReady
+          expr: |
+            gotk_reconcile_condition{type="Ready", status="False", kind="HelmRelease"} == 1
+          for: 30m
+          labels:
+            severity: critical
+          annotations:
+            summary: "HelmRelease {{ $labels.namespace }}/{{ $labels.name }} failing"
+            description: "HelmRelease {{ $labels.namespace }}/{{ $labels.name }} has been in a non-Ready state for more than 30 minutes."
+
+    - name: spegel
+      rules:
+        - alert: SpegelMirrorFailureRate
+          expr: |
+            sum(rate(spegel_mirror_requests_total{cache="miss"}[10m]))
+            / sum(rate(spegel_mirror_requests_total[10m])) > 0.9
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Spegel mirror cache miss rate above 90%"
+            description: "Spegel peer-to-peer image mirror has >90% cache miss rate for 15 minutes, indicating possible DHT or connectivity issues."
+
+    - name: image-pull
+      rules:
+        - alert: ImagePullBackOff
+          expr: |
+            kube_pod_container_status_waiting_reason{reason="ImagePullBackOff"} == 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} in ImagePullBackOff"
+            description: "Container has been unable to pull its image for more than 10 minutes."
