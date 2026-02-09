@@ -16,13 +16,11 @@ spec:
   install:
     remediation:
       retries: 3
-    timeout: 15m
   upgrade:
     cleanupOnFail: true
     remediation:
       strategy: rollback
       retries: 3
-    timeout: 15m
   values:
     controllers:
       stirling-pdf:
@@ -61,9 +59,6 @@ spec:
                   - ALL
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
