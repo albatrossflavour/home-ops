@@ -29,7 +29,7 @@ spec:
           app:
             image:
               repository: ghcr.io/kpetremann/mqtt-exporter
-              tag: 1.9.0@sha256:c9b5074f23daadbbe2fdf008e440378cd4cffac024bcedf2d1c8f29ddaa9ab5c
+              tag: 1.11.1@sha256:7db8598791d77a1924c0b1ad9152d79c80a376af7c73884331181f4d159cf69c
             env:
               TZ: "${TIMEZONE:=Etc/UTC}"
               # LOG_LEVEL: DEBUG
