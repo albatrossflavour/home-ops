@@ -84,6 +84,7 @@
             transition: border-color 0.15s;
         }
         .event-card:hover { border-color: #388bfd; }
+        .event-card.highlighted { border-color: #388bfd; box-shadow: 0 0 12px rgba(56,139,253,0.3); }
 
         .event-header {
             display: flex;
@@ -342,8 +343,12 @@
                 grid.className = 'events-grid';
 
                 groups[date].forEach(function(ev) {
+                    // Stable ID from timestamp
+                    var eventId = ev.timestamp.replace(/[^0-9]/g, '');
+
                     var card = document.createElement('div');
                     card.className = 'event-card';
+                    card.id = 'event-' + eventId;
 
                     var badgeClass = 'badge-' + ev.type;
                     var ts = new Date(ev.timestamp);
@@ -366,14 +371,15 @@
 
                     var videoHtml = '';
                     var videoSrc = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
+                    var actionsHtml = '<div class="event-actions">' +
+                        '<a href="#" class="share-btn" data-event-id="' + eventId + '">Share</a>';
                     if (videoSrc) {
                         videoHtml = '<div class="event-video">' +
                             '<video controls preload="metadata" src="' + videoSrc + '#t=0.1">' +
-                            '</video></div>' +
-                            '<div class="event-actions">' +
-                            '<a href="' + videoSrc + '" download>Download</a>' +
-                            '</div>';
+                            '</video></div>';
+                        actionsHtml += '<a href="' + videoSrc + '" download>Download</a>';
                     }
+                    actionsHtml += '</div>';
 
                     card.innerHTML =
                         '<div class="event-header">' +
@@ -381,7 +387,8 @@
                         '<span class="event-time">' + timeStr + '</span>' +
                         '</div>' +
                         '<div class="event-stats">' + statsHtml + '</div>' +
-                        videoHtml;
+                        videoHtml +
+                        actionsHtml;
 
                     grid.appendChild(card);
                 });
@@ -392,6 +399,30 @@
 
             if (dates.length === 0) {
                 container.innerHTML = '<p style="text-align:center;padding:3rem;color:#8b949e;">No events recorded yet.</p>';
+            }
+
+            // Share button handler
+            container.addEventListener('click', function(e) {
+                var btn = e.target.closest('.share-btn');
+                if (!btn) return;
+                e.preventDefault();
+                var eid = btn.getAttribute('data-event-id');
+                var url = window.location.origin + '/?event=' + eid + '#events';
+                navigator.clipboard.writeText(url).then(function() {
+                    btn.textContent = 'Copied!';
+                    setTimeout(function() { btn.textContent = 'Share'; }, 2000);
+                });
+            });
+
+            // Deep-link: scroll to event if ?event= param present
+            var params = new URLSearchParams(window.location.search);
+            var targetId = params.get('event');
+            if (targetId) {
+                var el = document.getElementById('event-' + targetId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('highlighted');
+                }
             }
         }
 
