@@ -12,13 +12,32 @@
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "green",
+        "name": "Shitbox",
+        "target": {
+          "expr": "",
+          "interval": "",
+          "refId": "Anno",
+          "tags": [
+            "shitbox"
+          ],
+          "type": "tags"
+        }
       }
     ]
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 2,
-  "id": 5,
+  "id": 8,
   "links": [],
   "panels": [
     {
