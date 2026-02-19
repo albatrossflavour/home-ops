@@ -128,18 +128,30 @@
             border-radius: 6px;
             overflow: hidden;
             background: #000;
+            margin-bottom: 0.5rem;
         }
         .event-video video {
             width: 100%;
             display: block;
         }
-        .event-video-link {
+        .event-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .event-actions a {
+            flex: 1;
             display: block;
-            padding: 0.75rem;
+            padding: 0.5rem;
             text-align: center;
             font-size: 0.8rem;
             background: #21262d;
             border-radius: 6px;
+            color: #c9d1d9;
+            transition: background 0.15s;
+        }
+        .event-actions a:hover {
+            background: #30363d;
+            text-decoration: none;
         }
 
         /* Map */
@@ -341,13 +353,15 @@
                     }
 
                     var videoHtml = '';
-                    if (ev.video_url) {
+                    var videoSrc = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
+                    if (videoSrc) {
                         videoHtml = '<div class="event-video">' +
-                            '<video controls preload="none" poster="">' +
-                            '<source src="' + ev.video_url + '" type="video/mp4">' +
-                            '</video></div>';
-                    } else if (ev.video_path) {
-                        videoHtml = '<a class="event-video-link" href="/captures/' + ev.video_path + '">Download video</a>';
+                            '<video controls preload="metadata">' +
+                            '<source src="' + videoSrc + '" type="video/mp4">' +
+                            '</video></div>' +
+                            '<div class="event-actions">' +
+                            '<a href="' + videoSrc + '" download>Download</a>' +
+                            '</div>';
                     }
 
                     card.innerHTML =
@@ -424,6 +438,10 @@
                 }
                 if (ev.duration_ms !== undefined) {
                     popupLines.push('<br>Duration: ' + (ev.duration_ms / 1000).toFixed(1) + 's');
+                }
+                var popupVideo = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
+                if (popupVideo) {
+                    popupLines.push('<br><a href="' + popupVideo + '" target="_blank" style="color:#58a6ff">Watch video</a>');
                 }
                 popupLines.push('</div></div>');
 
