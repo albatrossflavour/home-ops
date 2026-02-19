@@ -27,4 +27,8 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "pdlf.net"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "shit-of-theseus.com"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+  - hostname: "grafana.shit-of-theseus.com"
+    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - service: http_status:404

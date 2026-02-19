@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./helmrelease.yaml
+  - ./grafana-helmrelease.yaml
+configMapGenerator:
+  - name: shit-of-theseus-webroot
+    files:
+      - webroot/index.html
+  - name: shit-of-theseus-nginx-config
+    files:
+      - nginx-config/default.conf
+generatorOptions:
+  disableNameSuffixHash: true

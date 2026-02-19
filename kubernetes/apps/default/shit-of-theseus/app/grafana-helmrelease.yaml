@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-shitbox
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: grafana
+      version: 10.5.12
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    deploymentStrategy:
+      type: Recreate
+    downloadDashboardsImage:
+      registry: docker.io
+      repository: alpine/curl
+      tag: "8.17.0@sha256:956ed14ce7361a4aba16c1b043e4491db3c9e08498e30be1385504278debce3b"
+    env:
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel
+      GF_SECURITY_ANGULAR_SUPPORT_ENABLED: true
+      GF_SERVER_ROOT_URL: "https://grafana.shit-of-theseus.com"
+    grafana.ini:
+      analytics:
+        check_for_updates: false
+        check_for_plugin_updates: false
+        reporting_enabled: false
+      auth.anonymous:
+        enabled: true
+        org_id: 1
+        org_role: Viewer
+      auth:
+        disable_login_form: true
+      security:
+        allow_embedding: true
+        cookie_secure: true
+      news:
+        news_feed_enabled: false
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            access: proxy
+            url: http://prometheus-operated.observability.svc.cluster.local:9090
+            jsonData:
+              timeInterval: 1m
+            isDefault: true
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: default
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+    dashboards:
+      default:
+        shitbox:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/shitbox-telemetry.json
+          datasource: Prometheus
+    plugins:
+      - natel-discrete-panel
+      - pr0ps-trackmap-panel
+    ingress:
+      enabled: true
+      annotations:
+        external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+      ingressClassName: external
+      hosts: ["grafana.shit-of-theseus.com"]
+    persistence:
+      enabled: false
+    testFramework:
+      enabled: false

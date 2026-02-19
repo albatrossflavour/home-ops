@@ -28,6 +28,7 @@ spec:
             - dashboard.lab.albatrossflavour.com
             - smarthome.pdlf.net
             - pdlf.net
+            - shit-of-theseus.com
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -48,3 +49,4 @@ spec:
         selector:
           dnsZones:
             - "${SECRET_DOMAIN}"
+            - shit-of-theseus.com
