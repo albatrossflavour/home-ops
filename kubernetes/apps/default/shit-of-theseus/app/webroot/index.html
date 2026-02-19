@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shit of Theseus — Rally Telemetry</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">  <!-- pragma: allowlist secret -->
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -114,6 +116,7 @@
         .event-stats {
             display: flex;
             gap: 1rem;
+            flex-wrap: wrap;
             font-size: 0.8rem;
             color: #8b949e;
             margin-bottom: 0.75rem;
@@ -138,6 +141,28 @@
             border-radius: 6px;
         }
 
+        /* Map */
+        #map {
+            height: 70vh;
+            border-radius: 8px;
+            border: 1px solid #21262d;
+            margin-top: 1rem;
+        }
+        #map-loading { text-align: center; padding: 3rem; color: #8b949e; }
+        #map-error { text-align: center; padding: 3rem; color: #f85149; display: none; }
+        #map-empty { text-align: center; padding: 3rem; color: #8b949e; display: none; }
+
+        .map-popup .popup-type {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+        .map-popup .popup-detail {
+            font-size: 0.8rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
         /* Dashboard */
         .grafana-container {
             margin-top: 1rem;
@@ -158,6 +183,7 @@
         @media (max-width: 600px) {
             header, nav, main { padding-left: 1rem; padding-right: 1rem; }
             .events-grid { grid-template-columns: 1fr; }
+            #map { height: 50vh; }
         }
     </style>
 </head>
@@ -169,6 +195,7 @@
 
     <nav>
         <a href="#events" class="active" data-section="events">Events</a>
+        <a href="#map" data-section="map">Map</a>
         <a href="#dashboard" data-section="dashboard">Dashboard</a>
     </nav>
 
@@ -177,6 +204,13 @@
             <div id="loading">Loading events...</div>
             <div id="error">Failed to load events. No events data available yet.</div>
             <div id="events-list"></div>
+        </div>
+
+        <div id="map-section" class="section">
+            <div id="map-loading">Loading map data...</div>
+            <div id="map-error">Failed to load event data for map.</div>
+            <div id="map-empty">No events with location data yet.</div>
+            <div id="map"></div>
         </div>
 
         <div id="dashboard-section" class="section">
@@ -193,8 +227,21 @@
         </div>
     </main>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>  <!-- pragma: allowlist secret -->
     <script>
     (function() {
+        var BADGE_COLORS = {
+            HIGH_G: '#da3633',
+            BIG_CORNER: '#d29922',
+            HARD_BRAKE: '#f85149',
+            ROUGH_ROAD: '#8957e5',
+            BUTTON: '#238636'
+        };
+
+        var eventsData = null;
+        var mapInitialised = false;
+
         // Navigation
         document.querySelectorAll('nav a').forEach(function(link) {
             link.addEventListener('click', function(e) {
@@ -205,13 +252,17 @@
                 this.classList.add('active');
                 document.getElementById(section + '-section').classList.add('active');
                 history.replaceState(null, '', '#' + section);
+
+                if (section === 'map' && !mapInitialised && eventsData) {
+                    initMap(eventsData);
+                }
             });
         });
 
         // Handle initial hash
         var hash = window.location.hash.replace('#', '');
-        if (hash === 'dashboard') {
-            document.querySelector('nav a[data-section="dashboard"]').click();
+        if (hash === 'dashboard' || hash === 'map') {
+            document.querySelector('nav a[data-section="' + hash + '"]').click();
         }
 
         // Load events
@@ -221,21 +272,27 @@
                 return r.json();
             })
             .then(function(events) {
+                eventsData = events;
                 document.getElementById('loading').style.display = 'none';
+                document.getElementById('map-loading').style.display = 'none';
                 renderEvents(events);
+
+                if (document.getElementById('map-section').classList.contains('active')) {
+                    initMap(events);
+                }
             })
             .catch(function() {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
+                document.getElementById('map-loading').style.display = 'none';
+                document.getElementById('map-error').style.display = 'block';
             });
 
         function renderEvents(events) {
-            // Sort newest first
             events.sort(function(a, b) {
                 return new Date(b.timestamp) - new Date(a.timestamp);
             });
 
-            // Group by date
             var groups = {};
             events.forEach(function(ev) {
                 var date = ev.timestamp.split('T')[0];
@@ -271,6 +328,9 @@
                     });
 
                     var statsHtml = '';
+                    if (ev.speed_kmh !== undefined) {
+                        statsHtml += '<span>Speed: <strong>' + Math.round(ev.speed_kmh) + ' km/h</strong></span>';
+                    }
                     if (ev.peak_g !== undefined) {
                         statsHtml += '<span>Peak: <strong>' + ev.peak_g.toFixed(2) + ' g</strong></span>';
                     }
@@ -306,6 +366,80 @@
             if (dates.length === 0) {
                 container.innerHTML = '<p style="text-align:center;padding:3rem;color:#8b949e;">No events recorded yet.</p>';
             }
+        }
+
+        function initMap(events) {
+            mapInitialised = true;
+
+            var geoEvents = events.filter(function(ev) {
+                return ev.lat !== undefined && ev.lng !== undefined;
+            });
+
+            if (geoEvents.length === 0) {
+                document.getElementById('map').style.display = 'none';
+                document.getElementById('map-empty').style.display = 'block';
+                return;
+            }
+
+            var map = L.map('map', {
+                zoomControl: true
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            var bounds = L.latLngBounds();
+            var markers = [];
+
+            geoEvents.sort(function(a, b) {
+                return new Date(a.timestamp) - new Date(b.timestamp);
+            });
+
+            geoEvents.forEach(function(ev) {
+                var color = BADGE_COLORS[ev.type] || '#30363d';
+                var ts = new Date(ev.timestamp);
+                var dateStr = ts.toLocaleDateString(undefined, {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                });
+                var timeStr = ts.toLocaleTimeString(undefined, {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+
+                var popupLines = [
+                    '<div class="map-popup">',
+                    '<div class="popup-type" style="color:' + color + '">' + ev.type + '</div>',
+                    '<div class="popup-detail">',
+                    dateStr + ' ' + timeStr
+                ];
+                if (ev.speed_kmh !== undefined) {
+                    popupLines.push('<br>Speed: ' + Math.round(ev.speed_kmh) + ' km/h');
+                }
+                if (ev.peak_g !== undefined) {
+                    popupLines.push('<br>Peak: ' + ev.peak_g.toFixed(2) + ' g');
+                }
+                if (ev.duration_ms !== undefined) {
+                    popupLines.push('<br>Duration: ' + (ev.duration_ms / 1000).toFixed(1) + 's');
+                }
+                popupLines.push('</div></div>');
+
+                var marker = L.circleMarker([ev.lat, ev.lng], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 0.9,
+                    fillOpacity: 0.85
+                }).bindPopup(popupLines.join(''));
+
+                marker.addTo(map);
+                markers.push(marker);
+                bounds.extend([ev.lat, ev.lng]);
+            });
+
+            map.fitBounds(bounds, { padding: [40, 40] });
         }
     })();
     </script>
