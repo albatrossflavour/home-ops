@@ -82,6 +82,8 @@
             padding: 1rem;
             cursor: pointer;
             transition: border-color 0.15s;
+            display: flex;
+            flex-direction: column;
         }
         .event-card:hover { border-color: #388bfd; }
         .event-card.highlighted { border-color: #388bfd; box-shadow: 0 0 12px rgba(56,139,253,0.3); }
@@ -124,6 +126,9 @@
         }
         .event-stats span strong { color: #c9d1d9; }
 
+        .event-media {
+            margin-top: auto;
+        }
         .event-video {
             border-radius: 6px;
             overflow: hidden;
@@ -358,15 +363,15 @@
 
                     var displayName = DISPLAY_NAMES[ev.type] || ev.type;
 
+                    var noStats = {MANUAL_CAPTURE: 1, BOOT: 1};
                     var statsHtml = '';
-                    if (ev.speed_kmh !== undefined && ev.speed_kmh > 0) {
-                        statsHtml += '<span>Speed: <strong>' + Math.round(ev.speed_kmh) + ' km/h</strong></span>';
-                    }
-                    if (ev.peak_g !== undefined && ev.peak_g > 0) {
-                        statsHtml += '<span>Peak: <strong>' + ev.peak_g.toFixed(2) + ' g</strong></span>';
-                    }
-                    if (ev.duration_ms !== undefined && ev.duration_ms > 0) {
-                        statsHtml += '<span>Duration: <strong>' + (ev.duration_ms / 1000).toFixed(1) + 's</strong></span>';
+                    if (!noStats[ev.type]) {
+                        if (ev.speed_kmh !== undefined && ev.speed_kmh > 0) {
+                            statsHtml += '<span>Speed: <strong>' + Math.round(ev.speed_kmh) + ' km/h</strong></span>';
+                        }
+                        if (ev.peak_g !== undefined && ev.peak_g > 0) {
+                            statsHtml += '<span>Peak: <strong>' + ev.peak_g.toFixed(2) + ' g</strong></span>';
+                        }
                     }
 
                     var videoHtml = '';
@@ -386,9 +391,8 @@
                         '<span class="badge ' + badgeClass + '">' + displayName + '</span>' +
                         '<span class="event-time">' + timeStr + '</span>' +
                         '</div>' +
-                        '<div class="event-stats">' + statsHtml + '</div>' +
-                        videoHtml +
-                        actionsHtml;
+                        (statsHtml ? '<div class="event-stats">' + statsHtml + '</div>' : '') +
+                        '<div class="event-media">' + videoHtml + actionsHtml + '</div>';
 
                     grid.appendChild(card);
                 });
@@ -478,9 +482,6 @@
                 }
                 if (ev.peak_g !== undefined && ev.peak_g > 0) {
                     popupLines.push('<br>Peak: ' + ev.peak_g.toFixed(2) + ' g');
-                }
-                if (ev.duration_ms !== undefined && ev.duration_ms > 0) {
-                    popupLines.push('<br>Duration: ' + (ev.duration_ms / 1000).toFixed(1) + 's');
                 }
                 var popupVideo = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
                 if (popupVideo) {
