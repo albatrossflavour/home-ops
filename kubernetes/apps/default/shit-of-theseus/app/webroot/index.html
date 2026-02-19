@@ -259,6 +259,8 @@
             BOOT: '#1f6feb'
         };
 
+        var TIMEZONE = 'Australia/Sydney';
+
         var DISPLAY_NAMES = {
             HIGH_G: 'High G-Force',
             BIG_CORNER: 'Big Corner',
@@ -325,7 +327,9 @@
 
             var groups = {};
             events.forEach(function(ev) {
-                var date = ev.timestamp.split('T')[0];
+                var date = new Date(ev.timestamp).toLocaleDateString('en-CA', {
+                    timeZone: TIMEZONE
+                });
                 if (!groups[date]) groups[date] = [];
                 groups[date].push(ev);
             });
@@ -337,10 +341,12 @@
                 var group = document.createElement('div');
                 group.className = 'date-group';
 
-                var d = new Date(date + 'T00:00:00');
+                var parts = date.split('-');
+                var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
                 var heading = document.createElement('h2');
-                heading.textContent = d.toLocaleDateString(undefined, {
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                heading.textContent = d.toLocaleDateString('en-AU', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                    timeZone: 'UTC'
                 });
                 group.appendChild(heading);
 
@@ -357,8 +363,9 @@
 
                     var badgeClass = 'badge-' + ev.type;
                     var ts = new Date(ev.timestamp);
-                    var timeStr = ts.toLocaleTimeString(undefined, {
-                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    var timeStr = ts.toLocaleTimeString('en-AU', {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit',
+                        timeZone: TIMEZONE
                     });
 
                     var displayName = DISPLAY_NAMES[ev.type] || ev.type;
@@ -463,11 +470,13 @@
             geoEvents.forEach(function(ev) {
                 var color = BADGE_COLORS[ev.type] || '#30363d';
                 var ts = new Date(ev.timestamp);
-                var dateStr = ts.toLocaleDateString(undefined, {
-                    year: 'numeric', month: 'short', day: 'numeric'
+                var dateStr = ts.toLocaleDateString('en-AU', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    timeZone: TIMEZONE
                 });
-                var timeStr = ts.toLocaleTimeString(undefined, {
-                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                var timeStr = ts.toLocaleTimeString('en-AU', {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    timeZone: TIMEZONE
                 });
 
                 var popupName = DISPLAY_NAMES[ev.type] || ev.type;
