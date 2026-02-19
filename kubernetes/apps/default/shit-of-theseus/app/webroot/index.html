@@ -356,8 +356,7 @@
                     var videoSrc = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
                     if (videoSrc) {
                         videoHtml = '<div class="event-video">' +
-                            '<video controls preload="metadata">' +
-                            '<source src="' + videoSrc + '" type="video/mp4">' +
+                            '<video controls preload="metadata" src="' + videoSrc + '#t=0.1">' +
                             '</video></div>' +
                             '<div class="event-actions">' +
                             '<a href="' + videoSrc + '" download>Download</a>' +
