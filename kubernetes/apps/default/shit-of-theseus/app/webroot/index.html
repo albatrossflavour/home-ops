@@ -98,7 +98,6 @@
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: 600;
-            text-transform: uppercase;
             letter-spacing: 0.03em;
         }
         .badge-HIGH_G { background: #da3633; color: #fff; }
@@ -250,7 +249,18 @@
             HARD_BRAKE: '#f85149',
             ROUGH_ROAD: '#8957e5',
             BUTTON: '#238636',
+            MANUAL_CAPTURE: '#238636',
             BOOT: '#1f6feb'
+        };
+
+        var DISPLAY_NAMES = {
+            HIGH_G: 'High G-Force',
+            BIG_CORNER: 'Big Corner',
+            HARD_BRAKE: 'Hard Brake',
+            ROUGH_ROAD: 'Rough Road',
+            BUTTON: 'Manual',
+            MANUAL_CAPTURE: 'Manual',
+            BOOT: 'Startup'
         };
 
         var eventsData = null;
@@ -341,14 +351,16 @@
                         hour: '2-digit', minute: '2-digit', second: '2-digit'
                     });
 
+                    var displayName = DISPLAY_NAMES[ev.type] || ev.type;
+
                     var statsHtml = '';
-                    if (ev.speed_kmh !== undefined) {
+                    if (ev.speed_kmh !== undefined && ev.speed_kmh > 0) {
                         statsHtml += '<span>Speed: <strong>' + Math.round(ev.speed_kmh) + ' km/h</strong></span>';
                     }
-                    if (ev.peak_g !== undefined) {
+                    if (ev.peak_g !== undefined && ev.peak_g > 0) {
                         statsHtml += '<span>Peak: <strong>' + ev.peak_g.toFixed(2) + ' g</strong></span>';
                     }
-                    if (ev.duration_ms !== undefined) {
+                    if (ev.duration_ms !== undefined && ev.duration_ms > 0) {
                         statsHtml += '<span>Duration: <strong>' + (ev.duration_ms / 1000).toFixed(1) + 's</strong></span>';
                     }
 
@@ -365,7 +377,7 @@
 
                     card.innerHTML =
                         '<div class="event-header">' +
-                        '<span class="badge ' + badgeClass + '">' + ev.type + '</span>' +
+                        '<span class="badge ' + badgeClass + '">' + displayName + '</span>' +
                         '<span class="event-time">' + timeStr + '</span>' +
                         '</div>' +
                         '<div class="event-stats">' + statsHtml + '</div>' +
@@ -423,19 +435,20 @@
                     hour: '2-digit', minute: '2-digit', second: '2-digit'
                 });
 
+                var popupName = DISPLAY_NAMES[ev.type] || ev.type;
                 var popupLines = [
                     '<div class="map-popup">',
-                    '<div class="popup-type" style="color:' + color + '">' + ev.type + '</div>',
+                    '<div class="popup-type" style="color:' + color + '">' + popupName + '</div>',
                     '<div class="popup-detail">',
                     dateStr + ' ' + timeStr
                 ];
-                if (ev.speed_kmh !== undefined) {
+                if (ev.speed_kmh !== undefined && ev.speed_kmh > 0) {
                     popupLines.push('<br>Speed: ' + Math.round(ev.speed_kmh) + ' km/h');
                 }
-                if (ev.peak_g !== undefined) {
+                if (ev.peak_g !== undefined && ev.peak_g > 0) {
                     popupLines.push('<br>Peak: ' + ev.peak_g.toFixed(2) + ' g');
                 }
-                if (ev.duration_ms !== undefined) {
+                if (ev.duration_ms !== undefined && ev.duration_ms > 0) {
                     popupLines.push('<br>Duration: ' + (ev.duration_ms / 1000).toFixed(1) + 's');
                 }
                 var popupVideo = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
