@@ -9,6 +9,8 @@ configMapGenerator:
   - name: shit-of-theseus-webroot
     files:
       - webroot/index.html
+      - webroot/logo.png
+      - webroot/route.jpg
   - name: shit-of-theseus-nginx-config
     files:
       - nginx-config/default.conf

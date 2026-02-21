@@ -235,6 +235,89 @@
             font-size: 0.875rem;
         }
 
+        /* About */
+        .about-hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .about-hero img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #c06000;
+            margin-bottom: 1rem;
+        }
+        .about-hero h2 {
+            font-size: 1.5rem;
+            color: #f0dbb8;
+            margin-bottom: 0.25rem;
+        }
+        .about-hero p {
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+        .about-card {
+            background: #161b22;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .about-card h3 {
+            color: #e0a040;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+        .about-card p {
+            margin-bottom: 0.75rem;
+        }
+        .about-card p:last-child {
+            margin-bottom: 0;
+        }
+        .route-map {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #2a1f0e;
+            margin-top: 0.75rem;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .team-member {
+            background: #161b22;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .team-member .member-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #2a1f0e;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #c06000;
+        }
+        .team-member h4 {
+            color: #f0dbb8;
+            margin-bottom: 0.25rem;
+        }
+        .team-member .member-role {
+            color: #e0a040;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+        .team-member p {
+            font-size: 0.875rem;
+            color: #8b949e;
+        }
+
         /* Footer */
         footer {
             border-top: 1px solid #2a1f0e;
@@ -259,7 +342,7 @@
 </head>
 <body>
     <header>
-        <img src="data:image/png;base64,__LOGO_B64__" alt="Shitbox Rally 2026" class="header-logo">
+        <img src="/logo.png" alt="Shitbox Rally 2026" class="header-logo">
         <div class="header-text">
             <h1>Shit of Theseus</h1>
             <div class="team-name">"A Team Has No Name"</div>
@@ -275,6 +358,8 @@
         <a href="#events" class="active" data-section="events">Events</a>
         <a href="#map" data-section="map">Map</a>
         <a href="#dashboard" data-section="dashboard">Dashboard</a>
+        <a href="#car" data-section="car">The Car</a>
+        <a href="#about" data-section="about">About</a>
     </nav>
 
     <main>
@@ -302,6 +387,49 @@
             <a class="grafana-link" href="https://grafana.shit-of-theseus.com" target="_blank" rel="noopener">
                 Open full Grafana dashboard &rarr;
             </a>
+        </div>
+        <div id="car-section" class="section">
+            <div class="about-hero">
+                <img src="/logo.png" alt="Shitbox Rally 2026">
+                <h2>The Shit of Theseus</h2>
+                <p>The world's most instrumented shitbox</p>
+            </div>
+
+            <div class="about-card">
+                <h3>Why "Shit of Theseus"?</h3>
+                <p>The Ship of Theseus is a thought experiment: if you replace every plank of a ship one at a time, is it still the same ship? Our car asks the same question, except instead of planks it's head gaskets, radiator hoses, and suspension bushings.</p>
+                <p>By the time we reach Melbourne, there's a real chance that more of the car will be replacement parts than original. At what point does it stop being the car we started with? We don't know. But we're going to find out.</p>
+            </div>
+
+            <div class="about-card">
+                <h3>The Telemetry</h3>
+                <p>This car is fitted with a Raspberry Pi running a custom telemetry system that captures GPS position, 100 Hz accelerometer data, engine bay temperature, and power monitoring. It detects driving events in real time &mdash; hard braking, big corners, high G-forces, and rough road &mdash; and automatically records video with a dashcam-style ring buffer.</p>
+                <p>All data is stored locally in SQLite (because coverage in outback Queensland is... optimistic) and batch-synced to Prometheus over a WireGuard VPN when connectivity is available. The events and video you see on this site are captured and uploaded automatically from the car.</p>
+                <p>There's even a tiny OLED screen on the dashboard showing GPS status, sensor health, and recording state &mdash; so we know when something breaks without needing to SSH into the car at 110 km/h.</p>
+            </div>
+
+            <div class="about-card">
+                <h3>The Route</h3>
+                <p>Port Douglas to Melbourne, May 1st &ndash; 9th 2026. Seven overnight stops across 4,000+ km of outback and alpine roads.</p>
+                <img src="/route.jpg" alt="Shitbox Rally 2026 Route: Port Douglas to Melbourne" class="route-map">
+            </div>
+        </div>
+
+        <div id="about-section" class="section">
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-avatar">T</div>
+                    <h4>Tim</h4>
+                    <div class="member-role">Driver / Telemetry</div>
+                    <p>TODO: Tim's bio goes here.</p>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">S</div>
+                    <h4>Steve</h4>
+                    <div class="member-role">Co-driver / Mechanic</div>
+                    <p>TODO: Steve's bio goes here.</p>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -359,7 +487,7 @@
 
         // Handle initial hash
         var hash = window.location.hash.replace('#', '');
-        if (hash === 'dashboard' || hash === 'map') {
+        if (hash === 'dashboard' || hash === 'map' || hash === 'car' || hash === 'about') {
             document.querySelector('nav a[data-section="' + hash + '"]').click();
         }
 
