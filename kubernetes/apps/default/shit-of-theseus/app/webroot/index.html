@@ -616,13 +616,36 @@
             var filterBar = document.getElementById('day-filter-bar');
             var filterSelect = document.getElementById('day-filter-select');
 
+            function activateVideos(group) {
+                group.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
+                    var src = ph.getAttribute('data-video-src');
+                    if (src) {
+                        ph.innerHTML = '<video controls preload="metadata" src="' + src + '#t=0.1"></video>';
+                        ph.className = 'event-video';
+                    }
+                });
+            }
+
+            function deactivateVideos(group) {
+                group.querySelectorAll('.event-video').forEach(function(v) {
+                    var video = v.querySelector('video');
+                    if (video) {
+                        var src = video.src.replace(/#t=.*$/, '');
+                        v.setAttribute('data-video-src', src);
+                        v.innerHTML = '';
+                        v.className = 'event-video-placeholder';
+                    }
+                });
+            }
+
+            var filterToDate = null;
+
             if (dates.length > 1) {
                 document.getElementById('day-filter').style.display = '';
 
                 // "All" button
                 var allBtn = document.createElement('button');
                 allBtn.textContent = 'All';
-                allBtn.className = 'active';
                 allBtn.setAttribute('data-date', 'all');
                 filterBar.appendChild(allBtn);
 
@@ -651,29 +674,7 @@
                     filterSelect.appendChild(opt);
                 });
 
-                function activateVideos(group) {
-                    group.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
-                        var src = ph.getAttribute('data-video-src');
-                        if (src) {
-                            ph.innerHTML = '<video controls preload="metadata" src="' + src + '#t=0.1"></video>';
-                            ph.className = 'event-video';
-                        }
-                    });
-                }
-
-                function deactivateVideos(group) {
-                    group.querySelectorAll('.event-video').forEach(function(v) {
-                        var video = v.querySelector('video');
-                        if (video) {
-                            var src = video.src.replace(/#t=.*$/, '');
-                            v.setAttribute('data-video-src', src);
-                            v.innerHTML = '';
-                            v.className = 'event-video-placeholder';
-                        }
-                    });
-                }
-
-                function filterToDate(selectedDate) {
+                filterToDate = function(selectedDate) {
                     var dateGroups = container.querySelectorAll('.date-group');
                     dateGroups.forEach(function(g) {
                         var show = selectedDate === 'all' || g.getAttribute('data-date') === selectedDate;
@@ -684,12 +685,11 @@
                             deactivateVideos(g);
                         }
                     });
-                    // Update button bar active state
                     filterBar.querySelectorAll('button').forEach(function(b) {
                         b.classList.toggle('active', b.getAttribute('data-date') === selectedDate);
                     });
                     filterSelect.value = selectedDate;
-                }
+                };
 
                 filterBar.addEventListener('click', function(e) {
                     if (e.target.tagName !== 'BUTTON') return;
@@ -699,9 +699,6 @@
                 filterSelect.addEventListener('change', function() {
                     filterToDate(this.value);
                 });
-
-                // Always default to most recent day
-                filterToDate(dates[0]);
             }
 
             dates.forEach(function(date) {
@@ -776,15 +773,12 @@
 
             if (dates.length === 0) {
                 container.innerHTML = '<p style="text-align:center;padding:3rem;color:#8b949e;">No events recorded yet.</p>';
-            } else if (dates.length === 1) {
+            } else if (filterToDate) {
+                // Multiple days — filter to most recent, activating only its videos
+                filterToDate(dates[0]);
+            } else {
                 // Single day — no filter, just activate videos directly
-                container.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
-                    var src = ph.getAttribute('data-video-src');
-                    if (src) {
-                        ph.innerHTML = '<video controls preload="metadata" src="' + src + '#t=0.1"></video>';
-                        ph.className = 'event-video';
-                    }
-                });
+                container.querySelectorAll('.date-group').forEach(activateVideos);
             }
 
             // Share button handler
