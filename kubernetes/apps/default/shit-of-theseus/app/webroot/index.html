@@ -202,7 +202,7 @@
         .event-media {
             margin-top: auto;
         }
-        .event-video {
+        .event-video, .event-video-placeholder {
             border-radius: 6px;
             overflow: hidden;
             background: #000;
@@ -651,13 +651,37 @@
                     filterSelect.appendChild(opt);
                 });
 
+                function activateVideos(group) {
+                    group.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
+                        var src = ph.getAttribute('data-video-src');
+                        if (src) {
+                            ph.innerHTML = '<video controls preload="metadata" src="' + src + '#t=0.1"></video>';
+                            ph.className = 'event-video';
+                        }
+                    });
+                }
+
+                function deactivateVideos(group) {
+                    group.querySelectorAll('.event-video').forEach(function(v) {
+                        var video = v.querySelector('video');
+                        if (video) {
+                            var src = video.src.replace(/#t=.*$/, '');
+                            v.setAttribute('data-video-src', src);
+                            v.innerHTML = '';
+                            v.className = 'event-video-placeholder';
+                        }
+                    });
+                }
+
                 function filterToDate(selectedDate) {
                     var dateGroups = container.querySelectorAll('.date-group');
                     dateGroups.forEach(function(g) {
-                        if (selectedDate === 'all') {
-                            g.style.display = '';
+                        var show = selectedDate === 'all' || g.getAttribute('data-date') === selectedDate;
+                        g.style.display = show ? '' : 'none';
+                        if (show) {
+                            activateVideos(g);
                         } else {
-                            g.style.display = g.getAttribute('data-date') === selectedDate ? '' : 'none';
+                            deactivateVideos(g);
                         }
                     });
                     // Update button bar active state
@@ -676,10 +700,8 @@
                     filterToDate(this.value);
                 });
 
-                // Default to most recent day if more than 3 days of data
-                if (dates.length > 3) {
-                    filterToDate(dates[0]);
-                }
+                // Always default to most recent day
+                filterToDate(dates[0]);
             }
 
             dates.forEach(function(date) {
@@ -732,9 +754,7 @@
                     var actionsHtml = '<div class="event-actions">' +
                         '<a href="#" class="share-btn" data-event-id="' + eventId + '">Share</a>';
                     if (videoSrc) {
-                        videoHtml = '<div class="event-video">' +
-                            '<video controls preload="metadata" src="' + videoSrc + '#t=0.1">' +
-                            '</video></div>';
+                        videoHtml = '<div class="event-video-placeholder" data-video-src="' + videoSrc + '"></div>';
                         actionsHtml += '<a href="' + videoSrc + '" download>Download</a>';
                     }
                     actionsHtml += '</div>';
@@ -756,6 +776,15 @@
 
             if (dates.length === 0) {
                 container.innerHTML = '<p style="text-align:center;padding:3rem;color:#8b949e;">No events recorded yet.</p>';
+            } else if (dates.length === 1) {
+                // Single day — no filter, just activate videos directly
+                container.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
+                    var src = ph.getAttribute('data-video-src');
+                    if (src) {
+                        ph.innerHTML = '<video controls preload="metadata" src="' + src + '#t=0.1"></video>';
+                        ph.className = 'event-video';
+                    }
+                });
             }
 
             // Share button handler
