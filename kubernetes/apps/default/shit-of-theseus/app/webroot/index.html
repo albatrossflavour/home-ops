@@ -632,15 +632,12 @@
                 allOpt.textContent = 'All days';
                 filterSelect.appendChild(allOpt);
 
-                // Day number counter
-                var sortedAsc = dates.slice().sort();
                 dates.forEach(function(date) {
-                    var dayNum = sortedAsc.indexOf(date) + 1;
                     var parts = date.split('-');
                     var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-                    var label = 'Day ' + dayNum + ' (' + d.toLocaleDateString('en-AU', {
-                        weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC'
-                    }) + ')';
+                    var label = d.toLocaleDateString('en-AU', {
+                        weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC'
+                    });
                     var count = groups[date].length;
 
                     var btn = document.createElement('button');
