@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shit of Theseus — Rally Telemetry</title>
+    <title>Shit of Theseus — A Team Has No Name — Shitbox Rally 2026</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">  <!-- pragma: allowlist secret -->
     <style>
@@ -14,29 +14,66 @@
             color: #c9d1d9;
             line-height: 1.6;
         }
-        a { color: #58a6ff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        a { color: #e0a040; text-decoration: none; }
+        a:hover { text-decoration: underline; color: #f0c060; }
 
+        /* Header */
         header {
-            border-bottom: 1px solid #21262d;
-            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #2a1f0e;
+            padding: 1.25rem 2rem;
+            background: linear-gradient(180deg, #161b22 0%, #12100c 100%);
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
         }
-        header h1 {
+        .header-logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 2px solid #c06000;
+            flex-shrink: 0;
+        }
+        .header-text { flex: 1; }
+        .header-text h1 {
             font-size: 1.5rem;
-            color: #f0f6fc;
-            font-weight: 600;
+            color: #f0dbb8;
+            font-weight: 700;
         }
-        header p {
+        .header-text .team-name {
+            color: #e0a040;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-style: italic;
+        }
+        .header-text .subtitle {
             color: #8b949e;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
+            font-size: 0.8rem;
+            margin-top: 0.15rem;
         }
+        .donate-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.25rem;
+            background: #c06000;
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            text-decoration: none !important;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .donate-btn:hover { background: #e07010; transform: translateY(-1px); }
+        .donate-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
+        /* Nav */
         nav {
             display: flex;
             gap: 1rem;
             padding: 0.75rem 2rem;
-            border-bottom: 1px solid #21262d;
+            border-bottom: 1px solid #2a1f0e;
             background: #161b22;
         }
         nav a {
@@ -47,8 +84,8 @@
             color: #c9d1d9;
             transition: background 0.15s;
         }
-        nav a:hover { background: #21262d; text-decoration: none; }
-        nav a.active { background: #1f6feb; color: #fff; }
+        nav a:hover { background: #2a1f0e; text-decoration: none; }
+        nav a.active { background: #c06000; color: #fff; }
 
         main { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
 
@@ -62,11 +99,11 @@
         .date-group { margin-bottom: 2rem; }
         .date-group h2 {
             font-size: 1rem;
-            color: #8b949e;
+            color: #e0a040;
             font-weight: 500;
             margin-bottom: 0.75rem;
             padding-bottom: 0.5rem;
-            border-bottom: 1px solid #21262d;
+            border-bottom: 1px solid #2a1f0e;
         }
 
         .events-grid {
@@ -77,7 +114,7 @@
 
         .event-card {
             background: #161b22;
-            border: 1px solid #21262d;
+            border: 1px solid #2a1f0e;
             border-radius: 8px;
             padding: 1rem;
             cursor: pointer;
@@ -85,8 +122,8 @@
             display: flex;
             flex-direction: column;
         }
-        .event-card:hover { border-color: #388bfd; }
-        .event-card.highlighted { border-color: #388bfd; box-shadow: 0 0 12px rgba(56,139,253,0.3); }
+        .event-card:hover { border-color: #c06000; }
+        .event-card.highlighted { border-color: #e0a040; box-shadow: 0 0 12px rgba(192,96,0,0.3); }
 
         .event-header {
             display: flex;
@@ -108,7 +145,7 @@
         .badge-HARD_BRAKE { background: #f85149; color: #fff; }
         .badge-ROUGH_ROAD { background: #8957e5; color: #fff; }
         .badge-BUTTON { background: #238636; color: #fff; }
-        .badge-BOOT { background: #1f6feb; color: #fff; }
+        .badge-BOOT { background: #40a0c0; color: #fff; }
         .badge-default { background: #30363d; color: #c9d1d9; }
 
         .event-time {
@@ -124,7 +161,7 @@
             color: #8b949e;
             margin-bottom: 0.75rem;
         }
-        .event-stats span strong { color: #c9d1d9; }
+        .event-stats span strong { color: #f0dbb8; }
 
         .event-media {
             margin-top: auto;
@@ -155,7 +192,7 @@
             transition: background 0.15s;
         }
         .event-actions a:hover {
-            background: #30363d;
+            background: #2a1f0e;
             text-decoration: none;
         }
 
@@ -163,7 +200,7 @@
         #map {
             height: 70vh;
             border-radius: 8px;
-            border: 1px solid #21262d;
+            border: 1px solid #2a1f0e;
             margin-top: 1rem;
         }
         #map-loading { text-align: center; padding: 3rem; color: #8b949e; }
@@ -188,7 +225,7 @@
         .grafana-container iframe {
             width: 100%;
             height: 80vh;
-            border: 1px solid #21262d;
+            border: 1px solid #2a1f0e;
             border-radius: 8px;
             background: #161b22;
         }
@@ -198,8 +235,23 @@
             font-size: 0.875rem;
         }
 
+        /* Footer */
+        footer {
+            border-top: 1px solid #2a1f0e;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: #8b949e;
+            font-size: 0.8rem;
+            background: #0a0d12;
+        }
+        footer a { color: #e0a040; }
+
         @media (max-width: 600px) {
-            header, nav, main { padding-left: 1rem; padding-right: 1rem; }
+            header { flex-wrap: wrap; padding: 1rem; }
+            .header-logo { width: 56px; height: 56px; }
+            .header-text h1 { font-size: 1.2rem; }
+            .donate-btn { width: 100%; justify-content: center; margin-top: 0.5rem; }
+            nav, main { padding-left: 1rem; padding-right: 1rem; }
             .events-grid { grid-template-columns: 1fr; }
             #map { height: 50vh; }
         }
@@ -207,8 +259,16 @@
 </head>
 <body>
     <header>
-        <h1>Shit of Theseus</h1>
-        <p>Rally telemetry from the world's most instrumented shitbox</p>
+        <img src="/logo.png" alt="Shitbox Rally 2026" class="header-logo">
+        <div class="header-text">
+            <h1>Shit of Theseus</h1>
+            <div class="team-name">"A Team Has No Name"</div>
+            <div class="subtitle">Shitbox Rally 2026 — Rally telemetry from the world's most instrumented shitbox</div>
+        </div>
+        <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener" class="donate-btn">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            Donate
+        </a>
     </header>
 
     <nav>
@@ -245,6 +305,12 @@
         </div>
     </main>
 
+    <footer>
+        <a href="https://www.shitboxrally.com.au" target="_blank" rel="noopener">Shitbox Rally</a>
+        raises money for the Cancer Council.
+        <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener">Support our team &rarr;</a>
+    </footer>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>  <!-- pragma: allowlist secret -->
     <script>
@@ -256,7 +322,7 @@
             ROUGH_ROAD: '#8957e5',
             BUTTON: '#238636',
             MANUAL_CAPTURE: '#238636',
-            BOOT: '#1f6feb'
+            BOOT: '#40a0c0'
         };
 
         var TIMEZONE = 'Australia/Sydney';
@@ -494,7 +560,7 @@
                 }
                 var popupVideo = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
                 if (popupVideo) {
-                    popupLines.push('<br><a href="' + popupVideo + '" target="_blank" style="color:#58a6ff">Watch video</a>');
+                    popupLines.push('<br><a href="' + popupVideo + '" target="_blank" style="color:#e0a040">Watch video</a>');
                 }
                 popupLines.push('</div></div>');
 
