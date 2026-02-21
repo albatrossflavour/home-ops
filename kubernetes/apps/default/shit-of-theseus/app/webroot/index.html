@@ -270,6 +270,17 @@
         .about-card p:last-child {
             margin-bottom: 0;
         }
+        .car-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .car-gallery img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #2a1f0e;
+        }
         .route-map {
             width: 100%;
             border-radius: 8px;
@@ -395,6 +406,10 @@
             <div class="about-card">
                 <h3>The Car</h3>
                 <p>A <strong>2001 Ford Laser</strong> &mdash; the kind of car that was never exciting, even when it was new. Twenty-five years and several questionable owners later, it's held together by zip ties, optimism, and a surprisingly resilient 1.6L Zetec engine.</p>
+                <div class="car-gallery">
+                    <img src="/car-front.jpg" alt="The Shit of Theseus — front view">
+                    <img src="/car-side.jpg" alt="The Shit of Theseus — side view">
+                </div>
             </div>
 
             <div class="about-card">
