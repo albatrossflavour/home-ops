@@ -351,7 +351,7 @@
             border: 1px solid #2a1f0e;
             border-radius: 8px;
             padding: 1.5rem;
-            text-align: center;
+            text-align: left;
         }
         .team-member .member-avatar {
             width: 80px;
@@ -377,6 +377,24 @@
         .team-member p {
             font-size: 0.875rem;
             color: #8b949e;
+            margin-bottom: 0.5rem;
+        }
+        .team-member p:last-child {
+            margin-bottom: 0;
+        }
+        .team-member ul {
+            margin: 0.25rem 0 0.5rem 1.25rem;
+            padding: 0;
+            color: #8b949e;
+            font-size: 0.875rem;
+        }
+        .team-member li {
+            margin-bottom: 0.2rem;
+        }
+        .team-member .member-avatar,
+        .team-member h4,
+        .team-member .member-role {
+            text-align: center;
         }
 
         /* Footer */
@@ -626,8 +644,19 @@
                 <div class="team-member">
                     <div class="member-avatar">T</div>
                     <h4>Tony</h4>
-                    <div class="member-role">CTO</div>
-                    <p>TODO: Tony's bio goes here.</p>
+                    <div class="member-role">CTO &mdash; Chief Telemetry Overbuilder</div>
+                    <p>Tony builds systems for a living. Normally they live in racks and behave themselves. This one is bolted to the dashboard of a 2001 Ford Laser and absolutely will not behave itself.</p>
+                    <p>He built the telemetry because:</p>
+                    <ul>
+                        <li>The car cannot be trusted</li>
+                        <li>Data is calming</li>
+                        <li>If something breaks, it should at least be graphed</li>
+                    </ul>
+                    <p>His dad died of cancer in 2011.</p>
+                    <p>His mum is now living with terminal cancer.</p>
+                    <p>At some point cancer stops being a statistic and starts being the thing that rearranges your family.</p>
+                    <p>This rally is a way of doing something that isn't just waiting.</p>
+                    <p>If you enjoy watching a $1,500 car run better monitoring than some enterprise environments, and you'd like to help fund cancer research, <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener">please donate</a>.</p>
                 </div>
             </div>
         </div>
