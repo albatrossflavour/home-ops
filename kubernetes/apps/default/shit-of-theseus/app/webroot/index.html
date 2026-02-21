@@ -90,6 +90,44 @@
         .section { display: none; }
         .section.active { display: block; }
 
+        /* Day filter */
+        .day-filter { margin-bottom: 1.5rem; }
+        .day-filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .day-filter-bar button {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #2a1f0e;
+            border-radius: 6px;
+            background: #161b22;
+            color: #c9d1d9;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            font-family: inherit;
+        }
+        .day-filter-bar button:hover { border-color: #c06000; }
+        .day-filter-bar button.active { background: #c06000; color: #fff; border-color: #c06000; }
+        .day-filter-select {
+            display: none;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #2a1f0e;
+            border-radius: 6px;
+            background: #161b22;
+            color: #c9d1d9;
+            font-size: 0.875rem;
+            font-family: inherit;
+            appearance: auto;
+        }
+        @media (max-width: 600px) {
+            .day-filter-bar { display: none; }
+            .day-filter-select { display: block; }
+        }
+
         /* Events */
         #loading { text-align: center; padding: 3rem; color: #8b949e; }
         #error { text-align: center; padding: 3rem; color: #f85149; display: none; }
@@ -372,6 +410,10 @@
 
     <main>
         <div id="events-section" class="section active">
+            <div id="day-filter" class="day-filter" style="display:none;">
+                <div class="day-filter-bar" id="day-filter-bar"></div>
+                <select class="day-filter-select" id="day-filter-select"></select>
+            </div>
             <div id="loading">Loading events...</div>
             <div id="error">Failed to load events. No events data available yet.</div>
             <div id="events-list"></div>
@@ -570,9 +612,83 @@
             var container = document.getElementById('events-list');
             var dates = Object.keys(groups).sort().reverse();
 
+            // Build day filter
+            var filterBar = document.getElementById('day-filter-bar');
+            var filterSelect = document.getElementById('day-filter-select');
+
+            if (dates.length > 1) {
+                document.getElementById('day-filter').style.display = '';
+
+                // "All" button
+                var allBtn = document.createElement('button');
+                allBtn.textContent = 'All';
+                allBtn.className = 'active';
+                allBtn.setAttribute('data-date', 'all');
+                filterBar.appendChild(allBtn);
+
+                // "All" option
+                var allOpt = document.createElement('option');
+                allOpt.value = 'all';
+                allOpt.textContent = 'All days';
+                filterSelect.appendChild(allOpt);
+
+                // Day number counter
+                var sortedAsc = dates.slice().sort();
+                dates.forEach(function(date) {
+                    var dayNum = sortedAsc.indexOf(date) + 1;
+                    var parts = date.split('-');
+                    var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+                    var label = 'Day ' + dayNum + ' (' + d.toLocaleDateString('en-AU', {
+                        weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC'
+                    }) + ')';
+                    var count = groups[date].length;
+
+                    var btn = document.createElement('button');
+                    btn.textContent = label + ' \u00B7 ' + count;
+                    btn.setAttribute('data-date', date);
+                    filterBar.appendChild(btn);
+
+                    var opt = document.createElement('option');
+                    opt.value = date;
+                    opt.textContent = label + ' \u2014 ' + count + ' events';
+                    filterSelect.appendChild(opt);
+                });
+
+                function filterToDate(selectedDate) {
+                    var dateGroups = container.querySelectorAll('.date-group');
+                    dateGroups.forEach(function(g) {
+                        if (selectedDate === 'all') {
+                            g.style.display = '';
+                        } else {
+                            g.style.display = g.getAttribute('data-date') === selectedDate ? '' : 'none';
+                        }
+                    });
+                    // Update button bar active state
+                    filterBar.querySelectorAll('button').forEach(function(b) {
+                        b.classList.toggle('active', b.getAttribute('data-date') === selectedDate);
+                    });
+                    filterSelect.value = selectedDate;
+                }
+
+                filterBar.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'BUTTON') return;
+                    filterToDate(e.target.getAttribute('data-date'));
+                });
+
+                filterSelect.addEventListener('change', function() {
+                    filterToDate(this.value);
+                });
+
+                // Default to most recent day if more than 3 days of data
+                if (dates.length > 3) {
+                    filterToDate(dates[0]);
+                }
+            }
+
             dates.forEach(function(date) {
                 var group = document.createElement('div');
                 group.className = 'date-group';
+                group.setAttribute('data-date', date);
 
                 var parts = date.split('-');
                 var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
