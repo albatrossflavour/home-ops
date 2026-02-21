@@ -359,6 +359,7 @@
         <a href="#map" data-section="map">Map</a>
         <a href="#dashboard" data-section="dashboard">Dashboard</a>
         <a href="#car" data-section="car">The Car</a>
+        <a href="#route" data-section="route">Route</a>
         <a href="#about" data-section="about">About</a>
     </nav>
 
@@ -403,11 +404,33 @@
 
             <div class="about-card">
                 <h3>The Telemetry</h3>
-                <p>This car is fitted with a Raspberry Pi running a custom telemetry system that captures GPS position, 100 Hz accelerometer data, engine bay temperature, and power monitoring. It detects driving events in real time &mdash; hard braking, big corners, high G-forces, and rough road &mdash; and automatically records video with a dashcam-style ring buffer.</p>
-                <p>All data is stored locally in SQLite (because coverage in outback Queensland is... optimistic) and batch-synced to Prometheus over a WireGuard VPN when connectivity is available. The events and video you see on this site are captured and uploaded automatically from the car.</p>
-                <p>There's even a tiny OLED screen on the dashboard showing GPS status, sensor health, and recording state &mdash; so we know when something breaks without needing to SSH into the car at 110 km/h.</p>
+                <p>Everything you see on this site is captured and uploaded automatically from the car. No manual intervention, no post-processing. The entire system is custom-built, open source, and running on a Raspberry Pi bolted to the dash.</p>
             </div>
 
+            <div class="about-card">
+                <h3>The Hardware</h3>
+                <p>The brains of the operation is a <strong>Raspberry Pi</strong> running a single Python daemon that orchestrates everything. Connected to it over I2C and USB:</p>
+                <p><strong>MPU-6050 IMU</strong> (I2C, 0x68) &mdash; 6-axis accelerometer and gyroscope sampling at 100 Hz. This is the core sensor: it feeds a ring buffer that the event detection state machine watches continuously. Accelerometer range is set to &plusmn;4g, gyroscope to &plusmn;500&deg;/s. When it detects a hard brake, big corner, high G-force event, or sustained rough road, it triggers a capture.</p>
+                <p><strong>GPS via gpsd</strong> &mdash; A USB GPS receiver providing 1 Hz position, speed, altitude, and satellite count. Speed readings below 3 km/h are floored to zero to eliminate stationary GPS drift. The system tracks three GPS states: gpsd down, connected but no fix, and full satellite lock.</p>
+                <p><strong>BME680 Environment Sensor</strong> (I2C, 0x77) &mdash; Temperature, humidity, barometric pressure, and air quality (VOC gas resistance). Sampled at 1 Hz. Useful for tracking engine bay heat soak and ambient conditions along the route.</p>
+                <p><strong>INA219 Power Monitor</strong> (I2C, 0x40) &mdash; Measures bus voltage, current draw, and power consumption of the Pi itself. At 1 Hz, this gives us early warning if the car's electrical system is struggling or if the Pi is pulling too much from the cigarette lighter adapter.</p>
+                <p><strong>USB Webcam</strong> (/dev/video0) &mdash; 720p at 30fps dashcam via ffmpeg. Runs a continuous ring buffer of 10-second segments, keeping the last 50 seconds. When an event triggers, it stitches the pre-event buffer with 30 seconds of post-event footage into a single MP4 with a GPS/speed overlay. Audio captured from the webcam mic. A physical button on GPIO 17 triggers manual captures too.</p>
+                <p><strong>SSD1306 OLED Display</strong> (I2C, 0x3C) &mdash; A tiny 128&times;64 monochrome screen on the dashboard. Four lines showing GPS fix &amp; speed, peak G-force &amp; event count, sensor health (IMU/ENV/PWR), and network status with CPU temperature. Failed sensors show inverted (white-on-black) so problems are obvious at a glance without needing to SSH in at 110 km/h.</p>
+                <p><strong>Piezo Buzzer</strong> (GPIO 17) &mdash; Audible confirmation when an event is detected or a manual capture is triggered.</p>
+            </div>
+
+            <div class="about-card">
+                <h3>The Software</h3>
+                <p>The whole system runs as a single systemd service (<code>shitbox-telemetry</code>) managing three concurrent paths:</p>
+                <p><strong>High-rate path (100 Hz):</strong> The IMU feeds samples into a ring buffer. An event detection state machine watches for threshold crossings &mdash; sustained high G, hard braking deceleration, lateral cornering force, or rough road vibration. When triggered, it captures the pre-event IMU data and kicks off video recording.</p>
+                <p><strong>Low-rate path (1 Hz):</strong> GPS, environment, and power collectors write to a local SQLite database (WAL mode, thread-safe). This is the offline-first core &mdash; everything goes to disk first, network second.</p>
+                <p><strong>Capture path:</strong> GPIO button monitoring and video recording via ffmpeg subprocesses. The video ring buffer runs continuously; events just mark where to cut. Timelapse frames are captured every 60 seconds when the car is moving above 5 km/h.</p>
+                <p><strong>Sync:</strong> When the Pi has network connectivity (checked against the Prometheus host over WireGuard), a batch sync service reads from a cursor in SQLite and writes to Prometheus via remote_write with Snappy compression. Video and event data are rsynced to a NAS, which is mounted by this website's nginx container via NFS. The system is designed to work entirely offline and catch up when it finds signal.</p>
+            </div>
+
+        </div>
+
+        <div id="route-section" class="section">
             <div class="about-card">
                 <h3>The Route</h3>
                 <p>Port Douglas to Melbourne, May 1st &ndash; 9th 2026. Seven overnight stops across 4,000+ km of outback and alpine roads.</p>
@@ -419,9 +442,9 @@
             <div class="team-grid">
                 <div class="team-member">
                     <div class="member-avatar">T</div>
-                    <h4>Tim</h4>
+                    <h4>Tony</h4>
                     <div class="member-role">Driver / Telemetry</div>
-                    <p>TODO: Tim's bio goes here.</p>
+                    <p>TODO: Tony's bio goes here.</p>
                 </div>
                 <div class="team-member">
                     <div class="member-avatar">S</div>
@@ -487,7 +510,7 @@
 
         // Handle initial hash
         var hash = window.location.hash.replace('#', '');
-        if (hash === 'dashboard' || hash === 'map' || hash === 'car' || hash === 'about') {
+        if (hash === 'dashboard' || hash === 'map' || hash === 'car' || hash === 'route' || hash === 'about') {
             document.querySelector('nav a[data-section="' + hash + '"]').click();
         }
 
