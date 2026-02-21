@@ -308,6 +308,22 @@
         .about-card p:last-child {
             margin-bottom: 0;
         }
+        .about-card h4 {
+            color: #c9d1d9;
+            font-size: 0.95rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 0.25rem;
+        }
+        .about-card ul {
+            margin: 0.5rem 0 0.75rem 1.25rem;
+            padding: 0;
+            color: #8b949e;
+        }
+        .about-card li {
+            margin-bottom: 0.25rem;
+        }
         .car-gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -462,29 +478,131 @@
 
             <div class="about-card">
                 <h3>The Telemetry</h3>
-                <p>Everything you see on this site is captured and uploaded automatically from the car. No manual intervention, no post-processing. The entire system is custom-built, open source, and running on a Raspberry Pi bolted to the dash. The code is at <a href="https://github.com/albatrossflavour/shitbox" target="_blank" rel="noopener">github.com/albatrossflavour/shitbox</a>.</p>
+                <p>This isn't just a car.<br>It's a rolling data centre held together with hope.</p>
+                <p>Everything you see on this site is captured and uploaded automatically from the car.</p>
+                <p>No manual uploads.<br>No post-processing.<br>No "we'll fix it later".</p>
+                <p>It's fully automated, open source, and running on a Raspberry Pi bolted to the dash like it absolutely belongs there.</p>
+                <p>The code lives at <a href="https://github.com/albatrossflavour/shitbox" target="_blank" rel="noopener">github.com/albatrossflavour/shitbox</a></p>
+                <p>Because if you're going to over-engineer something, you may as well publish it.</p>
             </div>
 
             <div class="about-card">
                 <h3>The Hardware</h3>
-                <p>The brains of the operation is a <strong>Raspberry Pi</strong> running a single Python daemon that orchestrates everything. Connected to it over I2C and USB:</p>
-                <p><strong>MPU-6050 IMU</strong> (I2C, 0x68) &mdash; 6-axis accelerometer and gyroscope sampling at 100 Hz. This is the core sensor: it feeds a ring buffer that the event detection state machine watches continuously. Accelerometer range is set to &plusmn;4g, gyroscope to &plusmn;500&deg;/s. When it detects a hard brake, big corner, high G-force event, or sustained rough road, it triggers a capture.</p>
-                <p><strong>GPS via gpsd</strong> &mdash; A USB GPS receiver providing 1 Hz position, speed, altitude, and satellite count. Speed readings below 3 km/h are floored to zero to eliminate stationary GPS drift. The system tracks three GPS states: gpsd down, connected but no fix, and full satellite lock.</p>
-                <p><strong>BME680 Environment Sensor</strong> (I2C, 0x77) &mdash; Temperature, humidity, barometric pressure, and air quality (VOC gas resistance). Sampled at 1 Hz. Useful for tracking engine bay heat soak and ambient conditions along the route.</p>
-                <p><strong>INA219 Power Monitor</strong> (I2C, 0x40) &mdash; Measures bus voltage, current draw, and power consumption of the Pi itself. At 1 Hz, this gives us early warning if the car's electrical system is struggling or if the Pi is pulling too much from the cigarette lighter adapter.</p>
-                <p><strong>USB Webcam</strong> (/dev/video0) &mdash; 720p at 30fps dashcam via ffmpeg with audio from the webcam mic. The camera runs continuously in a dashcam-style ring buffer: ffmpeg writes 10-second segments, keeping the last 5 on disk (50 seconds of rolling footage). This means the system always has the last ~50 seconds of video available, even before an event is detected.</p>
-                <p><strong>Big Red Button</strong> (GPIO 17) &mdash; A physical arcade-style button mounted on the dashboard. Press it and the system immediately captures the current video buffer, stitching together the pre-roll footage with 30 seconds of post-capture video into a single MP4. A piezo buzzer gives an audible chirp to confirm the capture was triggered. The button is debounced at 50ms to avoid double-fires on bumpy roads.</p>
-                <p><strong>SSD1306 OLED Display</strong> (I2C, 0x3C) &mdash; A tiny 128&times;64 monochrome screen on the dashboard. Four lines showing GPS fix &amp; speed, peak G-force &amp; event count, sensor health (IMU/ENV/PWR), and network status with CPU temperature. Failed sensors show inverted (white-on-black) so problems are obvious at a glance without needing to SSH in at 110 km/h.</p>
+                <p>The brains of the operation is a <strong>Raspberry Pi</strong> running a single Python daemon that orchestrates everything.</p>
+                <p>Connected to it:</p>
+
+                <h4>MPU-6050 IMU</h4>
+                <p>6-axis accelerometer and gyroscope at 100 Hz.</p>
+                <ul>
+                    <li>&plusmn;4g accel</li>
+                    <li>&plusmn;500&deg;/s gyro</li>
+                    <li>Continuous ring buffer</li>
+                    <li>Event detection state machine</li>
+                </ul>
+                <p>It watches for:</p>
+                <ul>
+                    <li>Hard braking</li>
+                    <li>Big cornering forces</li>
+                    <li>High G events</li>
+                    <li>Sustained rough road vibration</li>
+                </ul>
+                <p>When it sees something interesting, it triggers a capture.</p>
+
+                <h4>GPS via gpsd</h4>
+                <p>1 Hz position, speed, altitude and satellite count.</p>
+                <ul>
+                    <li>Below 3 km/h is floored to zero to eliminate GPS drift</li>
+                    <li>Tracks gpsd down, no fix, and full lock</li>
+                </ul>
+                <p>Because if we're going to break down, we want coordinates.</p>
+
+                <h4>BME680 Environment Sensor</h4>
+                <p>Temperature, humidity, pressure and VOC gas resistance.</p>
+                <ul>
+                    <li>Sampled at 1 Hz</li>
+                    <li>Lets us track engine bay heat soak and ambient misery</li>
+                </ul>
+
+                <h4>INA219 Power Monitor</h4>
+                <p>Monitors bus voltage and current draw.</p>
+                <ul>
+                    <li>Early warning if the car's electrical system starts having opinions</li>
+                    <li>Also tells us if the Pi is about to brown out mid-drama</li>
+                </ul>
+
+                <h4>USB Dashcam</h4>
+                <p>720p at 30fps via ffmpeg.</p>
+                <ul>
+                    <li>Continuous 10-second segments</li>
+                    <li>50-second rolling buffer</li>
+                </ul>
+                <p>Meaning the system always has the last 50 seconds of video before anything happens.</p>
+                <p>Which is very important for mechanical regret analysis.</p>
+
+                <h4>Big Red Button</h4>
+                <p>GPIO 17. Arcade style.</p>
+                <p>Press it and:</p>
+                <ul>
+                    <li>The system grabs the pre-roll</li>
+                    <li>Records 30 seconds after</li>
+                    <li>Muxes into a single MP4</li>
+                    <li>Chirps via piezo to confirm</li>
+                </ul>
+                <p>Debounced at 50ms because rally roads are not gentle.</p>
+
+                <h4>OLED Dashboard</h4>
+                <p>128&times;64 monochrome display.</p>
+                <p>Shows:</p>
+                <ul>
+                    <li>GPS fix and speed</li>
+                    <li>Peak G-force and event count</li>
+                    <li>Sensor health</li>
+                    <li>Network state</li>
+                    <li>CPU temperature</li>
+                </ul>
+                <p>Failed sensors invert white-on-black so we can spot problems without SSHing at 110 km/h.</p>
             </div>
 
             <div class="about-card">
                 <h3>The Software</h3>
-                <p>The whole system runs as a single systemd service (<code>shitbox-telemetry</code>) managing three concurrent paths:</p>
-                <p><strong>High-rate path (100 Hz):</strong> The IMU feeds samples into a ring buffer. An event detection state machine watches for threshold crossings &mdash; sustained high G, hard braking deceleration, lateral cornering force, or rough road vibration. When triggered, it captures the pre-event IMU data and kicks off video recording.</p>
-                <p><strong>Low-rate path (1 Hz):</strong> GPS, environment, and power collectors write to a local SQLite database (WAL mode, thread-safe). This is the offline-first core &mdash; everything goes to disk first, network second.</p>
-                <p><strong>Capture path:</strong> The video ring buffer runs continuously via ffmpeg, writing 10-second segments to disk. When an event fires (either from the detection state machine or the big red button), the system grabs the existing buffer segments covering the last 30 seconds of pre-event footage, then continues recording for another 30 seconds. These are live-stitched into a single MP4 using ffmpeg's concat demuxer &mdash; no re-encoding, just muxing, so it's fast enough to happen in real time on the Pi. A GPS/speed overlay is burned into the final video so you can see exactly where and how fast the car was going. The result is a 60-second clip that shows what happened before and after the event.</p>
-                <p><strong>Timelapse:</strong> In parallel with the event capture system, the Pi grabs a single frame from the webcam every 60 seconds whenever the car is moving above 5 km/h. These frames are assembled into a timelapse video at the end of each day, giving a compressed view of the entire day's driving. GPS-stamped so each frame can be placed on the map.</p>
-                <p><strong>Sync:</strong> When the Pi has network connectivity (checked against the Prometheus host over WireGuard), a batch sync service reads from a cursor in SQLite and writes to Prometheus via remote_write with Snappy compression. Video and event data are rsynced to a NAS, which is mounted by this website's nginx container via NFS. The system is designed to work entirely offline and catch up when it finds signal.</p>
+                <p>Everything runs as a single systemd service:<br><code>shitbox-telemetry</code></p>
+                <p>Because of course it does.</p>
+                <p>Three concurrent paths:</p>
+
+                <h4>High-Rate Path &mdash; 100 Hz</h4>
+                <p>IMU into ring buffer.<br>State machine watches for threshold crossings.<br>Captures pre-event IMU data and triggers video capture.</p>
+
+                <h4>Low-Rate Path &mdash; 1 Hz</h4>
+                <p>GPS, environment and power metrics written to SQLite in WAL mode.</p>
+                <p>Offline first.<br>Disk first.<br>Network second.</p>
+                <p>If we're in the middle of nowhere, nothing is lost.</p>
+
+                <h4>Capture Path</h4>
+                <p>ffmpeg writes rolling segments.</p>
+                <p>When triggered:</p>
+                <ul>
+                    <li>Pre-event buffer grabbed</li>
+                    <li>30 seconds post-event recorded</li>
+                    <li>Stitched using concat demuxer</li>
+                    <li>No re-encoding, just muxing</li>
+                </ul>
+                <p>GPS and speed overlay burned in.</p>
+                <p>Result: a 60-second clip showing what happened before and after.</p>
+
+                <h4>Timelapse</h4>
+                <p>One frame per minute above 5 km/h.<br>Compiled into a daily timelapse.</p>
+                <p>GPS-stamped so we can replay the route.</p>
+
+                <h4>Sync</h4>
+                <p>When network appears:</p>
+                <ul>
+                    <li>Prometheus remote_write with Snappy</li>
+                    <li>WireGuard tunnel</li>
+                    <li>rsync to NAS</li>
+                    <li>NFS mount into nginx</li>
+                </ul>
+                <p>Designed to run fully offline and catch up later.</p>
+                <p>Because mobile signal in rural Australia is more of a suggestion than a service.</p>
             </div>
 
         </div>
