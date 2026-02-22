@@ -749,6 +749,7 @@
         };
 
         var TIMEZONE = 'Australia/Sydney';
+        var RALLY_START = new Date('2026-04-30T00:00:00+10:00');
 
         var DISPLAY_NAMES = {
             HIGH_G: 'High G-Force',
@@ -793,6 +794,10 @@
                 return r.json();
             })
             .then(function(events) {
+                // Only show events from the rally period onwards
+                events = events.filter(function(ev) {
+                    return new Date(ev.timestamp) >= RALLY_START;
+                });
                 eventsData = events;
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('map-loading').style.display = 'none';
