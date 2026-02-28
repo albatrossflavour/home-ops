@@ -96,6 +96,43 @@
         .section { display: none; }
         .section.active { display: block; }
 
+        /* Rally progress banner */
+        .rally-progress {
+            background: #161b22;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .rally-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .rally-progress-header span {
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+        .rally-progress-header strong {
+            color: #f0dbb8;
+        }
+        .rally-progress-bar {
+            height: 8px;
+            background: #21262d;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .rally-progress-fill {
+            height: 100%;
+            background: #c06000;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
         /* Day filter */
         .day-filter { margin-bottom: 1.5rem; }
         .day-filter-bar {
@@ -465,6 +502,7 @@
 
     <main>
         <div id="events-section" class="section active">
+            <div id="rally-progress" class="rally-progress" style="display:none;"></div>
             <div id="day-filter" class="day-filter" style="display:none;">
                 <div class="day-filter-bar" id="day-filter-bar"></div>
                 <select class="day-filter-select" id="day-filter-select"></select>
@@ -711,6 +749,7 @@
         };
 
         var TIMEZONE = 'Australia/Sydney';
+        var RALLY_START = new Date('2025-01-30T00:00:00+10:00');
 
         var DISPLAY_NAMES = {
             HIGH_G: 'High G-Force',
@@ -755,6 +794,10 @@
                 return r.json();
             })
             .then(function(events) {
+                // Only show events from the rally period onwards
+                events = events.filter(function(ev) {
+                    return new Date(ev.timestamp) >= RALLY_START;
+                });
                 eventsData = events;
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('map-loading').style.display = 'none';
@@ -775,6 +818,28 @@
             events.sort(function(a, b) {
                 return new Date(b.timestamp) - new Date(a.timestamp);
             });
+
+            // Rally progress banner from most recent event with distance data
+            var TOTAL_DISTANCE_KM = 2650;
+            var progressEl = document.getElementById('rally-progress');
+            for (var pi = 0; pi < events.length; pi++) {
+                var pe = events[pi];
+                if (pe.distance_from_start_km != null && pe.distance_to_destination_km != null) {
+                    var fromStart = Math.round(pe.distance_from_start_km);
+                    var toDest = Math.round(pe.distance_to_destination_km);
+                    var pct = Math.min(100, Math.max(0, (fromStart / TOTAL_DISTANCE_KM) * 100));
+                    progressEl.innerHTML =
+                        '<div class="rally-progress-header">' +
+                        '<span>From Port Douglas: <strong>' + fromStart.toLocaleString() + ' km</strong></span>' +
+                        '<span>To Melbourne: <strong>' + toDest.toLocaleString() + ' km</strong></span>' +
+                        '</div>' +
+                        '<div class="rally-progress-bar">' +
+                        '<div class="rally-progress-fill" style="width:' + pct.toFixed(1) + '%"></div>' +
+                        '</div>';
+                    progressEl.style.display = '';
+                    break;
+                }
+            }
 
             var groups = {};
             events.forEach(function(ev) {
