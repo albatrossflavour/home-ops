@@ -159,3 +159,35 @@ spec:
           annotations:
             summary: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} in ImagePullBackOff"
             description: "Container has been unable to pull its image for more than 10 minutes."
+
+    - name: home-sensors
+      rules:
+        - alert: MqttExporterDown
+          expr: |
+            up{job="mqtt-exporter"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "mqtt-exporter scrape target is down"
+            description: "Prometheus cannot scrape mqtt-exporter for 5+ minutes. Home sensor data is being lost."
+
+        - alert: HomeTemperatureDataMissing
+          expr: |
+            absent(mqtt_temperature{job="mqtt-exporter"})
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Home temperature sensor data has stopped"
+            description: "No mqtt_temperature metrics from mqtt-exporter for 15+ minutes. Check mqtt-exporter logs and EMQX connectivity."
+
+        - alert: HomeTemperatureSensorsLow
+          expr: |
+            count(mqtt_temperature{job="mqtt-exporter"}) < 5
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Only {{ $value }} temperature sensors reporting (expected ~18)"
+            description: "Fewer than 5 temperature sensors are reporting. The mqtt-exporter may be hitting its metric limit or sensors are offline."
