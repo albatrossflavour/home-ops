@@ -9,7 +9,7 @@ data:
   config.yaml: |
     endpoints:
       - name: Kromgo
-        url: "https://kromgo.albatrossflavour.com/"
+        url: "https://kromgo.albatrossflavour.com/cluster_nodes"
         group: "Observability"
         description: "Prometheus Badge Generator"
         tags: ["monitoring", "metrics", "badges", "external"]
