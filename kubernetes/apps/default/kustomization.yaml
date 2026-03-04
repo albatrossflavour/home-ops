@@ -19,5 +19,5 @@ resources:
   - ./theme-park/ks.yaml
   - ./zigbee2mqtt/ks.yaml
   - ./shit-of-theseus/ks.yaml
-  - ./syncthing/ks.yaml
+  # - ./syncthing/ks.yaml
   # - ./nextcloud/ks.yaml
