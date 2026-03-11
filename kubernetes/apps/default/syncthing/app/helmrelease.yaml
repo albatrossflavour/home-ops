@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: overseerr
+  name: syncthing
 spec:
   interval: 30m
   chart:
@@ -29,40 +29,29 @@ spec:
       namespace: volsync-system
   values:
     controllers:
-      overseerr:
+      syncthing:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/seerr-team/seerr
-              tag: "v3.1.0@sha256:b35ba0461c4a1033d117ac1e5968fd4cbe777899e4cbfbdeaf3d10a42a0eb7e9"
+              repository: syncthing/syncthing
+              tag: "2.0.14@sha256:6d2ab058383b533e045cf2c32fc4c6bbe87c612c92bc2aca9f552fb099b2e123"
             env:
               TZ: "${TZ}"
-              LOG_LEVEL: "info"
-              PORT: &port 5055
+              PUID: "1000"
+              PGID: "1000"
             probes:
-              liveness: &probes
+              liveness:
                 enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /api/v1/status
-                    port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              readiness:
+                enabled: true
             resources:
               requests:
                 cpu: 10m
+                memory: 128Mi
               limits:
-                memory: 2Gi
+                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -70,30 +59,26 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [65542]
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: overseerr
+        controller: syncthing
         ports:
           http:
-            port: *port
+            port: 8384
     ingress:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/name: Seerr
-          gethomepage.dev/siteMonitor: http://requests.${SECRET_DOMAIN}
-          gethomepage.dev/icon: seerr.png
-          gethomepage.dev/description: TV/Movie Requests
-          gethomepage.dev/widget.type: seerr
-          gethomepage.dev/widget.url: https://requests.${SECRET_DOMAIN}
-          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_OVERSEERR_TOKEN}}` }}"
-          gethomepage.dev/widget.fields: '["pending"]'
+          gethomepage.dev/group: "Utilities"
+          gethomepage.dev/name: "Syncthing"
+          gethomepage.dev/icon: "syncthing.png"
+          gethomepage.dev/description: "File synchronisation"
         className: external
         hosts:
-          - host: requests.${SECRET_DOMAIN}
+          - host: syncthing.${SECRET_DOMAIN}
             paths:
               - path: /
                 service:
@@ -101,16 +86,12 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: overseerr
+        existingClaim: syncthing
         globalMounts:
-          - path: /app/config
-      cache:
-        existingClaim: overseerr-cache
+          - path: /var/syncthing/config
+      data:
+        type: nfs
+        server: 192.168.1.22
+        path: /volume2/apps/syncthing
         globalMounts:
-          - path: /app/config/cache
-      logs:
-        type: emptyDir
-        globalMounts:
-          - path: /app/config/logs
-      tmp:
-        type: emptyDir
+          - path: /var/syncthing/data
