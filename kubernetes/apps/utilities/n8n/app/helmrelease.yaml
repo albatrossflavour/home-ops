@@ -36,7 +36,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: "18@sha256:ae89578925b480f5972f237dda2f7a37efe36aff500d3e7bd1d3a6a3181e4191"
+              tag: "18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf"
             envFrom:
               - secretRef:
                   name: n8n-secret
@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: docker.n8n.io/n8nio/n8n
-              tag: 2.9.1@sha256:7fc6bfb986401011cb9e7dc08389f8b8f51330a7bd0a0b7acef832b47839b9f3
+              tag: 2.12.1@sha256:b9b732f6c61a9cb782824518467c69303e87b2d66028a0a81be6af8cd0dd89b3
             env:
               TZ: Australia/Sydney
               N8N_HOST: 0.0.0.0

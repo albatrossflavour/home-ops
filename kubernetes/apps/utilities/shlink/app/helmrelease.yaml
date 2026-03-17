@@ -29,7 +29,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: "18@sha256:ae89578925b480f5972f237dda2f7a37efe36aff500d3e7bd1d3a6a3181e4191"
+              tag: "18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf"
             envFrom:
               - secretRef:
                   name: shlink-secret
@@ -37,7 +37,7 @@ spec:
           app:
             image:
               repository: shlinkio/shlink
-              tag: "5.0.0@sha256:5bbedb6913b951f23428a61b581e7a22e33bdda0446455dfb4a598e57f15ff73"
+              tag: "5.0.1@sha256:a6d8508bc6b0eba5a28e1ee8b64dd5253434cd113c950e715baab4020edcd2a1"
             env:
               TZ: Australia/Sydney
               DEFAULT_DOMAIN: short.${SECRET_DOMAIN}

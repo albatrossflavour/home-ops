@@ -32,7 +32,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: "18@sha256:ae89578925b480f5972f237dda2f7a37efe36aff500d3e7bd1d3a6a3181e4191"
+              tag: "18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf"
             envFrom:
               - secretRef:
                   name: resume-secret
@@ -40,7 +40,7 @@ spec:
           app:
             image:
               repository: amruthpillai/reactive-resume
-              tag: "v5.0.9@sha256:4b7eeee75dde8dbc211aec6eca8761a6d6eb0b7422bfe5bca987e471c953f7cd"
+              tag: "v5.0.11@sha256:f8e8ec1321049ee2763453f3df4d414b012e5dcf92d3724ef86e9bbd8a55e708"
             env:
               TZ: ${TIMEZONE}
               PORT: "3000"
@@ -79,7 +79,7 @@ spec:
           browserless:
             image:
               repository: ghcr.io/browserless/chromium
-              tag: v2.41.0@sha256:e11efbae6480278d2e2683ce5128b67055531f6c82380e5cddcd81d13120c56f
+              tag: v2.42.0@sha256:71ae7fa09bd1bf78efaa2803d75c837ab5a56e0d7637695bff3077d87248e642
             env:
               TOKEN: "$(CHROME_TOKEN)"
               PORT: "3001"

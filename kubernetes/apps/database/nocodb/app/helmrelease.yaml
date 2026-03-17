@@ -38,7 +38,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: "18@sha256:ae89578925b480f5972f237dda2f7a37efe36aff500d3e7bd1d3a6a3181e4191"
+              tag: "18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf"
             envFrom:
               - secretRef:
                   name: nocodb-secret
@@ -46,7 +46,7 @@ spec:
           app:
             image:
               repository: nocodb/nocodb
-              tag: 0.301.2@sha256:d3aba4f7e89bd18fc01d6853eea0fa82476b161a678f7f0ff52380f4c52bb87f
+              tag: 0.301.3@sha256:c3d38b5563234d287710519ff7507d43dfa553241bc70b955f91d90698065340
             env:
               TZ: Australia/Sydney
               NC_DISABLE_TELE: "true"

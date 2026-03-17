@@ -38,7 +38,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: "18@sha256:ae89578925b480f5972f237dda2f7a37efe36aff500d3e7bd1d3a6a3181e4191"
+              tag: "18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf"
             envFrom:
               - secretRef:
                   name: paperless-secret
@@ -47,7 +47,7 @@ spec:
           app:
             image:
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: "2.20.7@sha256:7b937cb2fa2885ab0ecfceb8c7e8827e2312472d9d897a270097ba7f5522dcdc"
+              tag: "2.20.10@sha256:07a0b4ba01ce377c82a0636e16c0c3d931fde5b7e9304de6601986cc42d9b6e6"
             env:
               # Application configuration
               PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
@@ -107,7 +107,7 @@ spec:
           redis:
             image:
               repository: docker.io/valkey/valkey
-              tag: "9.0.2@sha256:930b41430fb727f533c5982fe509b6f04233e26d0f7354e04de4b0d5c706e44e"
+              tag: "9.0.3@sha256:3eeb09785cd61ec8e3be35f8804c8892080f3ca21934d628abc24ee4ed1698f6"
             resources:
               requests:
                 cpu: 5m
