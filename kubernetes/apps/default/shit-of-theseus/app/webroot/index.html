@@ -475,6 +475,38 @@
             .events-grid { grid-template-columns: 1fr; }
             #map { height: 50vh; }
         }
+
+        /* Timelapse */
+        #timelapse-loading { text-align: center; padding: 3rem; color: #8b949e; }
+        .timelapse-day {
+            background: #161b22;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .timelapse-day h2 {
+            font-size: 1rem;
+            color: #e0a040;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #2a1f0e;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .timelapse-day h2 span {
+            font-size: 0.8rem;
+            color: #8b949e;
+            font-weight: 400;
+        }
+        .timelapse-day video {
+            width: 100%;
+            border-radius: 6px;
+            background: #000;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -497,6 +529,7 @@
         <a href="#dashboard" data-section="dashboard">Dashboard</a>
         <a href="#car" data-section="car">The Car</a>
         <a href="#route" data-section="route">Route</a>
+        <a href="#timelapse" data-section="timelapse">Timelapse</a>
         <a href="#about" data-section="about">About</a>
     </nav>
 
@@ -692,6 +725,13 @@
             </div>
         </div>
 
+        <div id="timelapse-section" class="section">
+            <div id="timelapse-loading">Loading timelapses...</div>
+            <div id="timelapse-error" style="display:none;text-align:center;padding:3rem;color:#f85149;">Failed to load timelapse data.</div>
+            <div id="timelapse-empty" style="display:none;text-align:center;padding:3rem;color:#8b949e;">No timelapse videos compiled yet.</div>
+            <div id="timelapse-list"></div>
+        </div>
+
         <div id="about-section" class="section">
             <div class="team-grid">
                 <div class="team-member">
@@ -778,12 +818,17 @@
                 if (section === 'map' && !mapInitialised && eventsData) {
                     initMap(eventsData);
                 }
+                if (section === 'timelapse' && !timelapseLoaded) {
+                    loadTimelapses();
+                }
             });
         });
 
+        var timelapseLoaded = false;
+
         // Handle initial hash
         var hash = window.location.hash.replace('#', '');
-        if (hash === 'dashboard' || hash === 'map' || hash === 'car' || hash === 'route' || hash === 'about') {
+        if (hash === 'dashboard' || hash === 'map' || hash === 'car' || hash === 'route' || hash === 'timelapse' || hash === 'about') {
             document.querySelector('nav a[data-section="' + hash + '"]').click();
         }
 
@@ -1123,6 +1168,46 @@
             });
 
             map.fitBounds(bounds, { padding: [40, 40] });
+        }
+
+        function loadTimelapses() {
+            timelapseLoaded = true;
+            fetch('/captures/timelapse.json', { cache: 'no-cache' })
+                .then(function(r) {
+                    if (!r.ok) throw new Error(r.status);
+                    return r.json();
+                })
+                .then(function(entries) {
+                    document.getElementById('timelapse-loading').style.display = 'none';
+                    if (!entries.length) {
+                        document.getElementById('timelapse-empty').style.display = 'block';
+                        return;
+                    }
+                    var container = document.getElementById('timelapse-list');
+                    entries.forEach(function(entry) {
+                        var parts = entry.date.split('-');
+                        var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+                        var label = d.toLocaleDateString('en-AU', {
+                            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                            timeZone: 'UTC'
+                        });
+                        var durationSec = Math.round(entry.frame_count / 24);
+                        var meta = entry.frame_count + ' frames';
+                        if (durationSec > 0) {
+                            meta += ' \u00B7 ~' + durationSec + 's';
+                        }
+                        var div = document.createElement('div');
+                        div.className = 'timelapse-day';
+                        div.innerHTML =
+                            '<h2>' + label + ' <span>' + meta + '</span></h2>' +
+                            '<video controls preload="metadata" playsinline src="' + entry.video_url + '"></video>';
+                        container.appendChild(div);
+                    });
+                })
+                .catch(function() {
+                    document.getElementById('timelapse-loading').style.display = 'none';
+                    document.getElementById('timelapse-error').style.display = 'block';
+                });
         }
     })();
     </script>
