@@ -34,7 +34,7 @@
       }
     ]
   },
-  "description": "Shit of Theseus — Rally Command Centre",
+  "description": "Shit of Theseus \u2014 Rally Command Centre",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 2,
@@ -75,10 +75,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 5,
         "x": 0,
-        "y": 0
+        "y": 0,
+        "w": 5,
+        "h": 5
       },
       "id": 1,
       "options": {
@@ -108,7 +108,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Speed",
       "transparent": true,
       "type": "stat"
     },
@@ -145,10 +145,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 5,
         "x": 5,
-        "y": 0
+        "y": 0,
+        "w": 5,
+        "h": 5
       },
       "id": 2,
       "options": {
@@ -202,10 +202,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
-        "w": 2,
         "x": 10,
-        "y": 0
+        "y": 0,
+        "w": 4,
+        "h": 3
       },
       "id": 3,
       "options": {
@@ -235,7 +235,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Top Speed",
       "transparent": true,
       "type": "stat"
     },
@@ -262,10 +262,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
-        "w": 2,
-        "x": 10,
-        "y": 3
+        "x": 14,
+        "y": 0,
+        "w": 4,
+        "h": 3
       },
       "id": 4,
       "options": {
@@ -295,7 +295,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Peak G",
       "transparent": true,
       "type": "stat"
     },
@@ -332,10 +332,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 12,
-        "y": 0
+        "x": 21,
+        "y": 3,
+        "w": 3,
+        "h": 2
       },
       "id": 5,
       "options": {
@@ -365,7 +365,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "CPU Temp",
       "transparent": true,
       "type": "stat"
     },
@@ -391,10 +391,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
-        "w": 2,
-        "x": 12,
-        "y": 3
+        "x": 10,
+        "y": 3,
+        "w": 4,
+        "h": 2
       },
       "id": 6,
       "options": {
@@ -424,7 +424,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Altitude",
       "transparent": true,
       "type": "stat"
     },
@@ -476,10 +476,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
-        "w": 2,
         "x": 14,
-        "y": 0
+        "y": 3,
+        "w": 4,
+        "h": 2
       },
       "id": 7,
       "options": {
@@ -558,10 +558,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
-        "w": 2,
-        "x": 14,
-        "y": 2
+        "x": 18,
+        "y": 0,
+        "w": 3,
+        "h": 3
       },
       "id": 8,
       "options": {
@@ -623,10 +623,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 1,
-        "w": 2,
-        "x": 14,
-        "y": 4
+        "x": 21,
+        "y": 0,
+        "w": 3,
+        "h": 3
       },
       "id": 9,
       "options": {
@@ -656,7 +656,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Sats",
       "transparent": true,
       "type": "stat"
     },
@@ -693,10 +693,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 16,
-        "y": 0
+        "x": 18,
+        "y": 3,
+        "w": 3,
+        "h": 2
       },
       "id": 10,
       "options": {
@@ -763,10 +763,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 14,
-        "y": 0
+        "x": 0,
+        "y": 5,
+        "w": 4,
+        "h": 3
       },
       "id": 50,
       "options": {
@@ -796,7 +796,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "CPU %",
       "transparent": true,
       "type": "stat"
     },
@@ -830,10 +830,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
-        "w": 2,
-        "x": 16,
-        "y": 3
+        "x": 4,
+        "y": 5,
+        "w": 4,
+        "h": 3
       },
       "id": 11,
       "options": {
@@ -863,7 +863,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Sync Backlog",
       "transparent": true,
       "type": "stat"
     },
@@ -893,10 +893,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 18,
-        "y": 0
+        "x": 8,
+        "y": 5,
+        "w": 4,
+        "h": 3
       },
       "id": 12,
       "options": {
@@ -926,7 +926,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Cabin",
       "transparent": true,
       "type": "stat"
     },
@@ -956,10 +956,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
-        "w": 3,
-        "x": 18,
-        "y": 3
+        "x": 16,
+        "y": 5,
+        "w": 4,
+        "h": 3
       },
       "id": 13,
       "options": {
@@ -989,7 +989,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Humidity",
       "transparent": true,
       "type": "stat"
     },
@@ -1019,10 +1019,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 21,
-        "y": 0
+        "x": 12,
+        "y": 5,
+        "w": 4,
+        "h": 3
       },
       "id": 14,
       "options": {
@@ -1052,7 +1052,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Pressure",
       "transparent": true,
       "type": "stat"
     },
@@ -1081,10 +1081,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
-        "w": 3,
-        "x": 21,
-        "y": 3
+        "x": 20,
+        "y": 5,
+        "w": 4,
+        "h": 3
       },
       "id": 15,
       "options": {
@@ -1114,7 +1114,7 @@
           "refId": "A"
         }
       ],
-      "title": "",
+      "title": "Power",
       "transparent": true,
       "type": "stat"
     },
@@ -1153,7 +1153,7 @@
         "h": 14,
         "w": 14,
         "x": 0,
-        "y": 5
+        "y": 8
       },
       "id": 20,
       "options": {
@@ -1370,7 +1370,7 @@
         "h": 7,
         "w": 10,
         "x": 14,
-        "y": 5
+        "y": 8
       },
       "id": 21,
       "options": {
@@ -1527,7 +1527,7 @@
         "h": 7,
         "w": 10,
         "x": 14,
-        "y": 12
+        "y": 15
       },
       "id": 22,
       "options": {
@@ -1579,7 +1579,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 22
       },
       "id": 30,
       "title": "Vehicle Dynamics",
@@ -1695,7 +1695,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 20
+        "y": 23
       },
       "id": 31,
       "options": {
@@ -1848,7 +1848,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 20
+        "y": 23
       },
       "id": 32,
       "options": {
@@ -1896,7 +1896,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "G-G diagram — lateral vs longitudinal forces. Wider = more cornering grip, taller = more braking/acceleration.",
+      "description": "G-G diagram \u2014 lateral vs longitudinal forces. Wider = more cornering grip, taller = more braking/acceleration.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1975,7 +1975,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 20
+        "y": 23
       },
       "id": 33,
       "options": {
@@ -2020,7 +2020,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 30
       },
       "id": 40,
       "title": "Environment & System",
@@ -2165,7 +2165,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 28
+        "y": 31
       },
       "id": 41,
       "options": {
@@ -2206,13 +2206,6 @@
           "legendFormat": "IMU",
           "range": true,
           "refId": "C"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_cpu_pct",
-          "legendFormat": "CPU %",
-          "range": true,
-          "refId": "D"
         }
       ],
       "title": "Temperatures",
@@ -2319,7 +2312,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 28
+        "y": 31
       },
       "id": 42,
       "options": {
@@ -2459,7 +2452,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 28
+        "y": 31
       },
       "id": 43,
       "options": {
@@ -2575,7 +2568,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 38
       },
       "id": 44,
       "options": {
