@@ -734,6 +734,79 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              },
+              {
+                "color": "#d29922",
+                "value": 70
+              },
+              {
+                "color": "#da3633",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 14,
+        "y": 0
+      },
+      "id": 50,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_cpu_pct",
+          "legendFormat": "CPU %",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
           "decimals": 0,
           "mappings": [],
           "thresholds": {
@@ -2062,6 +2135,29 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1f6feb",
+                  "mode": "fixed"
+                }
+              }
+            ]
           }
         ]
       },
@@ -2093,7 +2189,7 @@
         {
           "editorMode": "code",
           "expr": "shitbox_cpu_temp",
-          "legendFormat": "CPU",
+          "legendFormat": "CPU Temp",
           "range": true,
           "refId": "A"
         },
@@ -2110,6 +2206,13 @@
           "legendFormat": "IMU",
           "range": true,
           "refId": "C"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_cpu_pct",
+          "legendFormat": "CPU %",
+          "range": true,
+          "refId": "D"
         }
       ],
       "title": "Temperatures",
