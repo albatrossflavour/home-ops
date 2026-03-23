@@ -491,9 +491,11 @@ check_events() {
     fi
 
     # Get events from last 10 minutes with Warning type
+    # Filter out transient probe failures that occur during normal pod startup/restart
     warning_events=$($KUBECTL get events -A --field-selector type=Warning -o json 2>/dev/null | \
         jq -r --arg cutoff "$ten_min_ago" \
         '.items[] | select(.lastTimestamp > $cutoff) |
+        select(.reason != "Unhealthy" and .reason != "ProbeWarning") |
         "\(.involvedObject.namespace // "cluster")/\(.involvedObject.name): \(.message)"' 2>/dev/null | \
         head -10)
 
