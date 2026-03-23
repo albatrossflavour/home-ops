@@ -595,10 +595,6 @@
                         <div class="status-value" id="status-events-today">—</div>
                     </div>
                     <div class="status-card">
-                        <div class="status-label">Peak G Today</div>
-                        <div class="status-value" id="status-peak-g">—</div>
-                    </div>
-                    <div class="status-card">
                         <div class="status-label">Top Speed Today</div>
                         <div class="status-value" id="status-top-speed">—</div>
                     </div>
@@ -985,14 +981,13 @@
                 if (ev.peak_g > peakG) peakG = ev.peak_g;
                 if (ev.speed_kmh > topSpeed) topSpeed = ev.speed_kmh;
             });
-            document.getElementById('status-peak-g').textContent = peakG > 0 ? peakG.toFixed(2) + ' g' : '—';
             document.getElementById('status-top-speed').textContent = topSpeed > 0 ? Math.round(topSpeed) + ' km/h' : '—';
 
-            // Last known location
+            // Last known location — use location_name if available, else raw coords
             var locEvent = sorted.find(function(ev) { return ev.lat && ev.lng; });
             if (locEvent) {
                 document.getElementById('status-location').textContent =
-                    locEvent.lat.toFixed(4) + ', ' + locEvent.lng.toFixed(4);
+                    locEvent.location_name || (locEvent.lat.toFixed(4) + ', ' + locEvent.lng.toFixed(4));
             }
 
             // Mini map
