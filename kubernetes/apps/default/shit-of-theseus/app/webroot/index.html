@@ -476,6 +476,48 @@
             #map { height: 50vh; }
         }
 
+        /* Status tab */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .status-card {
+            background: #161b22;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+        }
+        .status-label {
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.35rem;
+        }
+        .status-value {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #f0dbb8;
+        }
+        .status-value.small { font-size: 1rem; }
+        .status-value.highlight { color: #e0a040; }
+        #status-map {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #2a1f0e;
+        }
+        #status-loading { text-align: center; padding: 3rem; color: #8b949e; }
+        .status-last-update {
+            text-align: right;
+            font-size: 0.78rem;
+            color: #8b949e;
+            margin-bottom: 1rem;
+        }
+
         /* Timelapse */
         #timelapse-loading { text-align: center; padding: 3rem; color: #8b949e; }
         .timelapse-day {
@@ -524,17 +566,53 @@
     </header>
 
     <nav>
-        <a href="#events" class="active" data-section="events">Events</a>
+        <a href="#status" class="active" data-section="status">Status</a>
+        <a href="#videos" data-section="videos">Videos</a>
+        <a href="#timelapse" data-section="timelapse">Timelapse</a>
         <a href="#map" data-section="map">Map</a>
         <a href="#dashboard" data-section="dashboard">Dashboard</a>
         <a href="#car" data-section="car">The Car</a>
         <a href="#route" data-section="route">Route</a>
-        <a href="#timelapse" data-section="timelapse">Timelapse</a>
         <a href="#about" data-section="about">About</a>
     </nav>
 
     <main>
-        <div id="events-section" class="section active">
+        <div id="status-section" class="section active">
+            <div id="status-loading">Loading status...</div>
+            <div id="status-content" style="display:none;">
+                <div class="status-last-update" id="status-last-update-line"></div>
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-label">Distance from Start</div>
+                        <div class="status-value highlight" id="status-from-start">—</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">To Melbourne</div>
+                        <div class="status-value" id="status-to-dest">—</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">Today's Events</div>
+                        <div class="status-value" id="status-events-today">—</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">Peak G Today</div>
+                        <div class="status-value" id="status-peak-g">—</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">Top Speed Today</div>
+                        <div class="status-value" id="status-top-speed">—</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">Last Known Location</div>
+                        <div class="status-value small" id="status-location">—</div>
+                    </div>
+                </div>
+                <div id="status-map"></div>
+            </div>
+            <div id="status-error" style="display:none;text-align:center;padding:3rem;color:#8b949e;">No data available yet.</div>
+        </div>
+
+        <div id="videos-section" class="section">
             <div id="rally-progress" class="rally-progress" style="display:none;"></div>
             <div id="day-filter" class="day-filter" style="display:none;">
                 <div class="day-filter-bar" id="day-filter-bar"></div>
@@ -821,6 +899,9 @@
                 if (section === 'timelapse' && !timelapseLoaded) {
                     loadTimelapses();
                 }
+                if (section === 'status' && eventsData && !statusMapInitialised) {
+                    renderStatus(eventsData);
+                }
             });
         });
 
@@ -828,7 +909,8 @@
 
         // Handle initial hash
         var hash = window.location.hash.replace('#', '');
-        if (hash === 'dashboard' || hash === 'map' || hash === 'car' || hash === 'route' || hash === 'timelapse' || hash === 'about') {
+        var validSections = ['status', 'videos', 'timelapse', 'map', 'dashboard', 'car', 'route', 'about'];
+        if (validSections.indexOf(hash) !== -1) {
             document.querySelector('nav a[data-section="' + hash + '"]').click();
         }
 
@@ -847,6 +929,7 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('map-loading').style.display = 'none';
                 renderEvents(events);
+                renderStatus(events);
 
                 if (document.getElementById('map-section').classList.contains('active')) {
                     initMap(events);
@@ -857,7 +940,81 @@
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('map-loading').style.display = 'none';
                 document.getElementById('map-error').style.display = 'block';
+                document.getElementById('status-loading').style.display = 'none';
+                document.getElementById('status-error').style.display = 'block';
             });
+
+        var statusMapInitialised = false;
+        function renderStatus(events) {
+            document.getElementById('status-loading').style.display = 'none';
+            if (!events || events.length === 0) {
+                document.getElementById('status-error').style.display = 'block';
+                return;
+            }
+            document.getElementById('status-content').style.display = 'block';
+
+            // Most recent event
+            var sorted = events.slice().sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });
+            var latest = sorted[0];
+
+            // Last update
+            var lu = new Date(latest.timestamp);
+            document.getElementById('status-last-update-line').textContent =
+                'Last data: ' + lu.toLocaleString('en-AU', { timeZone: TIMEZONE });
+
+            // Journey progress from most recent event with distance data
+            for (var i = 0; i < sorted.length; i++) {
+                if (sorted[i].distance_from_start_km != null) {
+                    document.getElementById('status-from-start').textContent =
+                        Math.round(sorted[i].distance_from_start_km).toLocaleString() + ' km';
+                    document.getElementById('status-to-dest').textContent =
+                        Math.round(sorted[i].distance_to_destination_km).toLocaleString() + ' km';
+                    break;
+                }
+            }
+
+            // Today's stats
+            var todayStr = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+            var todayEvents = events.filter(function(ev) {
+                return new Date(ev.timestamp).toLocaleDateString('en-CA', { timeZone: TIMEZONE }) === todayStr;
+            });
+            document.getElementById('status-events-today').textContent = todayEvents.length;
+
+            var peakG = 0, topSpeed = 0;
+            todayEvents.forEach(function(ev) {
+                if (ev.peak_g > peakG) peakG = ev.peak_g;
+                if (ev.speed_kmh > topSpeed) topSpeed = ev.speed_kmh;
+            });
+            document.getElementById('status-peak-g').textContent = peakG > 0 ? peakG.toFixed(2) + ' g' : '—';
+            document.getElementById('status-top-speed').textContent = topSpeed > 0 ? Math.round(topSpeed) + ' km/h' : '—';
+
+            // Last known location
+            var locEvent = sorted.find(function(ev) { return ev.lat && ev.lng; });
+            if (locEvent) {
+                document.getElementById('status-location').textContent =
+                    locEvent.lat.toFixed(4) + ', ' + locEvent.lng.toFixed(4);
+            }
+
+            // Mini map
+            if (!statusMapInitialised && locEvent) {
+                statusMapInitialised = true;
+                var smap = L.map('status-map').setView([locEvent.lat, locEvent.lng], 10);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
+                }).addTo(smap);
+                // Plot route dots
+                var pts = events.filter(function(ev) { return ev.lat && ev.lng; })
+                    .sort(function(a, b) { return new Date(a.timestamp) - new Date(b.timestamp); });
+                if (pts.length > 1) {
+                    L.polyline(pts.map(function(ev) { return [ev.lat, ev.lng]; }),
+                        { color: '#e0a040', weight: 2, opacity: 0.6 }).addTo(smap);
+                }
+                // Current position marker
+                L.circleMarker([locEvent.lat, locEvent.lng], {
+                    radius: 8, fillColor: '#e0a040', color: '#fff', weight: 2, fillOpacity: 1
+                }).addTo(smap).bindPopup('Last known position').openPopup();
+            }
+        }
 
         function renderEvents(events) {
             events.sort(function(a, b) {
