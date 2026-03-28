@@ -28,7 +28,7 @@ spec:
     downloadDashboardsImage:
       registry: docker.io
       repository: alpine/curl
-      tag: "8.17.0@sha256:b80d9b3536b7ae39fb7c27706d28d225257c0fc1df1a7526acc98fb0ef75917f"
+      tag: "8.17.0@sha256:5bd4985f3daa6d1ca87619802190afc24c0ccd410b1f123de5afc8e891b5fc71"
     admin:
       existingSecret: grafana-admin-secret
     env:
