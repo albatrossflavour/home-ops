@@ -61,6 +61,7 @@ spec:
       osd_recovery_max_active = 3
       osd_recovery_max_single_start = 1
       osd_max_backfills = 1
+      # https://github.com/rook/rook/issues/17245 - workaround for helm trailing newline regression
 
     cephClusterSpec:
       crashCollector:
