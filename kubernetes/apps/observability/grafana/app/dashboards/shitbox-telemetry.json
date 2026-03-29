@@ -1912,7 +1912,7 @@
               }
             ]
           },
-          "unit": "pressurehpa"
+          "unit": "short"
         },
         "overrides": [
           {
@@ -1960,20 +1960,13 @@
       "targets": [
         {
           "editorMode": "builder",
-          "expr": "shitbox_pressure",
-          "legendFormat": "Pressure",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "editorMode": "builder",
           "expr": "shitbox_sync_backlog",
           "legendFormat": "Sync Backlog",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "Barometric Pressure / Sync Backlog",
+      "title": "Sync Backlog",
       "type": "timeseries"
     },
     {
@@ -2227,16 +2220,9 @@
           "legendFormat": "Pressure",
           "range": true,
           "refId": "A"
-        },
-        {
-          "editorMode": "builder",
-          "expr": "shitbox_gas_resistance",
-          "legendFormat": "Gas Resistance",
-          "range": true,
-          "refId": "B"
         }
       ],
-      "title": "Pressure & Air Quality",
+      "title": "Barometric Pressure",
       "type": "timeseries"
     }
   ],

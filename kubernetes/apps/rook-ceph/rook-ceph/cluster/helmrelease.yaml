@@ -51,20 +51,13 @@ spec:
       bluestore_cache_size_ssd = 2147483648
       bluestore_cache_autotune = true
       osd_memory_target = 3221225472
-      # Slow operation logging thresholds (when to log slow ops)
       osd_op_history_slow_op_threshold = 30
       osd_op_history_slow_op_size = 20
       osd_op_complaint_time = 60
-      # Health warning thresholds (when to trigger HEALTH_WARN)
-      # Increase threshold to ignore transient BlueStore compaction bursts
       bluestore_slow_ops_warn_threshold = 100
-      # Reduce lifetime so warnings clear faster when issue resolves (1 hour instead of 24)
       bluestore_slow_ops_warn_lifetime = 3600
-      # Similarly for stalled reads - these can happen during compaction
       bdev_stalled_read_warn_threshold = 20
       bdev_stalled_read_warn_lifetime = 3600
-      # Recovery settings (enable PG remapping to complete)
-      # Conservative values to avoid impacting cluster performance
       osd_recovery_max_active = 3
       osd_recovery_max_single_start = 1
       osd_max_backfills = 1
