@@ -42,6 +42,10 @@ spec:
             (
               kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes
             ) > 0.75
+            unless on (namespace, persistentvolumeclaim)
+            (
+              kube_persistentvolumeclaim_info{storageclass="openebs-hostpath"}
+            )
           for: 5m
           labels:
             severity: warning
@@ -53,6 +57,10 @@ spec:
             (
               kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes
             ) > 0.85
+            unless on (namespace, persistentvolumeclaim)
+            (
+              kube_persistentvolumeclaim_info{storageclass="openebs-hostpath"}
+            )
           for: 5m
           labels:
             severity: critical
@@ -66,6 +74,10 @@ spec:
             ) < 0.15
             and
             predict_linear(kubelet_volume_stats_available_bytes[6h], 4 * 24 * 3600) < 0
+            unless on (namespace, persistentvolumeclaim)
+            (
+              kube_persistentvolumeclaim_info{storageclass="openebs-hostpath"}
+            )
           for: 1h
           labels:
             severity: warning
