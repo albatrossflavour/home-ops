@@ -1058,7 +1058,7 @@
                 group.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
                     var src = ph.getAttribute('data-video-src');
                     if (src) {
-                        ph.innerHTML = '<video controls preload="metadata" src="' + src + '#t=0.1"></video>';
+                        ph.innerHTML = '<video controls preload="none" poster="/captures/intro_poster.jpg" src="' + src + '"></video>';
                         ph.className = 'event-video';
                     }
                 });
@@ -1068,8 +1068,7 @@
                 group.querySelectorAll('.event-video').forEach(function(v) {
                     var video = v.querySelector('video');
                     if (video) {
-                        var src = video.src.replace(/#t=.*$/, '');
-                        v.setAttribute('data-video-src', src);
+                        v.setAttribute('data-video-src', video.src);
                         v.innerHTML = '';
                         v.className = 'event-video-placeholder';
                     }
