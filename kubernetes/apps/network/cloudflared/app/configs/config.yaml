@@ -32,5 +32,5 @@ ingress:
   - hostname: "grafana.shit-of-theseus.com"
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "nas.pdlf.net"
-    service: http://192.168.7.14
+    service: http://192.168.4.17
   - service: http_status:404
