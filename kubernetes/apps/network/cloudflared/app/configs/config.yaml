@@ -33,8 +33,8 @@ ingress:
     service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
   - hostname: "nas.pdlf.net"
     service: http://192.168.4.17
-  - hostname: "photos.pdlf.net"
+  - hostname: "immich.pdlf.net"
     service: http://192.168.4.17:2283
-  - hostname: "sync.pdlf.net"
+  - hostname: "syncthing.pdlf.net"
     service: http://192.168.4.17:8384
   - service: http_status:404
