@@ -37,4 +37,6 @@ ingress:
     service: http://192.168.4.17:2283
   - hostname: "syncthing.pdlf.net"
     service: http://192.168.4.17:8384
+  - hostname: "nextcloud.pdlf.net"
+    service: http://192.168.4.17:10081
   - service: http_status:404
