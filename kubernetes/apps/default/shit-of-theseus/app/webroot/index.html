@@ -539,17 +539,77 @@
         .note-badge { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; color: #8b949e; }
         .event-card:hover .note-badge { color: #e0a040; }
 
-        /* Drivers table */
-        .drivers-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-        .drivers-table th {
-          text-align: left; font-size: 0.75rem; text-transform: uppercase;
-          letter-spacing: 0.05em; color: #8b949e; padding: 0.5rem 0.75rem;
-          border-bottom: 1px solid #2a1f0e; font-weight: 400;
+        /* Driver cards */
+        .driver-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
         }
-        .drivers-table td { padding: 0.75rem; border-bottom: 1px solid #21262d; color: #c9d1d9; }
-        .drivers-table tr:last-child td { border-bottom: none; }
-        .drivers-table td:first-child { color: #f0dbb8; font-weight: 600; }
-        .drivers-table td.active-driver { color: #e0a040; }
+        .driver-card {
+            background: #161b22;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: border-color 0.15s;
+        }
+        .driver-card:hover { border-color: #c06000; }
+        .driver-card.active { border-color: #e0a040; }
+        .driver-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #2a1f0e;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #c06000;
+        }
+        .driver-card.active .driver-avatar { color: #e0a040; }
+        .driver-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f0dbb8;
+            margin-bottom: 0.25rem;
+        }
+        .driver-card.active .driver-name { color: #e0a040; }
+        .driver-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: #e0a040;
+            color: #0d1117;
+            border-radius: 4px;
+            padding: 0.15rem 0.45rem;
+            margin-bottom: 0.75rem;
+        }
+        .driver-time {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #c9d1d9;
+            margin-bottom: 0.25rem;
+        }
+        .driver-pct { font-size: 0.8rem; color: #8b949e; margin-bottom: 0.75rem; }
+        .driver-bar-track {
+            height: 4px;
+            background: #21262d;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .driver-bar-fill {
+            height: 100%;
+            background: #2a1f0e;
+            border-radius: 2px;
+            transition: width 0.6s ease;
+        }
+        .driver-card.active .driver-bar-fill { background: #e0a040; }
 
         /* Timelapse */
         #timelapse-loading { text-align: center; padding: 3rem; color: #8b949e; }
@@ -653,17 +713,11 @@
         </div>
 
         <div id="drivers-section" class="section">
-            <div class="about-card">
-                <h3 style="color:#e0a040;font-size:1.1rem;margin-bottom:0.75rem;">Driver Standings</h3>
-                <div id="drivers-loading" style="text-align:center;padding:3rem;color:#8b949e;">Loading driver data...</div>
-                <div id="drivers-content" style="display:none;">
-                    <table class="drivers-table">
-                        <thead><tr><th>Driver</th><th>Time Driven</th><th>% of Total</th></tr></thead>
-                        <tbody id="drivers-tbody"></tbody>
-                    </table>
-                </div>
-                <div id="drivers-error" style="display:none;text-align:center;padding:3rem;color:#8b949e;"></div>
+            <div id="drivers-loading" style="text-align:center;padding:3rem;color:#8b949e;">Loading driver data...</div>
+            <div id="drivers-content" style="display:none;">
+                <div class="driver-grid" id="drivers-grid"></div>
             </div>
+            <div id="drivers-error" style="display:none;text-align:center;padding:3rem;color:#8b949e;"></div>
         </div>
 
         <div id="videos-section" class="section">
@@ -1027,8 +1081,8 @@
             var loading = document.getElementById('drivers-loading');
             var content = document.getElementById('drivers-content');
             var error = document.getElementById('drivers-error');
-            var tbody = document.getElementById('drivers-tbody');
-            if (!loading || !content || !tbody) return;
+            var grid = document.getElementById('drivers-grid');
+            if (!loading || !content || !grid) return;
 
             if (!data || !data.drivers || data.drivers.length === 0) {
                 loading.style.display = 'none';
@@ -1041,15 +1095,20 @@
             for (var i = 0; i < data.drivers.length; i++) {
                 var d = data.drivers[i];
                 var isActive = data.active_driver && d.driver_name === data.active_driver;
-                var nameClass = isActive ? ' class="active-driver"' : '';
-                var nameSuffix = isActive ? ' \u00b7' : '';
-                html += '<tr>';
-                html += '<td' + nameClass + '><a href="#about" onclick="document.querySelector(\'[data-section=about]\').click();" style="color:inherit;text-decoration:none;">' + d.driver_name + nameSuffix + '</a></td>';
-                html += '<td>' + formatDriveTime(d.total_seconds) + '</td>';
-                html += '<td>' + d.pct.toFixed(1) + '%</td>';
-                html += '</tr>';
+                var cardClass = isActive ? ' active' : '';
+                var initial = d.driver_name.charAt(0).toUpperCase();
+                var badge = isActive ? '<div class="driver-badge">On Duty</div>' : '';
+                var pct = d.pct.toFixed(1);
+                html += '<a href="#about" onclick="document.querySelector(\'[data-section=about]\').click();return false;" class="driver-card' + cardClass + '">';
+                html += '<div class="driver-avatar">' + initial + '</div>';
+                html += '<div class="driver-name">' + d.driver_name + '</div>';
+                html += badge;
+                html += '<div class="driver-time">' + formatDriveTime(d.total_seconds) + '</div>';
+                html += '<div class="driver-pct">' + pct + '% of total drive time</div>';
+                html += '<div class="driver-bar-track"><div class="driver-bar-fill" style="width:' + pct + '%"></div></div>';
+                html += '</a>';
             }
-            tbody.innerHTML = html;
+            grid.innerHTML = html;
             loading.style.display = 'none';
             content.style.display = 'block';
         }
