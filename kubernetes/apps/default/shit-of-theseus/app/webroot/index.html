@@ -1031,6 +1031,17 @@
             return h + 'h ' + m + 'm';
         }
 
+        function jumpToEvent(eventId) {
+            document.querySelector('[data-section=videos]').click();
+            setTimeout(function() {
+                var card = document.getElementById('event-' + eventId);
+                if (!card) return;
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.classList.add('highlighted');
+                setTimeout(function() { card.classList.remove('highlighted'); }, 2000);
+            }, 100);
+        }
+
         function renderNotes(notes) {
             var container = document.getElementById('notes-container');
             if (!container) return;
@@ -1050,10 +1061,7 @@
                 }
                 var footer = '';
                 if (note.event_id != null) {
-                    var eventEl = document.getElementById('event-' + note.event_id);
-                    if (eventEl) {
-                        footer = '<div class="note-footer">Linked event: <a href="#videos" onclick="document.querySelector(\'[data-section=videos]\').click();">View linked event</a></div>';
-                    }
+                    footer = '<div class="note-footer">Linked event: <a href="#videos" onclick="jumpToEvent(' + note.event_id + ');return false;">View linked event</a></div>';
                 }
                 html += '<div class="note-card">';
                 html += '<div class="note-meta">' + meta + '</div>';
