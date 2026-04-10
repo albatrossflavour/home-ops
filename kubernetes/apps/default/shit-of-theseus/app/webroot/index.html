@@ -518,6 +518,39 @@
             margin-bottom: 1rem;
         }
 
+        /* Note card */
+        .note-card {
+          background: #161b22;
+          border: 1px solid #2a1f0e;
+          border-radius: 8px;
+          padding: 1rem 1.25rem;
+          margin-bottom: 1rem;
+        }
+        .note-card .note-meta { font-size: 0.75rem; color: #8b949e; margin-bottom: 0.5rem; }
+        .note-card .note-meta a { color: #e0a040; text-decoration: none; }
+        .note-card .note-meta a:hover { color: #f0c060; }
+        .note-card .note-body { font-size: 1rem; color: #c9d1d9; line-height: 1.6; }
+        .note-card .note-footer { font-size: 0.75rem; color: #8b949e; margin-top: 0.5rem; }
+        .note-card .note-footer a { color: #e0a040; text-decoration: none; }
+        .note-card .note-footer a:hover { color: #f0c060; }
+
+        /* Note badge */
+        .event-card { position: relative; }
+        .note-badge { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; color: #8b949e; }
+        .event-card:hover .note-badge { color: #e0a040; }
+
+        /* Drivers table */
+        .drivers-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .drivers-table th {
+          text-align: left; font-size: 0.75rem; text-transform: uppercase;
+          letter-spacing: 0.05em; color: #8b949e; padding: 0.5rem 0.75rem;
+          border-bottom: 1px solid #2a1f0e; font-weight: 400;
+        }
+        .drivers-table td { padding: 0.75rem; border-bottom: 1px solid #21262d; color: #c9d1d9; }
+        .drivers-table tr:last-child td { border-bottom: none; }
+        .drivers-table td:first-child { color: #f0dbb8; font-weight: 600; }
+        .drivers-table td.active-driver { color: #e0a040; }
+
         /* Timelapse */
         #timelapse-loading { text-align: center; padding: 3rem; color: #8b949e; }
         .timelapse-day {
@@ -567,6 +600,7 @@
 
     <nav>
         <a href="#status" class="active" data-section="status">Status</a>
+        <a href="#drivers" data-section="drivers">Drivers</a>
         <a href="#videos" data-section="videos">Videos</a>
         <a href="#timelapse" data-section="timelapse">Timelapse</a>
         <a href="#map" data-section="map">Map</a>
@@ -602,10 +636,34 @@
                         <div class="status-label">Last Known Location</div>
                         <div class="status-value small" id="status-location">—</div>
                     </div>
+                    <div class="status-card">
+                        <div class="status-label">Current Driver</div>
+                        <div class="status-value highlight" id="status-current-driver">&mdash;</div>
+                    </div>
                 </div>
                 <div id="status-map"></div>
+                <div id="notes-feed">
+                  <h3 style="color:#e0a040;font-size:1.1rem;margin-bottom:0.75rem;">Field Notes</h3>
+                  <div id="notes-container">
+                    <p style="text-align:center;padding:3rem;color:#8b949e;">No field notes yet.</p>
+                  </div>
+                </div>
             </div>
             <div id="status-error" style="display:none;text-align:center;padding:3rem;color:#8b949e;">No data available yet.</div>
+        </div>
+
+        <div id="drivers-section" class="section">
+            <div class="about-card">
+                <h3 style="color:#e0a040;font-size:1.1rem;margin-bottom:0.75rem;">Driver Standings</h3>
+                <div id="drivers-loading" style="text-align:center;padding:3rem;color:#8b949e;">Loading driver data...</div>
+                <div id="drivers-content" style="display:none;">
+                    <table class="drivers-table">
+                        <thead><tr><th>Driver</th><th>Time Driven</th><th>% of Total</th></tr></thead>
+                        <tbody id="drivers-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="drivers-error" style="display:none;text-align:center;padding:3rem;color:#8b949e;"></div>
+            </div>
         </div>
 
         <div id="videos-section" class="section">
@@ -876,6 +934,9 @@
         };
 
         var eventsData = null;
+        var notesData = null;
+        var fuelData = null;
+        var driverStatsData = null;
         var mapInitialised = false;
 
         // Navigation
@@ -905,9 +966,92 @@
 
         // Handle initial hash
         var hash = window.location.hash.replace('#', '');
-        var validSections = ['status', 'videos', 'timelapse', 'map', 'dashboard', 'car', 'route', 'about'];
+        var validSections = ['status', 'drivers', 'videos', 'timelapse', 'map', 'dashboard', 'car', 'route', 'about'];
         if (validSections.indexOf(hash) !== -1) {
             document.querySelector('nav a[data-section="' + hash + '"]').click();
+        }
+
+        function formatDriveTime(seconds) {
+            var h = Math.floor(seconds / 3600);
+            var m = Math.floor((seconds % 3600) / 60);
+            return h + 'h ' + m + 'm';
+        }
+
+        function renderNotes(notes) {
+            var container = document.getElementById('notes-container');
+            if (!container) return;
+            if (!notes || notes.length === 0) {
+                container.innerHTML = '<p style="text-align:center;padding:3rem;color:#8b949e;">No field notes yet.</p>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < notes.length; i++) {
+                var note = notes[i];
+                var date = new Date(note.timestamp_utc);
+                var dateStr = date.toLocaleDateString('en-AU', { timeZone: TIMEZONE });
+                var timeStr = date.toLocaleTimeString('en-AU', { timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit' });
+                var meta = '<span>' + dateStr + ' ' + timeStr + '</span>';
+                if (note.lat != null && note.lng != null && !note.gps_stale) {
+                    meta += ' &middot; <a href="https://www.google.com/maps?q=' + note.lat + ',' + note.lng + '" target="_blank" rel="noopener">View location</a>';
+                }
+                var footer = '';
+                if (note.event_id != null) {
+                    var eventEl = document.getElementById('event-' + note.event_id);
+                    if (eventEl) {
+                        footer = '<div class="note-footer">Linked event: <a href="#videos" onclick="document.querySelector(\'[data-section=videos]\').click();">View linked event</a></div>';
+                    }
+                }
+                html += '<div class="note-card">';
+                html += '<div class="note-meta">' + meta + '</div>';
+                html += '<div class="note-body">' + note.body + '</div>';
+                html += footer;
+                html += '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        function injectNoteBadges(notes) {
+            if (!notes) return;
+            var pencilSvg = '<svg class="note-badge" viewBox="0 0 16 16" fill="currentColor"><path d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zM11.524 2.2l-8.61 8.61a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l8.61-8.61a.25.25 0 000-.354l-1.086-1.086a.25.25 0 00-.353 0z"/></svg>';
+            for (var i = 0; i < notes.length; i++) {
+                if (notes[i].event_id != null) {
+                    var card = document.getElementById('event-' + notes[i].event_id);
+                    if (card && !card.querySelector('.note-badge')) {
+                        card.insertAdjacentHTML('beforeend', pencilSvg);
+                    }
+                }
+            }
+        }
+
+        function renderDrivers(data) {
+            var loading = document.getElementById('drivers-loading');
+            var content = document.getElementById('drivers-content');
+            var error = document.getElementById('drivers-error');
+            var tbody = document.getElementById('drivers-tbody');
+            if (!loading || !content || !tbody) return;
+
+            if (!data || !data.drivers || data.drivers.length === 0) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = 'No driver data recorded yet.';
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < data.drivers.length; i++) {
+                var d = data.drivers[i];
+                var isActive = data.active_driver && d.driver_name === data.active_driver;
+                var nameClass = isActive ? ' class="active-driver"' : '';
+                var nameSuffix = isActive ? ' \u00b7' : '';
+                html += '<tr>';
+                html += '<td' + nameClass + '>' + d.driver_name + nameSuffix + '</td>';
+                html += '<td>' + formatDriveTime(d.total_seconds) + '</td>';
+                html += '<td>' + d.pct.toFixed(1) + '%</td>';
+                html += '</tr>';
+            }
+            tbody.innerHTML = html;
+            loading.style.display = 'none';
+            content.style.display = 'block';
         }
 
         // Load events
@@ -926,6 +1070,7 @@
                 document.getElementById('map-loading').style.display = 'none';
                 renderEvents(events);
                 renderStatus(events);
+                if (notesData) injectNoteBadges(notesData);
 
                 if (document.getElementById('map-section').classList.contains('active')) {
                     initMap(events);
@@ -938,6 +1083,35 @@
                 document.getElementById('map-error').style.display = 'block';
                 document.getElementById('status-loading').style.display = 'none';
                 document.getElementById('status-error').style.display = 'block';
+            });
+
+        fetch('/captures/notes.json', { cache: 'no-cache' })
+            .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+            .then(function(notes) {
+                notesData = notes.slice().reverse();
+                renderNotes(notesData);
+                injectNoteBadges(notesData);
+            })
+            .catch(function() {});
+
+        fetch('/captures/fuel.json', { cache: 'no-cache' })
+            .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+            .then(function(fuel) { fuelData = fuel; })
+            .catch(function() {});
+
+        fetch('/captures/driver-stats.json', { cache: 'no-cache' })
+            .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+            .then(function(data) {
+                driverStatsData = data;
+                var el = document.getElementById('status-current-driver');
+                if (el) { el.textContent = data.active_driver || '\u2014'; }
+                renderDrivers(data);
+            })
+            .catch(function() {
+                var loading = document.getElementById('drivers-loading');
+                var error = document.getElementById('drivers-error');
+                if (loading) loading.style.display = 'none';
+                if (error) { error.style.display = 'block'; error.textContent = 'Driver data unavailable.'; }
             });
 
         var statusMapInitialised = false;
@@ -1008,6 +1182,11 @@
                 L.circleMarker([locEvent.lat, locEvent.lng], {
                     radius: 8, fillColor: '#e0a040', color: '#fff', weight: 2, fillOpacity: 1
                 }).addTo(smap).bindPopup('Last known position').openPopup();
+            }
+
+            if (driverStatsData) {
+                var driverEl = document.getElementById('status-current-driver');
+                if (driverEl) { driverEl.textContent = driverStatsData.active_driver || '\u2014'; }
             }
         }
 
