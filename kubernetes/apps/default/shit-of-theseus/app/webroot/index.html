@@ -1044,7 +1044,7 @@
                 var nameClass = isActive ? ' class="active-driver"' : '';
                 var nameSuffix = isActive ? ' \u00b7' : '';
                 html += '<tr>';
-                html += '<td' + nameClass + '>' + d.driver_name + nameSuffix + '</td>';
+                html += '<td' + nameClass + '><a href="#about" onclick="document.querySelector(\'[data-section=about]\').click();" style="color:inherit;text-decoration:none;">' + d.driver_name + nameSuffix + '</a></td>';
                 html += '<td>' + formatDriveTime(d.total_seconds) + '</td>';
                 html += '<td>' + d.pct.toFixed(1) + '%</td>';
                 html += '</tr>';
