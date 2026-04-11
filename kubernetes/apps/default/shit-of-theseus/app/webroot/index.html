@@ -303,7 +303,7 @@
         }
         .grafana-container iframe {
             width: 100%;
-            height: 80vh;
+            height: 90vh;
             border: 1px solid #2a1f0e;
             border-radius: 8px;
             background: #161b22;
@@ -757,16 +757,17 @@
         </div>
 
         <div id="dashboard-section" class="section">
+            <a class="grafana-link" href="https://grafana.shit-of-theseus.com/d/shitbox-rally-command?orgId=1" target="_blank" rel="noopener" style="font-size:0.8rem;">Open full Grafana dashboard &rarr;</a>
+            <p style="color:#8b949e;font-size:0.875rem;margin-bottom:1rem;">Live sensor data from the Shit of Theseus. Updated every 30 seconds while the car is connected.</p>
             <div class="grafana-container">
+                <div id="grafana-loading" style="text-align:center;padding:3rem;color:#8b949e;">Loading dashboard...</div>
                 <iframe
-                    src="https://grafana.shit-of-theseus.com/d/shitbox-telemetry?orgId=1&kiosk"
+                    src="https://grafana.shit-of-theseus.com/d/shitbox-rally-command?orgId=1&kiosk"
                     frameborder="0"
                     allowfullscreen
+                    onload="var gl=document.getElementById('grafana-loading');if(gl)gl.style.display='none';"
                 ></iframe>
             </div>
-            <a class="grafana-link" href="https://grafana.shit-of-theseus.com" target="_blank" rel="noopener">
-                Open full Grafana dashboard &rarr;
-            </a>
         </div>
         <div id="car-section" class="section">
             <div class="about-hero">
@@ -1598,6 +1599,49 @@
             });
 
             map.fitBounds(bounds, { padding: [40, 40] });
+
+            // Fuel stop pins
+            if (fuelData && fuelData.length > 0) {
+                var cumDist = 0, cumVol = 0;
+                for (var fi = 0; fi < fuelData.length; fi++) {
+                    var stop = fuelData[fi];
+                    if (stop.lat == null || stop.lng == null) continue;
+
+                    var cumAvgKml = null;
+                    if (fi > 0 && stop.odometer_km != null && fuelData[fi - 1].odometer_km != null) {
+                        var dist = stop.odometer_km - fuelData[fi - 1].odometer_km;
+                        if (dist > 0) {
+                            cumDist += dist;
+                            cumVol += stop.volume_litres;
+                            cumAvgKml = (cumDist / cumVol).toFixed(1);
+                        }
+                    }
+
+                    var fDate = new Date(stop.timestamp_utc);
+                    var fDateStr = fDate.toLocaleDateString('en-AU', { timeZone: TIMEZONE });
+                    var fTimeStr = fDate.toLocaleTimeString('en-AU', { timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit' });
+
+                    var fPopup = [
+                        '<div class="map-popup">',
+                        '<div class="popup-type" style="color:#c06000">Fuel Stop</div>',
+                        '<div class="popup-detail">',
+                        fDateStr + ' ' + fTimeStr,
+                        '<br>Volume: ' + stop.volume_litres.toFixed(1) + ' L',
+                        '<br>This stop: ' + (stop.km_per_litre != null ? stop.km_per_litre.toFixed(1) + ' km/L' : '\u2014'),
+                        '<br>Running avg: ' + (cumAvgKml != null ? cumAvgKml + ' km/L' : '\u2014'),
+                        '</div></div>'
+                    ];
+
+                    L.circleMarker([stop.lat, stop.lng], {
+                        radius: 8,
+                        fillColor: '#c06000',
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 0.9,
+                        fillOpacity: 0.85
+                    }).bindPopup(fPopup.join('')).addTo(map);
+                }
+            }
         }
 
         function loadTimelapses() {
