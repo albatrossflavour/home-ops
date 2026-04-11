@@ -74,7 +74,8 @@
             ]
           },
           "unit": "velocitykmh",
-          "decimals": 0
+          "decimals": 0,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -99,7 +100,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -232,7 +233,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -303,7 +305,8 @@
             ]
           },
           "unit": "short",
-          "decimals": 0
+          "decimals": 0,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -328,7 +331,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -366,7 +369,8 @@
             ]
           },
           "unit": "lengthm",
-          "decimals": 0
+          "decimals": 0,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -391,7 +395,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -441,7 +445,8 @@
             ]
           },
           "unit": "celsius",
-          "decimals": 1
+          "decimals": 1,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -466,7 +471,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -504,7 +509,8 @@
             ]
           },
           "unit": "velocitykmh",
-          "decimals": 0
+          "decimals": 0,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -529,7 +535,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -567,7 +573,8 @@
             ]
           },
           "unit": "accG",
-          "decimals": 2
+          "decimals": 2,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -592,7 +599,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -638,7 +645,8 @@
             ]
           },
           "unit": "percent",
-          "decimals": 0
+          "decimals": 0,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -663,7 +671,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -709,7 +717,8 @@
             ]
           },
           "unit": "celsius",
-          "decimals": 1
+          "decimals": 1,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -734,7 +743,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -798,7 +807,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -940,7 +950,8 @@
             ]
           },
           "unit": "short",
-          "decimals": 0
+          "decimals": 0,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -965,7 +976,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -1003,7 +1014,8 @@
             ]
           },
           "unit": "watt",
-          "decimals": 1
+          "decimals": 1,
+          "noValue": "Offline"
         },
         "overrides": []
       },
@@ -1028,7 +1040,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -1417,36 +1429,6 @@
                 "value": 20
               }
             ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Lateral G"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#d29922",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Longitudinal G"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
-              }
-            ]
           }
         ]
       },
@@ -1481,20 +1463,6 @@
           "legendFormat": "Total G",
           "range": true,
           "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "abs(shitbox_ay)",
-          "legendFormat": "Lateral G",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_ax",
-          "legendFormat": "Longitudinal G",
-          "range": true,
-          "refId": "C"
         }
       ],
       "title": "G-Force",
@@ -1510,7 +1478,7 @@
       },
       "id": 40,
       "panels": [],
-      "title": "THERMAL",
+      "title": "ENVIRONMENT",
       "type": "row"
     },
     {
@@ -1721,7 +1689,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Humidity"
+              "options": "Humidity %"
             },
             "properties": [
               {
@@ -1738,6 +1706,10 @@
               {
                 "id": "custom.axisPlacement",
                 "value": "right"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
               }
             ]
           }
@@ -1778,7 +1750,7 @@
         {
           "editorMode": "code",
           "expr": "shitbox_humidity",
-          "legendFormat": "Humidity",
+          "legendFormat": "Humidity %",
           "range": true,
           "refId": "B"
         }
@@ -1857,29 +1829,6 @@
                 }
               }
             ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Ambient Light"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#d29922",
-                  "mode": "fixed"
-                }
-              },
-              {
-                "id": "unit",
-                "value": "lux"
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              }
-            ]
           }
         ]
       },
@@ -1914,16 +1863,9 @@
           "legendFormat": "Pressure",
           "range": true,
           "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_lux",
-          "legendFormat": "Ambient Light",
-          "range": true,
-          "refId": "B"
         }
       ],
-      "title": "Atmosphere",
+      "title": "Pressure",
       "type": "timeseries"
     },
     {
@@ -2519,7 +2461,7 @@
       "gridPos": {
         "x": 0,
         "y": 41,
-        "w": 12,
+        "w": 8,
         "h": 7
       },
       "id": 51,
@@ -2634,9 +2576,9 @@
         ]
       },
       "gridPos": {
-        "x": 12,
+        "x": 8,
         "y": 41,
-        "w": 12,
+        "w": 8,
         "h": 7
       },
       "id": 52,
@@ -2669,6 +2611,117 @@
       ],
       "title": "Cabin Air Quality",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "lux"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Lux"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#d29922",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 41,
+        "w": 8,
+        "h": 7
+      },
+      "id": 53,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_lux",
+          "legendFormat": "Lux",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Ambient Light",
+      "type": "timeseries"
     }
   ],
   "preload": false,
@@ -2698,5 +2751,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-command",
-  "version": 2
+  "version": 3
 }
