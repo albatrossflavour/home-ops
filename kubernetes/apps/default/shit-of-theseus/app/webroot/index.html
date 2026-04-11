@@ -718,6 +718,14 @@
                         <div class="status-label">Current Driver</div>
                         <div class="status-value highlight" id="status-current-driver">&mdash;</div>
                     </div>
+                    <div class="status-card">
+                        <div class="status-label">Total Fuel</div>
+                        <div class="status-value" id="status-fuel-total">&mdash;</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">Breakdowns</div>
+                        <div class="status-value" id="status-breakdowns">&mdash;</div>
+                    </div>
                 </div>
                 <div id="status-map"></div>
                 <div id="notes-feed">
@@ -1288,6 +1296,23 @@
             if (driverStatsData) {
                 var driverEl = document.getElementById('status-current-driver');
                 if (driverEl) { driverEl.textContent = driverStatsData.active_driver || '\u2014'; }
+            }
+
+            if (fuelData && fuelData.length > 0) {
+                var totalLitres = fuelData.reduce(function(sum, f) { return sum + f.volume_litres; }, 0);
+                var firstOdo = null, lastOdo = null;
+                fuelData.forEach(function(f) {
+                    if (f.odometer_km != null) {
+                        if (firstOdo === null) firstOdo = f.odometer_km;
+                        lastOdo = f.odometer_km;
+                    }
+                });
+                var fuelText = totalLitres.toFixed(1) + ' L';
+                if (firstOdo !== null && lastOdo !== null && lastOdo > firstOdo) {
+                    fuelText += ' (' + ((lastOdo - firstOdo) / totalLitres).toFixed(1) + ' km/L avg)';
+                }
+                var fuelEl = document.getElementById('status-fuel-total');
+                if (fuelEl) { fuelEl.textContent = fuelText; }
             }
         }
 
