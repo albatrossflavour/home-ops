@@ -209,7 +209,8 @@
           "editorMode": "code",
           "expr": "shitbox_events_total",
           "legendFormat": "{{type}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
