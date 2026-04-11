@@ -1402,8 +1402,8 @@
                 grid.className = 'events-grid';
 
                 groups[date].forEach(function(ev) {
-                    // Stable ID from timestamp
-                    var eventId = ev.timestamp.replace(/[^0-9]/g, '');
+                    // Prefer the numeric ms-timestamp id from events.json; fall back to stripped timestamp
+                    var eventId = ev.id != null ? ev.id : ev.timestamp.replace(/[^0-9]/g, '');
 
                     var card = document.createElement('div');
                     card.className = 'event-card';
