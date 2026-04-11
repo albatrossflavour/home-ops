@@ -479,9 +479,12 @@
         /* Status tab */
         .status-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             margin-bottom: 1.5rem;
+        }
+        @media (max-width: 700px) {
+            .status-grid { grid-template-columns: repeat(2, 1fr); }
         }
         .status-card {
             background: #161b22;
@@ -675,6 +678,18 @@
 
     <main>
         <div id="status-section" class="section active">
+            <div style="background:#161b22;border:1px solid #2a1f0e;border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;line-height:1.7;">
+                <p style="color:#c9d1d9;margin-bottom:0.5rem;">
+                    <strong style="color:#f0dbb8;">A Team Has No Name</strong> is driving a $1,500 2001 Ford Laser from Port Douglas to Melbourne for the
+                    <a href="https://www.shitboxrally.com.au" target="_blank" rel="noopener">Shitbox Rally</a> — raising money for the Cancer Council.
+                    This page updates automatically from sensors on the car. No manual uploads, no post-processing.
+                </p>
+                <p style="color:#8b949e;font-size:0.875rem;">
+                    Watch the events come in on the <a href="#videos" onclick="document.querySelector('[data-section=videos]').click();return false;">Videos</a> tab,
+                    follow our position on the <a href="#map" onclick="document.querySelector('[data-section=map]').click();return false;">Map</a>,
+                    or <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener">donate to the cause</a>.
+                </p>
+            </div>
             <div id="status-loading">Loading status...</div>
             <div id="status-content" style="display:none;">
                 <div class="status-last-update" id="status-last-update-line"></div>
