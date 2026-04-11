@@ -1530,7 +1530,9 @@
                 return ev.lat !== undefined && ev.lng !== undefined;
             });
 
-            if (geoEvents.length === 0) {
+            var geoFuel = fuelData ? fuelData.filter(function(f) { return f.lat != null && f.lng != null; }) : [];
+
+            if (geoEvents.length === 0 && geoFuel.length === 0) {
                 document.getElementById('map').style.display = 'none';
                 document.getElementById('map-empty').style.display = 'block';
                 return;
@@ -1598,8 +1600,6 @@
                 bounds.extend([ev.lat, ev.lng]);
             });
 
-            map.fitBounds(bounds, { padding: [40, 40] });
-
             // Fuel stop pins
             if (fuelData && fuelData.length > 0) {
                 var cumDist = 0, cumVol = 0;
@@ -1640,8 +1640,11 @@
                         opacity: 0.9,
                         fillOpacity: 0.85
                     }).bindPopup(fPopup.join('')).addTo(map);
+                    bounds.extend([stop.lat, stop.lng]);
                 }
             }
+
+            map.fitBounds(bounds, { padding: [40, 40] });
         }
 
         function loadTimelapses() {
