@@ -235,7 +235,7 @@
             }
           },
           "mappings": [],
-          "unit": "s"
+          "unit": "dthms"
         },
         "overrides": []
       },
@@ -271,11 +271,12 @@
           "editorMode": "code",
           "expr": "shitbox_driver_time_seconds",
           "legendFormat": "{{name}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
-      "title": "Driver %",
+      "title": "Drive Time",
       "type": "piechart",
       "transparent": true
     },
@@ -325,16 +326,17 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value",
+        "textMode": "name",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "label_replace(shitbox_active_driver, \"__name__\", \"$1\", \"name\", \"(.*)\")",
-          "legendFormat": "Driver",
-          "range": true,
+          "expr": "shitbox_active_driver",
+          "legendFormat": "{{name}}",
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
