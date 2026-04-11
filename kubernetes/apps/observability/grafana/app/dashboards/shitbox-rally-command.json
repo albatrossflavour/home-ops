@@ -48,6 +48,9 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -70,14 +73,15 @@
               }
             ]
           },
-          "unit": "velocitykmh"
+          "unit": "velocitykmh",
+          "decimals": 0
         },
         "overrides": []
       },
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 5,
+        "w": 6,
         "h": 5
       },
       "id": 1,
@@ -109,8 +113,8 @@
         }
       ],
       "title": "Speed",
-      "transparent": true,
-      "type": "stat"
+      "type": "stat",
+      "transparent": true
     },
     {
       "datasource": {
@@ -119,7 +123,9 @@
       },
       "fieldConfig": {
         "defaults": {
-          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "max": 3,
           "min": 0,
@@ -140,12 +146,13 @@
               }
             ]
           },
-          "unit": "accG"
+          "unit": "accG",
+          "decimals": 1
         },
         "overrides": []
       },
       "gridPos": {
-        "x": 5,
+        "x": 6,
         "y": 0,
         "w": 5,
         "h": 5
@@ -177,8 +184,8 @@
         }
       ],
       "title": "G-Force",
-      "transparent": true,
-      "type": "gauge"
+      "type": "gauge",
+      "transparent": true
     },
     {
       "datasource": {
@@ -187,6 +194,305 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "#da3633",
+                  "index": 0,
+                  "text": "NO FIX"
+                },
+                "1": {
+                  "color": "#d29922",
+                  "index": 1,
+                  "text": "GPS FIX"
+                },
+                "2": {
+                  "color": "#238636",
+                  "index": 2,
+                  "text": "DGPS"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#da3633",
+                "value": 0
+              },
+              {
+                "color": "#238636",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 11,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_fix",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "GPS",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#da3633",
+                "value": 0
+              },
+              {
+                "color": "#d29922",
+                "value": 4
+              },
+              {
+                "color": "#238636",
+                "value": 8
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 15,
+        "y": 0,
+        "w": 3,
+        "h": 5
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_sat",
+          "legendFormat": "Sats",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Satellites",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1f6feb",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "lengthm",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 3,
+        "h": 5
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_alt",
+          "legendFormat": "Altitude",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Altitude",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1f6feb",
+                "value": 0
+              },
+              {
+                "color": "#238636",
+                "value": 20
+              },
+              {
+                "color": "#d29922",
+                "value": 80
+              },
+              {
+                "color": "#da3633",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "celsius",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 21,
+        "y": 0,
+        "w": 3,
+        "h": 5
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_temp{probe=\"engine_bay\"}",
+          "legendFormat": "Engine Bay",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Engine Bay",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -197,17 +503,18 @@
               }
             ]
           },
-          "unit": "velocitykmh"
+          "unit": "velocitykmh",
+          "decimals": 0
         },
         "overrides": []
       },
       "gridPos": {
-        "x": 10,
-        "y": 0,
-        "w": 4,
+        "x": 0,
+        "y": 5,
+        "w": 3,
         "h": 3
       },
-      "id": 3,
+      "id": 7,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -236,8 +543,8 @@
         }
       ],
       "title": "Top Speed",
-      "transparent": true,
-      "type": "stat"
+      "type": "stat",
+      "transparent": true
     },
     {
       "datasource": {
@@ -246,7 +553,9 @@
       },
       "fieldConfig": {
         "defaults": {
-          "decimals": 2,
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -257,17 +566,18 @@
               }
             ]
           },
-          "unit": "accG"
+          "unit": "accG",
+          "decimals": 2
         },
         "overrides": []
       },
       "gridPos": {
-        "x": 14,
-        "y": 0,
-        "w": 4,
+        "x": 3,
+        "y": 5,
+        "w": 3,
         "h": 3
       },
-      "id": 4,
+      "id": 8,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -296,8 +606,79 @@
         }
       ],
       "title": "Peak G",
-      "transparent": true,
-      "type": "stat"
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              },
+              {
+                "color": "#d29922",
+                "value": 70
+              },
+              {
+                "color": "#da3633",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 5,
+        "w": 3,
+        "h": 3
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_cpu_pct",
+          "legendFormat": "CPU %",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CPU %",
+      "type": "stat",
+      "transparent": true
     },
     {
       "datasource": {
@@ -327,17 +708,18 @@
               }
             ]
           },
-          "unit": "celsius"
+          "unit": "celsius",
+          "decimals": 1
         },
         "overrides": []
       },
       "gridPos": {
-        "x": 21,
-        "y": 3,
+        "x": 9,
+        "y": 5,
         "w": 3,
-        "h": 2
+        "h": 3
       },
-      "id": 5,
+      "id": 10,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -360,14 +742,14 @@
         {
           "editorMode": "code",
           "expr": "shitbox_cpu_temp",
-          "legendFormat": "CPU",
+          "legendFormat": "CPU Temp",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "CPU Temp",
-      "transparent": true,
-      "type": "stat"
+      "type": "stat",
+      "transparent": true
     },
     {
       "datasource": {
@@ -376,65 +758,9 @@
       },
       "fieldConfig": {
         "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#1f6feb",
-                "value": 0
-              }
-            ]
+          "color": {
+            "mode": "thresholds"
           },
-          "unit": "lengthm"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 10,
-        "y": 3,
-        "w": 4,
-        "h": 2
-      },
-      "id": 6,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_alt",
-          "legendFormat": "Altitude",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Altitude",
-      "transparent": true,
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
           "mappings": [
             {
               "options": {
@@ -471,17 +797,18 @@
                 "value": 1
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "x": 14,
-        "y": 3,
+        "x": 12,
+        "y": 5,
         "w": 4,
-        "h": 2
+        "h": 3
       },
-      "id": 7,
+      "id": 11,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
@@ -510,7 +837,8 @@
         }
       ],
       "title": "Throttle",
-      "type": "stat"
+      "type": "stat",
+      "transparent": true
     },
     {
       "datasource": {
@@ -519,155 +847,9 @@
       },
       "fieldConfig": {
         "defaults": {
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "#da3633",
-                  "index": 0,
-                  "text": "No Fix"
-                },
-                "1": {
-                  "color": "#d29922",
-                  "index": 1,
-                  "text": "GPS Fix"
-                },
-                "2": {
-                  "color": "#238636",
-                  "index": 2,
-                  "text": "DGPS"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#da3633",
-                "value": 0
-              },
-              {
-                "color": "#238636",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 18,
-        "y": 0,
-        "w": 3,
-        "h": 3
-      },
-      "id": 8,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_fix",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "GPS",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#da3633",
-                "value": 0
-              },
-              {
-                "color": "#d29922",
-                "value": 4
-              },
-              {
-                "color": "#238636",
-                "value": 8
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 21,
-        "y": 0,
-        "w": 3,
-        "h": 3
-      },
-      "id": 9,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_sat",
-          "legendFormat": "Sats",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Sats",
-      "transparent": true,
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "max": 100,
           "min": 0,
@@ -688,20 +870,21 @@
               }
             ]
           },
-          "unit": "percent"
+          "unit": "percent",
+          "decimals": 0
         },
         "overrides": []
       },
       "gridPos": {
-        "x": 18,
-        "y": 3,
+        "x": 16,
+        "y": 5,
         "w": 3,
-        "h": 2
+        "h": 3
       },
-      "id": 10,
+      "id": 12,
       "options": {
-        "minVizHeight": 50,
-        "minVizWidth": 50,
+        "minVizHeight": 75,
+        "minVizWidth": 75,
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -725,7 +908,8 @@
         }
       ],
       "title": "Disk Free",
-      "type": "gauge"
+      "type": "gauge",
+      "transparent": true
     },
     {
       "datasource": {
@@ -737,77 +921,6 @@
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 0,
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#238636",
-                "value": 0
-              },
-              {
-                "color": "#d29922",
-                "value": 70
-              },
-              {
-                "color": "#da3633",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 5,
-        "w": 4,
-        "h": 3
-      },
-      "id": 50,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_cpu_pct",
-          "legendFormat": "CPU %",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "CPU %",
-      "transparent": true,
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "decimals": 0,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -825,17 +938,19 @@
                 "value": 10000
               }
             ]
-          }
+          },
+          "unit": "short",
+          "decimals": 0
         },
         "overrides": []
       },
       "gridPos": {
-        "x": 4,
+        "x": 19,
         "y": 5,
-        "w": 4,
+        "w": 3,
         "h": 3
       },
-      "id": 11,
+      "id": 13,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -864,197 +979,8 @@
         }
       ],
       "title": "Sync Backlog",
-      "transparent": true,
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#8957e5",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "celsius"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 8,
-        "y": 5,
-        "w": 4,
-        "h": 3
-      },
-      "id": 12,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_env_temp",
-          "legendFormat": "Cabin",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Cabin",
-      "transparent": true,
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#1f6feb",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "humidity"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 16,
-        "y": 5,
-        "w": 4,
-        "h": 3
-      },
-      "id": 13,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_humidity",
-          "legendFormat": "Humidity",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Humidity",
-      "transparent": true,
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#8957e5",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "pressurehpa"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 5,
-        "w": 4,
-        "h": 3
-      },
-      "id": 14,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_pressure",
-          "legendFormat": "Pressure",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Pressure",
-      "transparent": true,
-      "type": "stat"
+      "type": "stat",
+      "transparent": true
     },
     {
       "datasource": {
@@ -1076,17 +1002,18 @@
               }
             ]
           },
-          "unit": "watt"
+          "unit": "watt",
+          "decimals": 1
         },
         "overrides": []
       },
       "gridPos": {
-        "x": 20,
+        "x": 22,
         "y": 5,
-        "w": 4,
+        "w": 2,
         "h": 3
       },
-      "id": 15,
+      "id": 14,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -1115,8 +1042,8 @@
         }
       ],
       "title": "Power",
-      "transparent": true,
-      "type": "stat"
+      "type": "stat",
+      "transparent": true
     },
     {
       "datasource": {
@@ -1150,10 +1077,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 14,
-        "w": 14,
         "x": 0,
-        "y": 8
+        "y": 8,
+        "w": 14,
+        "h": 14
       },
       "id": 20,
       "options": {
@@ -1284,7 +1211,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 20,
+            "fillOpacity": 12,
             "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
@@ -1314,7 +1241,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#238636",
                 "value": 0
               }
             ]
@@ -1325,9 +1252,31 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "Speed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#e0a040",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Altitude"
             },
             "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1f6feb",
+                  "mode": "fixed"
+                }
+              },
               {
                 "id": "unit",
                 "value": "lengthm"
@@ -1337,40 +1286,18 @@
                 "value": "right"
               },
               {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
-              },
-              {
                 "id": "custom.fillOpacity",
                 "value": 5
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Speed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#238636",
-                  "mode": "fixed"
-                }
               }
             ]
           }
         ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 10,
         "x": 14,
-        "y": 8
+        "y": 8,
+        "w": 10,
+        "h": 7
       },
       "id": 21,
       "options": {
@@ -1428,7 +1355,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 20,
+            "fillOpacity": 8,
             "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
@@ -1436,8 +1363,8 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -1454,8 +1381,6 @@
             }
           },
           "mappings": [],
-          "max": 3,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1465,7 +1390,9 @@
               }
             ]
           },
-          "unit": "accG"
+          "unit": "accG",
+          "min": 0,
+          "max": 3
         },
         "overrides": [
           {
@@ -1487,14 +1414,14 @@
               },
               {
                 "id": "custom.fillOpacity",
-                "value": 30
+                "value": 20
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Longitudinal"
+              "options": "Lateral G"
             },
             "properties": [
               {
@@ -1509,13 +1436,13 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Lateral"
+              "options": "Longitudinal G"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "#238636",
+                  "fixedColor": "#1f6feb",
                   "mode": "fixed"
                 }
               }
@@ -1524,10 +1451,10 @@
         ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 10,
         "x": 14,
-        "y": 15
+        "y": 15,
+        "w": 10,
+        "h": 7
       },
       "id": 22,
       "options": {
@@ -1557,15 +1484,15 @@
         },
         {
           "editorMode": "code",
-          "expr": "abs(shitbox_ax)",
-          "legendFormat": "Longitudinal",
+          "expr": "abs(shitbox_ay)",
+          "legendFormat": "Lateral G",
           "range": true,
           "refId": "B"
         },
         {
           "editorMode": "code",
-          "expr": "abs(shitbox_ay)",
-          "legendFormat": "Lateral",
+          "expr": "shitbox_ax",
+          "legendFormat": "Longitudinal G",
           "range": true,
           "refId": "C"
         }
@@ -1576,454 +1503,14 @@
     {
       "collapsed": false,
       "gridPos": {
-        "h": 1,
+        "x": 0,
+        "y": 22,
         "w": 24,
-        "x": 0,
-        "y": 22
-      },
-      "id": 30,
-      "title": "Vehicle Dynamics",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": true,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "max": 3,
-          "min": -3,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "accG"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "X (Brake/Accel)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#da3633",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Y (Cornering)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#238636",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Z (Vertical)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 0,
-        "y": 23
-      },
-      "id": 31,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_ax",
-          "legendFormat": "X (Brake/Accel)",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_ay",
-          "legendFormat": "Y (Cornering)",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_az",
-          "legendFormat": "Z (Vertical)",
-          "range": true,
-          "refId": "C"
-        }
-      ],
-      "title": "Accelerometer (Raw Axes)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": true,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "max": 250,
-          "min": -250,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "rotdps"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Roll"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#da3633",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Pitch"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#238636",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Yaw"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 8,
-        "y": 23
-      },
-      "id": 32,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_gx",
-          "legendFormat": "Roll",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_gy",
-          "legendFormat": "Pitch",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_gz",
-          "legendFormat": "Yaw",
-          "range": true,
-          "refId": "C"
-        }
-      ],
-      "title": "Gyroscope (Rotation Rates)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "G-G diagram \u2014 lateral vs longitudinal forces. Wider = more cornering grip, taller = more braking/acceleration.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": true,
-            "axisColorMode": "text",
-            "axisLabel": "Force",
-            "axisPlacement": "auto",
-            "fillOpacity": 40,
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "pointShape": "circle",
-            "pointSize": {
-              "fixed": 4
-            },
-            "pointStrokeWidth": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "show": "points"
-          },
-          "mappings": [],
-          "max": 2.5,
-          "min": -2.5,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "accG"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Lateral (Y)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#238636",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Longitudinal (X)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#da3633",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 16,
-        "y": 23
-      },
-      "id": 33,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "mapping": "auto",
-        "series": [
-          {}
-        ],
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "none",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "{\n  __name__=~\"shitbox_ax|shitbox_ay\"\n}",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "G-G Diagram",
-      "transformations": [
-        {
-          "id": "prepareTimeSeries",
-          "options": {}
-        }
-      ],
-      "type": "xychart"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 30
+        "h": 1
       },
       "id": 40,
-      "title": "Environment & System",
+      "panels": [],
+      "title": "THERMAL",
       "type": "row"
     },
     {
@@ -2045,7 +1532,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 15,
+            "fillOpacity": 12,
             "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
@@ -2061,13 +1548,13 @@
             },
             "showPoints": "never",
             "showValues": false,
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "line"
+              "mode": "off"
             }
           },
           "mappings": [],
@@ -2075,16 +1562,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent",
+                "color": "#238636",
                 "value": 0
-              },
-              {
-                "color": "#d29922",
-                "value": 70
-              },
-              {
-                "color": "#da3633",
-                "value": 80
               }
             ]
           },
@@ -2094,62 +1573,9 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "CPU"
+              "options": "Exterior"
             },
             "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#da3633",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Cabin"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#8957e5",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "IMU"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#d29922",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "CPU %"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "percent"
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              },
               {
                 "id": "color",
                 "value": {
@@ -2158,21 +1584,37 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Engine Bay"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#c06000",
+                  "mode": "fixed"
+                }
+              }
+            ]
           }
         ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 8,
         "x": 0,
-        "y": 31
+        "y": 23,
+        "w": 8,
+        "h": 8
       },
       "id": 41,
       "options": {
         "legend": {
           "calcs": [
             "mean",
-            "max"
+            "max",
+            "lastNotNull"
           ],
           "displayMode": "table",
           "placement": "bottom",
@@ -2188,27 +1630,20 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_cpu_temp",
-          "legendFormat": "CPU Temp",
+          "expr": "shitbox_temp{probe=\"exterior\"}",
+          "legendFormat": "Exterior",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
-          "expr": "shitbox_env_temp",
-          "legendFormat": "Cabin",
+          "expr": "shitbox_temp{probe=\"engine_bay\"}",
+          "legendFormat": "Engine Bay",
           "range": true,
           "refId": "B"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_temp",
-          "legendFormat": "IMU",
-          "range": true,
-          "refId": "C"
         }
       ],
-      "title": "Temperatures",
+      "title": "Engine Temps",
       "type": "timeseries"
     },
     {
@@ -2230,7 +1665,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 15,
+            "fillOpacity": 10,
             "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
@@ -2246,7 +1681,7 @@
             },
             "showPoints": "never",
             "showValues": false,
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2260,14 +1695,29 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#238636",
                 "value": 0
               }
             ]
           },
-          "unit": "pressurehpa"
+          "unit": "celsius"
         },
         "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cabin Temp"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8957e5",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
           {
             "matcher": {
               "id": "byName",
@@ -2275,22 +1725,124 @@
             },
             "properties": [
               {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1f6feb",
+                  "mode": "fixed"
+                }
+              },
+              {
                 "id": "unit",
                 "value": "humidity"
               },
               {
                 "id": "custom.axisPlacement",
                 "value": "right"
-              },
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 23,
+        "w": 8,
+        "h": 8
+      },
+      "id": 42,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_env_temp",
+          "legendFormat": "Cabin Temp",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_humidity",
+          "legendFormat": "Humidity",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Cabin Environment",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
+                "color": "#238636",
+                "value": 0
               }
             ]
           },
+          "unit": "pressurehpa"
+        },
+        "overrides": [
           {
             "matcher": {
               "id": "byName",
@@ -2305,16 +1857,39 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Ambient Light"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#d29922",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "lux"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
           }
         ]
       },
       "gridPos": {
-        "h": 7,
+        "x": 16,
+        "y": 23,
         "w": 8,
-        "x": 8,
-        "y": 31
+        "h": 8
       },
-      "id": 42,
+      "id": 43,
       "options": {
         "legend": {
           "calcs": [
@@ -2342,13 +1917,334 @@
         },
         {
           "editorMode": "code",
-          "expr": "shitbox_humidity",
-          "legendFormat": "Humidity",
+          "expr": "shitbox_lux",
+          "legendFormat": "Ambient Light",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "Pressure & Humidity",
+      "title": "Atmosphere",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 31,
+        "w": 24,
+        "h": 1
+      },
+      "id": 30,
+      "panels": [],
+      "title": "VEHICLE DYNAMICS",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 6,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "accG"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "X \u2014 Longitudinal"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#d29922",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Y \u2014 Lateral"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1f6feb",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Z \u2014 Vertical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8957e5",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 8,
+        "h": 8
+      },
+      "id": 31,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_ax",
+          "legendFormat": "X \u2014 Longitudinal",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_ay",
+          "legendFormat": "Y \u2014 Lateral",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_az",
+          "legendFormat": "Z \u2014 Vertical",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Accelerometer",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 6,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "X"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#d29922",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Y"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1f6feb",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Z"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8957e5",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 32,
+        "w": 8,
+        "h": 8
+      },
+      "id": 32,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_gx",
+          "legendFormat": "X",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_gy",
+          "legendFormat": "Y",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_gz",
+          "legendFormat": "Z",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Gyroscope",
       "type": "timeseries"
     },
     {
@@ -2370,7 +2266,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 15,
+            "fillOpacity": 8,
             "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
@@ -2386,7 +2282,7 @@
             },
             "showPoints": "never",
             "showValues": false,
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2400,28 +2296,40 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#238636",
                 "value": 0
               }
             ]
           },
-          "unit": "volt"
+          "unit": "accG",
+          "min": 0
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "Current"
+              "options": "Total G"
             },
             "properties": [
               {
-                "id": "unit",
-                "value": "mamp"
+                "id": "color",
+                "value": {
+                  "fixedColor": "#da3633",
+                  "mode": "fixed"
+                }
               },
               {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              },
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Lateral G"
+            },
+            "properties": [
               {
                 "id": "color",
                 "value": {
@@ -2434,13 +2342,13 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Voltage"
+              "options": "Longitudinal G"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "#238636",
+                  "fixedColor": "#1f6feb",
                   "mode": "fixed"
                 }
               }
@@ -2449,12 +2357,172 @@
         ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 8,
         "x": 16,
-        "y": 31
+        "y": 32,
+        "w": 8,
+        "h": 8
       },
-      "id": 43,
+      "id": 33,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2)",
+          "legendFormat": "Total G",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "abs(shitbox_ay)",
+          "legendFormat": "Lateral G",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_ax",
+          "legendFormat": "Longitudinal G",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "G-Force Breakdown",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 24,
+        "h": 1
+      },
+      "id": 50,
+      "panels": [],
+      "title": "SUPPORT SYSTEMS",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "volt"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Voltage"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#e0a040",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Current"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1f6feb",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "amp"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 41,
+        "w": 12,
+        "h": 7
+      },
+      "id": 51,
       "options": {
         "legend": {
           "calcs": [
@@ -2510,7 +2578,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 15,
+            "fillOpacity": 10,
             "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
@@ -2519,14 +2587,14 @@
             },
             "insertNulls": false,
             "lineInterpolation": "smooth",
-            "lineWidth": 3,
+            "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
             "showPoints": "never",
             "showValues": false,
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2540,17 +2608,18 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#238636",
                 "value": 0
               }
             ]
-          }
+          },
+          "unit": "ohm"
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "Air Quality"
+              "options": "Gas Resistance"
             },
             "properties": [
               {
@@ -2565,12 +2634,12 @@
         ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 38
+        "x": 12,
+        "y": 41,
+        "w": 12,
+        "h": 7
       },
-      "id": 44,
+      "id": 52,
       "options": {
         "legend": {
           "calcs": [
@@ -2579,12 +2648,12 @@
             "max"
           ],
           "displayMode": "table",
-          "placement": "right",
+          "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -2593,12 +2662,12 @@
         {
           "editorMode": "code",
           "expr": "shitbox_gas_resistance",
-          "legendFormat": "Air Quality",
+          "legendFormat": "Gas Resistance",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Cabin Air Quality (Gas Resistance)",
+      "title": "Cabin Air Quality",
       "type": "timeseries"
     }
   ],
@@ -2629,5 +2698,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-command",
-  "version": 1
+  "version": 2
 }
