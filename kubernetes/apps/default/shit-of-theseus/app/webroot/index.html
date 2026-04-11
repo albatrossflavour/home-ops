@@ -538,6 +538,9 @@
         .event-card { position: relative; }
         .note-badge { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; color: #8b949e; }
         .event-card:hover .note-badge { color: #e0a040; }
+        .note-badge-link { position: absolute; top: 6px; right: 6px; display: flex; padding: 2px; border-radius: 4px; }
+        .note-badge-link:hover .note-badge { color: #e0a040; }
+        .note-card.highlighted { border-color: #e0a040; box-shadow: 0 0 12px rgba(192,96,0,0.3); }
 
         /* Driver cards */
         .driver-grid {
@@ -1031,7 +1034,7 @@
             return h + 'h ' + m + 'm';
         }
 
-        function jumpToEvent(eventId) {
+        window.jumpToEvent = function(eventId) {
             document.querySelector('[data-section=videos]').click();
             setTimeout(function() {
                 var card = document.getElementById('event-' + eventId);
@@ -1040,7 +1043,18 @@
                 card.classList.add('highlighted');
                 setTimeout(function() { card.classList.remove('highlighted'); }, 2000);
             }, 100);
-        }
+        };
+
+        window.jumpToNote = function(noteId) {
+            document.querySelector('[data-section=status]').click();
+            setTimeout(function() {
+                var card = document.getElementById('note-' + noteId);
+                if (!card) return;
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.classList.add('highlighted');
+                setTimeout(function() { card.classList.remove('highlighted'); }, 2000);
+            }, 100);
+        };
 
         function renderNotes(notes) {
             var container = document.getElementById('notes-container');
@@ -1063,7 +1077,8 @@
                 if (note.event_id != null) {
                     footer = '<div class="note-footer">Linked event: <a href="#videos" onclick="jumpToEvent(' + note.event_id + ');return false;">View linked event</a></div>';
                 }
-                html += '<div class="note-card">';
+                var noteId = note.id != null ? note.id : i;
+                html += '<div class="note-card" id="note-' + noteId + '">';
                 html += '<div class="note-meta">' + meta + '</div>';
                 html += '<div class="note-body">' + note.body + '</div>';
                 html += footer;
@@ -1078,8 +1093,11 @@
             for (var i = 0; i < notes.length; i++) {
                 if (notes[i].event_id != null) {
                     var card = document.getElementById('event-' + notes[i].event_id);
-                    if (card && !card.querySelector('.note-badge')) {
-                        card.insertAdjacentHTML('beforeend', pencilSvg);
+                    if (card && !card.querySelector('.note-badge-link')) {
+                        var noteId = notes[i].id != null ? notes[i].id : i;
+                        card.insertAdjacentHTML('beforeend',
+                            '<a href="#status" class="note-badge-link" onclick="jumpToNote(' + noteId + ');return false;" title="View linked note">' + pencilSvg + '</a>'
+                        );
                     }
                 }
             }
