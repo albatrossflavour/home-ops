@@ -39,13 +39,27 @@ spec:
               tag: "2.0.15@sha256:37c0e031d9f5559dfa416f0f9157509277d97a24abd0ad27590bd92a91616ecc"
             env:
               TZ: "${TZ}"
-              PUID: "1000"
-              PGID: "1000"
+              PUID: "568"
+              PGID: "568"
             probes:
               liveness:
                 enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /rest/noauth/health
+                    port: 8384
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
               readiness:
                 enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /rest/noauth/health
+                    port: 8384
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
             resources:
               requests:
                 cpu: 10m
@@ -55,9 +69,9 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65542]
         seccompProfile: { type: RuntimeDefault }
@@ -67,16 +81,28 @@ spec:
         ports:
           http:
             port: 8384
+      sync:
+        controller: syncthing
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: "192.168.8.125"
+        ports:
+          sync:
+            port: 22000
+            protocol: TCP
+          discovery:
+            port: 21027
+            protocol: UDP
     ingress:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: "Utilities"
           gethomepage.dev/name: "Syncthing"
           gethomepage.dev/icon: "syncthing.png"
           gethomepage.dev/description: "File synchronisation"
-        className: external
+        className: internal
         hosts:
           - host: syncthing.${SECRET_DOMAIN}
             paths:
