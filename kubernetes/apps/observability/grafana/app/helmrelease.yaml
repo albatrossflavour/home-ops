@@ -133,8 +133,6 @@ spec:
             type: file
             disableDeletion: false
             editable: true
-            allowUiUpdates: false
-            updateIntervalSeconds: 30
             options:
               path: /var/lib/grafana/dashboards/default
           - name: kubernetes
