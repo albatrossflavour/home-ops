@@ -3018,26 +3018,25 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "#238636",
-                "value": 0
-              }
+              { "color": "#238636", "value": 0 },
+              { "color": "#8957e5", "value": 12 },
+              { "color": "#d29922", "value": 35 },
+              { "color": "#da3633", "value": 55 }
             ]
           },
-          "unit": "ohm"
+          "unit": "µg/m³"
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "Gas Resistance"
+              "options": "PM2.5"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "#238636",
-                  "mode": "fixed"
+                  "mode": "thresholds"
                 }
               }
             ]
@@ -3072,8 +3071,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_gas_resistance",
-          "legendFormat": "Gas Resistance",
+          "expr": "shitbox_pm25",
+          "legendFormat": "PM2.5",
           "range": true,
           "refId": "A"
         }
