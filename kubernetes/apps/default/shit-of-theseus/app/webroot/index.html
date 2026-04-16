@@ -1725,7 +1725,7 @@
                     '<div class="day-stat-card"><div class="stat-label">Fuel</div><div class="stat-value">' + stats.fuelBurned.toFixed(1) + ' L</div></div>' +
                 '</section>';
 
-            var mapPlaceholder = '<section><h3 class="day-section-heading">Map</h3><div id="day-map" class="day-section-placeholder">Day map placeholder \u2014 wired by Plan 19-07.</div></section>';
+            var mapPlaceholder = '<section><h3 class="day-section-heading">Map</h3><div id="day-map" class="day-map-container"></div></section>';
             var spinePlaceholder = '<section><h3 class="day-section-heading">Timeline</h3><div id="day-spine"></div></section>';
             var videosPlaceholder = '<section><h3 class="day-section-heading">Video highlights</h3><div id="day-videos" class="day-section-placeholder">Video highlights placeholder \u2014 wired by Plan 19-06/Phase 19 backfill.</div></section>';
             var timelapsePlaceholder = '<section><h3 class="day-section-heading">Timelapse</h3><div id="day-timelapse" class="day-section-placeholder">Timelapse embed \u2014 /captures/' + escapeHtml(dayISO) + '/timelapse.mp4 if present.</div></section>';
@@ -1753,9 +1753,13 @@
                     agendaDay: agendaDay
                 }));
             }
+
+            // Day map (Plan 19-07) — DOM is mounted, safe to init Leaflet.
+            initDayMap(dayISO, routeData, eventsData);
         }
 
         function renderHomepage() {
+            _teardownDayMap();
             renderDayNav(agendaData, null);
             // Phase 18 behaviour: show legacy sections. Plans 19-08/09/10 replace this with
             // mode-specific renderers keyed off detectMode(agendaData, routeData && routeData.generated_at).
@@ -1765,6 +1769,7 @@
         }
 
         function renderAbout() {
+            _teardownDayMap();
             renderDayNav(agendaData, null);
             // Stub — Plan 19-11 moves /about content here.
             showRoute(
