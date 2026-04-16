@@ -284,6 +284,88 @@
             .day-map-container { height: 280px; }
         }
 
+        /* Before-mode homepage (Phase 19 — D-16, NARR-01) */
+        .before-hero {
+            text-align: center;
+            padding: 2rem 1rem 1.5rem 1rem;
+        }
+        .before-hero h1 {
+            color: #f0dbb8; font-size: 2rem; margin: 0 0 0.5rem 0;
+        }
+        .before-hero .rally-team {
+            color: #e0a040; font-size: 1.1rem; margin-bottom: 0.25rem;
+        }
+        .before-hero .rally-route {
+            color: #8b949e; font-size: 0.95rem;
+        }
+        .before-countdown {
+            display: flex; justify-content: center; gap: 0.75rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .countdown-tile {
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            padding: 0.75rem 1rem;
+            min-width: 72px;
+            text-align: center;
+        }
+        .countdown-tile .cd-value {
+            color: #e0a040; font-size: 2rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .countdown-tile .cd-label {
+            color: #8b949e; font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 0.05em; margin-top: 0.35rem;
+        }
+        .before-cta {
+            text-align: center; color: #c9d1d9; font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .before-planned-route {
+            text-align: center; margin-bottom: 2rem;
+        }
+        .before-planned-route img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #2a1f0e;
+        }
+        .before-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .before-day-list {
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .before-day-row {
+            display: grid;
+            grid-template-columns: 56px 80px 1fr;
+            gap: 1rem;
+            align-items: start;
+            padding: 0.75rem 1rem;
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            text-decoration: none;
+            color: #c9d1d9;
+            transition: border-color 0.15s;
+        }
+        .before-day-row:hover { border-color: #e0a040; }
+        .before-day-row .bd-num {
+            color: #e0a040; font-size: 1.5rem; font-weight: 600;
+            text-align: center; line-height: 1;
+        }
+        .before-day-row .bd-date { color: #8b949e; font-size: 0.85rem; }
+        .before-day-row .bd-title { color: #f0dbb8; font-weight: 600; }
+        .before-day-row .bd-route { color: #8b949e; font-size: 0.85rem; margin-top: 0.2rem; }
+        @media (max-width: 600px) {
+            .before-hero h1 { font-size: 1.5rem; }
+            .countdown-tile { min-width: 58px; padding: 0.5rem 0.6rem; }
+            .countdown-tile .cd-value { font-size: 1.4rem; }
+            .before-day-row { grid-template-columns: 44px 1fr; }
+            .before-day-row .bd-date { grid-column: 2; }
+        }
+
         /* Day filter */
         .day-filter { margin-bottom: 1.5rem; }
         .day-filter-bar {
@@ -1549,6 +1631,41 @@
             }
         }
 
+        // Before-mode countdown (Plan 19-08 — NARR-01 / D-16)
+        function _stopCountdown() {
+            if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+        }
+
+        function _startCountdown(targetIso, hostEl) {
+            _stopCountdown();
+            if (!hostEl) return;
+            var targetTs = Date.parse(targetIso + 'T00:00:00+10:00');
+            if (isNaN(targetTs)) return;
+
+            function tick() {
+                var now = Date.now();
+                var deltaMs = targetTs - now;
+                if (deltaMs <= 0) {
+                    _stopCountdown();
+                    // Transition: re-render homepage; detectMode will now return 'live'.
+                    renderHomepage();
+                    return;
+                }
+                var totalSec = Math.floor(deltaMs / 1000);
+                var days  = Math.floor(totalSec / 86400);
+                var hours = Math.floor((totalSec % 86400) / 3600);
+                var mins  = Math.floor((totalSec % 3600) / 60);
+                var secs  = totalSec % 60;
+                hostEl.innerHTML =
+                    '<div class="countdown-tile"><div class="cd-value">' + days  + '</div><div class="cd-label">Days</div></div>' +
+                    '<div class="countdown-tile"><div class="cd-value">' + hours + '</div><div class="cd-label">Hours</div></div>' +
+                    '<div class="countdown-tile"><div class="cd-value">' + mins  + '</div><div class="cd-label">Minutes</div></div>' +
+                    '<div class="countdown-tile"><div class="cd-value">' + secs  + '</div><div class="cd-label">Seconds</div></div>';
+            }
+            tick();
+            _countdownTimer = setInterval(tick, 1000);
+        }
+
         function initDayMap(dayISO, route, events) {
             _teardownDayMap();
             var host = document.getElementById('day-map');
@@ -1689,6 +1806,7 @@
 
         // Day page scaffold (Plan 19-05 — replaces 19-03 stub).
         function renderDayPage(dayISO) {
+            _stopCountdown();
             renderDayNav(agendaData, dayISO);
 
             var agendaDay = agendaData && agendaData.days
@@ -1760,16 +1878,34 @@
 
         function renderHomepage() {
             _teardownDayMap();
+            _stopCountdown();
             renderDayNav(agendaData, null);
-            // Phase 18 behaviour: show legacy sections. Plans 19-08/09/10 replace this with
-            // mode-specific renderers keyed off detectMode(agendaData, routeData && routeData.generated_at).
+
             var mode = detectMode(agendaData, routeData && routeData.generated_at);
-            console.log('homepage mode:', mode);
-            showLegacySections();
+            if (mode === 'before' && agendaData) {
+                renderHomepageBefore(agendaData);
+                return;
+            }
+
+            // Fallback: minimal placeholder that does not crash if agendaData is null.
+            if (!agendaData) {
+                showRoute('<div class="day-page"><section class="day-header"><h1>Shit of Theseus</h1><div class="day-subtitle">Agenda loading\u2026</div></section></div>');
+                return;
+            }
+
+            // Modes live/archive/unknown — temporary placeholder until Plans 19-09/19-10.
+            showRoute(
+                '<div class="day-page">' +
+                    '<section class="day-header"><h1>Rally status</h1>' +
+                    '<div class="day-subtitle">Detected mode: ' + escapeHtml(mode) + ' \u2014 full homepage lands in Plan 19-' + (mode === 'live' ? '09' : '10') + '.</div>' +
+                    '</section>' +
+                '</div>'
+            );
         }
 
         function renderAbout() {
             _teardownDayMap();
+            _stopCountdown();
             renderDayNav(agendaData, null);
             // Stub — Plan 19-11 moves /about content here.
             showRoute(
@@ -1798,6 +1934,7 @@
         var agendaData = null;
         var routeData = null;
         var _currentDayMap = null;
+        var _countdownTimer = null;
         var mapInitialised = false;
 
         // Navigation
