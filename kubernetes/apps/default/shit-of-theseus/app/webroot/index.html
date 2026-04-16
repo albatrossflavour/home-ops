@@ -2052,28 +2052,80 @@
             initDayMap(dayISO, routeData, eventsData);
         }
 
+        // Live-mode homepage renderer (Plan 19-09 — NARR-01 / D-17 / D-08)
+        function renderHomepageLive() {
+            var today = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+
+            // Guard: if 'today' is outside the rally window, fall through to archive.
+            if (agendaData && agendaData.rally) {
+                var start = agendaData.rally.start_date;
+                var end   = agendaData.rally.end_date;
+                if (end && today > end) {
+                    // We've overshot into archive territory; fall back.
+                    if (typeof renderHomepageArchive === 'function') { renderHomepageArchive(); return; }
+                }
+                if (start && today < start) {
+                    // Underflow — before mode. (detectMode should already have caught this; guard anyway.)
+                    renderHomepageBefore(agendaData);
+                    return;
+                }
+            }
+
+            // 1. Render the day-page for today (which handles day-nav, agenda, stats, spine, map).
+            renderDayPage(today);
+
+            // 2. Prepend the current-driver widget by inserting it above .day-page content.
+            var widgetHtml = renderCurrentDriverWidget(driverStatsData);
+            if (widgetHtml) {
+                var host = document.getElementById('dynamic-route');
+                var dayPage = host && host.querySelector('.day-page');
+                if (dayPage) {
+                    var wrapper = document.createElement('div');
+                    wrapper.innerHTML = widgetHtml;
+                    dayPage.insertBefore(wrapper.firstChild, dayPage.firstChild);
+                }
+            }
+
+            // 3. Inject a pulsing LIVE badge into the day-header h1.
+            var headerH1 = document.querySelector('.day-page .day-header h1');
+            if (headerH1 && !headerH1.querySelector('.live-badge')) {
+                var badge = document.createElement('span');
+                badge.className = 'live-badge';
+                badge.textContent = 'LIVE';
+                headerH1.appendChild(badge);
+            }
+
+            // 4. Start the auto-refresh loop.
+            _stopLiveRefresh();
+            _liveRefreshTimer = setInterval(refreshLiveData, LIVE_REFRESH_MS);
+        }
+
         function renderHomepage() {
             _teardownDayMap();
             _stopCountdown();
+            _stopLiveRefresh();
             renderDayNav(agendaData, null);
 
             var mode = detectMode(agendaData, routeData && routeData.generated_at);
-            if (mode === 'before' && agendaData) {
-                renderHomepageBefore(agendaData);
-                return;
-            }
 
-            // Fallback: minimal placeholder that does not crash if agendaData is null.
             if (!agendaData) {
                 showRoute('<div class="day-page"><section class="day-header"><h1>Shit of Theseus</h1><div class="day-subtitle">Agenda loading\u2026</div></section></div>');
                 return;
             }
 
-            // Modes live/archive/unknown — temporary placeholder until Plans 19-09/19-10.
+            if (mode === 'before') {
+                renderHomepageBefore(agendaData);
+                return;
+            }
+            if (mode === 'live') {
+                renderHomepageLive();
+                return;
+            }
+            // Archive + unknown — placeholder until Plan 19-10 lands.
             showRoute(
                 '<div class="day-page">' +
-                    '<section class="day-header"><h1>Rally status</h1>' +
-                    '<div class="day-subtitle">Detected mode: ' + escapeHtml(mode) + ' \u2014 full homepage lands in Plan 19-' + (mode === 'live' ? '09' : '10') + '.</div>' +
+                    '<section class="day-header"><h1>Rally archive</h1>' +
+                    '<div class="day-subtitle">Detected mode: ' + escapeHtml(mode) + ' \u2014 archive homepage lands in Plan 19-10.</div>' +
                     '</section>' +
                 '</div>'
             );
