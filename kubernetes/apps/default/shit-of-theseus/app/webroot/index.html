@@ -1150,8 +1150,61 @@
             route();
         });
 
+        // Day-nav progress bar (Plan 19-04)
+        function _formatShortDate(iso) {
+            // '2026-05-27' → '27 May' using UTC to avoid timezone shifting
+            var parts = iso.split('-');
+            if (parts.length !== 3) return iso;
+            var d = new Date(Date.UTC(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)));
+            if (isNaN(d.getTime())) return iso;
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', timeZone: 'UTC' });
+        }
+
+        function renderDayNav(agenda, highlightDayISO) {
+            var host = document.getElementById('day-nav');
+            if (!host) return;
+            if (!agenda || !agenda.days || agenda.days.length === 0) {
+                host.style.display = 'none';
+                host.innerHTML = '';
+                return;
+            }
+            var today = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+            var html = '';
+            agenda.days.forEach(function(day) {
+                var state;
+                if (highlightDayISO && day.date === highlightDayISO) {
+                    state = 'current';
+                } else if (day.date < today) {
+                    state = 'completed';
+                } else if (day.date === today) {
+                    state = 'current';
+                } else {
+                    state = 'future';
+                }
+                var num = String(Number(day.day_number) || 0);
+                var dateLabel = _formatShortDate(day.date);
+                if (state === 'future') {
+                    html += '<span class="day-nav-segment future" aria-label="Day ' + num + ' \u2014 upcoming">'
+                         +  '<span class="day-nav-number">' + num + '</span>'
+                         +  '<span class="day-nav-date">' + dateLabel + '</span>'
+                         +  '</span>';
+                } else {
+                    // Anchor form — navigateToDay handles pushState; real href is the fallback for middle-click / copy-link.
+                    html += '<a class="day-nav-segment ' + state + '" href="/day/' + day.date + '" '
+                         +  'onclick="event.preventDefault(); navigateToDay(\'' + day.date + '\');" '
+                         +  'aria-label="Day ' + num + ' \u2014 ' + (state === 'current' ? 'today' : 'past') + '">'
+                         +  '<span class="day-nav-number">' + num + '</span>'
+                         +  '<span class="day-nav-date">' + dateLabel + '</span>'
+                         +  '</a>';
+                }
+            });
+            host.innerHTML = html;
+            host.style.display = '';
+        }
+
         // Stubs — Plan 19-05/06/07 replace these with real renderers.
         function renderDayPage(dayISO) {
+            renderDayNav(agendaData, dayISO);
             var dayExists = agendaData && agendaData.days && agendaData.days.some(function(d) { return d.date === dayISO; });
             var headerText = 'Day ' + dayISO;
             if (dayExists) {
@@ -1173,6 +1226,7 @@
         }
 
         function renderHomepage() {
+            renderDayNav(agendaData, null);
             // Phase 18 behaviour: show legacy sections. Plans 19-08/09/10 replace this with
             // mode-specific renderers keyed off detectMode(agendaData, routeData && routeData.generated_at).
             var mode = detectMode(agendaData, routeData && routeData.generated_at);
@@ -1181,6 +1235,7 @@
         }
 
         function renderAbout() {
+            renderDayNav(agendaData, null);
             // Stub — Plan 19-11 moves /about content here.
             showRoute(
                 '<div style="background:#161b22;border:1px solid #2a1f0e;border-radius:8px;padding:1.5rem;">' +
