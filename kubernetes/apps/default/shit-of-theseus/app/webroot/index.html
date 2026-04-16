@@ -366,6 +366,53 @@
             .before-day-row .bd-date { grid-column: 2; }
         }
 
+        /* Live-mode homepage (Phase 19 — D-17, D-08, NARR-01) */
+        .live-badge {
+            display: inline-block;
+            background: #da3633; color: #fff;
+            font-size: 0.7rem; font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            letter-spacing: 0.08em;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+            animation: livepulse 2s ease-in-out infinite;
+        }
+        @keyframes livepulse {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0.55; }
+        }
+        .current-driver-widget {
+            display: flex; align-items: center; gap: 1rem;
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .current-driver-widget .cdw-avatar {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: #c06000; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; font-weight: 600;
+            flex-shrink: 0;
+        }
+        .current-driver-widget .cdw-text { flex: 1; }
+        .current-driver-widget .cdw-label {
+            color: #8b949e; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .current-driver-widget .cdw-name {
+            color: #f0dbb8; font-size: 1.15rem; font-weight: 600;
+            margin-top: 0.2rem;
+        }
+        .current-driver-widget .cdw-time {
+            color: #8b949e; font-size: 0.85rem;
+        }
+        @media (max-width: 600px) {
+            .current-driver-widget { padding: 0.75rem 1rem; }
+            .current-driver-widget .cdw-avatar { width: 40px; height: 40px; font-size: 1.15rem; }
+            .current-driver-widget .cdw-name   { font-size: 1rem; }
+        }
+
         /* Day filter */
         .day-filter { margin-bottom: 1.5rem; }
         .day-filter-bar {
@@ -1666,6 +1713,68 @@
             _countdownTimer = setInterval(tick, 1000);
         }
 
+        // Live-mode helpers (Plan 19-09 — NARR-01 / D-08 / D-17)
+
+        function _formatDriveTimeLocal(seconds) {
+            if (seconds == null || isNaN(seconds)) return '';
+            var s = Math.floor(seconds);
+            var h = Math.floor(s / 3600);
+            var m = Math.floor((s % 3600) / 60);
+            return (h > 0 ? h + 'h ' : '') + m + 'm';
+        }
+
+        function renderCurrentDriverWidget(ds) {
+            if (!ds || !ds.active_driver) {
+                return ''; // Silent — don't clutter the UI with "no driver" noise.
+            }
+            var name = escapeHtml(ds.active_driver);
+            var initial = ds.active_driver.charAt(0).toUpperCase();
+            var driverRow = null;
+            if (ds.drivers) {
+                for (var i = 0; i < ds.drivers.length; i++) {
+                    if (ds.drivers[i].driver_name === ds.active_driver) { driverRow = ds.drivers[i]; break; }
+                }
+            }
+            var timeLabel = driverRow ? _formatDriveTimeLocal(driverRow.total_seconds) + ' on the wheel' : '';
+            return '<section class="current-driver-widget">' +
+                '<div class="cdw-avatar">' + escapeHtml(initial) + '</div>' +
+                '<div class="cdw-text">' +
+                    '<div class="cdw-label">Currently driving</div>' +
+                    '<div class="cdw-name">' + name + '</div>' +
+                    (timeLabel ? '<div class="cdw-time">' + escapeHtml(timeLabel) + '</div>' : '') +
+                '</div>' +
+            '</section>';
+        }
+
+        var _liveRefreshTimer = null;
+        var LIVE_REFRESH_MS = 120000;
+
+        function _stopLiveRefresh() {
+            if (_liveRefreshTimer) { clearInterval(_liveRefreshTimer); _liveRefreshTimer = null; }
+        }
+
+        function refreshLiveData() {
+            // Re-fetch the data sources that change during a live rally.
+            var p = [
+                fetch('/captures/events.json',       { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+                fetch('/captures/notes.json',        { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+                fetch('/captures/fuel.json',         { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+                fetch('/captures/route.json',        { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+                fetch('/captures/driver-stats.json', { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+            ];
+            return Promise.all(p).then(function(results) {
+                if (results[0] != null) eventsData       = results[0];
+                if (results[1] != null) notesData        = results[1].slice().reverse();
+                if (results[2] != null) fuelData         = results[2];
+                if (results[3] != null) routeData        = results[3];
+                if (results[4] != null) driverStatsData  = results[4];
+                // Re-render only if we're still on the homepage.
+                if (window.location.pathname === '/' || window.location.pathname === '') {
+                    renderHomepage();
+                }
+            });
+        }
+
         // Before-mode homepage renderer (Plan 19-08 — NARR-01 / D-16)
         function renderHomepageBefore(agenda) {
             var rally = agenda.rally || {};
@@ -1873,6 +1982,7 @@
         // Day page scaffold (Plan 19-05 — replaces 19-03 stub).
         function renderDayPage(dayISO) {
             _stopCountdown();
+            _stopLiveRefresh();
             renderDayNav(agendaData, dayISO);
 
             var agendaDay = agendaData && agendaData.days
@@ -1972,6 +2082,7 @@
         function renderAbout() {
             _teardownDayMap();
             _stopCountdown();
+            _stopLiveRefresh();
             renderDayNav(agendaData, null);
             // Stub — Plan 19-11 moves /about content here.
             showRoute(
