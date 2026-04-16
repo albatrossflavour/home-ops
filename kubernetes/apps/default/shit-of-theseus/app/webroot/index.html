@@ -1205,6 +1205,82 @@
                 .replace(/'/g, '&#39;');
         }
 
+        function renderAgendaContext(agendaDay) {
+            if (!agendaDay) {
+                return '<section class="day-agenda"><p style="color:#8b949e;margin:0;">No agenda entry for this day.</p></section>';
+            }
+            var parts = ['<section class="day-agenda"><h2>Agenda</h2>'];
+            if (agendaDay.route) {
+                parts.push('<div class="agenda-row"><strong>Route</strong><span>' + escapeHtml(agendaDay.route) + '</span></div>');
+            }
+            if (agendaDay.camping) {
+                parts.push('<div class="agenda-row"><strong>Camping</strong><span>' + escapeHtml(agendaDay.camping) + '</span></div>');
+            }
+            if (agendaDay.meals && agendaDay.meals.length > 0) {
+                var meals = '<div class="agenda-row"><strong>Meals</strong><ul class="meals">';
+                agendaDay.meals.forEach(function(m) {
+                    meals += '<li><time>' + escapeHtml(m.time || '') + '</time>' + escapeHtml(m.where || '') + '</li>';
+                });
+                meals += '</ul></div>';
+                parts.push(meals);
+            }
+            if (agendaDay.notes) {
+                parts.push('<div class="agenda-row"><strong>Notes</strong><span>' + escapeHtml(agendaDay.notes) + '</span></div>');
+            }
+            parts.push('</section>');
+            return parts.join('');
+        }
+
+        function _dayOf(iso) {
+            try { return new Date(iso).toLocaleDateString('en-CA', { timeZone: TIMEZONE }); }
+            catch(e) { return null; }
+        }
+
+        function _haversineKm(lat1, lng1, lat2, lng2) {
+            var R = 6371;
+            var toRad = function(deg) { return deg * Math.PI / 180; };
+            var dLat = toRad(lat2 - lat1);
+            var dLng = toRad(lng2 - lng1);
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2)
+                  + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2) * Math.sin(dLng/2);
+            return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+        }
+
+        function computeDayStats(dayISO, events, route, fuel) {
+            var dayEvents = (events || []).filter(function(ev) { return _dayOf(ev.timestamp) === dayISO; });
+            var dayFuel   = (fuel   || []).filter(function(f)  { return _dayOf(f.timestamp_utc) === dayISO; });
+            var daySlice  = (route && route.days && route.days[dayISO]) || null;
+
+            var kmDriven = 0;
+            if (daySlice && daySlice.points && daySlice.points.length > 1) {
+                for (var i = 1; i < daySlice.points.length; i++) {
+                    kmDriven += _haversineKm(
+                        daySlice.points[i-1][0], daySlice.points[i-1][1],
+                        daySlice.points[i][0], daySlice.points[i][1]
+                    );
+                }
+            }
+
+            var peakG = 0;
+            var topSpeed = 0;
+            dayEvents.forEach(function(ev) {
+                if (ev.peak_g != null && ev.peak_g > peakG) peakG = ev.peak_g;
+                if (ev.peak_speed_kmh != null && ev.peak_speed_kmh > topSpeed) topSpeed = ev.peak_speed_kmh;
+            });
+
+            var fuelBurned = 0;
+            dayFuel.forEach(function(f) { if (f.volume_litres != null) fuelBurned += f.volume_litres; });
+
+            return {
+                km: kmDriven,
+                peakG: peakG,
+                topSpeed: topSpeed,
+                fuelBurned: fuelBurned,
+                eventCount: dayEvents.length,
+                hasData: daySlice != null || dayEvents.length > 0 || dayFuel.length > 0
+            };
+        }
+
         // Day-nav progress bar (Plan 19-04)
         function _formatShortDate(iso) {
             // '2026-05-27' → '27 May' using UTC to avoid timezone shifting
@@ -1257,27 +1333,61 @@
             host.style.display = '';
         }
 
-        // Stubs — Plan 19-05/06/07 replace these with real renderers.
+        // Day page scaffold (Plan 19-05 — replaces 19-03 stub).
         function renderDayPage(dayISO) {
             renderDayNav(agendaData, dayISO);
-            var dayExists = agendaData && agendaData.days && agendaData.days.some(function(d) { return d.date === dayISO; });
-            var headerText = 'Day ' + dayISO;
-            if (dayExists) {
-                var agendaDay = agendaData.days.filter(function(d) { return d.date === dayISO; })[0];
-                headerText = 'Day ' + agendaDay.day_number + ' \u2014 ' + agendaDay.title;
+
+            var agendaDay = agendaData && agendaData.days
+                ? agendaData.days.filter(function(d) { return d.date === dayISO; })[0]
+                : null;
+            var totalDays = (agendaData && agendaData.days) ? agendaData.days.length : 0;
+
+            var headerHtml;
+            if (agendaDay) {
+                headerHtml =
+                    '<section class="day-header">' +
+                        '<h1>Day ' + String(Number(agendaDay.day_number) || 0) + ' \u2014 ' + escapeHtml(agendaDay.title || '') + '</h1>' +
+                        '<div class="day-subtitle">' + escapeHtml(dayISO) +
+                        (totalDays ? ' \u00b7 Day ' + Number(agendaDay.day_number) + ' of ' + totalDays : '') +
+                        '</div>' +
+                    '</section>';
+            } else {
+                headerHtml =
+                    '<section class="day-header">' +
+                        '<h1>' + escapeHtml(dayISO) + '</h1>' +
+                        '<div class="day-subtitle">No agenda entry for this day.</div>' +
+                    '</section>';
             }
-            var safeHeader = document.createElement('div');
-            safeHeader.textContent = headerText;
-            var body = dayExists
-                ? '<p style="color:#8b949e;">Day page content lands in Plan 19-05/06/07.</p>'
-                : '<p style="color:#8b949e;">No agenda entry for ' + dayISO.replace(/[^0-9-]/g, '') + '.</p>';
-            showRoute(
-                '<div style="background:#161b22;border:1px solid #2a1f0e;border-radius:8px;padding:1.5rem;">' +
-                '<h2 style="color:#f0dbb8;margin-top:0;">' + safeHeader.innerHTML + '</h2>' +
-                body +
-                '<p><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></p>' +
-                '</div>'
-            );
+
+            var agendaHtml = renderAgendaContext(agendaDay);
+
+            var stats = computeDayStats(dayISO, eventsData, routeData, fuelData);
+            var statsHtml =
+                '<section class="day-stats">' +
+                    '<div class="day-stat-card"><div class="stat-label">Distance</div><div class="stat-value">' + stats.km.toFixed(0) + ' km</div></div>' +
+                    '<div class="day-stat-card"><div class="stat-label">Top Speed</div><div class="stat-value">' + stats.topSpeed.toFixed(0) + ' km/h</div></div>' +
+                    '<div class="day-stat-card"><div class="stat-label">Peak G</div><div class="stat-value">' + stats.peakG.toFixed(2) + ' g</div></div>' +
+                    '<div class="day-stat-card"><div class="stat-label">Events</div><div class="stat-value">' + stats.eventCount + '</div></div>' +
+                    '<div class="day-stat-card"><div class="stat-label">Fuel</div><div class="stat-value">' + stats.fuelBurned.toFixed(1) + ' L</div></div>' +
+                '</section>';
+
+            var mapPlaceholder = '<section><h3 class="day-section-heading">Map</h3><div id="day-map" class="day-section-placeholder">Day map placeholder \u2014 wired by Plan 19-07.</div></section>';
+            var spinePlaceholder = '<section><h3 class="day-section-heading">Timeline</h3><div id="day-spine" class="day-section-placeholder">Timeline spine placeholder \u2014 wired by Plan 19-06.</div></section>';
+            var videosPlaceholder = '<section><h3 class="day-section-heading">Video highlights</h3><div id="day-videos" class="day-section-placeholder">Video highlights placeholder \u2014 wired by Plan 19-06/Phase 19 backfill.</div></section>';
+            var timelapsePlaceholder = '<section><h3 class="day-section-heading">Timelapse</h3><div id="day-timelapse" class="day-section-placeholder">Timelapse embed \u2014 /captures/' + escapeHtml(dayISO) + '/timelapse.mp4 if present.</div></section>';
+
+            var html =
+                '<div class="day-page">' +
+                    headerHtml +
+                    agendaHtml +
+                    statsHtml +
+                    mapPlaceholder +
+                    spinePlaceholder +
+                    videosPlaceholder +
+                    timelapsePlaceholder +
+                    '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
+                '</div>';
+            showRoute(html);
         }
 
         function renderHomepage() {
