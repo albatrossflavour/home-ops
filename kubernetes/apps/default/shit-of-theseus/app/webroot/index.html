@@ -1829,6 +1829,65 @@
             return totals;
         }
 
+        function renderHomepageArchive() {
+            var rally  = (agendaData && agendaData.rally) || {};
+            var days   = (agendaData && agendaData.days) || [];
+            var totals = _rallyTotals(eventsData, fuelData, routeData, agendaData);
+
+            var overviewHtml =
+                '<section class="archive-overview">' +
+                    '<h1>' + escapeHtml(rally.title || 'Rally') + '</h1>' +
+                    '<div class="archive-subtitle">' +
+                        escapeHtml(rally.start_date || '') +
+                        (rally.end_date ? ' \u2014 ' + escapeHtml(rally.end_date) : '') +
+                        (rally.team ? ' \u00b7 Team ' + escapeHtml(rally.team) : '') +
+                    '</div>' +
+                    '<div class="archive-stats">' +
+                        '<div class="day-stat-card"><div class="stat-label">Distance</div><div class="stat-value">' + totals.km.toFixed(0) + ' km</div></div>' +
+                        '<div class="day-stat-card"><div class="stat-label">Days</div><div class="stat-value">' + totals.dayCount + '</div></div>' +
+                        '<div class="day-stat-card"><div class="stat-label">Events</div><div class="stat-value">' + totals.eventCount + '</div></div>' +
+                        '<div class="day-stat-card"><div class="stat-label">Fuel</div><div class="stat-value">' + totals.fuelLitres.toFixed(0) + ' L</div></div>' +
+                        '<div class="day-stat-card"><div class="stat-label">Drivers</div><div class="stat-value">' + totals.driverCount + '</div></div>' +
+                    '</div>' +
+                '</section>';
+
+            // Day grid: newest-first — sort descending by date string.
+            var sortedDays = days.slice().sort(function(a, b) { return b.date.localeCompare(a.date); });
+            var gridParts = ['<section><h3 class="day-section-heading">Day by day</h3><div class="archive-day-grid">'];
+            sortedDays.forEach(function(d) {
+                var stats = computeDayStats(d.date, eventsData, routeData, fuelData);
+                var heroSrc = '/captures/' + d.date + '/hero.jpg';
+                var fallbackSrc = '/captures/' + d.date + '/timelapse-poster.jpg';
+                var dayNum = String(Number(d.day_number) || 0);
+                var thumb =
+                    '<div class="adc-thumb">' +
+                        '<img src="' + heroSrc + '" alt="" ' +
+                            'onerror="if(this.dataset.step!==\'fallback\'){this.dataset.step=\'fallback\';this.src=\'' + fallbackSrc + '\';}else{this.style.display=\'none\';this.parentNode.innerHTML=\'<div class=adc-thumb-fallback>Day ' + dayNum + '</div>\';}">' +
+                    '</div>';
+                var statsLine =
+                    stats.km.toFixed(0) + ' km \u00b7 ' +
+                    stats.eventCount + ' events \u00b7 ' +
+                    stats.fuelBurned.toFixed(1) + ' L';
+                gridParts.push(
+                    '<a class="archive-day-card" href="/day/' + d.date + '" onclick="event.preventDefault(); navigateToDay(\'' + d.date + '\');">' +
+                        thumb +
+                        '<div class="adc-body">' +
+                            '<div class="adc-header">' +
+                                '<div class="adc-num">Day ' + dayNum + '</div>' +
+                                '<div class="adc-date">' + escapeHtml(_formatShortDate(d.date)) + '</div>' +
+                            '</div>' +
+                            '<div class="adc-title">' + escapeHtml(d.title || '') + '</div>' +
+                            '<div class="adc-stats">' + escapeHtml(statsLine) + '</div>' +
+                        '</div>' +
+                    '</a>'
+                );
+            });
+            gridParts.push('</div></section>');
+
+            var html = '<div class="day-page">' + overviewHtml + gridParts.join('') + '</div>';
+            showRoute(html);
+        }
+
         var _liveRefreshTimer = null;
         var LIVE_REFRESH_MS = 120000;
 
@@ -2204,14 +2263,10 @@
                 renderHomepageLive();
                 return;
             }
-            // Archive + unknown — placeholder until Plan 19-10 lands.
-            showRoute(
-                '<div class="day-page">' +
-                    '<section class="day-header"><h1>Rally archive</h1>' +
-                    '<div class="day-subtitle">Detected mode: ' + escapeHtml(mode) + ' \u2014 archive homepage lands in Plan 19-10.</div>' +
-                    '</section>' +
-                '</div>'
-            );
+            if (mode === 'archive' || mode === 'unknown') { renderHomepageArchive(); return; }
+
+            // Defensive fallback — should never hit.
+            renderHomepageArchive();
         }
 
         function renderAbout() {
