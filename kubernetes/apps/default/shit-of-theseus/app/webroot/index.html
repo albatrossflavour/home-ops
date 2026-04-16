@@ -214,6 +214,58 @@
             .day-stats { grid-template-columns: repeat(2, 1fr); }
         }
 
+        /* Timeline spine (Phase 19 — D-06, D-07) */
+        .spine { position: relative; padding-left: 0; }
+        .spine-empty {
+            background: #161b22; border: 1px dashed #30363d; border-radius: 8px;
+            padding: 1.25rem; color: #8b949e; font-style: italic; text-align: center;
+        }
+        .spine-item {
+            display: grid;
+            grid-template-columns: 72px 24px 1fr;
+            gap: 0.75rem;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        .spine-time {
+            color: #8b949e; font-size: 0.8rem; font-variant-numeric: tabular-nums;
+            padding-top: 0.5rem; text-align: right;
+        }
+        .spine-rail {
+            position: relative; width: 24px; min-height: 100%;
+        }
+        .spine-rail::before {
+            content: ''; position: absolute; left: 11px; top: 0; bottom: -1rem;
+            width: 2px; background: #2a1f0e;
+        }
+        .spine-item:last-child .spine-rail::before { bottom: 50%; }
+        .spine-dot {
+            position: absolute; left: 4px; top: 0.6rem;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #21262d; border: 2px solid #0d1117;
+        }
+        .spine-card {
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            padding: 0.75rem 1rem; color: #c9d1d9;
+        }
+        .spine-card .spine-card-title { color: #f0dbb8; font-weight: 600; margin-bottom: 0.25rem; }
+        .spine-card .spine-card-meta  { color: #8b949e; font-size: 0.8rem; }
+        .spine-card .spine-card-body  { color: #c9d1d9; margin-top: 0.35rem; line-height: 1.5; }
+        .spine-card video { display: block; margin-top: 0.5rem; max-width: 100%; border-radius: 4px; }
+        .spine-item.event .spine-dot        { background: #da3633; }
+        .spine-item.note  .spine-dot        { background: #1f6feb; }
+        .spine-item.fuel  .spine-dot        { background: #2ea043; }
+        .spine-item.driver_change .spine-dot { background: #8957e5; }
+        .spine-item.stage_start .spine-dot  { background: #e0a040; }
+        .spine-item.stage_end   .spine-dot  { background: #8b949e; }
+        .spine-item.agenda_meal .spine-dot    { background: #d29922; }
+        .spine-item.agenda_camping .spine-dot { background: #6e7681; }
+        @media (max-width: 600px) {
+            .spine-item { grid-template-columns: 56px 20px 1fr; gap: 0.5rem; }
+            .spine-time { font-size: 0.72rem; }
+            .spine-dot  { left: 2px; width: 14px; height: 14px; }
+        }
+
         /* Day filter */
         .day-filter { margin-bottom: 1.5rem; }
         .day-filter-bar {
@@ -1279,6 +1331,196 @@
                 eventCount: dayEvents.length,
                 hasData: daySlice != null || dayEvents.length > 0 || dayFuel.length > 0
             };
+        }
+
+        // Timeline spine (Plan 19-06 — D-06, D-07)
+        function _formatSpineTime(iso) {
+            try {
+                var d = new Date(iso);
+                if (isNaN(d.getTime())) return '';
+                return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: TIMEZONE });
+            } catch (e) { return ''; }
+        }
+
+        function buildSpine(dayISO, data) {
+            var items = [];
+            var events = (data && data.events) || [];
+            var notes  = (data && data.notes)  || [];
+            var fuel   = (data && data.fuel)   || [];
+            var agendaDay = (data && data.agendaDay) || null;
+
+            events.forEach(function(ev) {
+                if (_dayOf(ev.timestamp) !== dayISO) return;
+                var ts = Date.parse(ev.timestamp);
+                if (isNaN(ts)) return;
+                items.push({ kind: 'event', _ts: ts, ts_iso: ev.timestamp, payload: ev });
+            });
+
+            notes.forEach(function(n) {
+                if (_dayOf(n.timestamp_utc) !== dayISO) return;
+                var ts = Date.parse(n.timestamp_utc);
+                if (isNaN(ts)) return;
+                items.push({ kind: 'note', _ts: ts, ts_iso: n.timestamp_utc, payload: n });
+            });
+
+            fuel.forEach(function(f) {
+                if (_dayOf(f.timestamp_utc) !== dayISO) return;
+                var ts = Date.parse(f.timestamp_utc);
+                if (isNaN(ts)) return;
+                items.push({ kind: 'fuel', _ts: ts, ts_iso: f.timestamp_utc, payload: f });
+            });
+
+            // Driver-change markers: derived from events[].active_driver transitions within this day.
+            var driverSeq = events
+                .filter(function(ev) { return _dayOf(ev.timestamp) === dayISO && ev.active_driver; })
+                .sort(function(a, b) { return Date.parse(a.timestamp) - Date.parse(b.timestamp); });
+            var prev = null;
+            driverSeq.forEach(function(ev) {
+                if (ev.active_driver !== prev) {
+                    var ts = Date.parse(ev.timestamp);
+                    if (!isNaN(ts)) {
+                        items.push({
+                            kind: 'driver_change', _ts: ts, ts_iso: ev.timestamp,
+                            payload: { from: prev, to: ev.active_driver }
+                        });
+                    }
+                    prev = ev.active_driver;
+                }
+            });
+
+            // Agenda markers: meals + camping. Meals have HH:MM time; camping pins to 20:00 local.
+            if (agendaDay && agendaDay.meals) {
+                agendaDay.meals.forEach(function(m) {
+                    if (!m.time) return;
+                    var iso = dayISO + 'T' + m.time + ':00';
+                    var ts = Date.parse(iso + '+10:00'); // Sydney-ish; close enough for ordering
+                    if (isNaN(ts)) return;
+                    items.push({ kind: 'agenda_meal', _ts: ts, ts_iso: iso, payload: m });
+                });
+            }
+            if (agendaDay && agendaDay.camping) {
+                var campIso = dayISO + 'T20:00:00';
+                var campTs = Date.parse(campIso + '+10:00');
+                if (!isNaN(campTs)) {
+                    items.push({ kind: 'agenda_camping', _ts: campTs, ts_iso: campIso, payload: { where: agendaDay.camping } });
+                }
+            }
+
+            // Stage bookends: first and last event of the day = start/end markers for now.
+            // (Future: derive from GPS motion transitions. Out of scope this plan — extension point.)
+            var dayEvents = items.filter(function(i) { return i.kind === 'event'; });
+            if (dayEvents.length > 0) {
+                items.push({
+                    kind: 'stage_start', _ts: dayEvents[0]._ts - 1, ts_iso: dayEvents[0].ts_iso,
+                    payload: { label: 'Day started' }
+                });
+                var last = dayEvents[dayEvents.length - 1];
+                items.push({
+                    kind: 'stage_end', _ts: last._ts + 1, ts_iso: last.ts_iso,
+                    payload: { label: 'Last activity' }
+                });
+            }
+
+            items.sort(function(a, b) { return a._ts - b._ts; });
+            return items;
+        }
+
+        function _spineEventCard(ev) {
+            var type = escapeHtml(ev.type || 'EVENT');
+            var colour = BADGE_COLORS[ev.type] || '#8b949e';
+            var metaBits = [];
+            if (ev.peak_g != null)         metaBits.push(Number(ev.peak_g).toFixed(2) + ' g');
+            if (ev.peak_speed_kmh != null) metaBits.push(Number(ev.peak_speed_kmh).toFixed(0) + ' km/h');
+            if (ev.duration_ms != null)    metaBits.push((Number(ev.duration_ms)/1000).toFixed(1) + ' s');
+            var video = '';
+            var videoSrc = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
+            if (videoSrc) {
+                video = '<video controls preload="metadata" playsinline src="' + escapeHtml(videoSrc) + '"></video>';
+            }
+            return '<div class="spine-card">'
+                 +   '<div class="spine-card-title" style="color:' + colour + ';">' + type + '</div>'
+                 +   (metaBits.length ? '<div class="spine-card-meta">' + escapeHtml(metaBits.join(' \u00b7 ')) + '</div>' : '')
+                 +   video
+                 + '</div>';
+        }
+
+        function _spineNoteCard(n) {
+            return '<div class="spine-card">'
+                 +   '<div class="spine-card-title">Note</div>'
+                 +   '<div class="spine-card-body">' + escapeHtml(n.body || '') + '</div>'
+                 + '</div>';
+        }
+
+        function _spineFuelCard(f) {
+            // PII guard: NEVER read cost_aud or price_aud from fuel payloads.
+            var bits = [];
+            if (f.volume_litres != null) bits.push(Number(f.volume_litres).toFixed(1) + ' L');
+            if (f.km_per_litre != null)  bits.push(Number(f.km_per_litre).toFixed(1) + ' km/L');
+            if (f.odometer_km != null)   bits.push('odo ' + Number(f.odometer_km).toFixed(0) + ' km');
+            return '<div class="spine-card">'
+                 +   '<div class="spine-card-title" style="color:#2ea043;">Fuel stop</div>'
+                 +   '<div class="spine-card-meta">' + escapeHtml(bits.join(' \u00b7 ')) + '</div>'
+                 + '</div>';
+        }
+
+        function _spineDriverChange(p) {
+            var from = p.from ? escapeHtml(p.from) : 'Start';
+            var to   = escapeHtml(p.to || '');
+            return '<div class="spine-card">'
+                 +   '<div class="spine-card-title" style="color:#8957e5;">Driver change</div>'
+                 +   '<div class="spine-card-body">' + from + ' \u2192 ' + to + '</div>'
+                 + '</div>';
+        }
+
+        function _spineStageBookend(kind, p) {
+            var label = escapeHtml(p.label || kind);
+            var colour = (kind === 'stage_start') ? '#e0a040' : '#8b949e';
+            return '<div class="spine-card">'
+                 +   '<div class="spine-card-title" style="color:' + colour + ';">' + label + '</div>'
+                 + '</div>';
+        }
+
+        function _spineAgendaMeal(m) {
+            return '<div class="spine-card">'
+                 +   '<div class="spine-card-title" style="color:#d29922;">Meal</div>'
+                 +   '<div class="spine-card-body">' + escapeHtml(m.where || '') + '</div>'
+                 + '</div>';
+        }
+
+        function _spineAgendaCamping(p) {
+            return '<div class="spine-card">'
+                 +   '<div class="spine-card-title" style="color:#6e7681;">Camp</div>'
+                 +   '<div class="spine-card-body">' + escapeHtml(p.where || '') + '</div>'
+                 + '</div>';
+        }
+
+        function renderSpine(items) {
+            if (!items || items.length === 0) {
+                return '<div class="spine-empty">Nothing logged yet for this day.</div>';
+            }
+            var out = '<div class="spine">';
+            items.forEach(function(it) {
+                var time = _formatSpineTime(it.ts_iso);
+                var card;
+                switch (it.kind) {
+                    case 'event':           card = _spineEventCard(it.payload); break;
+                    case 'note':            card = _spineNoteCard(it.payload); break;
+                    case 'fuel':            card = _spineFuelCard(it.payload); break;
+                    case 'driver_change':   card = _spineDriverChange(it.payload); break;
+                    case 'stage_start':
+                    case 'stage_end':       card = _spineStageBookend(it.kind, it.payload); break;
+                    case 'agenda_meal':     card = _spineAgendaMeal(it.payload); break;
+                    case 'agenda_camping':  card = _spineAgendaCamping(it.payload); break;
+                    default:                card = '<div class="spine-card">' + escapeHtml(it.kind) + '</div>';
+                }
+                out += '<div class="spine-item ' + it.kind + '">'
+                    +    '<div class="spine-time">' + escapeHtml(time) + '</div>'
+                    +    '<div class="spine-rail"><div class="spine-dot"></div></div>'
+                    +    card
+                    +  '</div>';
+            });
+            out += '</div>';
+            return out;
         }
 
         // Day-nav progress bar (Plan 19-04)
