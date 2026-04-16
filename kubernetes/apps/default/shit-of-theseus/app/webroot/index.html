@@ -170,6 +170,50 @@
             .day-nav-segment { padding: 0.4rem 0.15rem; }
         }
 
+        /* Day page layout (Phase 19 — D-11, D-12, D-13) */
+        .day-page { max-width: 960px; margin: 0 auto; }
+        .day-page > section { margin-bottom: 2rem; }
+        .day-header {
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            padding: 1.5rem 1.75rem;
+        }
+        .day-header h1 { margin: 0; color: #f0dbb8; font-size: 1.75rem; }
+        .day-header .day-subtitle { color: #8b949e; font-size: 0.95rem; margin-top: 0.25rem; }
+        .day-agenda {
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            padding: 1.25rem 1.5rem; line-height: 1.6;
+        }
+        .day-agenda h2 { margin: 0 0 0.75rem 0; color: #f0dbb8; font-size: 1.1rem; }
+        .day-agenda .agenda-row { display: flex; gap: 0.5rem; margin-bottom: 0.35rem; color: #c9d1d9; }
+        .day-agenda .agenda-row strong { color: #e0a040; min-width: 90px; }
+        .day-agenda ul.meals { list-style: none; padding: 0; margin: 0.25rem 0 0 0; }
+        .day-agenda ul.meals li { color: #c9d1d9; }
+        .day-agenda ul.meals li time { color: #e0a040; margin-right: 0.4rem; }
+        .day-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+        .day-stat-card {
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            padding: 0.75rem 1rem; text-align: center;
+        }
+        .day-stat-card .stat-label { color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .day-stat-card .stat-value { color: #f0dbb8; font-size: 1.35rem; font-weight: 600; margin-top: 0.25rem; }
+        .day-section-placeholder {
+            background: #161b22; border: 1px dashed #30363d; border-radius: 8px;
+            padding: 1.25rem; color: #8b949e; font-style: italic;
+        }
+        .day-section-heading {
+            color: #f0dbb8; font-size: 1.2rem; margin: 0 0 0.75rem 0;
+        }
+        @media (max-width: 600px) {
+            .day-page { padding: 0 0.5rem; }
+            .day-header { padding: 1rem 1.25rem; }
+            .day-header h1 { font-size: 1.35rem; }
+            .day-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+
         /* Day filter */
         .day-filter { margin-bottom: 1.5rem; }
         .day-filter-bar {
@@ -1149,6 +1193,17 @@
         window.addEventListener('popstate', function() {
             route();
         });
+
+        // Day-page helpers (Plan 19-05)
+        function escapeHtml(s) {
+            if (s === null || s === undefined) return '';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         // Day-nav progress bar (Plan 19-04)
         function _formatShortDate(iso) {
