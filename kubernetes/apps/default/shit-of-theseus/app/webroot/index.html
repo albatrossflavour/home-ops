@@ -1666,6 +1666,72 @@
             _countdownTimer = setInterval(tick, 1000);
         }
 
+        // Before-mode homepage renderer (Plan 19-08 — NARR-01 / D-16)
+        function renderHomepageBefore(agenda) {
+            var rally = agenda.rally || {};
+            var days = agenda.days || [];
+
+            var heroHtml =
+                '<section class="before-hero">' +
+                    '<h1>' + escapeHtml(rally.title || 'Shit of Theseus Rally') + '</h1>' +
+                    (rally.team ? '<div class="rally-team">Team ' + escapeHtml(rally.team) + '</div>' : '') +
+                    (rally.start_location && rally.end_location
+                        ? '<div class="rally-route">' + escapeHtml(rally.start_location) + ' \u2192 ' + escapeHtml(rally.end_location) + '</div>'
+                        : '') +
+                '</section>';
+
+            var countdownHtml = '<section class="before-countdown" id="before-countdown-host"></section>';
+
+            var ctaHtml = rally.start_date
+                ? '<div class="before-cta">Follow along from ' + escapeHtml(rally.start_date) + '.</div>'
+                : '<div class="before-cta">Follow along once we are rolling.</div>';
+
+            var statsHtml =
+                '<section class="before-stats">' +
+                    (rally.total_distance_km ? '<div class="day-stat-card"><div class="stat-label">Distance</div><div class="stat-value">' + Number(rally.total_distance_km).toFixed(0) + ' km</div></div>' : '') +
+                    '<div class="day-stat-card"><div class="stat-label">Days</div><div class="stat-value">' + days.length + '</div></div>' +
+                    (rally.team ? '<div class="day-stat-card"><div class="stat-label">Team</div><div class="stat-value" style="font-size:1rem;">' + escapeHtml(rally.team) + '</div></div>' : '') +
+                    (rally.start_date ? '<div class="day-stat-card"><div class="stat-label">Start</div><div class="stat-value" style="font-size:0.9rem;">' + escapeHtml(rally.start_date) + '</div></div>' : '') +
+                '</section>';
+
+            var plannedRouteHtml =
+                '<section class="before-planned-route">' +
+                    '<h3 class="day-section-heading">Planned route</h3>' +
+                    '<img src="/route.jpg" alt="Planned rally route" onerror="this.style.display=\'none\';">' +
+                '</section>';
+
+            var dayListParts = ['<section><h3 class="day-section-heading">The itinerary</h3><div class="before-day-list">'];
+            days.forEach(function(d) {
+                dayListParts.push(
+                    '<a class="before-day-row" href="/day/' + d.date + '" onclick="event.preventDefault(); navigateToDay(\'' + d.date + '\');">' +
+                        '<div class="bd-num">' + String(Number(d.day_number) || 0) + '</div>' +
+                        '<div><div class="bd-date">' + escapeHtml(_formatShortDate(d.date)) + '</div></div>' +
+                        '<div>' +
+                            '<div class="bd-title">' + escapeHtml(d.title || '') + '</div>' +
+                            (d.route ? '<div class="bd-route">' + escapeHtml(d.route) + '</div>' : '') +
+                        '</div>' +
+                    '</a>'
+                );
+            });
+            dayListParts.push('</div></section>');
+
+            var html = '<div class="day-page">' +
+                heroHtml +
+                countdownHtml +
+                ctaHtml +
+                statsHtml +
+                plannedRouteHtml +
+                dayListParts.join('') +
+                '</div>';
+
+            showRoute(html);
+
+            // Start the countdown after the DOM mounts.
+            if (rally.start_date) {
+                _startCountdown(rally.start_date, document.getElementById('before-countdown-host'));
+            }
+        }
+
         function initDayMap(dayISO, route, events) {
             _teardownDayMap();
             var host = document.getElementById('day-map');
