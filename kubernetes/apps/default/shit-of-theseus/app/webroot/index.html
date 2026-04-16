@@ -1014,6 +1014,49 @@
             BOOT: 'Startup'
         };
 
+        var LIVE_FRESHNESS_MS = 6 * 3600 * 1000;   // 6 hours — D-03 threshold
+
+        /**
+         * Decide which homepage mode to render.
+         * @param {object|null} agenda — parsed agenda.json, or null on fetch failure
+         * @param {string|null} routeGeneratedAt — ISO-8601 from routeData.generated_at, or null
+         * @returns {'before'|'live'|'archive'}
+         */
+        function detectMode(agenda, routeGeneratedAt) {
+            if (!agenda || !agenda.rally || !agenda.rally.start_date || !agenda.rally.end_date) {
+                return 'archive';
+            }
+            var today = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+            var start = agenda.rally.start_date;
+            var end = agenda.rally.end_date;
+            if (today < start) return 'before';
+            if (today > end) return 'archive';
+            if (!routeGeneratedAt) return 'archive';
+            var genDate = new Date(routeGeneratedAt);
+            if (isNaN(genDate.getTime())) return 'archive';
+            var ageMs = Date.now() - genDate.getTime();
+            if (ageMs < 0) return 'archive';
+            return ageMs < LIVE_FRESHNESS_MS ? 'live' : 'archive';
+        }
+
+        // Self-test — logs to console if any assertion fails. No test framework available.
+        (function _detectModeSelfTest() {
+            function assertEq(actual, expected, label) {
+                if (actual !== expected) {
+                    console.error('detectMode SELF-TEST FAIL:', label, 'got', actual, 'wanted', expected);
+                }
+            }
+            var a = { rally: { start_date: '2099-01-01', end_date: '2099-01-10' } };
+            assertEq(detectMode(a, null), 'before', 'future rally');
+            var b = { rally: { start_date: '2000-01-01', end_date: '2000-01-10' } };
+            assertEq(detectMode(b, null), 'archive', 'past rally');
+            var c = { rally: { start_date: '1900-01-01', end_date: '2999-01-01' } };
+            assertEq(detectMode(c, new Date().toISOString()), 'live', 'in-range + fresh');
+            assertEq(detectMode(c, '2000-01-01T00:00:00Z'), 'archive', 'in-range + stale');
+            assertEq(detectMode(null, null), 'archive', 'no agenda');
+            assertEq(detectMode({}, null), 'archive', 'malformed agenda');
+        })();
+
         var eventsData = null;
         var notesData = null;
         var fuelData = null;
