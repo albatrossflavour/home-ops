@@ -677,6 +677,7 @@
     </nav>
 
     <main>
+        <div id="dynamic-route" style="display:none;"></div>
         <div id="status-section" class="section active">
             <div style="background:#161b22;border:1px solid #2a1f0e;border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;line-height:1.7;">
                 <p style="color:#c9d1d9;margin-bottom:0.5rem;">
@@ -1057,6 +1058,110 @@
             assertEq(detectMode({}, null), 'archive', 'malformed agenda');
         })();
 
+        var DAY_URL_RE = /^\/day\/(\d{4}-\d{2}-\d{2})\/?$/;
+        var ABOUT_URL_RE = /^\/about\/?$/;
+
+        function showRoute(html) {
+            // Single entry-point for router-owned DOM. Hides all .section children of <main>.
+            document.querySelectorAll('main > .section').forEach(function(s) { s.style.display = 'none'; });
+            var host = document.getElementById('dynamic-route');
+            host.style.display = '';
+            host.innerHTML = html;
+        }
+
+        function showLegacySections() {
+            // Re-show the existing .section-based home. Used when router has nothing to render.
+            document.querySelectorAll('main > .section').forEach(function(s) { s.style.display = ''; });
+            var host = document.getElementById('dynamic-route');
+            host.style.display = 'none';
+            host.innerHTML = '';
+        }
+
+        function route() {
+            var pathname = window.location.pathname;
+            var dayMatch = pathname.match(DAY_URL_RE);
+            if (dayMatch) {
+                var dayISO = dayMatch[1];
+                // Validate the captured date parses
+                var d = new Date(dayISO + 'T00:00:00Z');
+                if (isNaN(d.getTime())) { renderHomepage(); return; }
+                renderDayPage(dayISO);
+                return;
+            }
+            if (ABOUT_URL_RE.test(pathname)) {
+                renderAbout();
+                return;
+            }
+            renderHomepage();
+        }
+
+        function navigateToDay(dayISO) {
+            history.pushState({ route: 'day', day: dayISO }, '', '/day/' + dayISO);
+            renderDayPage(dayISO);
+            window.scrollTo(0, 0);
+        }
+
+        function navigateHome() {
+            history.pushState({ route: 'home' }, '', '/');
+            renderHomepage();
+            window.scrollTo(0, 0);
+        }
+
+        window.addEventListener('popstate', function() {
+            route();
+        });
+
+        // Stubs — Plan 19-05/06/07 replace these with real renderers.
+        function renderDayPage(dayISO) {
+            var dayExists = agendaData && agendaData.days && agendaData.days.some(function(d) { return d.date === dayISO; });
+            var headerText = 'Day ' + dayISO;
+            if (dayExists) {
+                var agendaDay = agendaData.days.filter(function(d) { return d.date === dayISO; })[0];
+                headerText = 'Day ' + agendaDay.day_number + ' \u2014 ' + agendaDay.title;
+            }
+            var safeHeader = document.createElement('div');
+            safeHeader.textContent = headerText;
+            var body = dayExists
+                ? '<p style="color:#8b949e;">Day page content lands in Plan 19-05/06/07.</p>'
+                : '<p style="color:#8b949e;">No agenda entry for ' + dayISO.replace(/[^0-9-]/g, '') + '.</p>';
+            showRoute(
+                '<div style="background:#161b22;border:1px solid #2a1f0e;border-radius:8px;padding:1.5rem;">' +
+                '<h2 style="color:#f0dbb8;margin-top:0;">' + safeHeader.innerHTML + '</h2>' +
+                body +
+                '<p><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></p>' +
+                '</div>'
+            );
+        }
+
+        function renderHomepage() {
+            // Phase 18 behaviour: show legacy sections. Plans 19-08/09/10 replace this with
+            // mode-specific renderers keyed off detectMode(agendaData, routeData && routeData.generated_at).
+            var mode = detectMode(agendaData, routeData && routeData.generated_at);
+            console.log('homepage mode:', mode);
+            showLegacySections();
+        }
+
+        function renderAbout() {
+            // Stub — Plan 19-11 moves /about content here.
+            showRoute(
+                '<div style="background:#161b22;border:1px solid #2a1f0e;border-radius:8px;padding:1.5rem;">' +
+                '<h2 style="color:#f0dbb8;margin-top:0;">About</h2>' +
+                '<p style="color:#8b949e;">About content lands in Plan 19-11.</p>' +
+                '<p><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></p>' +
+                '</div>'
+            );
+        }
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // Re-run mode detection on tab focus return (D-04)
+                var pathname = window.location.pathname;
+                if (pathname === '/' || pathname === '/index.html') {
+                    renderHomepage();
+                }
+            }
+        });
+
         var eventsData = null;
         var notesData = null;
         var fuelData = null;
@@ -1268,15 +1373,18 @@
                 if (error) { error.style.display = 'block'; error.textContent = 'Driver data unavailable.'; }
             });
 
-        fetch('/agenda.json', { cache: 'no-cache' })
-            .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-            .then(function(agenda) { agendaData = agenda; })
-            .catch(function(err) { console.warn('agenda fetch failed', err); agendaData = null; });
-
-        fetch('/captures/route.json', { cache: 'no-cache' })
-            .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-            .then(function(route) { routeData = route; })
-            .catch(function(err) { console.warn('route fetch failed', err); routeData = null; });
+        // Wait for agenda + route to settle (success or fail), then run the SPA router.
+        // The other fetches keep resolving independently into renderEvents/renderNotes/etc.
+        Promise.allSettled([
+            fetch('/agenda.json', { cache: 'no-cache' })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(x) { agendaData = x || agendaData; })
+                .catch(function(err) { console.warn('agenda fetch failed', err); }),
+            fetch('/captures/route.json', { cache: 'no-cache' })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(x) { routeData = x || routeData; })
+                .catch(function(err) { console.warn('route fetch failed', err); })
+        ]).then(function() { route(); });
 
         var statusMapInitialised = false;
         function renderStatus(events) {
