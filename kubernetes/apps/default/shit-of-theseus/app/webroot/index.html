@@ -1614,7 +1614,7 @@
                 '</section>';
 
             var mapPlaceholder = '<section><h3 class="day-section-heading">Map</h3><div id="day-map" class="day-section-placeholder">Day map placeholder \u2014 wired by Plan 19-07.</div></section>';
-            var spinePlaceholder = '<section><h3 class="day-section-heading">Timeline</h3><div id="day-spine" class="day-section-placeholder">Timeline spine placeholder \u2014 wired by Plan 19-06.</div></section>';
+            var spinePlaceholder = '<section><h3 class="day-section-heading">Timeline</h3><div id="day-spine"></div></section>';
             var videosPlaceholder = '<section><h3 class="day-section-heading">Video highlights</h3><div id="day-videos" class="day-section-placeholder">Video highlights placeholder \u2014 wired by Plan 19-06/Phase 19 backfill.</div></section>';
             var timelapsePlaceholder = '<section><h3 class="day-section-heading">Timelapse</h3><div id="day-timelapse" class="day-section-placeholder">Timelapse embed \u2014 /captures/' + escapeHtml(dayISO) + '/timelapse.mp4 if present.</div></section>';
 
@@ -1630,6 +1630,17 @@
                     '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
                 '</div>';
             showRoute(html);
+
+            // Populate #day-spine now that it is in the DOM (Plan 19-06)
+            var spineHost = document.getElementById('day-spine');
+            if (spineHost) {
+                spineHost.innerHTML = renderSpine(buildSpine(dayISO, {
+                    events: eventsData || [],
+                    notes:  notesData  || [],
+                    fuel:   fuelData   || [],
+                    agendaDay: agendaDay
+                }));
+            }
         }
 
         function renderHomepage() {
