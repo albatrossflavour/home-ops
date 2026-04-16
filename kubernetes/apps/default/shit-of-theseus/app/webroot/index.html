@@ -1018,6 +1018,8 @@
         var notesData = null;
         var fuelData = null;
         var driverStatsData = null;
+        var agendaData = null;
+        var routeData = null;
         var mapInitialised = false;
 
         // Navigation
@@ -1222,6 +1224,16 @@
                 if (loading) loading.style.display = 'none';
                 if (error) { error.style.display = 'block'; error.textContent = 'Driver data unavailable.'; }
             });
+
+        fetch('/agenda.json', { cache: 'no-cache' })
+            .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+            .then(function(agenda) { agendaData = agenda; })
+            .catch(function(err) { console.warn('agenda fetch failed', err); agendaData = null; });
+
+        fetch('/captures/route.json', { cache: 'no-cache' })
+            .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+            .then(function(route) { routeData = route; })
+            .catch(function(err) { console.warn('route fetch failed', err); routeData = null; });
 
         var statusMapInitialised = false;
         function renderStatus(events) {
