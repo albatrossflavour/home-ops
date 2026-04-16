@@ -413,6 +413,59 @@
             .current-driver-widget .cdw-name   { font-size: 1rem; }
         }
 
+        /* Archive-mode homepage (Phase 19 — D-18, NARR-01) */
+        .archive-overview {
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+        }
+        .archive-overview h1 { color: #f0dbb8; margin: 0 0 0.25rem 0; font-size: 1.6rem; }
+        .archive-overview .archive-subtitle { color: #8b949e; margin-bottom: 1rem; font-size: 0.95rem; }
+        .archive-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.75rem;
+        }
+        .archive-day-grid {
+            display: flex; flex-direction: column; gap: 0.75rem;
+        }
+        .archive-day-card {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 1rem;
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            overflow: hidden;
+            text-decoration: none;
+            color: #c9d1d9;
+            transition: border-color 0.15s;
+        }
+        .archive-day-card:hover { border-color: #e0a040; }
+        .archive-day-card .adc-thumb {
+            position: relative;
+            background: #21262d;
+            min-height: 100px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .archive-day-card .adc-thumb img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .archive-day-card .adc-thumb-fallback {
+            color: #e0a040; font-size: 2.5rem; font-weight: 600;
+        }
+        .archive-day-card .adc-body {
+            padding: 1rem 1rem 1rem 0; display: flex; flex-direction: column; justify-content: center;
+        }
+        .archive-day-card .adc-header { display: flex; align-items: baseline; gap: 0.75rem; }
+        .archive-day-card .adc-num   { color: #e0a040; font-weight: 600; font-size: 0.95rem; }
+        .archive-day-card .adc-date  { color: #8b949e; font-size: 0.8rem; }
+        .archive-day-card .adc-title { color: #f0dbb8; font-weight: 600; font-size: 1.1rem; margin: 0.2rem 0; }
+        .archive-day-card .adc-stats { color: #8b949e; font-size: 0.8rem; }
+        @media (max-width: 600px) {
+            .archive-day-card { grid-template-columns: 90px 1fr; }
+            .archive-day-card .adc-thumb { min-height: 80px; }
+            .archive-day-card .adc-title { font-size: 1rem; }
+        }
+
         /* Day filter */
         .day-filter { margin-bottom: 1.5rem; }
         .day-filter-bar {
@@ -1744,6 +1797,36 @@
                     (timeLabel ? '<div class="cdw-time">' + escapeHtml(timeLabel) + '</div>' : '') +
                 '</div>' +
             '</section>';
+        }
+
+        function _rallyTotals(events, fuel, route, agenda) {
+            var totals = {
+                km: 0,
+                eventCount: (events || []).length,
+                fuelLitres: 0,
+                driverCount: 0,
+                dayCount: (agenda && agenda.days) ? agenda.days.length : 0,
+                startDate: agenda && agenda.rally ? agenda.rally.start_date : null,
+                endDate:   agenda && agenda.rally ? agenda.rally.end_date   : null
+            };
+            if (route && route.days) {
+                Object.keys(route.days).forEach(function(date) {
+                    var pts = route.days[date].points;
+                    if (!pts || pts.length < 2) return;
+                    for (var i = 1; i < pts.length; i++) {
+                        totals.km += _haversineKm(pts[i-1][0], pts[i-1][1], pts[i][0], pts[i][1]);
+                    }
+                });
+            }
+            (fuel || []).forEach(function(f) {
+                if (f.volume_litres != null) totals.fuelLitres += f.volume_litres;
+            });
+            var drivers = {};
+            (events || []).forEach(function(ev) {
+                if (ev.active_driver) drivers[ev.active_driver] = true;
+            });
+            totals.driverCount = Object.keys(drivers).length;
+            return totals;
         }
 
         var _liveRefreshTimer = null;
