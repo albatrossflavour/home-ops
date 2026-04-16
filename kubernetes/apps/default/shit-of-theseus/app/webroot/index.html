@@ -266,6 +266,24 @@
             .spine-dot  { left: 2px; width: 14px; height: 14px; }
         }
 
+        /* Day-page map (Phase 19 — D-21, D-22) */
+        .day-map-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #0d1117;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .day-map-empty {
+            background: #161b22; border: 1px dashed #30363d; border-radius: 8px;
+            padding: 1.25rem; color: #8b949e; font-style: italic; text-align: center;
+        }
+        @media (max-width: 600px) {
+            .day-map-container { height: 280px; }
+        }
+
         /* Day filter */
         .day-filter { margin-bottom: 1.5rem; }
         .day-filter-bar {
@@ -1523,6 +1541,100 @@
             return out;
         }
 
+        // Day-page map (Plan 19-07 — D-21 full-rally backdrop, D-22 day-slice highlight)
+        function _teardownDayMap() {
+            if (_currentDayMap) {
+                try { _currentDayMap.remove(); } catch (e) {}
+                _currentDayMap = null;
+            }
+        }
+
+        function initDayMap(dayISO, route, events) {
+            _teardownDayMap();
+            var host = document.getElementById('day-map');
+            if (!host) return;
+
+            var slice = (route && route.days && route.days[dayISO]) || null;
+            var hasBackdrop = route && route.days && Object.keys(route.days).length > 0;
+
+            // No data at all — render the muted placeholder.
+            if (!slice && !hasBackdrop) {
+                host.className = 'day-map-empty';
+                host.textContent = 'No route recorded for this day yet.';
+                return;
+            }
+
+            // We have SOME data. Rebuild the host as a map container.
+            host.className = 'day-map-container';
+            host.textContent = '';
+
+            // Determine initial centre. Prefer day slice midpoint; else rally centroid.
+            var centreLat, centreLng, initialZoom;
+            if (slice && slice.points && slice.points.length > 0) {
+                var mid = slice.points[Math.floor(slice.points.length / 2)];
+                centreLat = mid[0]; centreLng = mid[1]; initialZoom = 10;
+            } else {
+                var firstDay = Object.keys(route.days)[0];
+                var fp = route.days[firstDay].points[0];
+                centreLat = fp[0]; centreLng = fp[1]; initialZoom = 8;
+            }
+
+            _currentDayMap = L.map('day-map', { zoomControl: true, attributionControl: true })
+                .setView([centreLat, centreLng], initialZoom);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd', maxZoom: 19
+            }).addTo(_currentDayMap);
+
+            // Backdrop: all OTHER days in muted grey.
+            Object.keys(route.days).forEach(function(otherDate) {
+                if (otherDate === dayISO) return;
+                var pts = route.days[otherDate].points;
+                if (pts && pts.length > 1) {
+                    L.polyline(pts, {
+                        color: '#484f58',
+                        weight: 3,
+                        opacity: 0.55,
+                        interactive: false
+                    }).addTo(_currentDayMap);
+                }
+            });
+
+            // Day slice: bright orange on top.
+            if (slice && slice.points && slice.points.length > 1) {
+                var line = L.polyline(slice.points, {
+                    color: '#e0a040',
+                    weight: 5,
+                    opacity: 0.95
+                }).addTo(_currentDayMap);
+                _currentDayMap.fitBounds(line.getBounds(), { padding: [20, 20] });
+            }
+
+            // Event pins for this day only.
+            var dayEvents = (events || []).filter(function(ev) {
+                return _dayOf(ev.timestamp) === dayISO && ev.lat != null && ev.lng != null;
+            });
+            dayEvents.forEach(function(ev) {
+                var colour = BADGE_COLORS[ev.type] || '#8b949e';
+                L.circleMarker([ev.lat, ev.lng], {
+                    radius: 6,
+                    color: '#0d1117',
+                    weight: 1,
+                    fillColor: colour,
+                    fillOpacity: 0.9
+                }).addTo(_currentDayMap).bindPopup(
+                    '<strong>' + escapeHtml(ev.type || 'EVENT') + '</strong><br>' +
+                    _formatSpineTime(ev.timestamp)
+                );
+            });
+
+            // Safety: invalidate size after a tick so Leaflet measures correctly inside a newly-mounted SPA div.
+            setTimeout(function() {
+                if (_currentDayMap) _currentDayMap.invalidateSize();
+            }, 100);
+        }
+
         // Day-nav progress bar (Plan 19-04)
         function _formatShortDate(iso) {
             // '2026-05-27' → '27 May' using UTC to avoid timezone shifting
@@ -1680,6 +1792,7 @@
         var driverStatsData = null;
         var agendaData = null;
         var routeData = null;
+        var _currentDayMap = null;
         var mapInitialised = false;
 
         // Navigation
