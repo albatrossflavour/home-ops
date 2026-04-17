@@ -757,7 +757,7 @@
         .team-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+            gap: 2.5rem;
             align-items: start;
         }
         @media (max-width: 600px) {
@@ -769,7 +769,7 @@
             background: #161b22;
             border: 1px solid #2a1f0e;
             border-radius: 8px;
-            padding: 1.5rem;
+            padding: 1.75rem 2rem;
             text-align: left;
         }
         .team-member .member-avatar {
@@ -1037,7 +1037,7 @@
     <nav>
         <a href="/" onclick="event.preventDefault(); navigateHome();">Home</a>
         <a href="/car" onclick="event.preventDefault(); navigateToCar();">Car</a>
-        <a href="https://grafana.shit-of-theseus.com/d/shitbox-rally-command?orgId=1" target="_blank" rel="noopener">Grafana</a>
+        <a href="https://grafana.shit-of-theseus.com/d/shitbox-rally-command?orgId=1" target="_blank" rel="noopener">Telemetry</a>
         <a href="/about" onclick="event.preventDefault(); navigateToAbout();">About</a>
         <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener" style="color:#e0a040;">Donate</a>
     </nav>
@@ -1853,7 +1853,7 @@
                 if (state === 'future') {
                     html += '<span class="day-nav-segment future" aria-label="Day ' + num + ' \u2014 upcoming">'
                          +  '<span class="day-nav-number">' + num + '</span>'
-                         +  '<span class="day-nav-date">' + dateLabel + '</span>'
+                         +  '<span class="day-nav-date">Coming July</span>'
                          +  '</span>';
                 } else {
                     // Anchor form — navigateToDay handles pushState; real href is the fallback for middle-click / copy-link.
@@ -2101,6 +2101,8 @@
                     '<p>Debounced at 50ms because rally roads are not gentle.</p>' +
                     '<h4>Sensor Cluster</h4>' +
                     '<p>3D-printed PETG housing, ceiling-mounted in a 4\u00d72 grid. Parametric OpenSCAD design. Keeps everything tidy and vibration-isolated(ish).</p>' +
+                    '<h4>Wiring Diagram</h4>' +
+                    '<img src="/wiring.svg" alt="V2 telemetry wiring diagram" style="width:100%;margin-top:0.75rem;border-radius:8px;border:1px solid #2a1f0e;">' +
                 '</section>';
 
             var softwareHtml =
@@ -2247,7 +2249,7 @@
                             '<p>I\'m also in charge of the music and the beer. If the playlist\'s good and morale\'s high, I\'m doing my job.</p>' +
                             '<p>Tony bolts sensors to things and worries about graphs. I make sure we\'ve got fuel, a plan, and something decent playing when the car starts making noises it shouldn\'t.</p>' +
                             '<p>We\'re aiming to get from Port Douglas to Melbourne, raise as much as we can, and come back with a few stories worth telling.</p>' +
-                            '<p>If you\'d like to support the organised half of this operation, and more importantly cancer research, <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener">donate</a>.</p>' +
+                            '<p>We\'re aiming to raise as much as we can for cancer research along the way.</p>' +
                         '</div>' +
                         '<div class="team-member">' +
                             '<img class="member-avatar-img" src="https://www.gravatar.com/avatar/4fce033d079d9cb954f6ac0f2117523f?s=160" alt="Tony">' +
@@ -2266,7 +2268,7 @@
                             '<p>My mum is living with terminal cancer now.</p>' +
                             '<p>At some point cancer stops being an abstract "1 in 2" and becomes hospital corridors, phone calls, and dates you don\'t forget.</p>' +
                             '<p>This rally is something I can do. It\'s not a fix. It\'s not a cure. It\'s just action.</p>' +
-                            '<p>If you\'re entertained by a $1,500 car running better monitoring than some enterprise environments, and you\'d like to help fund cancer research, <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener">donate</a>.</p>' +
+                            '<p>If you\'re entertained by a $1,500 car running better monitoring than some enterprise environments, that\'s the spirit.</p>' +
                         '</div>' +
                     '</div>' +
                 '</section>';

@@ -14,6 +14,7 @@ configMapGenerator:
       - webroot/route.jpg
       - webroot/car-front.jpg
       - webroot/car-side.jpg
+      - webroot/wiring.svg
   - name: shit-of-theseus-nginx-config
     files:
       - nginx-config/default.conf
