@@ -1640,10 +1640,7 @@
 
             var heroHtml =
                 '<section class="before-hero">' +
-                    (rally.team ? '<div class="rally-team">Team ' + escapeHtml(rally.team) + '</div>' : '') +
-                    (rally.start_location && rally.end_location
-                        ? '<div class="rally-route">' + escapeHtml(rally.start_location) + ' \u2192 ' + escapeHtml(rally.end_location) + '</div>'
-                        : '') +
+                    '<p style="color:#8b949e;font-size:0.95rem;max-width:640px;margin:0 auto;">Two blokes, one $1,500 car, and 3,500 km of outback between Port Douglas and Melbourne. Every sensor reading, video clip, and breakdown is captured live and published here automatically. All to raise money for cancer research.</p>' +
                 '</section>';
 
             var countdownHtml = '<section class="before-countdown" id="before-countdown-host"></section>';
