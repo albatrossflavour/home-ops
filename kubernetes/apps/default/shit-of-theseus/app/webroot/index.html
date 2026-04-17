@@ -711,6 +711,43 @@
             border-radius: 8px;
             border: 1px solid #2a1f0e;
         }
+
+        /* Car specs grid */
+        .car-specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .car-spec-item {
+            background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
+            padding: 0.75rem 1rem; text-align: center;
+        }
+        .car-spec-item .spec-label { color: #8b949e; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .car-spec-item .spec-value { color: #f0dbb8; font-size: 1rem; font-weight: 600; margin-top: 0.2rem; }
+
+        /* Build timeline */
+        .build-timeline { position: relative; padding-left: 2rem; margin-top: 1rem; }
+        .build-timeline::before {
+            content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+            width: 2px; background: #2a1f0e;
+        }
+        .build-entry { position: relative; margin-bottom: 1.25rem; }
+        .build-entry:last-child { margin-bottom: 0; }
+        .build-entry::before {
+            content: ''; position: absolute; left: -1.65rem; top: 0.55rem;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #c06000; border: 2px solid #0d1117;
+        }
+        .build-entry .build-date {
+            color: #8b949e; font-size: 0.75rem; text-transform: uppercase;
+            letter-spacing: 0.04em; margin-bottom: 0.15rem;
+        }
+        .build-entry .build-title { color: #f0dbb8; font-weight: 600; margin-bottom: 0.2rem; }
+        .build-entry .build-desc { color: #c9d1d9; font-size: 0.9rem; line-height: 1.5; }
+        @media (max-width: 600px) {
+            .car-specs-grid { grid-template-columns: repeat(2, 1fr); }
+        }
         .route-map {
             width: 100%;
             border-radius: 8px;
@@ -1994,6 +2031,16 @@
                         '<img src="/car-front.jpg" alt="The Shit of Theseus, front view" onerror="this.style.display=\'none\';">' +
                         '<img src="/car-side.jpg" alt="The Shit of Theseus, side view" onerror="this.style.display=\'none\';">' +
                     '</div>' +
+                    '<div class="car-specs-grid" style="margin-top:1.25rem;">' +
+                        '<div class="car-spec-item"><div class="spec-label">Model</div><div class="spec-value">Ford Laser LXi</div></div>' +
+                        '<div class="car-spec-item"><div class="spec-label">Year</div><div class="spec-value">2001 (KQ)</div></div>' +
+                        '<div class="car-spec-item"><div class="spec-label">Engine</div><div class="spec-value">1.6L Zetec</div></div>' +
+                        '<div class="car-spec-item"><div class="spec-label">Code</div><div class="spec-value">ZM-DE DOHC</div></div>' +
+                        '<div class="car-spec-item"><div class="spec-label">Transmission</div><div class="spec-value">4-speed auto</div></div>' +
+                        '<div class="car-spec-item"><div class="spec-label">Drivetrain</div><div class="spec-value">FWD</div></div>' +
+                        '<div class="car-spec-item"><div class="spec-label">Purchase Price</div><div class="spec-value">~$1,500</div></div>' +
+                        '<div class="car-spec-item"><div class="spec-label">Name</div><div class="spec-value" style="font-style:italic;">Shit of Theseus</div></div>' +
+                    '</div>' +
                 '</section>';
 
             var whyHtml =
@@ -2016,40 +2063,44 @@
 
             var hardwareHtml =
                 '<section class="about-card">' +
-                    '<h3>The Hardware</h3>' +
-                    '<p>The brains of the operation is a <strong>Raspberry Pi</strong> running a single Python daemon that orchestrates everything.</p>' +
+                    '<h3>The Hardware (V2)</h3>' +
+                    '<p>The brains of the operation is a <strong>Raspberry Pi 5</strong> with NVMe storage, running a single Python daemon that orchestrates everything. The original Pi 4 was fried during a wiring incident. Because of course it was.</p>' +
                     '<p>Connected to it:</p>' +
-                    '<h4>MPU-6050 IMU</h4>' +
-                    '<p>6-axis accelerometer and gyroscope at 100 Hz.</p>' +
-                    '<ul><li>\u00b14g accel</li><li>\u00b1500\u00b0/s gyro</li><li>Continuous ring buffer</li><li>Event detection state machine</li></ul>' +
+                    '<h4>LSM6DSOX IMU</h4>' +
+                    '<p>6-axis accelerometer and gyroscope at 50 Hz, behind a TCA4307 I2C bus buffer for hot-plug resilience.</p>' +
+                    '<ul><li>Replaces the original MPU-6050</li><li>Continuous ring buffer</li><li>Event detection state machine</li></ul>' +
                     '<p>It watches for:</p>' +
                     '<ul><li>Hard braking</li><li>Big cornering forces</li><li>High G events</li><li>Sustained rough road vibration</li></ul>' +
                     '<p>When it sees something interesting, it triggers a capture.</p>' +
+                    '<h4>LIS3MDL Magnetometer</h4>' +
+                    '<p>3-axis magnetic field sensor. Heading reference for the IMU.</p>' +
                     '<h4>GPS via gpsd</h4>' +
                     '<p>1 Hz position, speed, altitude and satellite count.</p>' +
                     '<ul><li>Below 3 km/h is floored to zero to eliminate GPS drift</li><li>Tracks gpsd down, no fix, and full lock</li></ul>' +
                     '<p>Because if we\'re going to break down, we want coordinates.</p>' +
-                    '<h4>BME680 Environment Sensor</h4>' +
+                    '<h4>BME690 Environment Sensor</h4>' +
                     '<p>Temperature, humidity, pressure and VOC gas resistance.</p>' +
                     '<ul><li>Sampled at 1 Hz</li><li>Lets us track engine bay heat soak and ambient misery</li></ul>' +
-                    '<h4>INA219 Power Monitor</h4>' +
-                    '<p>Monitors bus voltage and current draw.</p>' +
+                    '<h4>INA226 Power Monitor</h4>' +
+                    '<p>High-side current and voltage monitoring.</p>' +
                     '<ul><li>Early warning if the car\'s electrical system starts having opinions</li><li>Also tells us if the Pi is about to brown out mid-drama</li></ul>' +
-                    '<h4>USB Dashcam</h4>' +
-                    '<p>720p at 30fps via ffmpeg.</p>' +
+                    '<h4>VEML7700 Light Sensor</h4>' +
+                    '<p>Ambient light level. Knows when we\'re in tunnels, under tree cover, or driving into sunset glare.</p>' +
+                    '<h4>Dual Cameras</h4>' +
+                    '<p>UGREEN front camera + Logitech Brio 100 cabin camera, composited into picture-in-picture by a single ffmpeg process.</p>' +
                     '<ul><li>Continuous 10-second segments</li><li>50-second rolling buffer</li></ul>' +
-                    '<p>Meaning the system always has the last 50 seconds of video before anything happens.</p>' +
+                    '<p>The system always has the last 50 seconds of video before anything happens.</p>' +
                     '<p>Which is very important for mechanical regret analysis.</p>' +
+                    '<h4>Waveshare 7" Display</h4>' +
+                    '<p>HDMI touchscreen running a dashboard kiosk. Replaces the old 128\u00d764 OLED.</p>' +
+                    '<p>Shows live telemetry, GPS, sensor health, and event counts. Big enough to read at speed without squinting.</p>' +
                     '<h4>Big Red Button</h4>' +
                     '<p>GPIO 17. Arcade style.</p>' +
                     '<p>Press it and:</p>' +
                     '<ul><li>The system grabs the pre-roll</li><li>Records 30 seconds after</li><li>Muxes into a single MP4</li><li>Chirps via piezo to confirm</li></ul>' +
                     '<p>Debounced at 50ms because rally roads are not gentle.</p>' +
-                    '<h4>OLED Dashboard</h4>' +
-                    '<p>128\u00d764 monochrome display.</p>' +
-                    '<p>Shows:</p>' +
-                    '<ul><li>GPS fix and speed</li><li>Peak G-force and event count</li><li>Sensor health</li><li>Network state</li><li>CPU temperature</li></ul>' +
-                    '<p>Failed sensors invert white-on-black so we can spot problems without SSHing at 110 km/h.</p>' +
+                    '<h4>Sensor Cluster</h4>' +
+                    '<p>3D-printed PETG housing, ceiling-mounted in a 4\u00d72 grid. Parametric OpenSCAD design. Keeps everything tidy and vibration-isolated(ish).</p>' +
                 '</section>';
 
             var softwareHtml =
@@ -2058,20 +2109,20 @@
                     '<p>Everything runs as a single systemd service:<br><code>shitbox-telemetry</code></p>' +
                     '<p>Because of course it does.</p>' +
                     '<p>Three concurrent paths:</p>' +
-                    '<h4>High-Rate Path, 100 Hz</h4>' +
+                    '<h4>High-Rate Path, 50 Hz</h4>' +
                     '<p>IMU into ring buffer.<br>State machine watches for threshold crossings.<br>Captures pre-event IMU data and triggers video capture.</p>' +
                     '<h4>Low-Rate Path, 1 Hz</h4>' +
                     '<p>GPS, environment and power metrics written to SQLite in WAL mode.</p>' +
                     '<p>Offline first.<br>Disk first.<br>Network second.</p>' +
                     '<p>If we\'re in the middle of nowhere, nothing is lost.</p>' +
                     '<h4>Capture Path</h4>' +
-                    '<p>ffmpeg writes rolling segments.</p>' +
+                    '<p>ffmpeg writes rolling segments from both cameras as a PiP composite.</p>' +
                     '<p>When triggered:</p>' +
                     '<ul><li>Pre-event buffer grabbed</li><li>30 seconds post-event recorded</li><li>Stitched using concat demuxer</li><li>No re-encoding, just muxing</li></ul>' +
                     '<p>GPS and speed overlay burned in.</p>' +
                     '<p>Result: a 60-second clip showing what happened before and after.</p>' +
                     '<h4>Timelapse</h4>' +
-                    '<p>One frame per minute above 5 km/h.<br>Compiled into a daily timelapse.</p>' +
+                    '<p>One frame every 10 seconds above 5 km/h.<br>Compiled into a daily timelapse at 24fps.</p>' +
                     '<p>GPS-stamped so we can replay the route.</p>' +
                     '<h4>Sync</h4>' +
                     '<p>When network appears:</p>' +
@@ -2080,12 +2131,77 @@
                     '<p>Because mobile signal in rural Australia is more of a suggestion than a service.</p>' +
                 '</section>';
 
+            var buildHtml =
+                '<section class="about-card">' +
+                    '<h3>The Build</h3>' +
+                    '<p>A rough chronology of how this got out of hand.</p>' +
+                    '<div class="build-timeline">' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">Website Narrative Rebuild</div>' +
+                            '<div class="build-desc">Day-centric SPA with route maps, field notes, fuel stops, and driver tracking. The site you\'re looking at now.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">V2 Hardware</div>' +
+                            '<div class="build-desc">Pi 5 + NVMe replacing the fried Pi 4. LSM6DSOX replacing the MPU-6050. New magnetometer, light sensor, and power monitor. Complete I2C bus rebuild with TCA4307 buffer.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">Waveshare 7" Display</div>' +
+                            '<div class="build-desc">HDMI touchscreen dashboard, VESA mounted separately from the Pi. Replaces the tiny OLED that required squinting at 110 km/h.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">Sensor Cluster Housing</div>' +
+                            '<div class="build-desc">3D-printed PETG ceiling mount. Parametric OpenSCAD design, 4\u00d72 grid. Keeps the sensors tidy and moderately vibration-proof.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">GPIO Bench Fit-out</div>' +
+                            '<div class="build-desc">GPS module, big red button, and piezo buzzer wired to the V2 Pi 5. Soldered connections this time, not breadboard jumpers.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Mar 2026</div>' +
+                            '<div class="build-title">Dual-Camera PiP</div>' +
+                            '<div class="build-desc">Front + cabin cameras composited in real-time by a single ffmpeg process. 10fps, ~7MB segments, stable at ~44% CPU on one core.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Mar 2026</div>' +
+                            '<div class="build-title">Timelapse System</div>' +
+                            '<div class="build-desc">One frame every 10 seconds while moving. Compiled daily into a 24fps video with intro card. Concat demuxer, ultrafast preset, under 30 seconds to compile.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Mar 2026</div>' +
+                            '<div class="build-title">ffmpeg Stability</div>' +
+                            '<div class="build-desc">Found and fixed the 2.5-minute stall bug: stderr pipe buffer filling up and blocking ffmpeg. Health monitor now drains it every 2 seconds. Boring fix, massive improvement.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Early 2026</div>' +
+                            '<div class="build-title">V1 Telemetry</div>' +
+                            '<div class="build-desc">Original build: Pi 4, MPU-6050, single USB camera, BME680, INA219, OLED display. Event detection, ring buffer capture, offline-first SQLite, Prometheus sync over WireGuard. The foundation everything else grew from.</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</section>';
+
+            var photosHtml =
+                '<section class="about-card">' +
+                    '<h3>Build Photos</h3>' +
+                    '<div class="car-gallery">' +
+                        '<img src="/car-interior.jpg" alt="Dashboard with Pi and display" onerror="this.style.display=\'none\';">' +
+                        '<img src="/car-sensor-cluster.jpg" alt="Ceiling-mounted sensor cluster" onerror="this.style.display=\'none\';">' +
+                        '<img src="/car-engine-bay.jpg" alt="Engine bay" onerror="this.style.display=\'none\';">' +
+                    '</div>' +
+                '</section>';
+
             var html = '<div class="day-page">' +
                 carIntro +
                 whyHtml +
                 telemetryHtml +
                 hardwareHtml +
                 softwareHtml +
+                buildHtml +
+                photosHtml +
                 '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
             '</div>';
             showRoute(html);
