@@ -2143,12 +2143,36 @@
                     '</div>' +
                 '</section>';
 
+            var driverStatsHtml = _renderDriverStatsForAbout(driverStatsData);
+
             var html = '<div class="day-page">' +
                 heroHtml +
                 teamHtml +
+                driverStatsHtml +
                 '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
             '</div>';
             showRoute(html);
+        }
+
+        function _renderDriverStatsForAbout(ds) {
+            if (!ds || !ds.drivers || ds.drivers.length === 0) return '';
+            var rows = '';
+            ds.drivers.forEach(function(d) {
+                var name = escapeHtml(d.driver_name || '');
+                var initial = escapeHtml((d.driver_name || '?').charAt(0).toUpperCase());
+                var isActive = ds.active_driver && d.driver_name === ds.active_driver;
+                var pct = (d.pct != null) ? Number(d.pct).toFixed(1) : '0';
+                var time = _formatDriveTimeLocal(d.total_seconds || 0);
+                rows +=
+                    '<div class="driver-card' + (isActive ? ' active' : '') + '" style="padding:1rem;background:#21262d;border-radius:8px;">' +
+                        '<div style="width:40px;height:40px;border-radius:50%;background:#c06000;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:600;">' + initial + '</div>' +
+                        '<div style="color:#f0dbb8;font-weight:600;margin-top:0.5rem;">' + name + '</div>' +
+                        (isActive ? '<div style="color:#e0a040;font-size:0.75rem;">On Duty</div>' : '') +
+                        '<div style="color:#8b949e;font-size:0.85rem;">' + escapeHtml(time) + '</div>' +
+                        '<div style="color:#8b949e;font-size:0.8rem;">' + escapeHtml(pct) + '% of total drive time</div>' +
+                    '</div>';
+            });
+            return '<section class="about-card"><h3>Drive Time</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">' + rows + '</div></section>';
         }
 
         function renderLegacyVideos() {

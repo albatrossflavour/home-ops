@@ -1,7 +1,7 @@
 {
   "rally": {
-    "start_date": "2026-05-27",
-    "end_date": "2026-06-05",
+    "start_date": "2026-07-11",
+    "end_date": "2026-07-17",
     "team": "A Team Has No Name",
     "title": "Shitbox Rally 2026",
     "start_location": "Port Douglas",
@@ -11,95 +11,71 @@
   },
   "days": [
     {
-      "date": "2026-05-27",
+      "date": "2026-07-11",
       "day_number": 1,
-      "title": "Port Douglas \u2192 Cairns",
-      "route": "Short shake-out leg south down the coast road.",
-      "camping": "Cairns Holiday Park",
-      "meals": [
-        { "time": "12:30", "where": "Mossman Bakery" }
-      ],
+      "title": "Port Douglas \u2192 The Oasis Roadhouse",
+      "route": "484 km (238 sealed, 246 unsealed). Start line at Raider Park, Port Douglas Sports Complex.",
+      "distance_km": 484,
+      "camping": "The Oasis Roadhouse",
+      "meals": [],
       "notes": null
     },
     {
-      "date": "2026-05-28",
+      "date": "2026-07-12",
       "day_number": 2,
-      "title": "Cairns \u2192 Charters Towers",
-      "route": "Up through the Atherton Tablelands, then west into the dry interior.",
-      "camping": "Charters Towers showgrounds",
-      "meals": [
-        { "time": "12:00", "where": "Ravenshoe Hotel" }
-      ],
+      "title": "The Oasis Roadhouse \u2192 Aramac",
+      "route": "551 km (358 sealed, 193 unsealed). Dress-up day: Star Wars.",
+      "distance_km": 551,
+      "camping": "Aramac Showgrounds",
+      "meals": [],
       "notes": null
     },
     {
-      "date": "2026-05-29",
+      "date": "2026-07-13",
       "day_number": 3,
-      "title": "Charters Towers \u2192 Clermont",
-      "route": "Across Queensland's central highlands on the Gregory Developmental Road.",
-      "camping": "Clermont caravan park",
+      "title": "Aramac \u2192 Toompine",
+      "route": "568 km (281 sealed, 287 unsealed). The longest day.",
+      "distance_km": 568,
+      "camping": "Toompine South Western Hotel",
       "meals": [],
       "notes": null
     },
     {
-      "date": "2026-05-30",
+      "date": "2026-07-14",
       "day_number": 4,
-      "title": "Clermont \u2192 Emerald",
-      "route": "Short day through the Bowen Basin — a breather before the long runs south.",
-      "camping": "Emerald showgrounds",
+      "title": "Toompine \u2192 Louth",
+      "route": "509 km (189 sealed, 320 unsealed). Most unsealed of the rally. Dress-up day: Unicorns.",
+      "distance_km": 509,
+      "camping": "Louth Racecourse",
       "meals": [],
       "notes": null
     },
     {
-      "date": "2026-05-31",
+      "date": "2026-07-15",
       "day_number": 5,
-      "title": "Emerald \u2192 Roma",
-      "route": "South-west through Springsure and Injune, into the Maranoa.",
-      "camping": "Roma showgrounds",
+      "title": "Louth \u2192 Narrandera",
+      "route": "559 km (374 sealed, 185 unsealed). Through Cobar and into NSW.",
+      "distance_km": 559,
+      "camping": "Narrandera Race Club",
       "meals": [],
       "notes": null
     },
     {
-      "date": "2026-06-01",
+      "date": "2026-07-16",
       "day_number": 6,
-      "title": "Roma \u2192 Cunnamulla",
-      "route": "West across the Channel Country — flat, red, and surprisingly beautiful.",
-      "camping": "Cunnamulla caravan park",
+      "title": "Narrandera \u2192 Dargo",
+      "route": "518 km (471 sealed, 47 unsealed). In Honour Of\u2026 Day.",
+      "distance_km": 518,
+      "camping": "Behind Dargo Hotel",
       "meals": [],
       "notes": null
     },
     {
-      "date": "2026-06-02",
+      "date": "2026-07-17",
       "day_number": 7,
-      "title": "Cunnamulla \u2192 Broken Hill",
-      "route": "South-west across the state border into outback New South Wales.",
-      "camping": "Broken Hill caravan park",
-      "meals": [],
-      "notes": null
-    },
-    {
-      "date": "2026-06-03",
-      "day_number": 8,
-      "title": "Broken Hill \u2192 Mildura",
-      "route": "South along the Silver City Highway, then across into Victoria's Sunraysia.",
-      "camping": "Mildura caravan park",
-      "meals": [],
-      "notes": null
-    },
-    {
-      "date": "2026-06-04",
-      "day_number": 9,
-      "title": "Mildura \u2192 Bendigo",
-      "route": "South through the Murray-Darling irrigation country and into central Victoria.",
-      "camping": "Bendigo showgrounds",
-      "meals": [],
-      "notes": null
-    },
-    {
-      "date": "2026-06-05",
-      "day_number": 10,
-      "title": "Bendigo \u2192 Melbourne",
-      "route": "The final run down the Calder Highway to Melbourne — finish line at St Kilda.",
+      "title": "Dargo \u2192 Melbourne",
+      "route": "345 km (310 sealed, 35 unsealed). Finish line at Point Ormond Reserve, Elwood from 3pm. Buy-backs $250 cash at morning briefing.",
+      "distance_km": 345,
       "camping": null,
       "meals": [],
       "notes": "Finish line. We made it."
