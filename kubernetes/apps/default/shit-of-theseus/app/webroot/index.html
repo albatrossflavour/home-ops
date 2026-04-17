@@ -2094,17 +2094,30 @@
             showRoute(html);
         }
 
+        function _driverStatsLine(name, ds) {
+            if (!ds || !ds.drivers) return '';
+            var match = null;
+            ds.drivers.forEach(function(d) {
+                if (d.driver_name && d.driver_name.toLowerCase() === name.toLowerCase()) match = d;
+            });
+            if (!match) return '';
+            var time = _formatDriveTimeLocal(match.total_seconds || 0);
+            var pct = (match.pct != null) ? Number(match.pct).toFixed(1) : '0';
+            var isActive = ds.active_driver && match.driver_name === ds.active_driver;
+            return '<div style="color:#8b949e;font-size:0.8rem;margin-bottom:0.75rem;">' +
+                escapeHtml(time) + ' on the wheel (' + escapeHtml(pct) + '%)' +
+                (isActive ? ' <span style="color:#e0a040;">On Duty</span>' : '') +
+            '</div>';
+        }
+
         function renderAbout() {
             _teardownDayMap();
             _stopCountdown();
             _stopLiveRefresh();
             renderDayNav(agendaData, null);
 
-            var heroHtml =
-                '<section class="about-hero" style="text-align:center;padding:2rem 1rem;">' +
-                    '<img src="/logo.png" alt="Shitbox Rally 2026" style="max-width:120px;" onerror="this.style.display=\'none\';">' +
-                    '<p style="color:#8b949e;">The world\'s most instrumented shitbox.</p>' +
-                '</section>';
+            var steveStats = _driverStatsLine('Steve', driverStatsData);
+            var tonyStats = _driverStatsLine('Tony', driverStatsData);
 
             var teamHtml =
                 '<section class="about-card">' +
@@ -2114,6 +2127,7 @@
                             '<div class="member-avatar">S</div>' +
                             '<h4>Steve</h4>' +
                             '<div class="member-role">CFO, Chief Fermentation Officer</div>' +
+                            steveStats +
                             '<p>I\'m here to raise money for cancer research.</p>' +
                             '<p>I\'m also here because pointing a $1,500 car at the horizon and seeing what happens feels like exactly the right kind of stupid.</p>' +
                             '<p>By day I\'m a program manager, which mostly means I deal with budgets, timelines and logistics. So for this rally I\'m keeping an eye on the money, the planning and making sure we don\'t forget something important 800 kilometres back up the road.</p>' +
@@ -2126,6 +2140,7 @@
                             '<img class="member-avatar-img" src="https://www.gravatar.com/avatar/4fce033d079d9cb954f6ac0f2117523f?s=160" alt="Tony">' +
                             '<h4>Tony</h4>' +
                             '<div class="member-role">CTO, Chief Telemetry Overbuilder</div>' +
+                            tonyStats +
                             '<p>I build systems for a living. Normally they sit in racks and behave themselves. This one is bolted to the dashboard of a 2001 Ford Laser and will almost certainly try to kill us.</p>' +
                             '<p>I built the telemetry because:</p>' +
                             '<ul>' +
@@ -2143,36 +2158,11 @@
                     '</div>' +
                 '</section>';
 
-            var driverStatsHtml = _renderDriverStatsForAbout(driverStatsData);
-
             var html = '<div class="day-page">' +
-                heroHtml +
                 teamHtml +
-                driverStatsHtml +
                 '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
             '</div>';
             showRoute(html);
-        }
-
-        function _renderDriverStatsForAbout(ds) {
-            if (!ds || !ds.drivers || ds.drivers.length === 0) return '';
-            var rows = '';
-            ds.drivers.forEach(function(d) {
-                var name = escapeHtml(d.driver_name || '');
-                var initial = escapeHtml((d.driver_name || '?').charAt(0).toUpperCase());
-                var isActive = ds.active_driver && d.driver_name === ds.active_driver;
-                var pct = (d.pct != null) ? Number(d.pct).toFixed(1) : '0';
-                var time = _formatDriveTimeLocal(d.total_seconds || 0);
-                rows +=
-                    '<div class="driver-card' + (isActive ? ' active' : '') + '" style="padding:1rem;background:#21262d;border-radius:8px;">' +
-                        '<div style="width:40px;height:40px;border-radius:50%;background:#c06000;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:600;">' + initial + '</div>' +
-                        '<div style="color:#f0dbb8;font-weight:600;margin-top:0.5rem;">' + name + '</div>' +
-                        (isActive ? '<div style="color:#e0a040;font-size:0.75rem;">On Duty</div>' : '') +
-                        '<div style="color:#8b949e;font-size:0.85rem;">' + escapeHtml(time) + '</div>' +
-                        '<div style="color:#8b949e;font-size:0.8rem;">' + escapeHtml(pct) + '% of total drive time</div>' +
-                    '</div>';
-            });
-            return '<section class="about-card"><h3>Drive Time</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">' + rows + '</div></section>';
         }
 
         function renderLegacyVideos() {
