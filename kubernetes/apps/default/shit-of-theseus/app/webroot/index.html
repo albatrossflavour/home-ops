@@ -1039,7 +1039,6 @@
         <a href="/car" onclick="event.preventDefault(); navigateToCar();">Car</a>
         <a href="https://grafana.shit-of-theseus.com/d/shitbox-rally-command?orgId=1" target="_blank" rel="noopener">Telemetry</a>
         <a href="/about" onclick="event.preventDefault(); navigateToAbout();">About</a>
-        <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener" style="color:#e0a040;">Donate</a>
     </nav>
 
     <div id="day-nav" class="day-nav" style="display:none;"></div>
@@ -2026,7 +2025,7 @@
             var carIntro =
                 '<section class="about-card">' +
                     '<h3>The Car</h3>' +
-                    '<p>A $1500 <strong>2001 Ford Laser</strong>, the kind of car that was never exciting, even when it was new. Twenty-five years and several questionable owners later, it\'s held together by zip ties, optimism, and a surprisingly resilient 1.6L Zetec engine.</p>' +
+                    '<p>The kind of car that was never exciting, even when it was new. Twenty-five years and several questionable owners later, it\'s held together by zip ties, optimism, and a surprisingly resilient engine.</p>' +
                     '<div class="car-gallery">' +
                         '<img src="/car-front.jpg" alt="The Shit of Theseus, front view" onerror="this.style.display=\'none\';">' +
                         '<img src="/car-side.jpg" alt="The Shit of Theseus, side view" onerror="this.style.display=\'none\';">' +
@@ -2187,12 +2186,12 @@
                 '</section>';
 
             var photosHtml =
-                '<section class="about-card">' +
+                '<section class="about-card" id="car-build-photos">' +
                     '<h3>Build Photos</h3>' +
                     '<div class="car-gallery">' +
-                        '<img src="/car-interior.jpg" alt="Dashboard with Pi and display" onerror="this.style.display=\'none\';">' +
-                        '<img src="/car-sensor-cluster.jpg" alt="Ceiling-mounted sensor cluster" onerror="this.style.display=\'none\';">' +
-                        '<img src="/car-engine-bay.jpg" alt="Engine bay" onerror="this.style.display=\'none\';">' +
+                        '<img src="/car-interior.jpg" alt="Dashboard with Pi and display" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
+                        '<img src="/car-sensor-cluster.jpg" alt="Ceiling-mounted sensor cluster" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
+                        '<img src="/car-engine-bay.jpg" alt="Engine bay" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
                     '</div>' +
                 '</section>';
 
@@ -2200,12 +2199,13 @@
                 carIntro +
                 whyHtml +
                 telemetryHtml +
-                hardwareHtml +
-                softwareHtml +
                 buildHtml +
                 photosHtml +
+                hardwareHtml +
+                softwareHtml +
                 '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
             '</div>';
+            window._carPhotoFail = 0;
             showRoute(html);
         }
 

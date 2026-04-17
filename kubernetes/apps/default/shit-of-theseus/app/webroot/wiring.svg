@@ -14,7 +14,7 @@
   <!-- ===== PI 5 (centre) ===== -->
   <rect x="340" y="240" width="220" height="120" rx="8" fill="#161b22" stroke="#c06000" stroke-width="2"/>
   <text x="450" y="272" text-anchor="middle" fill="#c06000" font-size="14" font-weight="700">Raspberry Pi 5</text>
-  <text x="450" y="292" text-anchor="middle" fill="#8b949e" font-size="10">Freenove Terminal Block HAT</text>
+  <text x="450" y="292" text-anchor="middle" fill="#8b949e" font-size="10">Proto Board HAT</text>
   <text x="450" y="310" text-anchor="middle" fill="#8b949e" font-size="10">NVMe SSD (via HAT)</text>
   <text x="450" y="328" text-anchor="middle" fill="#8b949e" font-size="10">/var/lib/shitbox → SQLite + captures</text>
   <text x="450" y="346" text-anchor="middle" fill="#6e7681" font-size="9">shitbox-telemetry.service</text>
