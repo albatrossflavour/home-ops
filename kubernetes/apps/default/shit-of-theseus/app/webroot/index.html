@@ -2101,6 +2101,10 @@
                 .catch(function(err) { console.warn('route fetch failed', err); })
         ]).then(function() { route(); });
 
+        window.navigateToDay = navigateToDay;
+        window.navigateHome = navigateHome;
+        window.navigateToAbout = navigateToAbout;
+
     })();
     </script>
 </body>
