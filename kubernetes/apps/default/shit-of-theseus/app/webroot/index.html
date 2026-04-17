@@ -2104,9 +2104,9 @@
             var time = _formatDriveTimeLocal(match.total_seconds || 0);
             var pct = (match.pct != null) ? Number(match.pct).toFixed(1) : '0';
             var isActive = ds.active_driver && match.driver_name === ds.active_driver;
-            return '<div style="color:#8b949e;font-size:0.8rem;margin-bottom:0.75rem;">' +
+            return '<div class="member-role" style="margin-top:-0.25rem;">' +
                 escapeHtml(time) + ' on the wheel (' + escapeHtml(pct) + '%)' +
-                (isActive ? ' <span style="color:#e0a040;">On Duty</span>' : '') +
+                (isActive ? ' <span style="color:#f0dbb8;font-weight:600;"> On Duty</span>' : '') +
             '</div>';
         }
 
