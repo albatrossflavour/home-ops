@@ -1973,14 +1973,74 @@
             _stopCountdown();
             _stopLiveRefresh();
             renderDayNav(agendaData, null);
-            // Stub — Plan 19-11 moves /about content here.
-            showRoute(
-                '<div style="background:#161b22;border:1px solid #2a1f0e;border-radius:8px;padding:1.5rem;">' +
-                '<h2 style="color:#f0dbb8;margin-top:0;">About</h2>' +
-                '<p style="color:#8b949e;">About content lands in Plan 19-11.</p>' +
-                '<p><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></p>' +
-                '</div>'
-            );
+
+            var driversHtml = _renderDriversForAbout(driverStatsData);
+
+            var heroHtml =
+                '<section class="about-hero" style="text-align:center;padding:2rem 1rem;">' +
+                    '<img src="/logo.png" alt="Shitbox Rally 2026" style="max-width:120px;" onerror="this.style.display=\'none\';">' +
+                    '<h1 style="color:#f0dbb8;">The Shit of Theseus</h1>' +
+                    '<p style="color:#8b949e;">The world\'s most instrumented shitbox.</p>' +
+                '</section>';
+
+            var carHtml =
+                '<section class="about-card">' +
+                    '<h3>The Car</h3>' +
+                    '<p>A $1500 <strong>2001 Ford Laser</strong> — the kind of car that was never exciting, even when it was new. Twenty-five years and several questionable owners later, it\'s held together by zip ties, optimism, and a surprisingly resilient 1.6L Zetec engine.</p>' +
+                    '<div class="car-gallery">' +
+                        '<img src="/car-front.jpg" alt="The Shit of Theseus — front view" onerror="this.style.display=\'none\';">' +
+                        '<img src="/car-side.jpg" alt="The Shit of Theseus — side view" onerror="this.style.display=\'none\';">' +
+                    '</div>' +
+                '</section>';
+
+            var whyHtml =
+                '<section class="about-card">' +
+                    '<h3>Why "Shit of Theseus"?</h3>' +
+                    '<p>The Ship of Theseus is a thought experiment: if you replace every plank of a ship one at a time, is it still the same ship? Our car asks the same question, except instead of planks it\'s head gaskets, radiator hoses, and suspension bushings.</p>' +
+                    '<p>By the time we reach Melbourne, there\'s a real chance that more of the car will be replacement parts than original. At what point does it stop being the car we started with? We don\'t know. But we\'re going to find out.</p>' +
+                '</section>';
+
+            var telemetryHtml =
+                '<section class="about-card">' +
+                    '<h3>The Telemetry</h3>' +
+                    '<p>This isn\'t just a car. It\'s a rolling data centre held together with hope, duct tape, and zip ties.</p>' +
+                    '<p>Everything you see on this site is captured and uploaded automatically from the car. No manual uploads. No post-processing. No "we\'ll fix it later".</p>' +
+                    '<p>The brains of the operation is a <strong>Raspberry Pi</strong> running a single Python daemon that orchestrates IMU sampling, GPS, video recording, and telemetry upload over WireGuard.</p>' +
+                    '<p>The code lives at <a href="https://github.com/albatrossflavour/shitbox" target="_blank" rel="noopener">github.com/albatrossflavour/shitbox</a>.</p>' +
+                '</section>';
+
+            var html = '<div class="day-page">' +
+                heroHtml +
+                driversHtml +
+                carHtml +
+                whyHtml +
+                telemetryHtml +
+                '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
+            '</div>';
+            showRoute(html);
+        }
+
+        function _renderDriversForAbout(ds) {
+            if (!ds || !ds.drivers || ds.drivers.length === 0) {
+                return '<section class="about-card"><h3>Drivers</h3><p style="color:#8b949e;">No driver data yet.</p></section>';
+            }
+            var rows = '';
+            ds.drivers.forEach(function(d) {
+                var name = escapeHtml(d.driver_name || '');
+                var initial = escapeHtml((d.driver_name || '?').charAt(0).toUpperCase());
+                var isActive = ds.active_driver && d.driver_name === ds.active_driver;
+                var pct = (d.pct != null) ? Number(d.pct).toFixed(1) : '0';
+                var time = _formatDriveTimeLocal(d.total_seconds || 0);
+                rows +=
+                    '<div class="driver-card' + (isActive ? ' active' : '') + '" style="padding:1rem;background:#21262d;border-radius:8px;">' +
+                        '<div class="driver-avatar" style="width:40px;height:40px;border-radius:50%;background:#c06000;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:600;">' + initial + '</div>' +
+                        '<div class="driver-name" style="color:#f0dbb8;font-weight:600;margin-top:0.5rem;">' + name + '</div>' +
+                        (isActive ? '<div class="driver-badge" style="color:#e0a040;font-size:0.75rem;">On Duty</div>' : '') +
+                        '<div class="driver-time" style="color:#8b949e;font-size:0.85rem;">' + escapeHtml(time) + '</div>' +
+                        '<div class="driver-pct" style="color:#8b949e;font-size:0.8rem;">' + escapeHtml(pct) + '% of total drive time</div>' +
+                    '</div>';
+            });
+            return '<section class="about-card"><h3>Drivers</h3><div class="driver-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">' + rows + '</div></section>';
         }
 
         document.addEventListener('visibilitychange', function() {
