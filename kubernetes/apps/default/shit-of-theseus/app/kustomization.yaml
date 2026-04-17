@@ -9,6 +9,7 @@ configMapGenerator:
   - name: shit-of-theseus-webroot
     files:
       - webroot/index.html
+      - webroot/agenda.json
       - webroot/logo.png
       - webroot/route.jpg
       - webroot/car-front.jpg
