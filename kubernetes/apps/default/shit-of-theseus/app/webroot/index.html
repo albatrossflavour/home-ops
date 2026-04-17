@@ -999,6 +999,7 @@
 
     <nav>
         <a href="/" onclick="event.preventDefault(); navigateHome();">Home</a>
+        <a href="/car" onclick="event.preventDefault(); navigateToCar();">Car</a>
         <a href="https://grafana.shit-of-theseus.com/d/shitbox-rally-command?orgId=1" target="_blank" rel="noopener">Grafana</a>
         <a href="/about" onclick="event.preventDefault(); navigateToAbout();">About</a>
         <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener" style="color:#e0a040;">Donate</a>
@@ -1088,6 +1089,8 @@
 
         var DAY_URL_RE = /^\/day\/(\d{4}-\d{2}-\d{2})\/?$/;
         var ABOUT_URL_RE = /^\/about\/?$/;
+        var CAR_URL_RE = /^\/car\/?$/;
+        var VIDEOS_URL_RE = /^\/videos\/?$/;
 
         function showRoute(html) {
             // Single entry-point for router-owned DOM. Hides all .section children of <main>.
@@ -1116,8 +1119,16 @@
                 renderDayPage(dayISO);
                 return;
             }
+            if (CAR_URL_RE.test(pathname)) {
+                renderCar();
+                return;
+            }
             if (ABOUT_URL_RE.test(pathname)) {
                 renderAbout();
+                return;
+            }
+            if (VIDEOS_URL_RE.test(pathname)) {
+                renderLegacyVideos();
                 return;
             }
             renderHomepage();
@@ -1132,6 +1143,12 @@
         function navigateHome() {
             history.pushState({ route: 'home' }, '', '/');
             renderHomepage();
+            window.scrollTo(0, 0);
+        }
+
+        function navigateToCar() {
+            history.pushState({ route: 'car' }, '', '/car');
+            route();
             window.scrollTo(0, 0);
         }
 
@@ -1623,7 +1640,6 @@
 
             var heroHtml =
                 '<section class="before-hero">' +
-                    '<h1>' + escapeHtml(rally.title || 'Shit of Theseus Rally') + '</h1>' +
                     (rally.team ? '<div class="rally-team">Team ' + escapeHtml(rally.team) + '</div>' : '') +
                     (rally.start_location && rally.end_location
                         ? '<div class="rally-route">' + escapeHtml(rally.start_location) + ' \u2192 ' + escapeHtml(rally.end_location) + '</div>'
@@ -1640,7 +1656,6 @@
                 '<section class="before-stats">' +
                     (rally.total_distance_km ? '<div class="day-stat-card"><div class="stat-label">Distance</div><div class="stat-value">' + Number(rally.total_distance_km).toFixed(0) + ' km</div></div>' : '') +
                     '<div class="day-stat-card"><div class="stat-label">Days</div><div class="stat-value">' + days.length + '</div></div>' +
-                    (rally.team ? '<div class="day-stat-card"><div class="stat-label">Team</div><div class="stat-value" style="font-size:1rem;">' + escapeHtml(rally.team) + '</div></div>' : '') +
                     (rally.start_date ? '<div class="day-stat-card"><div class="stat-label">Start</div><div class="stat-value" style="font-size:0.9rem;">' + escapeHtml(rally.start_date) + '</div></div>' : '') +
                 '</section>';
 
@@ -1968,28 +1983,19 @@
             renderHomepageArchive();
         }
 
-        function renderAbout() {
+        function renderCar() {
             _teardownDayMap();
             _stopCountdown();
             _stopLiveRefresh();
             renderDayNav(agendaData, null);
 
-            var driversHtml = _renderDriversForAbout(driverStatsData);
-
-            var heroHtml =
-                '<section class="about-hero" style="text-align:center;padding:2rem 1rem;">' +
-                    '<img src="/logo.png" alt="Shitbox Rally 2026" style="max-width:120px;" onerror="this.style.display=\'none\';">' +
-                    '<h1 style="color:#f0dbb8;">The Shit of Theseus</h1>' +
-                    '<p style="color:#8b949e;">The world\'s most instrumented shitbox.</p>' +
-                '</section>';
-
-            var carHtml =
+            var carIntro =
                 '<section class="about-card">' +
                     '<h3>The Car</h3>' +
-                    '<p>A $1500 <strong>2001 Ford Laser</strong> — the kind of car that was never exciting, even when it was new. Twenty-five years and several questionable owners later, it\'s held together by zip ties, optimism, and a surprisingly resilient 1.6L Zetec engine.</p>' +
+                    '<p>A $1500 <strong>2001 Ford Laser</strong>, the kind of car that was never exciting, even when it was new. Twenty-five years and several questionable owners later, it\'s held together by zip ties, optimism, and a surprisingly resilient 1.6L Zetec engine.</p>' +
                     '<div class="car-gallery">' +
-                        '<img src="/car-front.jpg" alt="The Shit of Theseus — front view" onerror="this.style.display=\'none\';">' +
-                        '<img src="/car-side.jpg" alt="The Shit of Theseus — side view" onerror="this.style.display=\'none\';">' +
+                        '<img src="/car-front.jpg" alt="The Shit of Theseus, front view" onerror="this.style.display=\'none\';">' +
+                        '<img src="/car-side.jpg" alt="The Shit of Theseus, side view" onerror="this.style.display=\'none\';">' +
                     '</div>' +
                 '</section>';
 
@@ -2003,44 +2009,381 @@
             var telemetryHtml =
                 '<section class="about-card">' +
                     '<h3>The Telemetry</h3>' +
-                    '<p>This isn\'t just a car. It\'s a rolling data centre held together with hope, duct tape, and zip ties.</p>' +
-                    '<p>Everything you see on this site is captured and uploaded automatically from the car. No manual uploads. No post-processing. No "we\'ll fix it later".</p>' +
-                    '<p>The brains of the operation is a <strong>Raspberry Pi</strong> running a single Python daemon that orchestrates IMU sampling, GPS, video recording, and telemetry upload over WireGuard.</p>' +
-                    '<p>The code lives at <a href="https://github.com/albatrossflavour/shitbox" target="_blank" rel="noopener">github.com/albatrossflavour/shitbox</a>.</p>' +
+                    '<p>This isn\'t just a car.<br>It\'s a rolling data centre held together with hope, duct tape, and zip ties.</p>' +
+                    '<p>Everything you see on this site is captured and uploaded automatically from the car.</p>' +
+                    '<p>No manual uploads.<br>No post-processing.<br>No "we\'ll fix it later".</p>' +
+                    '<p>It\'s fully automated, open source, and running on a Raspberry Pi bolted under the passenger seat like it absolutely belongs there.</p>' +
+                    '<p>The code lives at <a href="https://github.com/albatrossflavour/shitbox" target="_blank" rel="noopener">github.com/albatrossflavour/shitbox</a></p>' +
+                    '<p>Because if you\'re going to over-engineer something, you may as well publish it.</p>' +
+                '</section>';
+
+            var hardwareHtml =
+                '<section class="about-card">' +
+                    '<h3>The Hardware</h3>' +
+                    '<p>The brains of the operation is a <strong>Raspberry Pi</strong> running a single Python daemon that orchestrates everything.</p>' +
+                    '<p>Connected to it:</p>' +
+                    '<h4>MPU-6050 IMU</h4>' +
+                    '<p>6-axis accelerometer and gyroscope at 100 Hz.</p>' +
+                    '<ul><li>\u00b14g accel</li><li>\u00b1500\u00b0/s gyro</li><li>Continuous ring buffer</li><li>Event detection state machine</li></ul>' +
+                    '<p>It watches for:</p>' +
+                    '<ul><li>Hard braking</li><li>Big cornering forces</li><li>High G events</li><li>Sustained rough road vibration</li></ul>' +
+                    '<p>When it sees something interesting, it triggers a capture.</p>' +
+                    '<h4>GPS via gpsd</h4>' +
+                    '<p>1 Hz position, speed, altitude and satellite count.</p>' +
+                    '<ul><li>Below 3 km/h is floored to zero to eliminate GPS drift</li><li>Tracks gpsd down, no fix, and full lock</li></ul>' +
+                    '<p>Because if we\'re going to break down, we want coordinates.</p>' +
+                    '<h4>BME680 Environment Sensor</h4>' +
+                    '<p>Temperature, humidity, pressure and VOC gas resistance.</p>' +
+                    '<ul><li>Sampled at 1 Hz</li><li>Lets us track engine bay heat soak and ambient misery</li></ul>' +
+                    '<h4>INA219 Power Monitor</h4>' +
+                    '<p>Monitors bus voltage and current draw.</p>' +
+                    '<ul><li>Early warning if the car\'s electrical system starts having opinions</li><li>Also tells us if the Pi is about to brown out mid-drama</li></ul>' +
+                    '<h4>USB Dashcam</h4>' +
+                    '<p>720p at 30fps via ffmpeg.</p>' +
+                    '<ul><li>Continuous 10-second segments</li><li>50-second rolling buffer</li></ul>' +
+                    '<p>Meaning the system always has the last 50 seconds of video before anything happens.</p>' +
+                    '<p>Which is very important for mechanical regret analysis.</p>' +
+                    '<h4>Big Red Button</h4>' +
+                    '<p>GPIO 17. Arcade style.</p>' +
+                    '<p>Press it and:</p>' +
+                    '<ul><li>The system grabs the pre-roll</li><li>Records 30 seconds after</li><li>Muxes into a single MP4</li><li>Chirps via piezo to confirm</li></ul>' +
+                    '<p>Debounced at 50ms because rally roads are not gentle.</p>' +
+                    '<h4>OLED Dashboard</h4>' +
+                    '<p>128\u00d764 monochrome display.</p>' +
+                    '<p>Shows:</p>' +
+                    '<ul><li>GPS fix and speed</li><li>Peak G-force and event count</li><li>Sensor health</li><li>Network state</li><li>CPU temperature</li></ul>' +
+                    '<p>Failed sensors invert white-on-black so we can spot problems without SSHing at 110 km/h.</p>' +
+                '</section>';
+
+            var softwareHtml =
+                '<section class="about-card">' +
+                    '<h3>The Software</h3>' +
+                    '<p>Everything runs as a single systemd service:<br><code>shitbox-telemetry</code></p>' +
+                    '<p>Because of course it does.</p>' +
+                    '<p>Three concurrent paths:</p>' +
+                    '<h4>High-Rate Path, 100 Hz</h4>' +
+                    '<p>IMU into ring buffer.<br>State machine watches for threshold crossings.<br>Captures pre-event IMU data and triggers video capture.</p>' +
+                    '<h4>Low-Rate Path, 1 Hz</h4>' +
+                    '<p>GPS, environment and power metrics written to SQLite in WAL mode.</p>' +
+                    '<p>Offline first.<br>Disk first.<br>Network second.</p>' +
+                    '<p>If we\'re in the middle of nowhere, nothing is lost.</p>' +
+                    '<h4>Capture Path</h4>' +
+                    '<p>ffmpeg writes rolling segments.</p>' +
+                    '<p>When triggered:</p>' +
+                    '<ul><li>Pre-event buffer grabbed</li><li>30 seconds post-event recorded</li><li>Stitched using concat demuxer</li><li>No re-encoding, just muxing</li></ul>' +
+                    '<p>GPS and speed overlay burned in.</p>' +
+                    '<p>Result: a 60-second clip showing what happened before and after.</p>' +
+                    '<h4>Timelapse</h4>' +
+                    '<p>One frame per minute above 5 km/h.<br>Compiled into a daily timelapse.</p>' +
+                    '<p>GPS-stamped so we can replay the route.</p>' +
+                    '<h4>Sync</h4>' +
+                    '<p>When network appears:</p>' +
+                    '<ul><li>Prometheus remote_write with Snappy</li><li>WireGuard tunnel</li><li>rsync to NAS</li><li>NFS mount into nginx</li></ul>' +
+                    '<p>Designed to run fully offline and catch up later.</p>' +
+                    '<p>Because mobile signal in rural Australia is more of a suggestion than a service.</p>' +
                 '</section>';
 
             var html = '<div class="day-page">' +
-                heroHtml +
-                driversHtml +
-                carHtml +
+                carIntro +
                 whyHtml +
                 telemetryHtml +
+                hardwareHtml +
+                softwareHtml +
                 '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
             '</div>';
             showRoute(html);
         }
 
-        function _renderDriversForAbout(ds) {
-            if (!ds || !ds.drivers || ds.drivers.length === 0) {
-                return '<section class="about-card"><h3>Drivers</h3><p style="color:#8b949e;">No driver data yet.</p></section>';
+        function renderAbout() {
+            _teardownDayMap();
+            _stopCountdown();
+            _stopLiveRefresh();
+            renderDayNav(agendaData, null);
+
+            var heroHtml =
+                '<section class="about-hero" style="text-align:center;padding:2rem 1rem;">' +
+                    '<img src="/logo.png" alt="Shitbox Rally 2026" style="max-width:120px;" onerror="this.style.display=\'none\';">' +
+                    '<p style="color:#8b949e;">The world\'s most instrumented shitbox.</p>' +
+                '</section>';
+
+            var teamHtml =
+                '<section class="about-card">' +
+                    '<h3>The Team</h3>' +
+                    '<div class="team-grid">' +
+                        '<div class="team-member">' +
+                            '<div class="member-avatar">S</div>' +
+                            '<h4>Steve</h4>' +
+                            '<div class="member-role">CFO, Chief Fermentation Officer</div>' +
+                            '<p>I\'m here to raise money for cancer research.</p>' +
+                            '<p>I\'m also here because pointing a $1,500 car at the horizon and seeing what happens feels like exactly the right kind of stupid.</p>' +
+                            '<p>By day I\'m a program manager, which mostly means I deal with budgets, timelines and logistics. So for this rally I\'m keeping an eye on the money, the planning and making sure we don\'t forget something important 800 kilometres back up the road.</p>' +
+                            '<p>I\'m also in charge of the music and the beer. If the playlist\'s good and morale\'s high, I\'m doing my job.</p>' +
+                            '<p>Tony bolts sensors to things and worries about graphs. I make sure we\'ve got fuel, a plan, and something decent playing when the car starts making noises it shouldn\'t.</p>' +
+                            '<p>We\'re aiming to get from Port Douglas to Melbourne, raise as much as we can, and come back with a few stories worth telling.</p>' +
+                            '<p>If you\'d like to support the organised half of this operation, and more importantly cancer research, <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener">donate</a>.</p>' +
+                        '</div>' +
+                        '<div class="team-member">' +
+                            '<img class="member-avatar-img" src="https://www.gravatar.com/avatar/4fce033d079d9cb954f6ac0f2117523f?s=160" alt="Tony">' +
+                            '<h4>Tony</h4>' +
+                            '<div class="member-role">CTO, Chief Telemetry Overbuilder</div>' +
+                            '<p>I build systems for a living. Normally they sit in racks and behave themselves. This one is bolted to the dashboard of a 2001 Ford Laser and will almost certainly try to kill us.</p>' +
+                            '<p>I built the telemetry because:</p>' +
+                            '<ul>' +
+                                '<li>The car can\'t be trusted</li>' +
+                                '<li>Data makes me feel less helpless</li>' +
+                                '<li>If something breaks, it should at least leave a dataset</li>' +
+                                '<li>I know nothing about cars and needed to contribute somehow</li>' +
+                            '</ul>' +
+                            '<p>My dad died of cancer in 2011.</p>' +
+                            '<p>My mum is living with terminal cancer now.</p>' +
+                            '<p>At some point cancer stops being an abstract "1 in 2" and becomes hospital corridors, phone calls, and dates you don\'t forget.</p>' +
+                            '<p>This rally is something I can do. It\'s not a fix. It\'s not a cure. It\'s just action.</p>' +
+                            '<p>If you\'re entertained by a $1,500 car running better monitoring than some enterprise environments, and you\'d like to help fund cancer research, <a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener">donate</a>.</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</section>';
+
+            var html = '<div class="day-page">' +
+                heroHtml +
+                teamHtml +
+                '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
+            '</div>';
+            showRoute(html);
+        }
+
+        function renderLegacyVideos() {
+            _teardownDayMap();
+            _stopCountdown();
+            _stopLiveRefresh();
+
+            var containerHtml =
+                '<div class="day-page">' +
+                    '<section class="day-header"><h1 style="color:#f0dbb8;">Videos</h1></section>' +
+                    '<div id="legacy-rally-progress" class="rally-progress" style="display:none;"></div>' +
+                    '<div id="legacy-day-filter" class="day-filter" style="display:none;">' +
+                        '<div class="day-filter-bar" id="legacy-day-filter-bar"></div>' +
+                        '<select class="day-filter-select" id="legacy-day-filter-select"></select>' +
+                    '</div>' +
+                    '<div id="legacy-events-list"></div>' +
+                    '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
+                '</div>';
+            showRoute(containerHtml);
+
+            if (!eventsData || eventsData.length === 0) {
+                document.getElementById('legacy-events-list').innerHTML = '<p style="text-align:center;padding:3rem;color:#8b949e;">No events recorded yet.</p>';
+                return;
             }
-            var rows = '';
-            ds.drivers.forEach(function(d) {
-                var name = escapeHtml(d.driver_name || '');
-                var initial = escapeHtml((d.driver_name || '?').charAt(0).toUpperCase());
-                var isActive = ds.active_driver && d.driver_name === ds.active_driver;
-                var pct = (d.pct != null) ? Number(d.pct).toFixed(1) : '0';
-                var time = _formatDriveTimeLocal(d.total_seconds || 0);
-                rows +=
-                    '<div class="driver-card' + (isActive ? ' active' : '') + '" style="padding:1rem;background:#21262d;border-radius:8px;">' +
-                        '<div class="driver-avatar" style="width:40px;height:40px;border-radius:50%;background:#c06000;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:600;">' + initial + '</div>' +
-                        '<div class="driver-name" style="color:#f0dbb8;font-weight:600;margin-top:0.5rem;">' + name + '</div>' +
-                        (isActive ? '<div class="driver-badge" style="color:#e0a040;font-size:0.75rem;">On Duty</div>' : '') +
-                        '<div class="driver-time" style="color:#8b949e;font-size:0.85rem;">' + escapeHtml(time) + '</div>' +
-                        '<div class="driver-pct" style="color:#8b949e;font-size:0.8rem;">' + escapeHtml(pct) + '% of total drive time</div>' +
-                    '</div>';
+
+            var events = eventsData.slice().sort(function(a, b) {
+                return new Date(b.timestamp) - new Date(a.timestamp);
             });
-            return '<section class="about-card"><h3>Drivers</h3><div class="driver-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">' + rows + '</div></section>';
+
+            var TOTAL_DISTANCE_KM = 3534;
+            var progressEl = document.getElementById('legacy-rally-progress');
+            for (var pi = 0; pi < events.length; pi++) {
+                var pe = events[pi];
+                if (pe.distance_from_start_km != null && pe.distance_to_destination_km != null) {
+                    var fromStart = Math.round(pe.distance_from_start_km);
+                    var toDest = Math.round(pe.distance_to_destination_km);
+                    var pct = Math.min(100, Math.max(0, (fromStart / TOTAL_DISTANCE_KM) * 100));
+                    progressEl.innerHTML =
+                        '<div class="rally-progress-header">' +
+                        '<span>From Port Douglas: <strong>' + fromStart.toLocaleString() + ' km</strong></span>' +
+                        '<span>To Melbourne: <strong>' + toDest.toLocaleString() + ' km</strong></span>' +
+                        '</div>' +
+                        '<div class="rally-progress-bar">' +
+                        '<div class="rally-progress-fill" style="width:' + pct.toFixed(1) + '%"></div>' +
+                        '</div>';
+                    progressEl.style.display = '';
+                    break;
+                }
+            }
+
+            var groups = {};
+            events.forEach(function(ev) {
+                var date = new Date(ev.timestamp).toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+                if (!groups[date]) groups[date] = [];
+                groups[date].push(ev);
+            });
+
+            var container = document.getElementById('legacy-events-list');
+            var dates = Object.keys(groups).sort().reverse();
+
+            var filterBar = document.getElementById('legacy-day-filter-bar');
+            var filterSelect = document.getElementById('legacy-day-filter-select');
+
+            function activateVideos(group) {
+                group.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
+                    var src = ph.getAttribute('data-video-src');
+                    if (src) {
+                        ph.innerHTML = '<video controls preload="none" poster="/captures/intro_poster.jpg" src="' + src + '"></video>';
+                        ph.className = 'event-video';
+                    }
+                });
+            }
+
+            function deactivateVideos(group) {
+                group.querySelectorAll('.event-video').forEach(function(v) {
+                    var video = v.querySelector('video');
+                    if (video) {
+                        v.setAttribute('data-video-src', video.src);
+                        v.innerHTML = '';
+                        v.className = 'event-video-placeholder';
+                    }
+                });
+            }
+
+            var filterToDate = null;
+
+            if (dates.length > 1) {
+                document.getElementById('legacy-day-filter').style.display = '';
+
+                var allBtn = document.createElement('button');
+                allBtn.textContent = 'All';
+                allBtn.setAttribute('data-date', 'all');
+                filterBar.appendChild(allBtn);
+
+                var allOpt = document.createElement('option');
+                allOpt.value = 'all';
+                allOpt.textContent = 'All days';
+                filterSelect.appendChild(allOpt);
+
+                dates.forEach(function(date) {
+                    var parts = date.split('-');
+                    var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+                    var label = d.toLocaleDateString('en-AU', {
+                        weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC'
+                    });
+                    var count = groups[date].length;
+
+                    var btn = document.createElement('button');
+                    btn.textContent = label + ' \u00b7 ' + count;
+                    btn.setAttribute('data-date', date);
+                    filterBar.appendChild(btn);
+
+                    var opt = document.createElement('option');
+                    opt.value = date;
+                    opt.textContent = label + ' \u2014 ' + count + ' events';
+                    filterSelect.appendChild(opt);
+                });
+
+                filterToDate = function(selectedDate) {
+                    var dateGroups = container.querySelectorAll('.date-group');
+                    dateGroups.forEach(function(g) {
+                        var show = selectedDate === 'all' || g.getAttribute('data-date') === selectedDate;
+                        g.style.display = show ? '' : 'none';
+                        if (show) { activateVideos(g); } else { deactivateVideos(g); }
+                    });
+                    filterBar.querySelectorAll('button').forEach(function(b) {
+                        b.classList.toggle('active', b.getAttribute('data-date') === selectedDate);
+                    });
+                    filterSelect.value = selectedDate;
+                };
+
+                filterBar.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'BUTTON') return;
+                    filterToDate(e.target.getAttribute('data-date'));
+                });
+
+                filterSelect.addEventListener('change', function() {
+                    filterToDate(this.value);
+                });
+            }
+
+            dates.forEach(function(date) {
+                var group = document.createElement('div');
+                group.className = 'date-group';
+                group.setAttribute('data-date', date);
+
+                var parts = date.split('-');
+                var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+                var heading = document.createElement('h2');
+                heading.textContent = d.toLocaleDateString('en-AU', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC'
+                });
+                group.appendChild(heading);
+
+                var grid = document.createElement('div');
+                grid.className = 'events-grid';
+
+                groups[date].forEach(function(ev) {
+                    var eventId = ev.id != null ? ev.id : ev.timestamp.replace(/[^0-9]/g, '');
+                    var card = document.createElement('div');
+                    card.className = 'event-card';
+                    card.id = 'event-' + eventId;
+
+                    var badgeClass = 'badge-' + ev.type;
+                    var ts = new Date(ev.timestamp);
+                    var timeStr = ts.toLocaleTimeString('en-AU', {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: TIMEZONE
+                    });
+                    var displayName = DISPLAY_NAMES[ev.type] || ev.type;
+
+                    var noStats = {MANUAL_CAPTURE: 1, BOOT: 1};
+                    var statsHtml = '';
+                    if (!noStats[ev.type]) {
+                        if (ev.speed_kmh !== undefined && ev.speed_kmh > 0) {
+                            statsHtml += '<span>Speed: <strong>' + Math.round(ev.speed_kmh) + ' km/h</strong></span>';
+                        }
+                        if (ev.peak_g !== undefined && ev.peak_g > 0) {
+                            statsHtml += '<span>Peak: <strong>' + ev.peak_g.toFixed(2) + ' g</strong></span>';
+                        }
+                    }
+
+                    var videoHtml = '';
+                    var videoSrc = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
+                    var actionsHtml = '<div class="event-actions">' +
+                        '<a href="#" class="share-btn" data-event-id="' + eventId + '">Share</a>';
+                    if (videoSrc) {
+                        videoHtml = '<div class="event-video-placeholder" data-video-src="' + videoSrc + '"></div>';
+                        actionsHtml += '<a href="' + videoSrc + '" download>Download</a>';
+                    }
+                    actionsHtml += '</div>';
+
+                    card.innerHTML =
+                        '<div class="event-header">' +
+                        '<span class="badge ' + badgeClass + '">' + displayName + '</span>' +
+                        '<span class="event-time">' + timeStr + '</span>' +
+                        '</div>' +
+                        (statsHtml ? '<div class="event-stats">' + statsHtml + '</div>' : '') +
+                        '<div class="event-media">' + videoHtml + actionsHtml + '</div>';
+
+                    grid.appendChild(card);
+                });
+
+                group.appendChild(grid);
+                container.appendChild(group);
+            });
+
+            if (dates.length === 0) {
+                container.innerHTML = '<p style="text-align:center;padding:3rem;color:#8b949e;">No events recorded yet.</p>';
+            } else if (filterToDate) {
+                filterToDate(dates[0]);
+            } else {
+                container.querySelectorAll('.date-group').forEach(activateVideos);
+            }
+
+            container.addEventListener('click', function(e) {
+                var btn = e.target.closest('.share-btn');
+                if (!btn) return;
+                e.preventDefault();
+                var eid = btn.getAttribute('data-event-id');
+                var url = window.location.origin + '/videos?event=' + eid;
+                navigator.clipboard.writeText(url).then(function() {
+                    btn.textContent = 'Copied!';
+                    setTimeout(function() { btn.textContent = 'Share'; }, 2000);
+                });
+            });
+
+            var params = new URLSearchParams(window.location.search);
+            var targetId = params.get('event');
+            if (targetId) {
+                var el = document.getElementById('event-' + targetId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('highlighted');
+                }
+            }
         }
 
         document.addEventListener('visibilitychange', function() {
@@ -2103,6 +2446,7 @@
 
         window.navigateToDay = navigateToDay;
         window.navigateHome = navigateHome;
+        window.navigateToCar = navigateToCar;
         window.navigateToAbout = navigateToAbout;
 
     })();
