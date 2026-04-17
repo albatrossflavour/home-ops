@@ -2126,8 +2126,9 @@
                     '<p>One frame every 10 seconds above 5 km/h.<br>Compiled into a daily timelapse at 24fps.</p>' +
                     '<p>GPS-stamped so we can replay the route.</p>' +
                     '<h4>Sync</h4>' +
-                    '<p>When network appears:</p>' +
-                    '<ul><li>Prometheus remote_write with Snappy</li><li>WireGuard tunnel</li><li>rsync to NAS</li><li>NFS mount into nginx</li></ul>' +
+                    '<p>The Pi connects via ethernet to a GL.iNet GL-BE3600 travel router running WireGuard, which uplinks through a portable hotspot with an external antenna.</p>' +
+                    '<p>When connectivity appears:</p>' +
+                    '<ul><li>Prometheus remote_write with Snappy</li><li>rsync to NAS</li><li>NFS mount into nginx</li></ul>' +
                     '<p>Designed to run fully offline and catch up later.</p>' +
                     '<p>Because mobile signal in rural Australia is more of a suggestion than a service.</p>' +
                 '</section>';
