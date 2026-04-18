@@ -88,7 +88,7 @@ spec:
           machine-learning:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
-              tag: "release@sha256:33b17015c3d14f2565e9b8cd36b48a70027b14b5cd20da7fbfff21a370b0309c"
+              tag: "release@sha256:a2501141440f10516d329fdfba2c68082e19eb9ba6016c061ac80d23beadf7f3"
             env:
               TRANSFORMERS_CACHE: /cache
               XDG_CACHE_HOME: /cache
