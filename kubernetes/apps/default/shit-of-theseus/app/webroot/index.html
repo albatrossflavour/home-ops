@@ -207,11 +207,62 @@
         .day-section-heading {
             color: #f0dbb8; font-size: 1.2rem; margin: 0 0 0.75rem 0;
         }
+
+        /* Video highlights grid */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+        .video-card {
+            background: #161b22;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .video-card video {
+            width: 100%;
+            display: block;
+            background: #000;
+        }
+        .video-card-meta {
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+        .video-card-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #fff;
+        }
+        .video-card-time { color: #c9d1d9; }
+
+        /* Timelapse section */
+        .timelapse-player {
+            background: #161b22;
+            border: 1px solid #2a1f0e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .timelapse-player video {
+            width: 100%;
+            display: block;
+            background: #000;
+        }
+
         @media (max-width: 600px) {
             .day-page { padding: 0 0.5rem; }
             .day-header { padding: 1rem 1.25rem; }
             .day-header h1 { font-size: 1.35rem; }
             .day-stats { grid-template-columns: repeat(2, 1fr); }
+            .video-grid { grid-template-columns: 1fr; }
         }
 
         /* Timeline spine (Phase 19 — D-06, D-07) */
@@ -1911,8 +1962,8 @@
 
             var mapPlaceholder = '<section><h3 class="day-section-heading">Map</h3><div id="day-map" class="day-map-container"></div></section>';
             var spinePlaceholder = '<section><h3 class="day-section-heading">Timeline</h3><div id="day-spine"></div></section>';
-            var videosPlaceholder = '<section><h3 class="day-section-heading">Video highlights</h3><div id="day-videos" class="day-section-placeholder">Video highlights placeholder \u2014 wired by Plan 19-06/Phase 19 backfill.</div></section>';
-            var timelapsePlaceholder = '<section><h3 class="day-section-heading">Timelapse</h3><div id="day-timelapse" class="day-section-placeholder">Timelapse embed \u2014 /captures/' + escapeHtml(dayISO) + '/timelapse.mp4 if present.</div></section>';
+            var videosPlaceholder = '<section><h3 class="day-section-heading">Video highlights</h3><div id="day-videos"></div></section>';
+            var timelapsePlaceholder = '<section id="day-timelapse-section"><h3 class="day-section-heading">Timelapse</h3><div id="day-timelapse"></div></section>';
 
             var html =
                 '<div class="day-page">' +
@@ -1940,6 +1991,67 @@
 
             // Day map (Plan 19-07) — DOM is mounted, safe to init Leaflet.
             initDayMap(dayISO, routeData, eventsData);
+
+            // Video highlights — filter day events that have video
+            populateDayVideos(dayISO, eventsData);
+
+            // Timelapse — embed if the file exists
+            populateDayTimelapse(dayISO);
+        }
+
+        function populateDayVideos(dayISO, events) {
+            var host = document.getElementById('day-videos');
+            if (!host) return;
+            var dayVids = (events || []).filter(function(ev) {
+                return _dayOf(ev.timestamp) === dayISO &&
+                       (ev.video_url || ev.video_path);
+            });
+            if (dayVids.length === 0) {
+                host.parentElement.style.display = 'none';
+                return;
+            }
+            var html = '<div class="video-grid">';
+            dayVids.forEach(function(ev) {
+                var src = ev.video_url || '/captures/' + ev.video_path;
+                var colour = BADGE_COLORS[ev.type] || '#8b949e';
+                var type = escapeHtml(ev.type || 'EVENT');
+                var time = _formatSpineTime(ev.timestamp);
+                var metaBits = [];
+                if (ev.peak_g != null)         metaBits.push(Number(ev.peak_g).toFixed(2) + ' g');
+                if (ev.peak_speed_kmh != null) metaBits.push(Number(ev.peak_speed_kmh).toFixed(0) + ' km/h');
+                if (ev.duration_ms != null)    metaBits.push((Number(ev.duration_ms)/1000).toFixed(1) + ' s');
+                html += '<div class="video-card">'
+                     +    '<video controls preload="metadata" playsinline src="' + escapeHtml(src) + '"></video>'
+                     +    '<div class="video-card-meta">'
+                     +      '<span class="video-card-badge" style="background:' + colour + ';">' + type + '</span>'
+                     +      '<span class="video-card-time">' + escapeHtml(time) + '</span>'
+                     +      (metaBits.length ? '<span>' + escapeHtml(metaBits.join(' \u00b7 ')) + '</span>' : '')
+                     +    '</div>'
+                     +  '</div>';
+            });
+            html += '</div>';
+            host.innerHTML = html;
+        }
+
+        function populateDayTimelapse(dayISO) {
+            var section = document.getElementById('day-timelapse-section');
+            var host = document.getElementById('day-timelapse');
+            if (!host || !section) return;
+            var src = '/captures/' + dayISO + '/timelapse.mp4';
+            // HEAD request to check if the file exists before embedding
+            var xhr = new XMLHttpRequest();
+            xhr.open('HEAD', src, true);
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    host.innerHTML = '<div class="timelapse-player">'
+                        + '<video controls preload="metadata" playsinline src="' + escapeHtml(src) + '"></video>'
+                        + '</div>';
+                } else {
+                    section.style.display = 'none';
+                }
+            };
+            xhr.onerror = function() { section.style.display = 'none'; };
+            xhr.send();
         }
 
         // Live-mode homepage renderer (Plan 19-09 — NARR-01 / D-17 / D-08)
