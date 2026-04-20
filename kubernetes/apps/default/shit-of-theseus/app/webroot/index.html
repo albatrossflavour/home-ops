@@ -1901,20 +1901,12 @@
                 }
                 var num = String(Number(day.day_number) || 0);
                 var dateLabel = _formatShortDate(day.date);
-                if (state === 'future') {
-                    html += '<span class="day-nav-segment future" aria-label="Day ' + num + ' \u2014 upcoming">'
-                         +  '<span class="day-nav-number">' + num + '</span>'
-                         +  '<span class="day-nav-date">Coming July</span>'
-                         +  '</span>';
-                } else {
-                    // Anchor form — navigateToDay handles pushState; real href is the fallback for middle-click / copy-link.
-                    html += '<a class="day-nav-segment ' + state + '" href="/day/' + day.date + '" '
-                         +  'onclick="event.preventDefault(); navigateToDay(\'' + day.date + '\');" '
-                         +  'aria-label="Day ' + num + ' \u2014 ' + (state === 'current' ? 'today' : 'past') + '">'
-                         +  '<span class="day-nav-number">' + num + '</span>'
-                         +  '<span class="day-nav-date">' + dateLabel + '</span>'
-                         +  '</a>';
-                }
+                html += '<a class="day-nav-segment ' + state + '" href="/day/' + day.date + '" '
+                     +  'onclick="event.preventDefault(); navigateToDay(\'' + day.date + '\');" '
+                     +  'aria-label="Day ' + num + ' \u2014 ' + (state === 'current' ? 'today' : (state === 'future' ? 'upcoming' : 'past')) + '">'
+                     +  '<span class="day-nav-number">' + num + '</span>'
+                     +  '<span class="day-nav-date">' + dateLabel + '</span>'
+                     +  '</a>';
             });
             host.innerHTML = html;
             host.style.display = '';
