@@ -23,6 +23,8 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    admin:
+      existingSecret: grafana-shitbox-admin
     deploymentStrategy:
       type: Recreate
     downloadDashboardsImage:

@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./grafana-helmrelease.yaml
+  - ./grafana-externalsecret.yaml
 configMapGenerator:
   - name: shit-of-theseus-webroot
     files:
