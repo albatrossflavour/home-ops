@@ -2132,8 +2132,9 @@
                     '<h3>The Car</h3>' +
                     '<p>The kind of car that was never exciting, even when it was new. Twenty-five years and several questionable owners later, it\'s held together by zip ties, optimism, and a surprisingly resilient engine.</p>' +
                     '<div class="car-gallery">' +
-                        '<img src="/car-front.jpg" alt="The Shit of Theseus, front view" onerror="this.style.display=\'none\';">' +
-                        '<img src="/car-side.jpg" alt="The Shit of Theseus, side view" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-front.jpg" alt="The Shit of Theseus, front view" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-side.jpg" alt="The Shit of Theseus, side view" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-decals-hood.jpg" alt="Hood panels with the knights and rally decals" onerror="this.style.display=\'none\';">' +
                     '</div>' +
                     '<div class="car-specs-grid" style="margin-top:1.25rem;">' +
                         '<div class="car-spec-item"><div class="spec-label">Model</div><div class="spec-value">Ford Laser LXi</div></div>' +
@@ -2152,6 +2153,11 @@
                     '<h3>Why "Shit of Theseus"?</h3>' +
                     '<p>The Ship of Theseus is a thought experiment: if you replace every plank of a ship one at a time, is it still the same ship? Our car asks the same question, except instead of planks it\'s head gaskets, radiator hoses, and suspension bushings.</p>' +
                     '<p>By the time we reach Melbourne, there\'s a real chance that more of the car will be replacement parts than original. At what point does it stop being the car we started with? We don\'t know. But we\'re going to find out.</p>' +
+                    '<p>This is how we found it. A tired little Laser parked on the nature strip, surrounded by a front yard\'s worth of mild neglect. It hadn\'t run properly in months.</p>' +
+                    '<div class="car-gallery">' +
+                        '<img src="/build/car-origin-front.jpg" alt="The car when we bought it, front on" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-origin-yard.jpg" alt="The car on the nature strip before we took it home" onerror="this.style.display=\'none\';">' +
+                    '</div>' +
                 '</section>';
 
             var telemetryHtml =
@@ -2214,6 +2220,10 @@
                     '<p>Announces waypoints, distance milestones, and sensor alerts through the car speakers via AUX. No cloud. No latency. Just a stern Northern Englishman telling you how far you\'ve driven.</p>' +
                     '<h4 id="hw-cluster">Sensor Cluster</h4>' +
                     '<p>3D-printed PETG housing, ceiling-mounted in a 4\u00d72 grid. Parametric OpenSCAD design. Keeps everything tidy and vibration-isolated(ish).</p>' +
+                    '<h4 id="hw-retro-panel">Flux Capacitor Dash Panel</h4>' +
+                    '<p><img src="/build/car-retro-panel.jpg" alt="Back to the Future themed dashboard panel with flux capacitor, kill switch and Anderson plug" style="width:100%;max-width:520px;border-radius:8px;border:1px solid #2a1f0e;margin:0.5rem 0;" onerror="this.style.display=\'none\';"></p>' +
+                    '<p>A bespoke dashboard panel in the passenger footwell. A working flux capacitor for the novelty, a master kill switch for the seriousness, and an Anderson plug for charging the accessory battery from outside the car.</p>' +
+                    '<p>We\'re not hitting 88 mph in a Laser. The flux capacitor is load-bearing morale.</p>' +
                 '</section>';
 
             var softwareHtml =
@@ -2250,6 +2260,31 @@
                     '<h3>The Build</h3>' +
                     '<p>A rough chronology of how this got out of hand.</p>' +
                     '<div class="build-timeline">' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">Hardware Inventory &amp; Graceful Degradation</div>' +
+                            '<div class="build-desc">Every sensor is now declared in a manifest with a per-device health state machine, backoff ladder, and TTS announcements. The OLED rolls up missing devices; the dashboard kiosk has a floating HW panel. The Pi tells you what\'s broken instead of silently running on garbage data.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">Pi 5 Stack Enclosure</div>' +
+                            '<div class="build-desc">Parametric OpenSCAD case for the full Pi 5 stack: NVMe HAT, active cooler, GPIO extension, perma-proto. Vibration-isolated M2.5 mounts, GX12 aviation connector for the sensor loom, SMA bulkhead for GPS. PETG, printed on the Bambu P1S.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">Screen Bezel</div>' +
+                            '<div class="build-desc">3D-printed picture-frame surround for the Waveshare 7" display. Took three design passes to land on something that actually fit the screen and the mounting wall without wobbling.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">Flux Capacitor Dash Panel</div>' +
+                            '<div class="build-desc">Back-to-the-Future themed panel in the passenger footwell: working flux capacitor, master kill switch, Anderson plug for external accessory-battery charging. Half useful, half theatre, fully committed to the bit.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">Grafana Basic-Auth &amp; Kiosk Mode</div>' +
+                            '<div class="build-desc">Telemetry dashboard now loads in full kiosk mode (no sidebar, no nav). Switched Pi-side auth from API tokens to admin basic-auth with an on-disk password file, because the Grafana pod has no PVC and tokens don\'t survive restarts.</div>' +
+                        '</div>' +
                         '<div class="build-entry">' +
                             '<div class="build-date">Apr 2026</div>' +
                             '<div class="build-title">Website Narrative Rebuild</div>' +
@@ -2302,9 +2337,9 @@
                 '<section class="about-card" id="car-build-photos">' +
                     '<h3>Build Photos</h3>' +
                     '<div class="car-gallery">' +
-                        '<img src="/car-interior.jpg" alt="Dashboard with Pi and display" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
-                        '<img src="/car-sensor-cluster.jpg" alt="Ceiling-mounted sensor cluster" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
-                        '<img src="/car-engine-bay.jpg" alt="Engine bay" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
+                        '<img src="/build/car-interior.jpg" alt="Dashboard with Pi and display" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
+                        '<img src="/build/car-sensor-cluster.jpg" alt="Ceiling-mounted sensor cluster" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
+                        '<img src="/build/car-engine-bay.jpg" alt="Engine bay" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=3)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
                     '</div>' +
                 '</section>';
 
