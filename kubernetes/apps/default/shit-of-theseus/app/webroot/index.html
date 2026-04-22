@@ -68,6 +68,36 @@
         .donate-btn:hover { background: #e07010; transform: translateY(-1px); }
         .donate-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
+        .code-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.1rem;
+            background: #21262d;
+            color: #f0f6fc !important;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            text-decoration: none !important;
+            transition: background 0.2s, transform 0.1s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .code-btn:hover { background: #30363d; border-color: #484f58; transform: translateY(-1px); }
+        .code-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+        .donate-closer {
+            margin-top: 2rem;
+            padding: 2rem 1.75rem;
+            background: linear-gradient(135deg, #1a1208 0%, #2a1f0e 100%);
+            border: 1px solid #c06000;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .donate-closer h3 { margin-top: 0; color: #f0dbb8; }
+        .donate-closer p { color: #c9d1d9; max-width: 640px; margin: 0.75rem auto; line-height: 1.6; }
+        .donate-closer .donate-btn { margin-top: 1rem; padding: 0.75rem 1.75rem; font-size: 1rem; }
+
         /* Nav */
         nav {
             display: flex;
@@ -1090,6 +1120,7 @@
         <a href="/" onclick="event.preventDefault(); navigateHome();">Home</a>
         <a href="/car" onclick="event.preventDefault(); navigateToCar();">Car</a>
         <a href="https://grafana.shit-of-theseus.com/d/shitbox-rally-v2?orgId=1&kiosk" target="_blank" rel="noopener">Telemetry</a>
+        <a href="https://github.com/albatrossflavour/shitbox" target="_blank" rel="noopener">Code</a>
         <a href="/about" onclick="event.preventDefault(); navigateToAbout();">About</a>
     </nav>
 
@@ -2167,8 +2198,11 @@
                     '<p>Everything you see on this site is captured and uploaded automatically from the car.</p>' +
                     '<p>No manual uploads.<br>No post-processing.<br>No "we\'ll fix it later".</p>' +
                     '<p>It\'s fully automated, open source, and running on a Raspberry Pi bolted under the passenger seat like it absolutely belongs there.</p>' +
-                    '<p>The code lives at <a href="https://github.com/albatrossflavour/shitbox" target="_blank" rel="noopener">github.com/albatrossflavour/shitbox</a></p>' +
                     '<p>Because if you\'re going to over-engineer something, you may as well publish it.</p>' +
+                    '<p style="margin-top:1.25rem;"><a class="code-btn" href="https://github.com/albatrossflavour/shitbox" target="_blank" rel="noopener">' +
+                        '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>' +
+                        'View the code on GitHub' +
+                    '</a></p>' +
                     '<object data="/wiring.svg" type="image/svg+xml" style="width:100%;margin-top:1rem;border-radius:8px;border:1px solid #2a1f0e;">Wiring diagram</object>' +
                 '</section>';
 
@@ -2178,7 +2212,7 @@
                     '<p>The brains of the operation is a <strong>Raspberry Pi 5</strong> with NVMe storage, running a single Python daemon that orchestrates everything. The original Pi 4 was fried during a wiring incident. Because of course it was.</p>' +
                     '<p>Connected to it:</p>' +
                     '<h4 id="hw-lsm6dsox">LSM6DSOX IMU</h4>' +
-                    '<p>6-axis accelerometer and gyroscope at 50 Hz, behind a TCA4307 I2C bus buffer for hot-plug resilience.</p>' +
+                    '<p>6-axis accelerometer and gyroscope at 104 Hz, behind a TCA4307 I2C bus buffer for hot-plug resilience.</p>' +
                     '<ul><li>Replaces the original MPU-6050</li><li>Continuous ring buffer</li><li>Event detection state machine</li></ul>' +
                     '<p>It watches for:</p>' +
                     '<ul><li>Hard braking</li><li>Big cornering forces</li><li>High G events</li><li>Sustained rough road vibration</li></ul>' +
@@ -2201,7 +2235,7 @@
                     '<p>DFRobot air quality sensor on I2C 0x19. Measures particulate concentration.</p>' +
                     '<p>Completely frivolous. Completely fun.</p>' +
                     '<h4 id="hw-cameras">Dual Cameras</h4>' +
-                    '<p>ELP front camera + Logitech Brio 100 cabin camera, composited into picture-in-picture by a single ffmpeg process.</p>' +
+                    '<p>ELP USB1080P03-BH100 (H.264 UVC, 117&deg; HFOV) front + Logitech Brio 100 cabin, composited into picture-in-picture by a single ffmpeg process.</p>' +
                     '<ul><li>Continuous 10-second segments</li><li>50-second rolling buffer</li></ul>' +
                     '<p>The system always has the last 50 seconds of video before anything happens.</p>' +
                     '<p>Which is very important for mechanical regret analysis.</p>' +
@@ -2231,7 +2265,7 @@
                     '<p>Everything runs as a single systemd service:<br><code>shitbox-telemetry</code></p>' +
                     '<p>Running a service mesh under the passenger seat felt like a stretch.</p>' +
                     '<p>Three concurrent paths:</p>' +
-                    '<h4>High-Rate Path, 50 Hz</h4>' +
+                    '<h4>High-Rate Path, 104 Hz</h4>' +
                     '<p>IMU into ring buffer.<br>State machine watches for threshold crossings.<br>Captures pre-event IMU data and triggers video capture.</p>' +
                     '<h4>Low-Rate Path, 1 Hz</h4>' +
                     '<p>GPS, environment and power metrics written to SQLite in WAL mode.</p>' +
@@ -2341,6 +2375,18 @@
                     '</div>' +
                 '</section>';
 
+            var donateCloser =
+                '<section class="donate-closer">' +
+                    '<h3>Still reading?</h3>' +
+                    '<p>You\'ve just scrolled past more engineering detail than this car\'s previous owner encountered in twenty-five years of ownership.</p>' +
+                    '<p>All of this, the sensors, the ring buffers, the daft little buzzer, exists for one reason: to drag attention to the thing that actually matters. We\'re driving a $1,500 car 3,500 km to raise money for the Cancer Council.</p>' +
+                    '<p>If any of this was entertaining, the donate button works a lot harder than the alternator does.</p>' +
+                    '<a href="https://short.albatrossflavour.com/Shitbox" target="_blank" rel="noopener" class="donate-btn">' +
+                        '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' +
+                        'Donate to Cancer Council' +
+                    '</a>' +
+                '</section>';
+
             var html = '<div class="day-page">' +
                 carIntro +
                 whyHtml +
@@ -2349,6 +2395,7 @@
                 photosHtml +
                 hardwareHtml +
                 softwareHtml +
+                donateCloser +
                 '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
             '</div>';
             window._carPhotoFail = 0;
