@@ -2538,7 +2538,8 @@
                 group.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
                     var src = ph.getAttribute('data-video-src');
                     if (src) {
-                        ph.innerHTML = '<video controls preload="none" poster="/captures/intro_poster.jpg" src="' + src + '"></video>';
+                        var poster = ph.getAttribute('data-poster-url') || '/captures/intro_poster.jpg';
+                        ph.innerHTML = '<video controls preload="none" poster="' + poster + '" src="' + src + '"></video>';
                         ph.className = 'event-video';
                     }
                 });
@@ -2549,6 +2550,9 @@
                     var video = v.querySelector('video');
                     if (video) {
                         v.setAttribute('data-video-src', video.src);
+                        if (video.poster) {
+                            v.setAttribute('data-poster-url', video.poster);
+                        }
                         v.innerHTML = '';
                         v.className = 'event-video-placeholder';
                     }
@@ -2654,10 +2658,11 @@
 
                     var videoHtml = '';
                     var videoSrc = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
+                    var posterUrl = ev.poster_url || '/captures/intro_poster.jpg';
                     var actionsHtml = '<div class="event-actions">' +
                         '<a href="#" class="share-btn" data-event-id="' + eventId + '">Share</a>';
                     if (videoSrc) {
-                        videoHtml = '<div class="event-video-placeholder" data-video-src="' + videoSrc + '"></div>';
+                        videoHtml = '<div class="event-video-placeholder" data-video-src="' + videoSrc + '" data-poster-url="' + posterUrl + '"></div>';
                         actionsHtml += '<a href="' + videoSrc + '" download>Download</a>';
                     }
                     actionsHtml += '</div>';
