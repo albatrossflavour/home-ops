@@ -670,6 +670,46 @@
             width: 100%;
             display: block;
         }
+        .event-video-placeholder {
+            position: relative;
+            cursor: pointer;
+            aspect-ratio: 16 / 9;
+        }
+        .event-video-placeholder .evp-poster {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .event-video-placeholder .evp-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s, border-color 0.15s;
+        }
+        .event-video-placeholder:hover .evp-play {
+            background: rgba(224, 160, 64, 0.85);
+            border-color: #fff;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        .event-video-placeholder .evp-play svg {
+            width: 22px;
+            height: 22px;
+            margin-left: 3px;
+            fill: currentColor;
+        }
         .event-actions {
             display: flex;
             gap: 0.5rem;
@@ -2534,13 +2574,18 @@
             var filterBar = document.getElementById('legacy-day-filter-bar');
             var filterSelect = document.getElementById('legacy-day-filter-select');
 
+            var PLAY_ICON_SVG = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3.5v13l11-6.5z"/></svg>';
+            function renderPosterPlaceholder(ph) {
+                var poster = ph.getAttribute('data-poster-url') || '/captures/intro_poster.jpg';
+                ph.innerHTML =
+                    '<img class="evp-poster" src="' + poster + '" alt="" loading="lazy">' +
+                    '<button type="button" class="evp-play" aria-label="Play video">' + PLAY_ICON_SVG + '</button>';
+            }
+
             function activateVideos(group) {
                 group.querySelectorAll('.event-video-placeholder').forEach(function(ph) {
-                    var src = ph.getAttribute('data-video-src');
-                    if (src) {
-                        var poster = ph.getAttribute('data-poster-url') || '/captures/intro_poster.jpg';
-                        ph.innerHTML = '<video controls preload="none" poster="' + poster + '" src="' + src + '"></video>';
-                        ph.className = 'event-video';
+                    if (!ph.querySelector('.evp-poster') && ph.getAttribute('data-video-src')) {
+                        renderPosterPlaceholder(ph);
                     }
                 });
             }
@@ -2553,10 +2598,19 @@
                         if (video.poster) {
                             v.setAttribute('data-poster-url', video.poster);
                         }
-                        v.innerHTML = '';
+                        video.pause();
                         v.className = 'event-video-placeholder';
+                        renderPosterPlaceholder(v);
                     }
                 });
+            }
+
+            function swapToVideo(ph) {
+                var src = ph.getAttribute('data-video-src');
+                if (!src) { return; }
+                var poster = ph.getAttribute('data-poster-url') || '/captures/intro_poster.jpg';
+                ph.innerHTML = '<video controls autoplay preload="metadata" poster="' + poster + '" src="' + src + '"></video>';
+                ph.className = 'event-video';
             }
 
             var filterToDate = null;
@@ -2700,6 +2754,12 @@
                     btn.textContent = 'Copied!';
                     setTimeout(function() { btn.textContent = 'Share'; }, 2000);
                 });
+            });
+
+            container.addEventListener('click', function(e) {
+                var ph = e.target.closest('.event-video-placeholder');
+                if (!ph) return;
+                swapToVideo(ph);
             });
 
             var params = new URLSearchParams(window.location.search);
