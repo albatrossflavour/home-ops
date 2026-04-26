@@ -3040,6 +3040,33 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VOC"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kΩ"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "VOC (higher = cleaner)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1f6feb"
+                }
+              }
+            ]
           }
         ]
       },
@@ -3075,6 +3102,13 @@
           "legendFormat": "PM2.5",
           "range": true,
           "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_gas_resistance / 1000",
+          "legendFormat": "VOC",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Cabin Air Quality",
