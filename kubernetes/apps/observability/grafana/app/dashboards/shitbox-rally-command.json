@@ -3062,8 +3062,20 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#1f6feb"
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "#da3633", "value": null },
+                    { "color": "#d29922", "value": 100 },
+                    { "color": "#dbab09", "value": 180 },
+                    { "color": "#238636", "value": 280 },
+                    { "color": "#6e7681", "value": 1000 }
+                  ]
                 }
               }
             ]
