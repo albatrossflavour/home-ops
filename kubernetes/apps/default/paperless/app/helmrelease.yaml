@@ -79,6 +79,9 @@ spec:
               # Redis integration
               PAPERLESS_REDIS: redis://localhost:6379
 
+              # Default ownership for newly-consumed documents (private to tgreen)
+              PAPERLESS_DEFAULT_PERMISSIONS_OWNER: tgreen
+
               # User permissions for NFS storage
               USERMAP_GID: "65542" # gladius:external-services
 
