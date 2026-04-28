@@ -17,6 +17,9 @@
     If specified, creates a Chrome-compatible bookmarks HTML file
 .PARAMETER BookmarksPath
     Path where the bookmarks HTML file will be created. Defaults to current user's Downloads folder
+.PARAMETER FixDefender
+    Adds PowerShell to Windows Defender's Controlled Folder Access allowlist.
+    Run this once if the script fails with "file in use" / "access denied" errors when writing the hosts file.
 .EXAMPLE
     .\Sync-ClusterDNS.ps1
     Syncs DNS entries to the hosts file
@@ -26,6 +29,9 @@
 .EXAMPLE
     .\Sync-ClusterDNS.ps1 -CreateBookmarks
     Syncs DNS entries and creates a Chrome bookmarks file
+.EXAMPLE
+    .\Sync-ClusterDNS.ps1 -FixDefender
+    Allowlists PowerShell in Defender Controlled Folder Access, then runs the sync
 #>
 
 param(
@@ -33,7 +39,8 @@ param(
     [string]$HostsPath = "$env:SystemRoot\System32\drivers\etc\hosts",
     [string]$BookmarksPath = "$env:USERPROFILE\Downloads\ClusterServices-Bookmarks.html",
     [switch]$DryRun,
-    [switch]$CreateBookmarks
+    [switch]$CreateBookmarks,
+    [switch]$FixDefender
 )
 
 # Marker comments to identify our managed section
@@ -54,6 +61,96 @@ $serviceDescriptions = @{
     'homepage' = 'Homepage - Service dashboard'
     'immich'   = 'Immich - Photo and video management'
     'paperless' = 'Paperless - Document management'
+}
+
+function Write-HostsFileResilient {
+    param(
+        [Parameter(Mandatory)] [string]$Path,
+        [Parameter(Mandatory)] [string]$Content,
+        [int]$MaxAttempts = 4
+    )
+
+    # Use UTF-8 without BOM to match Windows hosts-file conventions
+    $encoding = New-Object System.Text.UTF8Encoding($false)
+    $tempPath = "$Path.new"
+
+    for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+        try {
+            [System.IO.File]::WriteAllText($tempPath, $Content, $encoding)
+            Move-Item -Path $tempPath -Destination $Path -Force -ErrorAction Stop
+            return
+        }
+        catch [System.IO.IOException] {
+            if (Test-Path $tempPath) { Remove-Item $tempPath -ErrorAction SilentlyContinue }
+            if ($attempt -eq $MaxAttempts) { throw }
+            $waitMs = 500 * $attempt
+            Write-Host "  Write attempt $attempt failed (lock or scan). Retrying in ${waitMs}ms..." -ForegroundColor DarkYellow
+            Start-Sleep -Milliseconds $waitMs
+        }
+        catch {
+            if (Test-Path $tempPath) { Remove-Item $tempPath -ErrorAction SilentlyContinue }
+            throw
+        }
+    }
+}
+
+function Test-DefenderCFAEnabled {
+    try {
+        $pref = Get-MpPreference -ErrorAction Stop
+    }
+    catch {
+        return $false
+    }
+    return ($pref.EnableControlledFolderAccess -eq 1)
+}
+
+function Show-DefenderCFAGuidance {
+    param([string]$HostsPath)
+
+    if (-not (Test-DefenderCFAEnabled)) { return }
+
+    Write-Host ""
+    Write-Host "Diagnosis: Windows Defender Controlled Folder Access is ENABLED." -ForegroundColor Yellow
+    Write-Host "  CFA blocks ALL writes to $HostsPath, even as Administrator." -ForegroundColor Yellow
+    Write-Host "  Re-run this script with -FixDefender to allowlist PowerShell, OR" -ForegroundColor Yellow
+    Write-Host "  manually: Settings > Windows Security > Virus & threat protection >" -ForegroundColor Gray
+    Write-Host "    Ransomware protection > Manage Controlled folder access >" -ForegroundColor Gray
+    Write-Host "    'Allow an app through' and add powershell.exe." -ForegroundColor Gray
+}
+
+function Add-DefenderHostsFileAllowlist {
+    Write-Host "Adding PowerShell to Defender Controlled Folder Access allowlist..." -ForegroundColor Cyan
+
+    try {
+        $pref = Get-MpPreference -ErrorAction Stop
+    }
+    catch {
+        Write-Host "  Defender is not available on this machine. Nothing to do." -ForegroundColor Yellow
+        return
+    }
+
+    if ($pref.EnableControlledFolderAccess -ne 1) {
+        Write-Host "  Controlled Folder Access is not enabled. Nothing to do." -ForegroundColor Green
+        return
+    }
+
+    # Allowlist both the Windows PowerShell host and pwsh, if present
+    $apps = @(
+        "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+    )
+    $pwshExe = (Get-Command pwsh.exe -ErrorAction SilentlyContinue).Source
+    if ($pwshExe) { $apps += $pwshExe }
+
+    foreach ($app in $apps) {
+        if (-not (Test-Path $app)) { continue }
+        try {
+            Add-MpPreference -ControlledFolderAccessAllowedApplications $app -ErrorAction Stop
+            Write-Host "  [OK] Allowlisted: $app" -ForegroundColor Green
+        }
+        catch {
+            Write-Host "  Failed to allowlist $app : $_" -ForegroundColor Red
+        }
+    }
 }
 
 function Get-ClusterDNSEntries {
@@ -134,21 +231,39 @@ function Update-HostsFile {
         Write-Host "Warning: Could not create backup: $_" -ForegroundColor Yellow
     }
 
-    # Write new content
+    # Write new content (resilient: temp file + atomic move, with retries)
     try {
-        Set-Content -Path $HostsPath -Value $newContent -NoNewline -ErrorAction Stop
-        Write-Host "✓ Hosts file updated successfully!" -ForegroundColor Green
+        Write-HostsFileResilient -Path $HostsPath -Content $newContent
+        Write-Host "[OK] Hosts file updated successfully!" -ForegroundColor Green
     }
     catch {
-        Write-Host "Failed to update hosts file: $_" -ForegroundColor Red
-        throw
+        # If CFA is enabled, that's almost certainly the cause. Auto-allowlist and retry once.
+        if (Test-DefenderCFAEnabled) {
+            Write-Host "Write blocked - Defender Controlled Folder Access detected." -ForegroundColor Yellow
+            Write-Host "Auto-allowlisting PowerShell and retrying..." -ForegroundColor Cyan
+            Add-DefenderHostsFileAllowlist
+            Start-Sleep -Seconds 1
+            try {
+                Write-HostsFileResilient -Path $HostsPath -Content $newContent
+                Write-Host "[OK] Hosts file updated successfully (after CFA allowlist)!" -ForegroundColor Green
+            }
+            catch {
+                Write-Host "Failed to update hosts file even after CFA allowlist: $_" -ForegroundColor Red
+                Show-DefenderCFAGuidance -HostsPath $HostsPath
+                throw
+            }
+        }
+        else {
+            Write-Host "Failed to update hosts file: $_" -ForegroundColor Red
+            throw
+        }
     }
 
     # Flush DNS cache
     Write-Host "Flushing DNS cache..." -ForegroundColor Cyan
     try {
         ipconfig /flushdns | Out-Null
-        Write-Host "✓ DNS cache flushed!" -ForegroundColor Green
+        Write-Host "[OK] DNS cache flushed!" -ForegroundColor Green
     }
     catch {
         Write-Host "Warning: Could not flush DNS cache: $_" -ForegroundColor Yellow
@@ -235,12 +350,12 @@ function New-ChromeBookmarks {
 
     try {
         Set-Content -Path $BookmarksPath -Value $html -Encoding UTF8 -ErrorAction Stop
-        Write-Host "✓ Bookmarks file created: $BookmarksPath" -ForegroundColor Green
+        Write-Host "[OK] Bookmarks file created: $BookmarksPath" -ForegroundColor Green
         Write-Host "  Services included: $($bookmarkEntries.Count)" -ForegroundColor Cyan
         Write-Host "`nTo import into Chrome:" -ForegroundColor Yellow
         Write-Host "  1. Open Chrome" -ForegroundColor Gray
         Write-Host "  2. Press Ctrl+Shift+O to open Bookmarks Manager" -ForegroundColor Gray
-        Write-Host "  3. Click the three dots (⋮) in the top right" -ForegroundColor Gray
+        Write-Host "  3. Click the three dots in the top right" -ForegroundColor Gray
         Write-Host "  4. Select 'Import bookmarks'" -ForegroundColor Gray
         Write-Host "  5. Choose the file: $BookmarksPath" -ForegroundColor Gray
     }
@@ -253,6 +368,12 @@ function New-ChromeBookmarks {
 try {
     Write-Host "=== Kubernetes Cluster DNS Sync ===" -ForegroundColor Magenta
     Write-Host ""
+
+    # Optional: allowlist PowerShell in Defender CFA before attempting any writes
+    if ($FixDefender) {
+        Add-DefenderHostsFileAllowlist
+        Write-Host ""
+    }
 
     # Get DNS entries from cluster
     $dnsEntries = Get-ClusterDNSEntries
@@ -276,7 +397,7 @@ try {
         $dnsEntries | Select-Object -First 5 | ForEach-Object {
             Write-Host "  - https://$($_.hostname)" -ForegroundColor Cyan
         }
-        if ($dnsEntries.Count > 5) {
+        if ($dnsEntries.Count -gt 5) {
             Write-Host "  ... and $($dnsEntries.Count - 5) more services" -ForegroundColor Cyan
         }
     }
