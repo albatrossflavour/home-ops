@@ -233,9 +233,6 @@ spec:
         home:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/home.json
           datasource: Prometheus
-        shitbox:
-          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/shitbox-telemetry.json
-          datasource: Prometheus
         shitbox-rally-command:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/shitbox-rally-command.json
           datasource: Prometheus
