@@ -2274,6 +2274,16 @@
                     '<h4 id="hw-sen0460">SEN0460 PM2.5 Sensor</h4>' +
                     '<p>DFRobot air quality sensor on I2C 0x19. Measures particulate concentration.</p>' +
                     '<p>Completely frivolous. Completely fun.</p>' +
+                    '<h4 id="hw-tpms">TPMS</h4>' +
+                    '<p>Four 433 MHz tyre pressure sensors, one per wheel, decoded on the Pi by a USB RTL-SDR dongle running <code>rtl_433</code>. The aftermarket sensors come up as &ldquo;Abarth-124 Spider&rdquo; in rtl_433\'s decoder list, which is the way of these things: same Schrader 433 MHz family, same data shape, different brand badge on the valve cap.</p>' +
+                    '<ul>' +
+                        '<li>Per-wheel PSI on the dashboard Health page in real time</li>' +
+                        '<li>SQLite, Prometheus, and Grafana for time series and history</li>' +
+                        '<li>Yellow band 25-28 PSI (Health page colour only), red below 25 PSI fires sustained-low TTS</li>' +
+                        '<li>Leak detection: a 5 PSI drop within 60 seconds fires &ldquo;tyre leaking, front driver&rdquo; out the cabin speakers</li>' +
+                    '</ul>' +
+                    '<p>The decoder\'s pressure maths was off by a factor of 2.45. Caught it bench-calibrating against four real tyres at a known pressure. One correction in the collector and everything reads true.</p>' +
+                    '<p>Hardware fault tolerance: pull the dongle mid-drive and the supervisor marks the radio missing, the four wheels go stale on the dashboard, and a TTS announcement reports the fault. Plug it back in and the radio comes back, the daemon respawns rtl_433, and the sensors resume reporting on their next chirp.</p>' +
                     '<h4 id="hw-cameras">Dual Cameras</h4>' +
                     '<p>ELP USB1080P03-BH100 (H.264 UVC, 117&deg; HFOV) front + Logitech Brio 100 cabin, composited into picture-in-picture by a single ffmpeg process.</p>' +
                     '<ul><li>Continuous 10-second segments</li><li>50-second rolling buffer</li></ul>' +
@@ -2333,6 +2343,11 @@
                     '<h3>The Build</h3>' +
                     '<p>A rough chronology of how this got out of hand.</p>' +
                     '<div class="build-timeline">' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Apr 2026</div>' +
+                            '<div class="build-title">TPMS Integration</div>' +
+                            '<div class="build-desc">Four 433 MHz tyre pressure sensors decoded by a USB RTL-SDR dongle running rtl_433. Per-wheel PSI lands on the dashboard Health page, SQLite, and Grafana, plus TTS alerts for sustained low pressure and a separate fast-deflation leak warning. The decoder\'s pressure maths was off by a factor of 2.45, caught with a stick gauge on the bench and fixed with one correction in the collector. Adds &ldquo;tyre leaking, rear passenger&rdquo; to the list of things the Pi can shout at us mid-drive.</div>' +
+                        '</div>' +
                         '<div class="build-entry">' +
                             '<div class="build-date">Apr 2026</div>' +
                             '<div class="build-title">Hardware Inventory &amp; Graceful Degradation</div>' +
