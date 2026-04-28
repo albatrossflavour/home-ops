@@ -97,9 +97,9 @@ spec:
       resources:
         requests:
           cpu: 10m
-          memory: 128Mi
+          memory: 256Mi
         limits:
-          memory: 1Gi
+          memory: 2Gi
 
     # Compactor - Downsamples and compacts object storage data
     compactor:
