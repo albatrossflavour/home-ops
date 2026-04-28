@@ -2339,9 +2339,228 @@
     },
     {
       "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "id": 68,
+      "panels": [],
+      "title": "TYRES",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 25
+              },
+              {
+                "color": "green",
+                "value": 28
+              }
+            ]
+          },
+          "unit": "pressureppsi",
+          "min": 20,
+          "max": 40
+        },
+        "overrides": []
+      },
       "gridPos": {
         "x": 0,
-        "y": 42,
+        "y": 43,
+        "w": 12,
+        "h": 8
+      },
+      "id": 69,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "min",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_tpms_pressure_psi{wheel=~\"$wheel\"}",
+          "legendFormat": "{{wheel}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "TPMS Pressure (PSI)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 43,
+        "w": 12,
+        "h": 8
+      },
+      "id": 70,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "min",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_tpms_temperature_c{wheel=~\"$wheel\"}",
+          "legendFormat": "{{wheel}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "TPMS Temperature (\u00b0C)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 51,
         "w": 24,
         "h": 1
       },
@@ -2456,7 +2675,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 43,
+        "y": 52,
         "w": 8,
         "h": 8
       },
@@ -2610,7 +2829,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 43,
+        "y": 52,
         "w": 8,
         "h": 8
       },
@@ -2769,7 +2988,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 43,
+        "y": 52,
         "w": 8,
         "h": 8
       },
@@ -2821,7 +3040,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 51,
+        "y": 60,
         "w": 24,
         "h": 1
       },
@@ -2929,7 +3148,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 52,
+        "y": 61,
         "w": 8,
         "h": 7
       },
@@ -3018,13 +3237,25 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "#238636", "value": 0 },
-              { "color": "#8957e5", "value": 12 },
-              { "color": "#d29922", "value": 35 },
-              { "color": "#da3633", "value": 55 }
+              {
+                "color": "#238636",
+                "value": 0
+              },
+              {
+                "color": "#8957e5",
+                "value": 12
+              },
+              {
+                "color": "#d29922",
+                "value": 35
+              },
+              {
+                "color": "#da3633",
+                "value": 55
+              }
             ]
           },
-          "unit": "µg/m³"
+          "unit": "\u00b5g/m\u00b3"
         },
         "overrides": [
           {
@@ -3049,7 +3280,7 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "kΩ"
+                "value": "k\u03a9"
               },
               {
                 "id": "custom.axisPlacement",
@@ -3070,11 +3301,26 @@
                 "value": {
                   "mode": "absolute",
                   "steps": [
-                    { "color": "#da3633", "value": null },
-                    { "color": "#d29922", "value": 100 },
-                    { "color": "#dbab09", "value": 180 },
-                    { "color": "#238636", "value": 280 },
-                    { "color": "#6e7681", "value": 1000 }
+                    {
+                      "color": "#da3633",
+                      "value": null
+                    },
+                    {
+                      "color": "#d29922",
+                      "value": 100
+                    },
+                    {
+                      "color": "#dbab09",
+                      "value": 180
+                    },
+                    {
+                      "color": "#238636",
+                      "value": 280
+                    },
+                    {
+                      "color": "#6e7681",
+                      "value": 1000
+                    }
                   ]
                 }
               }
@@ -3084,7 +3330,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 52,
+        "y": 61,
         "w": 8,
         "h": 7
       },
@@ -3202,7 +3448,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 52,
+        "y": 61,
         "w": 8,
         "h": 7
       },
@@ -3247,7 +3493,36 @@
     "command-centre"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(shitbox_tpms_pressure_psi, wheel)",
+        "includeAll": true,
+        "label": "Wheel",
+        "multi": true,
+        "name": "wheel",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(shitbox_tpms_pressure_psi, wheel)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-1h",
@@ -3265,5 +3540,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-v2",
-  "version": 1
+  "version": 2
 }
