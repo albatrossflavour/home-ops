@@ -2416,7 +2416,7 @@
               }
             ]
           },
-          "unit": "pressureppsi",
+          "unit": "pressurepsi",
           "min": 20,
           "max": 40
         },
