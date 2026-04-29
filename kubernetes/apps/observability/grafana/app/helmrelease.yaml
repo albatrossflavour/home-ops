@@ -236,6 +236,9 @@ spec:
         shitbox-rally-command:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/shitbox-rally-command.json
           datasource: Prometheus
+        shitbox-trip-summary:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/shitbox-trip-summary.json
+          datasource: Prometheus
         synology:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/synology-nfs.json
           datasource: Prometheus

@@ -1,0 +1,261 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": false,
+        "iconColor": "#da3633",
+        "name": "Shitbox Events",
+        "target": { "expr": "", "interval": "", "refId": "Anno", "tags": ["shitbox"], "type": "tags" }
+      }
+    ]
+  },
+  "description": "Shit of Theseus — Trip Summary. Per-day narrative roll-up. Inspired by CSS Electronics' trip-summary aggregation pattern but framed as rally story rather than fleet engineering.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Command Centre",
+      "tooltip": "Operator-level live dashboard",
+      "type": "link",
+      "url": "/d/shitbox-rally-v2/shitbox-rally-command-centre"
+    }
+  ],
+  "preload": false,
+  "refresh": "",
+  "schemaVersion": 42,
+  "tags": ["shitbox", "rally", "trip-summary", "narrative"],
+  "templating": {
+    "list": [
+      {
+        "current": { "text": "Day 1 — Port Douglas → Cairns", "value": "2026-05-27" },
+        "description": "Pick a rally day. Sets the panel-title context. Use the time-range picker (top right) to scope panels to the day's window.",
+        "label": "Day",
+        "name": "day",
+        "options": [
+          { "selected": true,  "text": "Day 1 — Port Douglas → Cairns",     "value": "2026-05-27" },
+          { "selected": false, "text": "Day 2 — Cairns → Charters Towers",   "value": "2026-05-28" },
+          { "selected": false, "text": "Day 3 — Charters Towers → Longreach","value": "2026-05-29" },
+          { "selected": false, "text": "Day 4 — Longreach → Birdsville",     "value": "2026-05-30" },
+          { "selected": false, "text": "Day 5 — Birdsville → William Creek", "value": "2026-05-31" },
+          { "selected": false, "text": "Day 6 — William Creek → Coober Pedy","value": "2026-06-01" },
+          { "selected": false, "text": "Day 7 — Coober Pedy → Marla",        "value": "2026-06-02" },
+          { "selected": false, "text": "Day 8 — Marla → Port Augusta",       "value": "2026-06-03" },
+          { "selected": false, "text": "Day 9 — Port Augusta → Mildura",     "value": "2026-06-04" },
+          { "selected": false, "text": "Day 10 — Mildura → Melbourne",       "value": "2026-06-05" }
+        ],
+        "query": "Day 1 — Port Douglas → Cairns : 2026-05-27, Day 2 — Cairns → Charters Towers : 2026-05-28, Day 3 — Charters Towers → Longreach : 2026-05-29, Day 4 — Longreach → Birdsville : 2026-05-30, Day 5 — Birdsville → William Creek : 2026-05-31, Day 6 — William Creek → Coober Pedy : 2026-06-01, Day 7 — Coober Pedy → Marla : 2026-06-02, Day 8 — Marla → Port Augusta : 2026-06-03, Day 9 — Port Augusta → Mildura : 2026-06-04, Day 10 — Mildura → Melbourne : 2026-06-05",
+        "type": "custom"
+      },
+      {
+        "current": { "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(shitbox_driver_time_seconds, driver)",
+        "includeAll": true,
+        "label": "Driver",
+        "multi": true,
+        "name": "driver",
+        "options": [],
+        "query": { "qryType": 1, "query": "label_values(shitbox_driver_time_seconds, driver)", "refId": "PrometheusVariableQueryEditor-VariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["", "30s", "1m", "5m"]
+  },
+  "timezone": "browser",
+  "title": "Shitbox Rally — Trip Summary",
+  "uid": "shitbox-trip-summary",
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "title": "$day",
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"display:flex;gap:1rem;align-items:center;\"><img src=\"https://shit-of-theseus.com/build/car-front.jpg\" style=\"max-height:90px;border-radius:6px;\"/><div style=\"flex:1;\"><div style=\"color:#8b949e;font-size:0.8rem;\">DRIVER STORY</div><div style=\"font-size:1.1rem;color:#e6edf3;\">${day}</div><div style=\"color:#8b949e;font-size:0.85rem;margin-top:0.4rem;\">Set the time range (top right) to the day's window for accurate stats. Future: bind automatically from this picker.</div></div></div>"
+      },
+      "transparent": true
+    },
+
+    { "id": 10, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 8,  "y": 0 }, "title": "Distance",
+      "description": "Day distance. TODO: needs a `shitbox_trip_distance_km` cumulative metric (or integrate `shitbox_spd` over the time range). Currently shown as a placeholder.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "lengthkm", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "#f0dbb8" }, "mappings": [{ "options": { "match": "null", "result": { "text": "—" } }, "type": "special" }] }, "overrides": [] },
+      "targets": [ { "expr": "max_over_time(shitbox_spd[$__range]) * 0", "legendFormat": "", "refId": "A" } ],
+      "pluginVersion": "10.1.5"
+    },
+    { "id": 11, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 }, "title": "Time Moving",
+      "description": "Time spent moving (>5 km/h). Computed as a fraction of samples above the threshold.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "fixed", "fixedColor": "#f0dbb8" } }, "overrides": [] },
+      "targets": [ { "expr": "count_over_time((shitbox_spd > 5)[$__range:]) * 60", "legendFormat": "", "refId": "A" } ]
+    },
+    { "id": 12, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 }, "title": "Top Speed",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["max"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "velocitykmh", "color": { "mode": "fixed", "fixedColor": "#f0dbb8" } }, "overrides": [] },
+      "targets": [ { "expr": "max_over_time(shitbox_spd[$__range])", "legendFormat": "", "refId": "A" } ]
+    },
+    { "id": 13, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 }, "title": "Peak G",
+      "description": "Largest g-force magnitude observed during the day, regardless of axis.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["max"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 2, "color": { "mode": "fixed", "fixedColor": "#da3633" } }, "overrides": [] },
+      "targets": [ { "expr": "max_over_time(sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2)[$__range])", "legendFormat": "", "refId": "A" } ]
+    },
+
+    { "id": 20, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 0,  "y": 4 }, "title": "Events",
+      "description": "Total events captured during the day (high g, hard brake, big corner, rough road, manual, boot, TPMS).",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "none", "color": { "mode": "fixed", "fixedColor": "#1f6feb" } }, "overrides": [] },
+      "targets": [ { "expr": "sum(increase(shitbox_events_total[$__range]))", "legendFormat": "", "refId": "A" } ]
+    },
+    { "id": 21, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 4,  "y": 4 }, "title": "Fuel Stops",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "none", "color": { "mode": "fixed", "fixedColor": "#3fb950" } }, "overrides": [] },
+      "targets": [ { "expr": "increase(shitbox_fuel_stops_total[$__range])", "legendFormat": "", "refId": "A" } ]
+    },
+    { "id": 22, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 8,  "y": 4 }, "title": "Fuel Used",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "lengthm", "decimals": 1, "color": { "mode": "fixed", "fixedColor": "#3fb950" } }, "overrides": [] },
+      "targets": [ { "expr": "increase(shitbox_fuel_litres_total[$__range])", "legendFormat": "", "refId": "A" } ]
+    },
+    { "id": 23, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 12, "y": 4 }, "title": "Avg Efficiency",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 1, "color": { "mode": "fixed", "fixedColor": "#3fb950" }, "mappings": [{ "options": { "match": "null", "result": { "text": "—" } }, "type": "special" }] }, "overrides": [{ "matcher": { "id": "byName", "options": "Value" }, "properties": [{ "id": "displayName", "value": "km/L" }] }] },
+      "targets": [ { "expr": "avg_over_time(shitbox_fuel_efficiency_kml[$__range])", "legendFormat": "", "refId": "A" } ]
+    },
+    { "id": 24, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 16, "y": 4 }, "title": "Notes",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "none", "color": { "mode": "fixed", "fixedColor": "#8957e5" } }, "overrides": [] },
+      "targets": [ { "expr": "increase(shitbox_notes_total[$__range])", "legendFormat": "", "refId": "A" } ]
+    },
+    { "id": 25, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 20, "y": 4 }, "title": "Hardware",
+      "description": "Sensors degraded or missing across the day. 0 = clean run; >0 = something flapped or stayed down.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
+      "fieldConfig": { "defaults": { "unit": "none", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "#3fb950", "value": null }, { "color": "#d29922", "value": 1 }, { "color": "#da3633", "value": 3 }] } }, "overrides": [] },
+      "targets": [ { "expr": "max_over_time(sum(shitbox_hardware_state{state=~\"DEGRADED|MISSING\"})[$__range:])", "legendFormat": "", "refId": "A" } ]
+    },
+
+    { "id": 30, "type": "geomap", "gridPos": { "h": 12, "w": 14, "x": 0, "y": 8 }, "title": "Route — $day",
+      "description": "GPS trail for the day. Future: overlay event pins coloured by type (HIGH_G red, BIG_CORNER amber, HARD_BRAKE red, ROUGH_ROAD purple, MANUAL green) and fuel stops as fuel-pump icons.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": {
+        "view": { "id": "fit", "lat": -25, "lon": 135, "zoom": 5 },
+        "controls": { "showZoom": true, "mouseWheelZoom": true, "showAttribution": true, "showScale": true, "showMeasure": false, "showDebug": false },
+        "basemap": { "type": "default", "name": "Layer 0" },
+        "layers": [
+          {
+            "type": "markers",
+            "name": "GPS trail",
+            "config": { "size": { "fixed": 4 }, "color": { "fixed": "#f0dbb8" } },
+            "location": { "mode": "coords", "latitude": "Value", "longitude": "Value #B" }
+          }
+        ],
+        "tooltip": { "mode": "details" }
+      },
+      "targets": [
+        { "expr": "shitbox_lat",  "legendFormat": "lat", "refId": "A" },
+        { "expr": "shitbox_lon",  "legendFormat": "lon", "refId": "B" }
+      ]
+    },
+
+    { "id": 40, "type": "piechart", "gridPos": { "h": 6, "w": 10, "x": 14, "y": 8 }, "title": "Drive Time by Driver",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "values": ["percent", "value"] },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "tooltip": { "mode": "single" }
+      },
+      "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [ { "expr": "increase(shitbox_driver_time_seconds{driver=~\"$driver\"}[$__range])", "legendFormat": "{{driver}}", "refId": "A" } ]
+    },
+
+    { "id": 50, "type": "barchart", "gridPos": { "h": 6, "w": 10, "x": 14, "y": 14 }, "title": "Events by Type",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": {
+        "orientation": "horizontal",
+        "stacking": "none",
+        "legend": { "displayMode": "hidden" },
+        "tooltip": { "mode": "single" },
+        "xTickLabelRotation": 0
+      },
+      "fieldConfig": { "defaults": { "unit": "none", "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [ { "expr": "increase(shitbox_events_total[$__range])", "legendFormat": "{{type}}", "refId": "A" } ]
+    },
+
+    { "id": 60, "type": "timeseries", "gridPos": { "h": 7, "w": 14, "x": 0, "y": 20 }, "title": "Speed & Altitude",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": true } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Speed" }, "properties": [{ "id": "unit", "value": "velocitykmh" }] },
+          { "matcher": { "id": "byName", "options": "Altitude" }, "properties": [{ "id": "unit", "value": "lengthm" }, { "id": "custom.axisPlacement", "value": "right" }] }
+        ]
+      },
+      "targets": [
+        { "expr": "shitbox_spd", "legendFormat": "Speed",    "refId": "A" },
+        { "expr": "shitbox_alt", "legendFormat": "Altitude", "refId": "B" }
+      ]
+    },
+
+    { "id": 70, "type": "table", "gridPos": { "h": 7, "w": 10, "x": 14, "y": 20 }, "title": "Fuel Stops & Efficiency",
+      "description": "Each fuel stop with running km/L. TODO: needs a per-fill-up timeseries metric or a table source. Currently shows the existing kml gauge as a sparkline-friendly placeholder.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "showHeader": true, "footer": { "show": false } },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] }, "custom": { "align": "auto", "displayMode": "auto" } }, "overrides": [] },
+      "targets": [ { "expr": "shitbox_fuel_efficiency_kml", "format": "table", "instant": true, "refId": "A" } ]
+    },
+
+    { "id": 80, "type": "text", "gridPos": { "h": 6, "w": 24, "x": 0, "y": 27 }, "title": "Day Narrative — $day",
+      "options": {
+        "mode": "markdown",
+        "content": "> _Auto-generated narrative goes here. Pulled from notes + events + driver-stats for the day._\n\n**Example shape**, populated post-drive:\n\n*\"Day 3, 487 km from Charters Towers to Longreach. Tony drove the morning into a headwind out of Pentland; Dani took the wheel after the lunch stop in Hughenden and pushed the pace through the long straights to Winton. Eight events captured: two HARD_BRAKE on the Flinders Highway descent, one BIG_CORNER through the Lochern bend, five HIGH_G hits crossing corrugations west of Winton. Two fuel stops, day average 9.2 km/L. No hardware degradation. Edward called twice from the back seat asking if we were there yet.\"*\n\n**Sources to wire (later):**\n- `notes.json` — extract free-text per day\n- `events.json` — group by type, attach location names from `_resolve_location`\n- `fuel.json` — list stops, compute day's running efficiency\n- `driver-stats.json` — per-driver time on the day\n- LLM rendering (or templated string fill) at the end\n\nThis is a placeholder while the design settles."
+      },
+      "transparent": true
+    },
+
+    { "id": 90, "type": "text", "gridPos": { "h": 4, "w": 24, "x": 0, "y": 33 }, "title": "Mock-up notes",
+      "options": {
+        "mode": "markdown",
+        "content": "**This is a mock-up.** Layout is intentional; data wiring is partial.\n\n- **Working live:** Top Speed, Peak G, Events count, Fuel Stops, Fuel Used, Avg Efficiency, Notes count, Hardware health, Drive Time pie, Events-by-type bar, Speed & Altitude time-series.\n- **Wired but rough:** Distance (no `shitbox_trip_distance_km` metric yet — placeholder), Time Moving (count_over_time approximation, not minutes-precise), Geomap (single-trail, no event pins / fuel pin overlay).\n- **Placeholder:** Fuel Stops & Efficiency table, Day Narrative.\n- **Day picker:** the `$day` template variable is display-only. The time-range picker (top right) still drives queries — set it to the day's window manually for now. A small dashboard-script could bind them automatically; out of scope for the mock.\n\nDelete this panel before declaring the dashboard done."
+      },
+      "transparent": true
+    }
+  ]
+}
