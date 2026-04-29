@@ -1192,6 +1192,23 @@
         var TIMEZONE = 'Australia/Sydney';
         var RALLY_START = new Date('2025-01-30T00:00:00+10:00');
 
+        var GRAFANA_BASE = 'https://grafana.shit-of-theseus.com/d/shitbox-rally-v2/shitbox-rally-command-centre';
+        var GRAFANA_LEAD_MS  = 10000; // 10 s lead-in before the event start
+        var GRAFANA_TRAIL_MS = 30000; // 30 s trail-out after the event end
+
+        function _eventTelemetryUrl(ev) {
+            // Build a Grafana deep-link scoped to the event's window plus a
+            // small lead-in and trail-out. Returns '' if the event lacks a
+            // parseable timestamp so the caller can omit the link.
+            if (!ev || !ev.timestamp) return '';
+            var startMs = new Date(ev.timestamp).getTime();
+            if (isNaN(startMs)) return '';
+            var dur = Number(ev.duration_ms) || 0;
+            var fromMs = startMs - GRAFANA_LEAD_MS;
+            var toMs   = startMs + dur + GRAFANA_TRAIL_MS;
+            return GRAFANA_BASE + '?orgId=1&from=' + fromMs + '&to=' + toMs;
+        }
+
         var DISPLAY_NAMES = {
             HIGH_G: 'High G-Force',
             BIG_CORNER: 'Big Corner',
@@ -2737,6 +2754,10 @@
                     if (videoSrc) {
                         videoHtml = '<div class="event-video-placeholder" data-video-src="' + videoSrc + '" data-poster-url="' + posterUrl + '"></div>';
                         actionsHtml += '<a href="' + videoSrc + '" download>Download</a>';
+                    }
+                    var telemetryUrl = _eventTelemetryUrl(ev);
+                    if (telemetryUrl) {
+                        actionsHtml += '<a href="' + telemetryUrl + '" target="_blank" rel="noopener">Telemetry &rarr;</a>';
                     }
                     actionsHtml += '</div>';
 
