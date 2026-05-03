@@ -118,17 +118,18 @@
       "targets": [ { "expr": "count_over_time((shitbox_spd > 5)[$__range:]) * 60", "legendFormat": "", "refId": "A" } ]
     },
     { "id": 12, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 }, "title": "Top Speed",
+      "description": "Highest speed observed during the day. Filtered to realistic values (≤ 180 km/h) — raw `shitbox_spd` can spike past 1000 km/h during GPS multipath / cold-fix events; the Laser is not breaking the sound barrier on the Eyre Highway.",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["max"], "fields": "", "values": false } },
       "fieldConfig": { "defaults": { "unit": "velocitykmh", "color": { "mode": "fixed", "fixedColor": "#f0dbb8" } }, "overrides": [] },
-      "targets": [ { "expr": "max_over_time(shitbox_spd[$__range])", "legendFormat": "", "refId": "A" } ]
+      "targets": [ { "expr": "max_over_time((shitbox_spd < 180)[$__range:])", "legendFormat": "", "refId": "A" } ]
     },
     { "id": 13, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 }, "title": "Peak G",
-      "description": "Largest g-force magnitude observed during the day, regardless of axis.",
+      "description": "Largest g-force magnitude observed during the day, regardless of axis. Clamped to ≤5g — anything above is an IMU bench-glitch, not a real road event (detector thresholds sit at 0.35–0.45g, hard real-world hits stay under 3g).",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": { "calcs": ["max"], "fields": "", "values": false } },
       "fieldConfig": { "defaults": { "unit": "none", "decimals": 2, "color": { "mode": "fixed", "fixedColor": "#da3633" } }, "overrides": [] },
-      "targets": [ { "expr": "max_over_time(sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2)[$__range])", "legendFormat": "", "refId": "A" } ]
+      "targets": [ { "expr": "max_over_time((sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2) < 5)[$__range:])", "legendFormat": "", "refId": "A" } ]
     },
 
     { "id": 20, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 0,  "y": 4 }, "title": "Events",
