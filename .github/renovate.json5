@@ -128,6 +128,18 @@
       ],
     },
     {
+      description: [
+        'Pin emqx-operator to 2.2.x - 2.3.0+ requires EMQX Enterprise 5.9+ with licence for clustering',
+      ],
+      matchDatasources: [
+        'helm',
+      ],
+      matchPackageNames: [
+        'emqx-operator',
+      ],
+      allowedVersions: '<2.3.0',
+    },
+    {
       matchDatasources: [
         'helm',
       ],
