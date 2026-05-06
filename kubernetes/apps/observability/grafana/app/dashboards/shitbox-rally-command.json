@@ -3151,20 +3151,27 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_voltage_volts{rail!~\"battery|batt\"}",
+          "expr": "shitbox_voltage_volts{rail=~\"ext5v|3v3_sys\"}",
           "legendFormat": "{{rail}} V",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
-          "expr": "shitbox_current_amps{rail!~\"battery|batt\"}",
-          "legendFormat": "{{rail}} A",
+          "expr": "shitbox_current_amps{rail=\"vdd_core\"}",
+          "legendFormat": "vdd_core A (SoC load)",
           "range": true,
           "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "sum(shitbox_current_amps{rail!~\"battery|batt\"})",
+          "legendFormat": "Pi total A",
+          "range": true,
+          "refId": "C"
         }
       ],
-      "title": "Pi Internal Rails (PMIC)",
+      "title": "Pi Power Summary",
       "type": "timeseries"
     },
     {
