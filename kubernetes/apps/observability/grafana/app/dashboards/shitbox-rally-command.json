@@ -3108,32 +3108,10 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "Voltage"
+              "id": "byRegexp",
+              "options": ".* A$"
             },
             "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#e0a040",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Current"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
-              },
               {
                 "id": "unit",
                 "value": "amp"
@@ -3173,20 +3151,20 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_voltage_volts{rail=\"ext5v\"}",
-          "legendFormat": "Pi 5V input",
+          "expr": "shitbox_voltage_volts{rail!~\"battery|batt\"}",
+          "legendFormat": "{{rail}} V",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
-          "expr": "sum(shitbox_current_amps{rail!=\"battery\"})",
-          "legendFormat": "Pi total current",
+          "expr": "shitbox_current_amps{rail!~\"battery|batt\"}",
+          "legendFormat": "{{rail}} A",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "Power Supply",
+      "title": "Pi Internal Rails (PMIC)",
       "type": "timeseries"
     },
     {
