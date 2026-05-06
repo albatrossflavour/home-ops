@@ -1516,8 +1516,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_power / 1000",
-          "legendFormat": "Power",
+          "expr": "sum(shitbox_power_watts{rail!=\"battery\"})",
+          "legendFormat": "Pi total power",
           "range": true,
           "refId": "A"
         }
@@ -3173,20 +3173,160 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_bus_voltage",
-          "legendFormat": "Voltage",
+          "expr": "shitbox_voltage_volts{rail=\"ext5v\"}",
+          "legendFormat": "Pi 5V input",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
-          "expr": "shitbox_current",
-          "legendFormat": "Current",
+          "expr": "sum(shitbox_current_amps{rail!=\"battery\"})",
+          "legendFormat": "Pi total current",
           "range": true,
           "refId": "B"
         }
       ],
       "title": "Power Supply",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "volt"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "12V battery"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#e0a040",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Battery current"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1f6feb",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "amp"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 68,
+        "w": 8,
+        "h": 7
+      },
+      "id": 60,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_voltage_volts{rail=\"battery\"}",
+          "legendFormat": "12V battery",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_current_amps{rail=\"battery\"}",
+          "legendFormat": "Battery current",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Battery (12V)",
       "type": "timeseries"
     },
     {
