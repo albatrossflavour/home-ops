@@ -6,6 +6,7 @@ resources:
   - ./helmrelease.yaml
   - ./grafana-helmrelease.yaml
   - ./grafana-externalsecret.yaml
+  - ./podmonitor.yaml
 configMapGenerator:
   - name: shit-of-theseus-webroot
     files:
@@ -17,5 +18,8 @@ configMapGenerator:
   - name: shit-of-theseus-nginx-config
     files:
       - nginx-config/default.conf
+  - name: shit-of-theseus-donation-exporter
+    files:
+      - donation-exporter/donation_exporter.py
 generatorOptions:
   disableNameSuffixHash: true

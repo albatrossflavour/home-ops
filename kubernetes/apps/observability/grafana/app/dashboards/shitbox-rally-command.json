@@ -3607,6 +3607,173 @@
       ],
       "title": "Ambient Light",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 75, "w": 24, "h": 1 },
+      "id": 70,
+      "panels": [],
+      "title": "FUNDRAISING",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#f9826c", "value": null }
+            ]
+          },
+          "unit": "currencyAUD",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": { "x": 0, "y": 76, "w": 8, "h": 6 },
+      "id": 71,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_donation_raised_aud",
+          "legendFormat": "Raised so far",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Donations Raised",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#da3633", "value": null },
+              { "color": "#d29922", "value": 50 },
+              { "color": "#238636", "value": 100 }
+            ]
+          },
+          "unit": "percent",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": { "x": 8, "y": 76, "w": 8, "h": 6 },
+      "id": 72,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "100 * shitbox_donation_raised_aud / shitbox_donation_goal_aud",
+          "legendFormat": "% of goal",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Goal Progress",
+      "type": "gauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 25,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "#238636", "value": 0 }]
+          },
+          "unit": "currencyAUD",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Goal" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "#8b949e", "mode": "fixed" } },
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [8, 6] } },
+              { "id": "custom.fillOpacity", "value": 0 }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "x": 16, "y": 76, "w": 8, "h": 6 },
+      "id": 73,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_donation_raised_aud",
+          "legendFormat": "Raised",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_donation_goal_aud",
+          "legendFormat": "Goal",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Donations Over Time",
+      "type": "timeseries"
     }
   ],
   "preload": false,

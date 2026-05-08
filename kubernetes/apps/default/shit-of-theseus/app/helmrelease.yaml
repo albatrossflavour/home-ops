@@ -38,12 +38,39 @@ spec:
                 memory: 32Mi
               limits:
                 memory: 128Mi
+          donation-exporter:
+            image:
+              repository: python
+              tag: "3.13-alpine"
+            command:
+              - sh
+              - -c
+              - |
+                pip install --no-cache-dir requests prometheus-client && \
+                python /scripts/donation_exporter.py
+            env:
+              DONATION_URL: "https://autumn2026.shitboxrally.com.au/a-team-has-no-name"
+              OUTPUT_PATH: "/shared/donation.json"
+              POLL_INTERVAL: "300"
+              METRICS_PORT: "8000"
+            ports:
+              - name: metrics
+                containerPort: 8000
+            resources:
+              requests:
+                cpu: 5m
+                memory: 48Mi
+              limits:
+                memory: 96Mi
     service:
       app:
         controller: *app
         ports:
           http:
             port: 80
+          metrics:
+            port: 8000
+            targetPort: 8000
     ingress:
       app:
         className: external
@@ -61,25 +88,50 @@ spec:
       webroot:
         type: configMap
         name: shit-of-theseus-webroot
-        globalMounts:
-          - path: /usr/share/nginx/html
+        advancedMounts:
+          shit-of-theseus:
+            app:
+              - path: /usr/share/nginx/html
       nginx-config:
         type: configMap
         name: shit-of-theseus-nginx-config
-        globalMounts:
-          - path: /etc/nginx/conf.d/default.conf
-            subPath: default.conf
+        advancedMounts:
+          shit-of-theseus:
+            app:
+              - path: /etc/nginx/conf.d/default.conf
+                subPath: default.conf
       captures:
         type: nfs
         server: 192.168.1.22
         path: /volume2/apps/shitbox
-        globalMounts:
-          - path: /usr/share/nginx/html/captures
-            readOnly: true
+        advancedMounts:
+          shit-of-theseus:
+            app:
+              - path: /usr/share/nginx/html/captures
+                readOnly: true
       build:
         type: nfs
         server: 192.168.1.22
         path: /volume2/apps/shitbox/build
-        globalMounts:
-          - path: /usr/share/nginx/html/build
-            readOnly: true
+        advancedMounts:
+          shit-of-theseus:
+            app:
+              - path: /usr/share/nginx/html/build
+                readOnly: true
+      donation-data:
+        type: emptyDir
+        advancedMounts:
+          shit-of-theseus:
+            app:
+              - path: /shared
+                readOnly: true
+            donation-exporter:
+              - path: /shared
+      donation-script:
+        type: configMap
+        name: shit-of-theseus-donation-exporter
+        advancedMounts:
+          shit-of-theseus:
+            donation-exporter:
+              - path: /scripts/donation_exporter.py
+                subPath: donation_exporter.py

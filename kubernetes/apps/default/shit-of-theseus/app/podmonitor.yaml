@@ -1,0 +1,16 @@
+---
+# Prometheus scrape config for the donation-exporter sidecar inside the
+# shit-of-theseus pod. The exporter exposes Prometheus-format gauges on
+# port 8000 (named `metrics` in the service spec).
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: shit-of-theseus-donation
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: shit-of-theseus
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 60s
+      path: /metrics

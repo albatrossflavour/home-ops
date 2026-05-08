@@ -68,6 +68,22 @@
         .donate-btn:hover { background: #e07010; transform: translateY(-1px); }
         .donate-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
+        /* Story-shaped fundraising line, sits under the header on every tab */
+        .donation-banner {
+            margin: 0 1rem 0.75rem;
+            padding: 0.6rem 1rem;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            color: #c9d1d9;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            text-align: center;
+        }
+        .donation-banner strong { color: #f9826c; font-weight: 600; }
+        .donation-banner a { color: #58a6ff; text-decoration: none; }
+        .donation-banner a:hover { text-decoration: underline; }
+
         .code-btn {
             display: inline-flex;
             align-items: center;
@@ -1156,6 +1172,8 @@
         </a>
     </header>
 
+    <div id="donation-banner" class="donation-banner" style="display:none;"></div>
+
     <nav>
         <a href="/" onclick="event.preventDefault(); navigateHome();">Home</a>
         <a href="/car" onclick="event.preventDefault(); navigateToCar();">Car</a>
@@ -1177,6 +1195,48 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>  <!-- pragma: allowlist secret -->
+    <script>
+    // Donation banner — fetches /donation.json (written by the
+    // donation-exporter sidecar) and renders a one-line story under
+    // the header. Refreshes every 5 minutes; matches the exporter
+    // poll cadence. Quietly hides itself on fetch errors so a 204
+    // pre-first-poll doesn't leave a dead box on the page.
+    (function() {
+        var el = document.getElementById('donation-banner');
+        if (!el) return;
+        var fmt = function(n) { return '$' + n.toLocaleString('en-AU'); };
+        var donateUrl = 'https://short.albatrossflavour.com/Shitbox';
+        var renderCopy = function(d) {
+            var raised = fmt(d.raised_aud);
+            var goal = fmt(d.goal_aud);
+            var pct = d.percent;
+            if (pct >= 100) {
+                return '<strong>' + raised + ' raised</strong> — ' + pct.toFixed(0) +
+                    '% past our ' + goal + ' goal. Every extra dollar still goes to ' +
+                    'the Cancer Council. <a href="' + donateUrl + '" target="_blank" ' +
+                    'rel="noopener">Top us up</a>.';
+            }
+            return '<strong>' + raised + ' raised</strong> towards our ' + goal +
+                ' goal — ' + pct.toFixed(0) + '% of the way there. Thanks legends. ' +
+                '<a href="' + donateUrl + '" target="_blank" rel="noopener">Chip in</a>.';
+        };
+        var refresh = function() {
+            fetch('/donation.json', { cache: 'no-store' })
+                .then(function(r) {
+                    if (!r.ok || r.status === 204) throw new Error('no data');
+                    return r.json();
+                })
+                .then(function(d) {
+                    if (typeof d.raised_aud !== 'number') throw new Error('bad data');
+                    el.innerHTML = renderCopy(d);
+                    el.style.display = 'block';
+                })
+                .catch(function() { el.style.display = 'none'; });
+        };
+        refresh();
+        setInterval(refresh, 5 * 60 * 1000);
+    })();
+    </script>
     <script>
     (function() {
         var BADGE_COLORS = {
