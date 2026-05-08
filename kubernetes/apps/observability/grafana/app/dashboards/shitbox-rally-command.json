@@ -3641,7 +3641,7 @@
               }
             ]
           },
-          "unit": "$",
+          "unit": "currency:$",
           "decimals": 0,
           "displayName": "Raised so far"
         },
@@ -3801,7 +3801,7 @@
               }
             ]
           },
-          "unit": "$",
+          "unit": "currency:$",
           "decimals": 0
         },
         "overrides": [
@@ -3850,7 +3850,7 @@
           ],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
           "hideZeros": false,
