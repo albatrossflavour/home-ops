@@ -45,7 +45,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 0,
+        "y": 7,
         "w": 24,
         "h": 1
       },
@@ -73,7 +73,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 1,
+        "y": 8,
         "w": 12,
         "h": 7
       },
@@ -136,7 +136,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 1,
+        "y": 8,
         "w": 12,
         "h": 7
       },
@@ -202,7 +202,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 8,
+        "y": 15,
         "w": 8,
         "h": 3
       },
@@ -267,7 +267,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 8,
+        "y": 15,
         "w": 4,
         "h": 3
       },
@@ -331,7 +331,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 8,
+        "y": 15,
         "w": 4,
         "h": 3
       },
@@ -403,7 +403,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 8,
+        "y": 15,
         "w": 4,
         "h": 3
       },
@@ -474,7 +474,7 @@
       },
       "gridPos": {
         "x": 20,
-        "y": 8,
+        "y": 15,
         "w": 4,
         "h": 3
       },
@@ -550,7 +550,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 11,
+        "y": 18,
         "w": 6,
         "h": 5
       },
@@ -623,7 +623,7 @@
       },
       "gridPos": {
         "x": 6,
-        "y": 11,
+        "y": 18,
         "w": 5,
         "h": 5
       },
@@ -709,7 +709,7 @@
       },
       "gridPos": {
         "x": 11,
-        "y": 11,
+        "y": 18,
         "w": 4,
         "h": 5
       },
@@ -781,7 +781,7 @@
       },
       "gridPos": {
         "x": 15,
-        "y": 11,
+        "y": 18,
         "w": 3,
         "h": 5
       },
@@ -845,7 +845,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 11,
+        "y": 18,
         "w": 3,
         "h": 5
       },
@@ -921,7 +921,7 @@
       },
       "gridPos": {
         "x": 21,
-        "y": 11,
+        "y": 18,
         "w": 3,
         "h": 5
       },
@@ -985,7 +985,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 16,
+        "y": 23,
         "w": 3,
         "h": 3
       },
@@ -1049,7 +1049,7 @@
       },
       "gridPos": {
         "x": 3,
-        "y": 16,
+        "y": 23,
         "w": 3,
         "h": 3
       },
@@ -1121,7 +1121,7 @@
       },
       "gridPos": {
         "x": 6,
-        "y": 16,
+        "y": 23,
         "w": 3,
         "h": 3
       },
@@ -1193,7 +1193,7 @@
       },
       "gridPos": {
         "x": 9,
-        "y": 16,
+        "y": 23,
         "w": 3,
         "h": 3
       },
@@ -1283,7 +1283,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 16,
+        "y": 23,
         "w": 4,
         "h": 3
       },
@@ -1356,7 +1356,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 16,
+        "y": 23,
         "w": 3,
         "h": 3
       },
@@ -1426,7 +1426,7 @@
       },
       "gridPos": {
         "x": 19,
-        "y": 16,
+        "y": 23,
         "w": 3,
         "h": 3
       },
@@ -1490,7 +1490,7 @@
       },
       "gridPos": {
         "x": 22,
-        "y": 16,
+        "y": 23,
         "w": 2,
         "h": 3
       },
@@ -1559,7 +1559,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 19,
+        "y": 26,
         "w": 14,
         "h": 14
       },
@@ -1776,7 +1776,7 @@
       },
       "gridPos": {
         "x": 14,
-        "y": 19,
+        "y": 26,
         "w": 10,
         "h": 7
       },
@@ -1903,7 +1903,7 @@
       },
       "gridPos": {
         "x": 14,
-        "y": 26,
+        "y": 33,
         "w": 10,
         "h": 7
       },
@@ -1941,7 +1941,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 33,
+        "y": 40,
         "w": 24,
         "h": 1
       },
@@ -2041,7 +2041,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 34,
+        "y": 41,
         "w": 8,
         "h": 8
       },
@@ -2186,7 +2186,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 34,
+        "y": 41,
         "w": 8,
         "h": 8
       },
@@ -2303,7 +2303,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 34,
+        "y": 41,
         "w": 8,
         "h": 8
       },
@@ -2347,7 +2347,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 42
+        "y": 49
       },
       "id": 68,
       "panels": [],
@@ -2424,7 +2424,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 43,
+        "y": 50,
         "w": 12,
         "h": 8
       },
@@ -2520,7 +2520,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 43,
+        "y": 0,
         "w": 12,
         "h": 8
       },
@@ -2560,7 +2560,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 51,
+        "y": 58,
         "w": 24,
         "h": 1
       },
@@ -2675,7 +2675,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 52,
+        "y": 59,
         "w": 8,
         "h": 8
       },
@@ -2829,7 +2829,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 52,
+        "y": 59,
         "w": 8,
         "h": 8
       },
@@ -2988,7 +2988,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 52,
+        "y": 59,
         "w": 8,
         "h": 8
       },
@@ -3040,7 +3040,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 60,
+        "y": 67,
         "w": 24,
         "h": 1
       },
@@ -3126,7 +3126,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 61,
+        "y": 68,
         "w": 8,
         "h": 7
       },
@@ -3273,7 +3273,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 68,
+        "y": 75,
         "w": 8,
         "h": 7
       },
@@ -3455,7 +3455,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 61,
+        "y": 68,
         "w": 8,
         "h": 7
       },
@@ -3573,7 +3573,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 61,
+        "y": 68,
         "w": 8,
         "h": 7
       },
@@ -3610,38 +3610,63 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "x": 0, "y": 75, "w": 24, "h": 1 },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
       "id": 70,
       "panels": [],
       "title": "FUNDRAISING",
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "#f9826c", "value": null }
+              {
+                "color": "#f9826c",
+                "value": null
+              }
             ]
           },
-          "unit": "currencyAUD",
-          "decimals": 0
+          "unit": "$",
+          "decimals": 0,
+          "displayName": "Raised so far"
         },
         "overrides": []
       },
-      "gridPos": { "x": 0, "y": 76, "w": 8, "h": 6 },
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 8,
+        "h": 6
+      },
       "id": 71,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -3658,19 +3683,33 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "min": 0,
           "max": 100,
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "#da3633", "value": null },
-              { "color": "#d29922", "value": 50 },
-              { "color": "#238636", "value": 100 }
+              {
+                "color": "#da3633",
+                "value": null
+              },
+              {
+                "color": "#d29922",
+                "value": 50
+              },
+              {
+                "color": "#238636",
+                "value": 100
+              }
             ]
           },
           "unit": "percent",
@@ -3678,13 +3717,24 @@
         },
         "overrides": []
       },
-      "gridPos": { "x": 8, "y": 76, "w": 8, "h": 6 },
+      "gridPos": {
+        "x": 8,
+        "y": 1,
+        "w": 8,
+        "h": 6
+      },
       "id": 72,
       "options": {
         "minVizHeight": 75,
         "minVizWidth": 75,
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
@@ -3702,10 +3752,15 @@
       "type": "gauge"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -3715,45 +3770,93 @@
             "drawStyle": "line",
             "fillOpacity": 25,
             "gradientMode": "opacity",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "lineInterpolation": "stepAfter",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": { "type": "linear" },
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "never",
             "spanNulls": true,
-            "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": { "mode": "off" }
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "#238636", "value": 0 }]
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
           },
-          "unit": "currencyAUD",
+          "unit": "$",
           "decimals": 0
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Goal" },
+            "matcher": {
+              "id": "byName",
+              "options": "Goal"
+            },
             "properties": [
-              { "id": "color", "value": { "fixedColor": "#8b949e", "mode": "fixed" } },
-              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [8, 6] } },
-              { "id": "custom.fillOpacity", "value": 0 }
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8b949e",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    8,
+                    6
+                  ]
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              }
             ]
           }
         ]
       },
-      "gridPos": { "x": 16, "y": 76, "w": 8, "h": 6 },
+      "gridPos": {
+        "x": 16,
+        "y": 1,
+        "w": 8,
+        "h": 6
+      },
       "id": 73,
       "options": {
         "legend": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
-        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
       },
       "pluginVersion": "12.3.1",
       "targets": [
