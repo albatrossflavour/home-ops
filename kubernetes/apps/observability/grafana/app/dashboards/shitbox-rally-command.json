@@ -2520,7 +2520,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 0,
+        "y": 50,
         "w": 12,
         "h": 8
       },
@@ -3616,7 +3616,7 @@
         "w": 24,
         "h": 1
       },
-      "id": 70,
+      "id": 100,
       "panels": [],
       "title": "FUNDRAISING",
       "type": "row"
@@ -3653,7 +3653,7 @@
         "w": 8,
         "h": 6
       },
-      "id": 71,
+      "id": 101,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -3723,7 +3723,7 @@
         "w": 8,
         "h": 6
       },
-      "id": 72,
+      "id": 102,
       "options": {
         "minVizHeight": 75,
         "minVizWidth": 75,
@@ -3842,7 +3842,7 @@
         "w": 8,
         "h": 6
       },
-      "id": 73,
+      "id": 103,
       "options": {
         "legend": {
           "calcs": [
@@ -3888,36 +3888,7 @@
     "command-centre"
   ],
   "templating": {
-    "list": [
-      {
-        "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(shitbox_tpms_pressure_psi, wheel)",
-        "includeAll": true,
-        "label": "Wheel",
-        "multi": true,
-        "name": "wheel",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values(shitbox_tpms_pressure_psi, wheel)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "type": "query"
-      }
-    ]
+    "list": []
   },
   "time": {
     "from": "now-1h",
