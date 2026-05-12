@@ -20,4 +20,5 @@ resources:
   - ./zigbee2mqtt/ks.yaml
   - ./shit-of-theseus/ks.yaml
   - ./syncthing/ks.yaml
+  - ./files/ks.yaml
   # - ./nextcloud/ks.yaml
