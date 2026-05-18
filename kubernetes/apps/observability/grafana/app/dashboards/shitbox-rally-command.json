@@ -2451,7 +2451,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_tpms_pressure_psi{wheel=~\"$wheel\"}",
+          "expr": "shitbox_tpms_pressure_psi",
           "legendFormat": "{{wheel}}",
           "range": true,
           "refId": "A"
@@ -2547,7 +2547,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_tpms_temperature_c{wheel=~\"$wheel\"}",
+          "expr": "shitbox_tpms_temperature_c",
           "legendFormat": "{{wheel}}",
           "range": true,
           "refId": "A"
