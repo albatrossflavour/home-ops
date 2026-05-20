@@ -27,3 +27,5 @@ wiki
 /config.yaml
 # Restore directories
 restored-*/
+.gsd
+.bg-shell
