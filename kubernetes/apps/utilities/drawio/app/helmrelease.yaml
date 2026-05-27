@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: jgraph/drawio
-              tag: "latest@sha256:d03d12e27887d68a2b1f7c454e78e5db0d608faf9e4b7640f0e7dd1ea6906440"
+              tag: "latest@sha256:3fbc301ab4cbb5ae02d47a5586b95ee287cb90c6b6385876fa44947ed99548b9"
             env:
               TZ: Australia/Sydney
             probes:
