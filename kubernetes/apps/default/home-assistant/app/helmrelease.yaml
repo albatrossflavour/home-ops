@@ -38,8 +38,8 @@ spec:
         initContainers:
           matter-server:
             image:
-              repository: ghcr.io/home-assistant-libs/python-matter-server
-              tag: "6.2.2"
+              repository: ghcr.io/matter-js/python-matter-server
+              tag: "8.1.2"
             restartPolicy: Always
             args:
               - --storage-path
