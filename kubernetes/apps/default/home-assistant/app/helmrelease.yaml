@@ -17,6 +17,7 @@ spec:
   install:
     remediation:
       retries: 3
+  timeout: 15m
   upgrade:
     cleanupOnFail: true
     remediation:
@@ -45,6 +46,23 @@ spec:
               - /data
               - --paa-root-cert-dir
               - /data/credentials
+            probes:
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 5580
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 5580
+                  initialDelaySeconds: 30
+                  periodSeconds: 20
             securityContext:
               runAsUser: 0
               runAsNonRoot: false
