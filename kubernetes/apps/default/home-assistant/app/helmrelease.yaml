@@ -45,8 +45,6 @@ spec:
               - /data
               - --paa-root-cert-dir
               - /data/credentials
-              - --bluetooth-adapter
-              - "-1"
             securityContext:
               runAsUser: 0
               runAsNonRoot: false
