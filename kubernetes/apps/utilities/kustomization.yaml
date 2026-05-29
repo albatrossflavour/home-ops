@@ -12,7 +12,7 @@ resources:
   - ./n8n/ks.yaml
   - ./node-red/ks.yaml
   - ./send/ks.yaml
-  - ./pdi-keepalive/ks.yaml
+# - ./pdi-keepalive/ks.yaml
   - ./gotenberg/ks.yaml
   - ./shlink/ks.yaml
   - ./stirling-pdf/ks.yaml
