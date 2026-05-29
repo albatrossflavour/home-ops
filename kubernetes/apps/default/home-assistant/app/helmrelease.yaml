@@ -35,6 +35,31 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
+          matter-server:
+            image:
+              repository: ghcr.io/home-assistant-libs/python-matter-server
+              tag: "8.1.2"
+            restartPolicy: Always
+            args:
+              - --storage-path
+              - /data
+              - --paa-root-cert-dir
+              - /data/credentials
+              - --bluetooth-adapter
+              - "-1"
+            securityContext:
+              runAsUser: 0
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+                add: ["NET_ADMIN", "NET_RAW"]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
           code-server:
             image:
               repository: ghcr.io/coder/code-server
@@ -194,6 +219,15 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      matter-data:
+        type: persistentVolumeClaim
+        size: 500Mi
+        storageClass: ceph-block
+        accessMode: ReadWriteOnce
+        advancedMounts:
+          home-assistant:
+            matter-server:
+              - path: /data
       local:
         enabled: true
         type: nfs
