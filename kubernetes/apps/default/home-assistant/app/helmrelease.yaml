@@ -38,7 +38,7 @@ spec:
           matter-server:
             image:
               repository: ghcr.io/home-assistant-libs/python-matter-server
-              tag: "8.1.2"
+              tag: "6.2.2"
             restartPolicy: Always
             args:
               - --storage-path
