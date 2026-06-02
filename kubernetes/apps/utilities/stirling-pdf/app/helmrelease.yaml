@@ -34,7 +34,7 @@ spec:
               DOCKER_ENABLE_SECURITY: "false"
               SYSTEM_ENABLEANALYTICS: "false"
               SYSTEM_ENABLEURLTOPDF: "true"
-              INSTALL_BOOK_AND_ADVANCED_HTML_OPS: "true"
+              JAVA_TOOL_OPTIONS: "-XX:MaxMetaspaceSize=256m"
             probes:
               liveness:
                 enabled: true
@@ -50,7 +50,7 @@ spec:
                 cpu: 10m
                 memory: 128Mi
               limits:
-                memory: 1Gi
+                memory: 2Gi
             securityContext:
               readOnlyRootFilesystem: false
     defaultPodOptions:
