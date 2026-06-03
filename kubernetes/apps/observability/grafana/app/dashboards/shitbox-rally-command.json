@@ -3243,6 +3243,44 @@
                   "fixedColor": "#e0a040",
                   "mode": "fixed"
                 }
+              },
+              {
+                "id": "min",
+                "value": 11
+              },
+              {
+                "id": "max",
+                "value": 15
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent",
+                      "value": null
+                    },
+                    {
+                      "color": "#da3633",
+                      "value": 12.0
+                    },
+                    {
+                      "color": "#d29922",
+                      "value": 12.7
+                    },
+                    {
+                      "color": "#238636",
+                      "value": 13.8
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.thresholdsStyle",
+                "value": {
+                  "mode": "dashed"
+                }
               }
             ]
           },
@@ -3311,7 +3349,7 @@
           "refId": "B"
         }
       ],
-      "title": "Battery (12V)",
+      "title": "Battery voltage (12V rail)",
       "type": "timeseries"
     },
     {
