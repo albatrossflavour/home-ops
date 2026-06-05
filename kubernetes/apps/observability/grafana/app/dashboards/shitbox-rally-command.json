@@ -2629,7 +2629,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "X \u2014 Longitudinal"
+              "options": "X \u2014 Lateral"
             },
             "properties": [
               {
@@ -2644,7 +2644,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Y \u2014 Lateral"
+              "options": "Y \u2014 Longitudinal"
             },
             "properties": [
               {
@@ -2701,14 +2701,14 @@
         {
           "editorMode": "code",
           "expr": "shitbox_ax",
-          "legendFormat": "X \u2014 Longitudinal",
+          "legendFormat": "X \u2014 Lateral",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
           "expr": "shitbox_ay",
-          "legendFormat": "Y \u2014 Lateral",
+          "legendFormat": "Y \u2014 Longitudinal",
           "range": true,
           "refId": "B"
         },
