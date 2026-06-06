@@ -2703,10 +2703,11 @@
 
             function swapToVideo(ph) {
                 var src = ph.getAttribute('data-video-src');
-                if (!src) { return; }
+                if (!src) { return null; }
                 var poster = ph.getAttribute('data-poster-url') || '/captures/intro_poster.jpg';
-                ph.innerHTML = '<video controls autoplay preload="metadata" poster="' + poster + '" src="' + src + '"></video>';
+                ph.innerHTML = '<video controls preload="metadata" playsinline poster="' + poster + '" src="' + src + '"></video>';
                 ph.className = 'event-video';
+                return ph.querySelector('video');
             }
 
             var filterToDate = null;
@@ -2859,7 +2860,11 @@
             container.addEventListener('click', function(e) {
                 var ph = e.target.closest('.event-video-placeholder');
                 if (!ph) return;
-                swapToVideo(ph);
+                var v = swapToVideo(ph);
+                if (v) {
+                    var p = v.play();
+                    if (p && typeof p.catch === 'function') { p.catch(function() {}); }
+                }
             });
 
             var params = new URLSearchParams(window.location.search);
