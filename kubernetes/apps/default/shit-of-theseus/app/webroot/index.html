@@ -1279,15 +1279,19 @@
             BOOT: 'Startup'
         };
 
-        var LIVE_FRESHNESS_MS = 6 * 3600 * 1000;   // 6 hours — D-03 threshold
-
         /**
          * Decide which homepage mode to render.
+         *
+         * Inside the rally window we always return 'live', regardless of how stale
+         * routeData is. Long stretches without Telstra coverage on the unsealed
+         * sections mean we routinely go many hours without a sync — that's not a
+         * fault state and viewers shouldn't see the page silently flip to archive.
+         * The live header surfaces "Last update: Xh ago" so freshness is visible.
+         *
          * @param {object|null} agenda — parsed agenda.json, or null on fetch failure
-         * @param {string|null} routeGeneratedAt — ISO-8601 from routeData.generated_at, or null
          * @returns {'before'|'live'|'archive'}
          */
-        function detectMode(agenda, routeGeneratedAt) {
+        function detectMode(agenda) {
             if (!agenda || !agenda.rally || !agenda.rally.start_date || !agenda.rally.end_date) {
                 return 'archive';
             }
@@ -1296,12 +1300,7 @@
             var end = agenda.rally.end_date;
             if (today < start) return 'before';
             if (today > end) return 'archive';
-            if (!routeGeneratedAt) return 'archive';
-            var genDate = new Date(routeGeneratedAt);
-            if (isNaN(genDate.getTime())) return 'archive';
-            var ageMs = Date.now() - genDate.getTime();
-            if (ageMs < 0) return 'archive';
-            return ageMs < LIVE_FRESHNESS_MS ? 'live' : 'archive';
+            return 'live';
         }
 
         // Self-test — logs to console if any assertion fails. No test framework available.
@@ -1312,15 +1311,33 @@
                 }
             }
             var a = { rally: { start_date: '2099-01-01', end_date: '2099-01-10' } };
-            assertEq(detectMode(a, null), 'before', 'future rally');
+            assertEq(detectMode(a), 'before', 'future rally');
             var b = { rally: { start_date: '2000-01-01', end_date: '2000-01-10' } };
-            assertEq(detectMode(b, null), 'archive', 'past rally');
+            assertEq(detectMode(b), 'archive', 'past rally');
             var c = { rally: { start_date: '1900-01-01', end_date: '2999-01-01' } };
-            assertEq(detectMode(c, new Date().toISOString()), 'live', 'in-range + fresh');
-            assertEq(detectMode(c, '2000-01-01T00:00:00Z'), 'archive', 'in-range + stale');
-            assertEq(detectMode(null, null), 'archive', 'no agenda');
-            assertEq(detectMode({}, null), 'archive', 'malformed agenda');
+            assertEq(detectMode(c), 'live', 'in-range');
+            assertEq(detectMode(null), 'archive', 'no agenda');
+            assertEq(detectMode({}), 'archive', 'malformed agenda');
         })();
+
+        /**
+         * Format an ISO-8601 timestamp as a relative "last update" string.
+         * Returns null for missing/unparseable/future timestamps — caller hides the line.
+         */
+        function formatLastUpdate(iso) {
+            if (!iso) return null;
+            var d = new Date(iso);
+            if (isNaN(d.getTime())) return null;
+            var ms = Date.now() - d.getTime();
+            if (ms < 0) return null;
+            var mins = Math.floor(ms / 60000);
+            if (mins < 1) return 'just now';
+            if (mins < 60) return mins + ' min ago';
+            var hours = Math.floor(mins / 60);
+            if (hours < 24) return hours + ' h ago';
+            var days = Math.floor(hours / 24);
+            return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+        }
 
         var DAY_URL_RE = /^\/day\/(\d{4}-\d{2}-\d{2})\/?$/;
         var ABOUT_URL_RE = /^\/about\/?$/;
@@ -2236,6 +2253,22 @@
                 headerH1.appendChild(badge);
             }
 
+            // 3a. Surface route data freshness so viewers can judge for themselves
+            //     during long no-signal stretches (unsealed sections, overnight stops).
+            var lastUpdate = formatLastUpdate(routeData && routeData.generated_at);
+            if (lastUpdate) {
+                var subtitle = document.querySelector('.day-page .day-header .day-subtitle');
+                if (subtitle && !subtitle.querySelector('.live-last-update')) {
+                    var span = document.createElement('span');
+                    span.className = 'live-last-update';
+                    span.textContent = 'Last update: ' + lastUpdate;
+                    if (subtitle.textContent.trim()) {
+                        subtitle.appendChild(document.createTextNode(' · '));
+                    }
+                    subtitle.appendChild(span);
+                }
+            }
+
             // 4. Start the auto-refresh loop.
             _stopLiveRefresh();
             _liveRefreshTimer = setInterval(refreshLiveData, LIVE_REFRESH_MS);
@@ -2247,7 +2280,7 @@
             _stopLiveRefresh();
             renderDayNav(agendaData, null);
 
-            var mode = detectMode(agendaData, routeData && routeData.generated_at);
+            var mode = detectMode(agendaData);
 
             if (!agendaData) {
                 showRoute('<div class="day-page"><section class="day-header"><h1>Shit of Theseus</h1><div class="day-subtitle">Agenda loading\u2026</div></section></div>');
