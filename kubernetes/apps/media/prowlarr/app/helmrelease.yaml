@@ -103,3 +103,13 @@ spec:
       config:
         enabled: true
         type: emptyDir
+      custom-definitions:
+        enabled: true
+        type: configMap
+        name: prowlarr-custom-definitions
+        advancedMounts:
+          prowlarr:
+            app:
+              - path: /config/Definitions/Custom/tvchaosuk-custom.yml
+                subPath: tvchaosuk-custom.yml
+                readOnly: true

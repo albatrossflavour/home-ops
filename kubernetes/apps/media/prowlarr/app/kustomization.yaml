@@ -5,3 +5,9 @@ resources:
   - externalsecret.yaml
   - helmrelease.yaml
   - ../../../../templates/gatus/guarded
+configMapGenerator:
+  - name: prowlarr-custom-definitions
+    files:
+      - ./tvchaosuk-custom.yml
+generatorOptions:
+  disableNameSuffixHash: true
