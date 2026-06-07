@@ -85,7 +85,7 @@ spec:
       configs:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
-        size: 1Gi
+        size: 2Gi
         storageClass: ceph-block
         globalMounts:
           - path: /configs
