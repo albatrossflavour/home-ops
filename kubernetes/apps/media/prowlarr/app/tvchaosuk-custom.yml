@@ -34,12 +34,13 @@ caps:
     music-search: [q]
 
 settings:
-  - name: username
+  - name: cookie
     type: text
-    label: Username
-  - name: password
-    type: password
-    label: Password
+    label: Cookie
+  - name: info_cookie
+    type: info
+    label: How to get the Cookie
+    default: "<ol><li>Log in to TVChaosUK in your browser.</li><li>Open DevTools (F12) → Application/Storage → Cookies → https://tvchaosuk.com.</li><li>Copy the full Cookie header (every name=value pair separated by '; ') from any request in the Network tab, or build it from the cookie list. The XSRF-TOKEN and tvchaosuk_session cookies are the load-bearing ones.</li><li>Paste it into the Cookie field above. Update when sessions expire (every few weeks to months).</li></ol>"
   - name: freeleech
     type: checkbox
     label: Search freeleech only
@@ -62,22 +63,12 @@ settings:
       asc: asc
 
 login:
-  path: login
-  method: form
-  form: form[action$="/login"]
+  method: cookie
   inputs:
-    username: "{{ .Config.username }}"
-    password: "{{ .Config.password }}"
-    remember: on
-  selectorinputs:
-    _token:
-      selector: input[name="_token"]
-      attribute: value
-  error:
-    - selector: div#ERROR_COPY
-#    test:
-#      path: /
-#      selector: a[href$="/logout"]
+    cookie: "{{ .Config.cookie }}"
+  test:
+    path: /
+    selector: a[href$="/logout"]
 
 search:
   paths:
