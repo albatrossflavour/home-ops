@@ -27,9 +27,10 @@ spec:
     - name: snapshot-controller
       namespace: volsync-system
   values:
+    # CSI driver settings moved to the ceph-csi-drivers chart in Rook v1.20.
+    # Only image overrides and the serviceMonitor remain valid under csi.* here.
+    # See ./csi-drivers/helmrelease.yaml for driver config.
     csi:
-      cephFSKernelMountOptions: ms_mode=prefer-crc
-      enableLiveness: true
       serviceMonitor:
         enabled: true
     monitoring:
