@@ -23,6 +23,7 @@ resources:
   - ./dysnix.yaml
   - ./external-secrets.yaml
   - ./rook-ceph.yaml
+  - ./ceph-csi-operator.yaml
   - ./cloudnative-pg.yaml
   - ./piraeus.yaml
   - ./backube.yaml
