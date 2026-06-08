@@ -457,12 +457,40 @@
         {
           "editorMode": "code",
           "expr": "kiln_sensor_bad_percent{instance=~\"$kiln\"}",
-          "legendFormat": "Failure Percentage",
+          "legendFormat": "Bad % (all types)",
           "range": true,
           "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "kiln_sensor_error_count{instance=~\"$kiln\", type=\"no_connection\"}",
+          "legendFormat": "No connection",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "kiln_sensor_error_count{instance=~\"$kiln\", type=\"short_to_ground\"}",
+          "legendFormat": "Short to GND",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "editorMode": "code",
+          "expr": "kiln_sensor_error_count{instance=~\"$kiln\", type=\"short_to_vcc\"}",
+          "legendFormat": "Short to VCC",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "editorMode": "code",
+          "expr": "kiln_sensor_error_count{instance=~\"$kiln\", type=\"unknown_error\"}",
+          "legendFormat": "Unknown error",
+          "range": true,
+          "refId": "E"
         }
       ],
-      "title": "Bad Sensor Reads",
+      "title": "Sensor Errors",
       "type": "timeseries"
     }
   ],
