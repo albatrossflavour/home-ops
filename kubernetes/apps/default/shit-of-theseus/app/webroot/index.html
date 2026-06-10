@@ -2312,8 +2312,10 @@
                     '<h3>The Car</h3>' +
                     '<p>The kind of car that was never exciting, even when it was new. Twenty-five years of careful ownership, then a hard pivot to us. Now it\'s held together by zip ties, optimism, and a firm policy of not lifting the bonnet unless we absolutely have to.</p>' +
                     '<div class="car-gallery">' +
-                        '<img src="/build/car-front.jpg" alt="The Shit of Theseus, front view" onerror="this.style.display=\'none\';">' +
-                        '<img src="/build/car-side.jpg" alt="The Shit of Theseus, side view" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-livery-front.jpg" alt="The Shit of Theseus in full Cancer Council livery" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-hood-art.jpg" alt="Hand-drawn Cancer Council daffodil and Team Has No Name banner on the hood" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-castle-art.jpg" alt="Hand-drawn castle and dragon on the side door" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-rally-roundel.jpg" alt="Shitbox Rally roundel decal on the side door" onerror="this.style.display=\'none\';">' +
                     '</div>' +
                     '<div class="car-specs-grid" style="margin-top:1.25rem;">' +
                         '<div class="car-spec-item"><div class="spec-label">Model</div><div class="spec-value">Ford Laser LXi</div></div>' +
@@ -2361,7 +2363,7 @@
                     '<p>The brains of the operation is a <strong>Raspberry Pi 5</strong> with NVMe storage, running a single Python daemon that orchestrates everything. The original Pi 4 was fried during a wiring incident. Because of course it was.</p>' +
                     '<p>Connected to it:</p>' +
                     '<h4 id="hw-lsm6dsox">LSM6DSOX IMU</h4>' +
-                    '<p>6-axis accelerometer and gyroscope at 104 Hz, behind a TCA4307 I2C bus buffer for hot-plug resilience.</p>' +
+                    '<p>6-axis accelerometer and gyroscope at 25 Hz application rate, with 208 Hz internal oversampling and on-chip anti-alias filtering, behind a TCA4307 I2C bus buffer for hot-plug resilience.</p>' +
                     '<ul><li>Replaces the original MPU-6050</li><li>Continuous ring buffer</li><li>Event detection state machine</li></ul>' +
                     '<p>It watches for:</p>' +
                     '<ul><li>Hard braking</li><li>Big cornering forces</li><li>High G events</li><li>Sustained rough road vibration</li></ul>' +
@@ -2372,7 +2374,7 @@
                     '<p>1 Hz position, speed, altitude and satellite count.</p>' +
                     '<ul><li>Below 3 km/h is floored to zero to eliminate GPS drift</li><li>Tracks gpsd down, no fix, and full lock</li></ul>' +
                     '<p>Because if we\'re going to break down, we want coordinates.</p>' +
-                    '<h4 id="hw-bme690">BME690 Environment Sensor</h4>' +
+                    '<h4 id="hw-bme680">BME680 Environment Sensor</h4>' +
                     '<p>Temperature, humidity, pressure and VOC gas resistance.</p>' +
                     '<ul><li>Sampled at 1 Hz</li><li>Lets us track engine bay heat soak and ambient misery</li></ul>' +
                     '<h4 id="hw-ina226">INA226 Power Monitor</h4>' +
@@ -2399,7 +2401,7 @@
                     '<p>The system always has the last 50 seconds of video before anything happens.</p>' +
                     '<p>Which is very important for mechanical regret analysis.</p>' +
                     '<h4 id="hw-display">Waveshare 7" Display</h4>' +
-                    '<p>HDMI touchscreen running a dashboard kiosk. Replaces the old 128\u00d764 OLED.</p>' +
+                    '<p>HDMI touchscreen running a dashboard kiosk. The 128\u00d764 OLED is still there as a glanceable status display for hardware health.</p>' +
                     '<p>Shows live telemetry, GPS, sensor health, and event counts. Big enough to read at speed without squinting.</p>' +
                     '<h4 id="hw-button">Big Red Button</h4>' +
                     '<p>GPIO 17. Arcade style.</p>' +
@@ -2424,7 +2426,7 @@
                     '<p>Everything runs as a single systemd service:<br><code>shitbox-telemetry</code></p>' +
                     '<p>Running a service mesh under the passenger seat felt like a stretch.</p>' +
                     '<p>Three concurrent paths:</p>' +
-                    '<h4>High-Rate Path, 104 Hz</h4>' +
+                    '<h4>High-Rate Path, 25 Hz</h4>' +
                     '<p>IMU into ring buffer.<br>State machine watches for threshold crossings.<br>Captures pre-event IMU data and triggers video capture.</p>' +
                     '<h4>Low-Rate Path, 1 Hz</h4>' +
                     '<p>GPS, environment and power metrics written to SQLite in WAL mode.</p>' +
@@ -2452,6 +2454,56 @@
                     '<h3>The Build</h3>' +
                     '<p>A rough chronology of how this got out of hand.</p>' +
                     '<div class="build-timeline">' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Jun 2026</div>' +
+                            '<div class="build-title">Auto-zero retirement and brake retune</div>' +
+                            '<div class="build-desc">The stationary IMU auto-zero had drifted the persisted forward-axis offset to -0.30g, which was permanently pulling the car-frame toward &ldquo;braking&rdquo; and firing the hard-brake detector on normal urban stops. Disabled auto-zero, wiped the persisted offsets so the sampler falls back to the config seeds, and bumped the hard-brake threshold from -0.35g to -0.50g. The car is sitting straight again and the brake events look like actual braking.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Jun 2026</div>' +
+                            '<div class="build-title">IMU axis convention overhaul</div>' +
+                            '<div class="build-desc">Months of dashboard G-ball weirdness traced back to the LSM6DSOX being mounted with its chip Y-axis pointing rearward. Reconciled the convention across the sampler, SQLite storage path, SSE stream, and detector so that &ldquo;right&rdquo; means right and &ldquo;forward&rdquo; means forward everywhere. Took five commits to land cleanly because every layer had its own opinion about what the axes meant.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Jun 2026</div>' +
+                            '<div class="build-title">Sensor cluster v3</div>' +
+                            '<div class="build-desc">3&times;3 grid redesign. The earlier 4&times;2 grid was running out of real estate as the bill of materials grew, and the lid had no clean way to break out four wheel sensors plus three temperature probes without bird-nesting. The new lid uses split WAGO 221 saddles with a front-exit cable channel. Printed clear so we can see which device has died without pulling the cluster off the ceiling.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Jun 2026</div>' +
+                            '<div class="build-title">Pi case v2</div>' +
+                            '<div class="build-desc">Three-piece print (bottom + top + roof) replacing the original monolithic enclosure. Hinged top so the perma-proto board is reachable without unbolting anything. GX12 cutouts moved to the back wall so the loom stops fighting the air intake. The roof gets the active cooler with proper airflow geometry instead of a fan blowing into a wall.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">May 2026</div>' +
+                            '<div class="build-title">Cabin/front video sync</div>' +
+                            '<div class="build-desc">Five debugging sessions to align the cabin picture-in-picture overlay with the front camera in rendered event clips. The Brio 100\'s 15fps stream drifts ~2 seconds against the ELP\'s H.264 stream after eight minutes, and ffmpeg\'s <code>-itsoffset</code> shifts audio as well as video. Landed on filter-level <code>setpts</code> on the video stream only, with a 2.5-second cabin pipeline latency compensation. Honest five-session debug, not a fashionable one-shot story.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">May 2026</div>' +
+                            '<div class="build-title">Cabin audio</div>' +
+                            '<div class="build-desc">Retired the Blue Snowball, switched cabin audio to the Logitech Brio 100\'s built-in mic, and added a 200 Hz highpass to the render audio chain to suppress USB EMI from the camera\'s own bus. The raw segments still contain the EMI, only the rendered clips are clean. Good enough.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">May 2026</div>' +
+                            '<div class="build-title">Manual capture button (dashboard)</div>' +
+                            '<div class="build-desc">A second way to trigger an event capture that doesn\'t involve reaching for the big red button. Useful when the passenger spots something interesting but the driver shouldn\'t be hunting for a switch.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">May 2026</div>' +
+                            '<div class="build-title">Pi 5 performance pass</div>' +
+                            '<div class="build-desc">Idle load average down from 5.7 to ~1.8 after dropping cabin PiP resolution from 720p to 480p, slowing the SSE fast stream from 10 Hz to 5 Hz, killing a 60fps requestAnimationFrame loop in the G-gauge canvas, and dropping the button poll rate from 100 Hz to 10 Hz. vdd_core current fell 55%. None of these were the headline feature; together they bought enough thermal margin to actually trust the car in the summer.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">May 2026</div>' +
+                            '<div class="build-title">GPS clock sync and RTC writeback</div>' +
+                            '<div class="build-desc">The Pi 5 has no battery on its RTC pads, so the system clock drifts across power cuts. Wired up GPS-driven clock correction at boot, calling <code>hwclock --systohc</code> after the system clock catches up so the RTC is at least correct for the next warm start. The GPS backup battery gives a warm fix in seconds, which closes most of the gap. A CR2032 on the RTC pads is the proper fix; that\'s a pre-rally nice-to-have.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">May 2026</div>' +
+                            '<div class="build-title">Boot reliability</div>' +
+                            '<div class="build-desc">A pile of headless-boot fixes so the car comes up reliably from cold without anyone touching it. <code>kiosk.service</code> ordering cycle resolved by switching from <code>multi-user.target</code> to <code>graphical.target</code>; X-readiness wait added before launching Chromium so it stops crashing in a restart loop; <code>hdmi_force_hotplug=1</code> so the Pi boots without a powered display; WiFi disabled at the firmware level. Boot time finally dropped from 53s to 6s after masking <code>NetworkManager-wait-online.service</code>, which had been sitting on the boot waiting for an interface that doesn\'t exist.</div>' +
+                        '</div>' +
                         '<div class="build-entry">' +
                             '<div class="build-date">Apr 2026</div>' +
                             '<div class="build-title">TPMS Integration</div>' +
@@ -2500,7 +2552,7 @@
                         '<div class="build-entry">' +
                             '<div class="build-date">Apr 2026</div>' +
                             '<div class="build-title">Waveshare 7" Display</div>' +
-                            '<div class="build-desc">HDMI touchscreen dashboard, VESA mounted separately from the Pi. Replaces the tiny OLED that required squinting at 110 km/h.</div>' +
+                            '<div class="build-desc">HDMI touchscreen dashboard, VESA mounted separately from the Pi. Becomes the primary display; the OLED stays on as a glanceable hardware-health summary.</div>' +
                         '</div>' +
                         '<div class="build-entry">' +
                             '<div class="build-date">Apr 2026</div>' +
@@ -2539,8 +2591,14 @@
                 '<section class="about-card" id="car-build-photos">' +
                     '<h3>Build Photos</h3>' +
                     '<div class="car-gallery">' +
-                        '<img src="/build/car-front.jpg" alt="Build detail, landscape" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=2)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
-                        '<img src="/build/car-origin-front.jpg" alt="Build detail, landscape" onerror="this.style.display=\'none\'; window._carPhotoFail=(window._carPhotoFail||0)+1; if(window._carPhotoFail>=2)document.getElementById(\'car-build-photos\').style.display=\'none\';">' +
+                        '<img src="/build/tech-pi-case-v2.jpg" alt="Pi case v2 assembled, top down, showing the active cooler roof and SMA antenna" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/tech-pi-case-internals.jpg" alt="Pi case open, showing the perma-proto board and sensor cluster PCB mounted inside" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/tech-sensor-cluster-v3.jpg" alt="Sensor cluster tray with active fan and PCB grid" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/tech-flux-capacitor.jpg" alt="Flux capacitor dash panel installed in the cabin with kill switch, big red button, and Anderson charge port" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-engine-bay.jpg" alt="Engine bay" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-sensor-cluster.jpg" alt="Sensor cluster mounted in the cabin ceiling" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-prototyping.jpg" alt="Prototype hardware on the bench" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-retro-panel.jpg" alt="Flux capacitor dash panel during prototyping" onerror="this.style.display=\'none\';">' +
                     '</div>' +
                 '</section>';
 
