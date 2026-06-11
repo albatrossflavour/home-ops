@@ -2456,6 +2456,11 @@
                     '<div class="build-timeline">' +
                         '<div class="build-entry">' +
                             '<div class="build-date">Jun 2026</div>' +
+                            '<div class="build-title">Front camera retune and cabin camera swap</div>' +
+                            '<div class="build-desc">Front camera was crushing the road into murk under any backlit sky, because auto-exposure was metering against a blown-out windscreen. Switched to Shutter Priority with a capped 10 ms exposure so the highlights physically can\'t run away, and lifted gamma to recover the shadows that the cap leaves behind. Cabin Logitech Brio 100 (58&deg; FOV) swapped for a UGREEN CM678 (85&deg; FOV) &mdash; same 640x480 MJPEG, same encode load, but the whole cabin actually fits in frame now. Audio moves with it to the UGREEN&rsquo;s built-in mic.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Jun 2026</div>' +
                             '<div class="build-title">Auto-zero retirement and brake retune</div>' +
                             '<div class="build-desc">The stationary IMU auto-zero had drifted the persisted forward-axis offset to -0.30g, which was permanently pulling the car-frame toward &ldquo;braking&rdquo; and firing the hard-brake detector on normal urban stops. Disabled auto-zero, wiped the persisted offsets so the sampler falls back to the config seeds, and bumped the hard-brake threshold from -0.35g to -0.50g. The car is sitting straight again and the brake events look like actual braking.</div>' +
                         '</div>' +
