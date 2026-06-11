@@ -2396,7 +2396,7 @@
                     '<p>The decoder\'s pressure maths was off by a factor of 2.45. Caught it bench-calibrating against four real tyres at a known pressure. One correction in the collector and everything reads true.</p>' +
                     '<p>Hardware fault tolerance: pull the dongle mid-drive and the supervisor marks the radio missing, the four wheels go stale on the dashboard, and a TTS announcement reports the fault. Plug it back in and the radio comes back, the daemon respawns rtl_433, and the sensors resume reporting on their next chirp.</p>' +
                     '<h4 id="hw-cameras">Dual Cameras</h4>' +
-                    '<p>ELP USB1080P03-BH100 (H.264 UVC, 117&deg; HFOV) front + Logitech Brio 100 cabin, composited into picture-in-picture by a single ffmpeg process.</p>' +
+                    '<p>ELP USB1080P03-BH100 (H.264 UVC, 117&deg; HFOV) front + UGREEN CM678 (85&deg; FOV) cabin. Front is stream-copied straight to disk; cabin is software-encoded and carries the mic. PiP is burned in only at save time, not on the 24/7 buffer.</p>' +
                     '<ul><li>Continuous 10-second segments</li><li>50-second rolling buffer</li></ul>' +
                     '<p>The system always has the last 50 seconds of video before anything happens.</p>' +
                     '<p>Which is very important for mechanical regret analysis.</p>' +
@@ -2454,6 +2454,11 @@
                     '<h3>The Build</h3>' +
                     '<p>A rough chronology of how this got out of hand.</p>' +
                     '<div class="build-timeline">' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Jun 2026</div>' +
+                            '<div class="build-title">The dashcam kept deleting the best bit</div>' +
+                            '<div class="build-desc">Every detected event saves a clip: a slice of footage buffered from before the trigger, joined to footage captured after. The saved clips had a hole punched in them right where the interesting thing happened. A hard brake that somehow wasn\'t in its own hard-brake clip, with the speed overlay counting down through the stop while the picture sat frozen on the road behind, then cut to a different street entirely. The pre-event footage lives in a ring buffer only 50 seconds deep, but the save waits 45 seconds to gather the after-footage before it copies anything. The one segment holding the trigger moment was getting recycled out of the buffer about a second before the save reached for it, and because that segment is by definition the one being written when the event fires, the bit it threw away was always the event itself. The fix was almost insulting: make the buffer deeper, 50 seconds to 120, so the footage survives long enough to be saved. Found by reading the logs second by second, not by guessing.</div>' +
+                        '</div>' +
                         '<div class="build-entry">' +
                             '<div class="build-date">Jun 2026</div>' +
                             '<div class="build-title">Front camera retune and cabin camera swap</div>' +
