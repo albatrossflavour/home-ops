@@ -21,4 +21,5 @@ resources:
   - ./shit-of-theseus/ks.yaml
   - ./syncthing/ks.yaml
   - ./files/ks.yaml
+  - ./toodlepip-website/ks.yaml
   # - ./nextcloud/ks.yaml

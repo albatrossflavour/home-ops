@@ -1,0 +1,91 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app toodlepip-website
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      toodlepip-website:
+        replicas: 1
+        strategy: RollingUpdate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/albatrossflavour/toodlepip-site
+              tag: latest
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+          contact-api:
+            image:
+              repository: ghcr.io/albatrossflavour/toodlepip-contact-api
+              tag: latest
+            env:
+              PORT: "3000"
+              SMTP_HOST: smtp-relay.default.svc.cluster.local
+              SMTP_PORT: "25"
+              SMTP_FROM: noreply@toodlepip.com.au
+              SMTP_TO: contact@toodlepip.com.au
+              ALERT_TO: tgreen@albatrossflavour.com
+              NODE_ENV: production
+            envFrom:
+              - secretRef:
+                  name: toodlepip-website-secret
+            resources:
+              requests:
+                cpu: 5m
+                memory: 48Mi
+              limits:
+                memory: 128Mi
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: 8080
+    ingress:
+      app:
+        className: internal
+        hosts:
+          - host: staging.toodlepip.com.au
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - staging.toodlepip.com.au
+            secretName: "${SECRET_DOMAIN/./-}-production-tls"
+    persistence:
+      contact-data:
+        type: nfs
+        server: 192.168.1.22
+        path: /volume2/apps/toodlepip.com.au/submissions
+        advancedMounts:
+          toodlepip-website:
+            contact-api:
+              - path: /data/submissions

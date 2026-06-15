@@ -896,82 +896,6 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#1f6feb",
-                "value": 0
-              },
-              {
-                "color": "#238636",
-                "value": 20
-              },
-              {
-                "color": "#d29922",
-                "value": 80
-              },
-              {
-                "color": "#da3633",
-                "value": 100
-              }
-            ]
-          },
-          "unit": "celsius",
-          "decimals": 1,
-          "noValue": "Offline"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 21,
-        "y": 18,
-        "w": 3,
-        "h": 5
-      },
-      "id": 6,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_temp{probe=\"engine_bay\"}",
-          "legendFormat": "Engine Bay",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Engine Bay",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
                 "color": "#da3633",
                 "value": 0
               }
@@ -1949,139 +1873,6 @@
       "panels": [],
       "title": "ENVIRONMENT",
       "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#238636",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "celsius"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Exterior"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Engine Bay"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#c06000",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 41,
-        "w": 8,
-        "h": 8
-      },
-      "id": 41,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_temp{probe=\"exterior\"}",
-          "legendFormat": "Exterior",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_temp{probe=\"engine_bay\"}",
-          "legendFormat": "Engine Bay",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "Engine Temps",
-      "type": "timeseries"
     },
     {
       "datasource": {
@@ -3225,184 +3016,6 @@
               {
                 "color": "#238636",
                 "value": 0
-              }
-            ]
-          },
-          "unit": "volt"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "12V battery"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#e0a040",
-                  "mode": "fixed"
-                }
-              },
-              {
-                "id": "min",
-                "value": 11
-              },
-              {
-                "id": "max",
-                "value": 15
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "transparent",
-                      "value": null
-                    },
-                    {
-                      "color": "#da3633",
-                      "value": 12.0
-                    },
-                    {
-                      "color": "#d29922",
-                      "value": 12.7
-                    },
-                    {
-                      "color": "#238636",
-                      "value": 13.8
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.thresholdsStyle",
-                "value": {
-                  "mode": "dashed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Battery current"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
-              },
-              {
-                "id": "unit",
-                "value": "amp"
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 75,
-        "w": 8,
-        "h": 7
-      },
-      "id": 60,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_voltage_volts{rail=\"battery\"}",
-          "legendFormat": "12V battery",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_current_amps{rail=\"battery\"}",
-          "legendFormat": "Battery current",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "Battery voltage (12V rail)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#238636",
-                "value": 0
               },
               {
                 "color": "#8957e5",
@@ -3438,12 +3051,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "VOC"
+              "options": "Air quality"
             },
             "properties": [
               {
                 "id": "unit",
-                "value": "k\u03a9"
+                "value": "short"
               },
               {
                 "id": "custom.axisPlacement",
@@ -3451,7 +3064,7 @@
               },
               {
                 "id": "custom.axisLabel",
-                "value": "VOC (higher = cleaner)"
+                "value": "Air quality (0-100, higher = cleaner)"
               },
               {
                 "id": "color",
@@ -3470,22 +3083,22 @@
                     },
                     {
                       "color": "#d29922",
-                      "value": 100
-                    },
-                    {
-                      "color": "#dbab09",
-                      "value": 180
+                      "value": 40
                     },
                     {
                       "color": "#238636",
-                      "value": 280
-                    },
-                    {
-                      "color": "#6e7681",
-                      "value": 1000
+                      "value": 70
                     }
                   ]
                 }
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100
               }
             ]
           }
@@ -3526,8 +3139,8 @@
         },
         {
           "editorMode": "code",
-          "expr": "shitbox_gas_resistance / 1000",
-          "legendFormat": "VOC",
+          "expr": "shitbox_air_quality",
+          "legendFormat": "Air quality",
           "range": true,
           "refId": "B"
         }

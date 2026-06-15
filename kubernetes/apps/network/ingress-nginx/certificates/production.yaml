@@ -12,6 +12,7 @@ spec:
   dnsNames:
     - "${SECRET_DOMAIN}"
     - "*.${SECRET_DOMAIN}"
+    - staging.toodlepip.com.au
     - www.toodlepip.com.au
     - www.bandcamp.tv
     - toodlepip.com.au
