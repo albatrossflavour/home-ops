@@ -32,6 +32,7 @@ spec:
             image:
               repository: ghcr.io/albatrossflavour/toodlepip-site
               tag: latest
+              pullPolicy: Always
             resources:
               requests:
                 cpu: 10m
@@ -42,6 +43,7 @@ spec:
             image:
               repository: ghcr.io/albatrossflavour/toodlepip-contact-api
               tag: latest
+              pullPolicy: Always
             env:
               PORT: "3000"
               SMTP_HOST: smtp-relay.default.svc.cluster.local
@@ -59,6 +61,27 @@ spec:
                 memory: 48Mi
               limits:
                 memory: 128Mi
+      gallery-scanner:
+        type: cronjob
+        cronjob:
+          schedule: "*/15 * * * *"
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+        containers:
+          scanner:
+            image:
+              repository: ghcr.io/albatrossflavour/toodlepip-scanner
+              tag: latest
+              pullPolicy: Always
+            env:
+              GALLERY_SOURCE: /gallery
+              GALLERY_OUTPUT: /gallery/output
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 512Mi
     service:
       app:
         controller: *app
@@ -89,3 +112,24 @@ spec:
           toodlepip-website:
             contact-api:
               - path: /data/submissions
+      gallery-source:
+        type: nfs
+        server: 192.168.1.22
+        path: /volume2/apps/toodlepip.com.au/gallery
+        advancedMounts:
+          gallery-scanner:
+            scanner:
+              - path: /gallery
+                readOnly: true
+      gallery-output:
+        type: nfs
+        server: 192.168.1.22
+        path: /volume2/apps/toodlepip.com.au/gallery-output
+        advancedMounts:
+          toodlepip-website:
+            app:
+              - path: /usr/share/nginx/html/gallery-data
+                readOnly: true
+          gallery-scanner:
+            scanner:
+              - path: /gallery/output
