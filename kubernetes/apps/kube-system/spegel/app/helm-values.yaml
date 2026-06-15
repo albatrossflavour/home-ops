@@ -3,6 +3,8 @@ spegel:
   containerdSock: /run/containerd/containerd.sock
   containerdRegistryConfigPath: /etc/cri/conf.d/hosts
   mirrorResolveRetries: 1
+  registryFilters:
+    - ".*:latest$"
 service:
   registry:
     hostPort: 29999
