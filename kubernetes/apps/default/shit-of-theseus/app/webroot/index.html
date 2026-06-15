@@ -2456,6 +2456,11 @@
                     '<div class="build-timeline">' +
                         '<div class="build-entry">' +
                             '<div class="build-date">Jun 2026</div>' +
+                            '<div class="build-title">The engine was floating on three mounts</div>' +
+                            '<div class="build-desc">Pulled the front engine mount and found the rubber had let go completely. The inner core with its sleeve had torn clean out of the outer ring, so the mount that\'s meant to anchor the front of the engine was doing nothing at all. The engine had been hanging on its remaining mounts and letting the front corner rock around as it pleased, which is exactly the sort of thing that chews through the other mounts next and does no favours to the driveline angles or the exhaust. Most of the rattle we\'d been quietly blaming on a tired old car was this one part. New mount in, and it\'s noticeably less rattly. Another original off the ship.</div>' +
+                        '</div>' +
+                        '<div class="build-entry">' +
+                            '<div class="build-date">Jun 2026</div>' +
                             '<div class="build-title">The dashcam kept deleting the best bit</div>' +
                             '<div class="build-desc">Every detected event saves a clip: a slice of footage buffered from before the trigger, joined to footage captured after. The saved clips had a hole punched in them right where the interesting thing happened. A hard brake that somehow wasn\'t in its own hard-brake clip, with the speed overlay counting down through the stop while the picture sat frozen on the road behind, then cut to a different street entirely. The pre-event footage lives in a ring buffer only 50 seconds deep, but the save waits 45 seconds to gather the after-footage before it copies anything. The one segment holding the trigger moment was getting recycled out of the buffer about a second before the save reached for it, and because that segment is by definition the one being written when the event fires, the bit it threw away was always the event itself. The fix was almost insulting: make the buffer deeper, 50 seconds to 120, so the footage survives long enough to be saved. Found by reading the logs second by second, not by guessing.</div>' +
                         '</div>' +
@@ -2606,6 +2611,7 @@
                         '<img src="/build/tech-sensor-cluster-v3.jpg" alt="Sensor cluster tray with active fan and PCB grid" onerror="this.style.display=\'none\';">' +
                         '<img src="/build/tech-flux-capacitor.jpg" alt="Flux capacitor dash panel installed in the cabin with kill switch, big red button, and Anderson charge port" onerror="this.style.display=\'none\';">' +
                         '<img src="/build/car-engine-bay.jpg" alt="Engine bay" onerror="this.style.display=\'none\';">' +
+                        '<img src="/build/car-engine-mount-failed.jpg" alt="The original front engine mount removed, rubber fully separated with the inner core torn out of the outer ring" onerror="this.style.display=\'none\';">' +
                         '<img src="/build/car-sensor-cluster.jpg" alt="Sensor cluster mounted in the cabin ceiling" onerror="this.style.display=\'none\';">' +
                         '<img src="/build/car-prototyping.jpg" alt="Prototype hardware on the bench" onerror="this.style.display=\'none\';">' +
                         '<img src="/build/car-retro-panel.jpg" alt="Flux capacitor dash panel during prototyping" onerror="this.style.display=\'none\';">' +
