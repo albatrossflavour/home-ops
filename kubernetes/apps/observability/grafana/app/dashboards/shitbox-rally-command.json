@@ -3324,7 +3324,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_donation_raised_aud",
+          "expr": "max(shitbox_donation_raised_aud)",
           "legendFormat": "Raised so far",
           "range": true,
           "refId": "A"
@@ -3393,7 +3393,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "100 * shitbox_donation_raised_aud / shitbox_donation_goal_aud",
+          "expr": "100 * max(shitbox_donation_raised_aud) / max(shitbox_donation_goal_aud)",
           "legendFormat": "% of goal",
           "range": true,
           "refId": "A"
@@ -3513,14 +3513,14 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_donation_raised_aud",
+          "expr": "max(shitbox_donation_raised_aud)",
           "legendFormat": "Raised",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
-          "expr": "shitbox_donation_goal_aud",
+          "expr": "max(shitbox_donation_goal_aud)",
           "legendFormat": "Goal",
           "range": true,
           "refId": "B"
