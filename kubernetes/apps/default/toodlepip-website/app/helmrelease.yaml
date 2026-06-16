@@ -65,8 +65,8 @@ spec:
         type: cronjob
         cronjob:
           schedule: "*/15 * * * *"
-          successfulJobsHistory: 3
-          failedJobsHistory: 3
+          successfulJobsHistory: 0
+          failedJobsHistory: 1
         containers:
           scanner:
             image:
