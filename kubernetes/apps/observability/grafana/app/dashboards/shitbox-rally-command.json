@@ -34,7 +34,7 @@
       }
     ]
   },
-  "description": "Shit of Theseus \u2014 Rally Command Centre",
+  "description": "Shit of Theseus — Rally Command Centre",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 2,
@@ -42,473 +42,17 @@
   "links": [],
   "panels": [
     {
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 7,
-        "w": 24,
-        "h": 1
-      },
       "id": 60,
+      "type": "row",
+      "collapsed": false,
+      "title": "LIVE",
       "panels": [],
-      "title": "RALLY SUMMARY",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": [
-            {
-              "title": "View Events",
-              "url": "https://shit-of-theseus.com/#videos",
-              "targetBlank": true
-            }
-          ]
-        },
-        "overrides": []
-      },
       "gridPos": {
+        "h": 1,
+        "w": 24,
         "x": 0,
-        "y": 8,
-        "w": 12,
-        "h": 7
-      },
-      "id": 61,
-      "options": {
-        "barRadius": 0.1,
-        "barWidth": 0.97,
-        "fillOpacity": 80,
-        "groupWidth": 0.7,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "orientation": "auto",
-        "showValue": "always",
-        "stacking": "none",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_events_total",
-          "legendFormat": "{{type}}",
-          "instant": true,
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Event Counts",
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": [],
-          "unit": "dthms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 7
-      },
-      "id": 67,
-      "options": {
-        "displayLabels": [
-          "name",
-          "percent"
-        ],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "values": [
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_driver_time_seconds",
-          "legendFormat": "{{name}}",
-          "instant": true,
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Drive Time",
-      "type": "piechart",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#238636",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "No driver set"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 15,
-        "w": 8,
-        "h": 3
-      },
-      "id": 66,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_active_driver",
-          "legendFormat": "{{name}}",
-          "instant": true,
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Driver",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#1f6feb",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "0"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 8,
-        "y": 15,
-        "w": 4,
-        "h": 3
-      },
-      "id": 62,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_fuel_stops_total",
-          "legendFormat": "Stops",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Fuel Stops",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#1f6feb",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "litre",
-          "decimals": 1,
-          "noValue": "0 L"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 15,
-        "w": 4,
-        "h": 3
-      },
-      "id": 63,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_fuel_litres_total",
-          "legendFormat": "Litres",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Total Fuel",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#da3633",
-                "value": 0
-              },
-              {
-                "color": "#d29922",
-                "value": 8
-              },
-              {
-                "color": "#238636",
-                "value": 12
-              }
-            ]
-          },
-          "unit": "short",
-          "decimals": 1,
-          "noValue": "\u2014"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 16,
-        "y": 15,
-        "w": 4,
-        "h": 3
-      },
-      "id": 64,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_fuel_efficiency_kml",
-          "legendFormat": "km/L",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Efficiency",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#1f6feb",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "0",
-          "links": [
-            {
-              "title": "View Notes",
-              "url": "https://shit-of-theseus.com/#status",
-              "targetBlank": true
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 20,
-        "y": 15,
-        "w": 4,
-        "h": 3
-      },
-      "id": 65,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_notes_total",
-          "legendFormat": "Notes",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Notes",
-      "type": "stat",
-      "transparent": true
+        "y": 0
+      }
     },
     {
       "datasource": {
@@ -549,10 +93,10 @@
         "overrides": []
       },
       "gridPos": {
+        "h": 5,
+        "w": 5,
         "x": 0,
-        "y": 18,
-        "w": 6,
-        "h": 5
+        "y": 1
       },
       "id": 1,
       "options": {
@@ -622,10 +166,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 6,
-        "y": 18,
+        "h": 5,
         "w": 5,
-        "h": 5
+        "x": 5,
+        "y": 1
       },
       "id": 2,
       "options": {
@@ -708,10 +252,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 11,
-        "y": 18,
-        "w": 4,
-        "h": 5
+        "h": 5,
+        "w": 5,
+        "x": 10,
+        "y": 1
       },
       "id": 3,
       "options": {
@@ -780,10 +324,10 @@
         "overrides": []
       },
       "gridPos": {
+        "h": 5,
+        "w": 4,
         "x": 15,
-        "y": 18,
-        "w": 3,
-        "h": 5
+        "y": 1
       },
       "id": 4,
       "options": {
@@ -844,10 +388,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 18,
-        "y": 18,
-        "w": 3,
-        "h": 5
+        "h": 5,
+        "w": 5,
+        "x": 19,
+        "y": 1
       },
       "id": 5,
       "options": {
@@ -896,134 +440,6 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#da3633",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "velocitykmh",
-          "decimals": 0,
-          "noValue": "Offline"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 23,
-        "w": 3,
-        "h": 3
-      },
-      "id": 7,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "max"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_spd",
-          "legendFormat": "Top Speed",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Top Speed",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#da3633",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "accG",
-          "decimals": 2,
-          "noValue": "Offline"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 3,
-        "y": 23,
-        "w": 3,
-        "h": 3
-      },
-      "id": 8,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "max"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2)",
-          "legendFormat": "Peak G",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Peak G",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
                 "color": "#238636",
                 "value": 0
               },
@@ -1044,10 +460,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 6,
-        "y": 23,
-        "w": 3,
-        "h": 3
+        "h": 3,
+        "w": 4,
+        "x": 0,
+        "y": 6
       },
       "id": 9,
       "options": {
@@ -1116,10 +532,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 9,
-        "y": 23,
-        "w": 3,
-        "h": 3
+        "h": 3,
+        "w": 4,
+        "x": 4,
+        "y": 6
       },
       "id": 10,
       "options": {
@@ -1163,96 +579,6 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "#238636",
-                  "index": 0,
-                  "text": "OK"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "from": 1,
-                "result": {
-                  "color": "#da3633",
-                  "index": 1,
-                  "text": "THROTTLED"
-                },
-                "to": 999999
-              },
-              "type": "range"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#238636",
-                "value": 0
-              },
-              {
-                "color": "#da3633",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "Offline"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 23,
-        "w": 4,
-        "h": 3
-      },
-      "id": 11,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_throttle_flags",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Throttle",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
           "mappings": [],
           "max": 100,
           "min": 0,
@@ -1279,10 +605,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 16,
-        "y": 23,
-        "w": 3,
-        "h": 3
+        "h": 3,
+        "w": 4,
+        "x": 8,
+        "y": 6
       },
       "id": 12,
       "options": {
@@ -1349,10 +675,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 19,
-        "y": 23,
-        "w": 3,
-        "h": 3
+        "h": 3,
+        "w": 4,
+        "x": 12,
+        "y": 6
       },
       "id": 13,
       "options": {
@@ -1413,10 +739,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 22,
-        "y": 23,
-        "w": 2,
-        "h": 3
+        "h": 3,
+        "w": 4,
+        "x": 16,
+        "y": 6
       },
       "id": 14,
       "options": {
@@ -1457,6 +783,96 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "#238636",
+                  "index": 0,
+                  "text": "OK"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": {
+                  "color": "#da3633",
+                  "index": 1,
+                  "text": "THROTTLED"
+                },
+                "to": 999999
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              },
+              {
+                "color": "#da3633",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short",
+          "noValue": "Offline"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 20,
+        "y": 6
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_throttle_flags",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Throttle",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
           "custom": {
             "hideFrom": {
               "legend": false,
@@ -1482,10 +898,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 0,
-        "y": 26,
+        "h": 14,
         "w": 14,
-        "h": 14
+        "x": 0,
+        "y": 9
       },
       "id": 20,
       "options": {
@@ -1699,10 +1115,10 @@
         ]
       },
       "gridPos": {
-        "x": 14,
-        "y": 26,
+        "h": 7,
         "w": 10,
-        "h": 7
+        "x": 14,
+        "y": 9
       },
       "id": 21,
       "options": {
@@ -1826,10 +1242,10 @@
         ]
       },
       "gridPos": {
-        "x": 14,
-        "y": 33,
+        "h": 7,
         "w": 10,
-        "h": 7
+        "x": 14,
+        "y": 16
       },
       "id": 22,
       "options": {
@@ -1862,503 +1278,17 @@
       "type": "timeseries"
     },
     {
+      "id": 30,
+      "type": "row",
       "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 40,
-        "w": 24,
-        "h": 1
-      },
-      "id": 40,
+      "title": "TELEMETRY",
       "panels": [],
-      "title": "ENVIRONMENT",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#238636",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "celsius"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Cabin Temp"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#8957e5",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Humidity %"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#1f6feb",
-                  "mode": "fixed"
-                }
-              },
-              {
-                "id": "unit",
-                "value": "humidity"
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "x": 8,
-        "y": 41,
-        "w": 8,
-        "h": 8
-      },
-      "id": 42,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_env_temp",
-          "legendFormat": "Cabin Temp",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "shitbox_humidity",
-          "legendFormat": "Humidity %",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "Cabin Environment",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 8,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#238636",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "pressurehpa"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Pressure"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#8957e5",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "x": 16,
-        "y": 41,
-        "w": 8,
-        "h": 8
-      },
-      "id": 43,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_pressure",
-          "legendFormat": "Pressure",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Pressure",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 49
-      },
-      "id": 68,
-      "panels": [],
-      "title": "TYRES",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 25
-              },
-              {
-                "color": "green",
-                "value": 28
-              }
-            ]
-          },
-          "unit": "pressurepsi",
-          "min": 20,
-          "max": 40
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 50,
-        "w": 12,
-        "h": 8
-      },
-      "id": 69,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "min",
-            "max",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_tpms_pressure_psi",
-          "legendFormat": "{{wheel}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "TPMS Pressure (PSI)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "celsius"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 50,
-        "w": 12,
-        "h": 8
-      },
-      "id": 70,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "min",
-            "max",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_tpms_temperature_c",
-          "legendFormat": "{{wheel}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "TPMS Temperature (\u00b0C)",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 58,
-        "w": 24,
-        "h": 1
-      },
-      "id": 30,
-      "panels": [],
-      "title": "VEHICLE DYNAMICS",
-      "type": "row"
+        "y": 23
+      }
     },
     {
       "datasource": {
@@ -2420,7 +1350,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "X \u2014 Lateral"
+              "options": "X — Lateral"
             },
             "properties": [
               {
@@ -2435,7 +1365,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Y \u2014 Longitudinal"
+              "options": "Y — Longitudinal"
             },
             "properties": [
               {
@@ -2450,7 +1380,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Z \u2014 Vertical"
+              "options": "Z — Vertical"
             },
             "properties": [
               {
@@ -2465,10 +1395,10 @@
         ]
       },
       "gridPos": {
-        "x": 0,
-        "y": 59,
+        "h": 8,
         "w": 8,
-        "h": 8
+        "x": 0,
+        "y": 24
       },
       "id": 31,
       "options": {
@@ -2492,21 +1422,21 @@
         {
           "editorMode": "code",
           "expr": "shitbox_ax",
-          "legendFormat": "X \u2014 Lateral",
+          "legendFormat": "X — Lateral",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
           "expr": "shitbox_ay",
-          "legendFormat": "Y \u2014 Longitudinal",
+          "legendFormat": "Y — Longitudinal",
           "range": true,
           "refId": "B"
         },
         {
           "editorMode": "code",
           "expr": "shitbox_az",
-          "legendFormat": "Z \u2014 Vertical",
+          "legendFormat": "Z — Vertical",
           "range": true,
           "refId": "C"
         }
@@ -2619,10 +1549,10 @@
         ]
       },
       "gridPos": {
-        "x": 8,
-        "y": 59,
+        "h": 8,
         "w": 8,
-        "h": 8
+        "x": 8,
+        "y": 24
       },
       "id": 32,
       "options": {
@@ -2778,10 +1708,10 @@
         ]
       },
       "gridPos": {
-        "x": 16,
-        "y": 59,
+        "h": 8,
         "w": 8,
-        "h": 8
+        "x": 16,
+        "y": 24
       },
       "id": 33,
       "options": {
@@ -2828,17 +1758,206 @@
       "type": "timeseries"
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 67,
-        "w": 24,
-        "h": 1
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
       },
-      "id": 50,
-      "panels": [],
-      "title": "SUPPORT SYSTEMS",
-      "type": "row"
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 25
+              },
+              {
+                "color": "green",
+                "value": 28
+              }
+            ]
+          },
+          "unit": "pressurepsi",
+          "min": 20,
+          "max": 40
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 69,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "min",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_tpms_pressure_psi",
+          "legendFormat": "{{wheel}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "TPMS Pressure (PSI)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 70,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "min",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_tpms_temperature_c",
+          "legendFormat": "{{wheel}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "TPMS Temperature (°C)",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -2894,34 +2013,60 @@
               }
             ]
           },
-          "unit": "volt"
+          "unit": "celsius"
         },
         "overrides": [
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": ".* A$"
+              "id": "byName",
+              "options": "Cabin Temp"
             },
             "properties": [
               {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8957e5",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Humidity %"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1f6feb",
+                  "mode": "fixed"
+                }
+              },
+              {
                 "id": "unit",
-                "value": "amp"
+                "value": "humidity"
               },
               {
                 "id": "custom.axisPlacement",
                 "value": "right"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
               }
             ]
           }
         ]
       },
       "gridPos": {
-        "x": 0,
-        "y": 68,
+        "h": 8,
         "w": 8,
-        "h": 7
+        "x": 0,
+        "y": 40
       },
-      "id": 51,
+      "id": 42,
       "options": {
         "legend": {
           "calcs": [
@@ -2942,27 +2087,130 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_voltage_volts{rail=~\"ext5v|3v3_sys\"}",
-          "legendFormat": "{{rail}} V",
+          "expr": "shitbox_env_temp",
+          "legendFormat": "Cabin Temp",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
-          "expr": "shitbox_current_amps{rail=\"vdd_core\"}",
-          "legendFormat": "vdd_core A (SoC load)",
+          "expr": "shitbox_humidity",
+          "legendFormat": "Humidity %",
           "range": true,
           "refId": "B"
-        },
-        {
-          "editorMode": "code",
-          "expr": "sum(shitbox_current_amps{rail!~\"battery|batt\"})",
-          "legendFormat": "Pi total A",
-          "range": true,
-          "refId": "C"
         }
       ],
-      "title": "Pi Power Summary",
+      "title": "Cabin Environment",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "pressurehpa"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pressure"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8957e5",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 40
+      },
+      "id": 43,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_pressure",
+          "legendFormat": "Pressure",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Pressure",
       "type": "timeseries"
     },
     {
@@ -3031,7 +2279,7 @@
               }
             ]
           },
-          "unit": "\u00b5g/m\u00b3"
+          "unit": "µg/m³"
         },
         "overrides": [
           {
@@ -3105,10 +2353,10 @@
         ]
       },
       "gridPos": {
-        "x": 8,
-        "y": 68,
+        "h": 8,
         "w": 8,
-        "h": 7
+        "x": 16,
+        "y": 40
       },
       "id": 52,
       "options": {
@@ -3223,10 +2471,10 @@
         ]
       },
       "gridPos": {
-        "x": 16,
-        "y": 68,
-        "w": 8,
-        "h": 7
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
       },
       "id": 53,
       "options": {
@@ -3260,17 +2508,739 @@
       "type": "timeseries"
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 0,
-        "w": 24,
-        "h": 1
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
       },
-      "id": 100,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "volt"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* A$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "amp"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "id": 51,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_voltage_volts{rail=~\"ext5v|3v3_sys\"}",
+          "legendFormat": "{{rail}} V",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "shitbox_current_amps{rail=\"vdd_core\"}",
+          "legendFormat": "vdd_core A (SoC load)",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "sum(shitbox_current_amps{rail!~\"battery|batt\"})",
+          "legendFormat": "Pi total A",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Pi Power Summary",
+      "type": "timeseries"
+    },
+    {
+      "id": 50,
+      "type": "row",
+      "collapsed": false,
+      "title": "RECORDS & ADMIN",
       "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#238636",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short",
+          "noValue": "No driver set"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 57
+      },
+      "id": 66,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_active_driver",
+          "legendFormat": "{{name}}",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Driver",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1f6feb",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 6,
+        "y": 57
+      },
+      "id": 62,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_fuel_stops_total",
+          "legendFormat": "Stops",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Fuel Stops",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1f6feb",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "litre",
+          "decimals": 1,
+          "noValue": "0 L"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 10,
+        "y": 57
+      },
+      "id": 63,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_fuel_litres_total",
+          "legendFormat": "Litres",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Total Fuel",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#da3633",
+                "value": 0
+              },
+              {
+                "color": "#d29922",
+                "value": 8
+              },
+              {
+                "color": "#238636",
+                "value": 12
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "—"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 14,
+        "y": 57
+      },
+      "id": 64,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_fuel_efficiency_kml",
+          "legendFormat": "km/L",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Efficiency",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1f6feb",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "links": [
+            {
+              "title": "View Notes",
+              "url": "https://shit-of-theseus.com/#status",
+              "targetBlank": true
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 57
+      },
+      "id": 65,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_notes_total",
+          "legendFormat": "Notes",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Notes",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#da3633",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "velocitykmh",
+          "decimals": 0,
+          "noValue": "Offline"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 12,
+        "x": 0,
+        "y": 60
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_spd",
+          "legendFormat": "Top Speed",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Top Speed",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#da3633",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "accG",
+          "decimals": 2,
+          "noValue": "Offline"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 12,
+        "x": 12,
+        "y": 60
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sqrt(shitbox_ax^2 + shitbox_ay^2 + shitbox_az^2)",
+          "legendFormat": "Peak G",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Peak G",
+      "type": "stat",
+      "transparent": true
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "View Events",
+              "url": "https://shit-of-theseus.com/#videos",
+              "targetBlank": true
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 63
+      },
+      "id": 61,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.97,
+        "fillOpacity": 80,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_events_total",
+          "legendFormat": "{{type}}",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Event Counts",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "unit": "dthms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 63
+      },
+      "id": 67,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "shitbox_driver_time_seconds",
+          "legendFormat": "{{name}}",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Drive Time",
+      "type": "piechart",
+      "transparent": true
+    },
+    {
+      "id": 100,
+      "type": "row",
+      "collapsed": false,
       "title": "FUNDRAISING",
-      "type": "row"
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 71
+      }
     },
     {
       "datasource": {
@@ -3299,10 +3269,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 0,
-        "y": 1,
+        "h": 6,
         "w": 8,
-        "h": 6
+        "x": 0,
+        "y": 72
       },
       "id": 101,
       "options": {
@@ -3369,10 +3339,10 @@
         "overrides": []
       },
       "gridPos": {
-        "x": 8,
-        "y": 1,
+        "h": 6,
         "w": 8,
-        "h": 6
+        "x": 8,
+        "y": 72
       },
       "id": 102,
       "options": {
@@ -3488,10 +3458,10 @@
         ]
       },
       "gridPos": {
-        "x": 16,
-        "y": 1,
+        "h": 6,
         "w": 8,
-        "h": 6
+        "x": 16,
+        "y": 72
       },
       "id": 103,
       "options": {
