@@ -127,12 +127,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "changed"
+              "options": "intentional"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Changed"
+                "value": "Intentional"
               },
               {
                 "id": "color",
@@ -177,6 +177,25 @@
                 "value": {
                   "fixedColor": "green",
                   "mode": "shades"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "corrective"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Corrective"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
                 }
               }
             ]
