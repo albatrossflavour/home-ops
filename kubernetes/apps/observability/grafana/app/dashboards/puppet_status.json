@@ -108,18 +108,18 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "failed"
+              "options": "unchanged"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Failed"
+                "value": "Unchanged"
               },
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
+                  "fixedColor": "green",
+                  "mode": "shades"
                 }
               }
             ]
@@ -138,6 +138,44 @@
                 "id": "color",
                 "value": {
                   "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "corrective"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Corrective"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "failed"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Failed"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
                   "mode": "fixed"
                 }
               }
@@ -165,69 +203,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "unchanged"
+              "options": "unknown"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Unchanged"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "shades"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "corrective"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Corrective"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "purple",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "unreported"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Unreporting"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "shades"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "unresponsive"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Unresponsive"
+                "value": "Unknown"
               },
               {
                 "id": "color",
@@ -291,12 +272,12 @@
             "includeByName": {},
             "indexByName": {
               "Time": 0,
-              "changed": 2,
-              "failed": 3,
-              "noop": 4,
               "unchanged": 1,
-              "unreported": 5,
-              "unresponsive": 6
+              "intentional": 2,
+              "corrective": 3,
+              "failed": 4,
+              "noop": 5,
+              "unknown": 6
             },
             "renameByName": {}
           }
@@ -1178,13 +1159,43 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "changed"
+              "options": "unchanged"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "intentional"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
                   "fixedColor": "dark-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "corrective"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-yellow",
                   "mode": "fixed"
                 }
               }
@@ -1223,37 +1234,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "unchanged"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "unreported"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "unresponsive"
+              "options": "unknown"
             },
             "properties": [
               {
@@ -1306,6 +1287,7 @@
           "editorMode": "code",
           "exemplar": true,
           "expr": "puppet_state_overview{state=\"unchanged\"}",
+          "hide": false,
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{state}}",
@@ -1319,7 +1301,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "puppet_state_overview{state=\"changed\"}",
+          "expr": "puppet_state_overview{state=\"intentional\"}",
           "hide": false,
           "instant": false,
           "interval": "$interval",
@@ -1334,43 +1316,13 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "puppet_state_overview{state=\"noop\"}",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "puppet_state_overview{state=\"unresponsive\"}",
+          "expr": "puppet_state_overview{state=\"corrective\"}",
           "hide": false,
           "instant": false,
           "interval": "$interval",
           "legendFormat": "{{state}}",
           "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "puppet_state_overview{state=\"unreported\"}",
-          "hide": false,
-          "instant": false,
-          "interval": "$interval",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "E"
         },
         {
           "datasource": {
@@ -1386,6 +1338,36 @@
           "legendFormat": "{{state}}",
           "range": true,
           "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "puppet_state_overview{state=\"noop\"}",
+          "hide": false,
+          "instant": false,
+          "interval": "$interval",
+          "legendFormat": "{{state}}",
+          "range": true,
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "puppet_state_overview{state=\"unknown\"}",
+          "hide": false,
+          "instant": false,
+          "interval": "$interval",
+          "legendFormat": "{{state}}",
+          "range": true,
+          "refId": "F"
         }
       ],
       "title": "Status Overview",
