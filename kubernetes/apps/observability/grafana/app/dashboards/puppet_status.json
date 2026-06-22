@@ -19,6 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
+  "id": 48,
   "links": [
     {
       "asDropdown": false,
@@ -243,19 +244,19 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "editorMode": "code",
+          "editorMode": "builder",
           "exemplar": false,
-          "expr": "puppet_state_overview",
-          "instant": false,
+          "expr": "last_over_time(puppet_state_overview[$__interval])",
+          "instant": true,
           "legendFormat": "{{state}}",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -272,11 +273,11 @@
             "includeByName": {},
             "indexByName": {
               "Time": 0,
-              "unchanged": 1,
-              "intentional": 2,
               "corrective": 3,
               "failed": 4,
+              "intentional": 2,
               "noop": 5,
+              "unchanged": 1,
               "unknown": 6
             },
             "renameByName": {}
@@ -338,7 +339,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -405,7 +406,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -481,7 +482,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -535,6 +536,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -585,7 +587,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -654,7 +656,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -725,7 +727,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -789,13 +791,14 @@
           "fields": "",
           "values": false
         },
+        "sort": "desc",
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -850,7 +853,7 @@
         },
         "viewMode": "list"
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "title": "Alerts",
       "type": "alertlist"
     },
@@ -890,6 +893,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": 7200000,
             "stacking": {
               "group": "A",
@@ -985,7 +989,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -1090,7 +1094,7 @@
         "sizing": "manual",
         "valueMode": "color"
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -1277,7 +1281,7 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 100
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -1430,7 +1434,7 @@
         "text": {},
         "valueMode": "color"
       },
-      "pluginVersion": "12.1.0",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -1735,7 +1739,7 @@
   ],
   "preload": false,
   "refresh": "",
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [
     "puppet"
   ],
@@ -1743,20 +1747,16 @@
     "list": [
       {
         "current": {
-          "selected": false,
           "text": "Prometheus",
           "value": "Prometheus"
         },
-        "hide": 0,
         "includeAll": false,
         "label": "Data Source",
-        "multi": false,
         "name": "DS_PROMETHEUS",
         "options": [],
         "query": "prometheus",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "type": "datasource"
       },
       {
