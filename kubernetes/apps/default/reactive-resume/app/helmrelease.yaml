@@ -83,7 +83,7 @@ spec:
           browserless:
             image:
               repository: ghcr.io/browserless/chromium
-              tag: v2.52.2@sha256:489361fa81fd8803a6e35f955c1f94007e928f022e84ade3ca90fdab2d6e14e6
+              tag: v2.54.1@sha256:5a0b8ffa43426549e9df7c822c68505e70f3817192ed111f81bd587a2a9e7229
             env:
               TOKEN: "$(CHROME_TOKEN)"
               PORT: "3001"
