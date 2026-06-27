@@ -30,7 +30,7 @@ spec:
     downloadDashboardsImage:
       registry: docker.io
       repository: alpine/curl
-      tag: "8.20.0@sha256:1f77ce9cc6be0ea91a58e14d1fe748ed3ffb085a1dee7a74897048acab50b9e2"
+      tag: "8.20.0@sha256:94e16c727ef767dab178bef606f2616c26a5bc16f94c01307b6c8aa74a8eac84"
     env:
       GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel
       GF_SECURITY_ANGULAR_SUPPORT_ENABLED: true
