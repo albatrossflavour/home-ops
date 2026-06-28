@@ -69,6 +69,12 @@ spec:
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
         pod:
+          # Operator-generated NetworkPolicy only allows the Dragonfly admin
+          # port (9999) from pods labelled control-plane=controller-manager.
+          # app-template doesn't set this, so add it or rollout readiness
+          # checks to the admin port time out.
+          labels:
+            control-plane: controller-manager
           securityContext:
             runAsUser: 65534
             runAsGroup: 65534
