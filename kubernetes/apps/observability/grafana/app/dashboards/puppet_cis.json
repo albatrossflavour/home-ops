@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 39,
+  "id": 49,
   "links": [
     {
       "asDropdown": true,
@@ -99,7 +99,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -185,7 +185,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -219,6 +219,9 @@
               "type": "auto"
             },
             "filterable": true,
+            "footer": {
+              "reducers": []
+            },
             "inspect": false
           },
           "mappings": [],
@@ -246,7 +249,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 316
+                "value": 284
               }
             ]
           },
@@ -279,18 +282,15 @@
       "id": 7,
       "options": {
         "cellHeight": "md",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
         "showHeader": true,
-        "sortBy": []
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Time since scan"
+          }
+        ]
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -314,9 +314,16 @@
           "options": {
             "excludeByName": {
               "Time": true,
+              "__name__": true,
+              "benchmark": true,
+              "cluster": true,
               "environment": true,
               "instance": true,
               "job": true,
+              "profile": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "scan_timestamp": true,
               "scanned_benchmark": true,
               "scanned_profile": true,
               "score_type": true,
@@ -325,6 +332,7 @@
             "includeByName": {},
             "indexByName": {},
             "renameByName": {
+              "Time": "",
               "Value": "Time since scan",
               "node": "Node"
             }
@@ -409,7 +417,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -505,7 +513,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -589,7 +597,7 @@
           "reverse": false
         }
       },
-      "pluginVersion": "12.1.1",
+      "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
@@ -611,7 +619,7 @@
     }
   ],
   "preload": false,
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [
     "puppet"
   ],
