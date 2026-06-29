@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 46,
+  "id": 49,
   "links": [
     {
       "asDropdown": false,
@@ -589,7 +589,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 401
+                "value": 270
               }
             ]
           }
@@ -605,7 +605,12 @@
       "options": {
         "cellHeight": "md",
         "showHeader": true,
-        "sortBy": []
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Time"
+          }
+        ]
       },
       "pluginVersion": "12.3.1",
       "targets": [
@@ -616,7 +621,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "puppet_patching_detail{patch_group=~\"${patch_group:regex}\",environment=~\"${environment:regex}\",security=~\"${security:regex}\"}",
+          "expr": "group by (package, security) (puppet_patching_detail{environment=~\"$environment\", patch_group=~\"$patch_group\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -631,33 +636,9 @@
           "options": {
             "include": {
               "names": [
-                "environment",
-                "node",
                 "package",
-                "patch_group",
-                "type"
+                "security"
               ]
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "includeByName": {},
-            "indexByName": {
-              "environment": 3,
-              "node": 0,
-              "package": 1,
-              "patch_group": 4,
-              "type": 2
-            },
-            "renameByName": {
-              "environment": "Environment",
-              "node": "Server",
-              "package": "Package",
-              "patch_group": "Patch Group",
-              "type": "Update Type"
             }
           }
         },
@@ -665,37 +646,20 @@
           "id": "groupToNestedTable",
           "options": {
             "fields": {
-              "Environment": {
-                "aggregations": []
-              },
-              "Package": {
+              "Value": {
                 "aggregations": [
-                  "count"
+                  "sum"
                 ]
               },
-              "Patch Group": {
+              "package": {
                 "aggregations": []
               },
-              "Server": {
-                "aggregations": []
-              },
-              "Update Type": {
+              "security": {
                 "aggregations": [],
                 "operation": "groupby"
               }
             },
             "showSubframeHeaders": true
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "Update Type"
-              }
-            ]
           }
         }
       ],
@@ -860,7 +824,7 @@
         },
         "description": "Display only security patches?",
         "includeAll": true,
-        "label": "Display only security patches?",
+        "label": "Security only?",
         "name": "security",
         "options": [
           {
