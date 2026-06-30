@@ -3512,7 +3512,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-36h",
     "to": "now"
   },
   "timepicker": {
