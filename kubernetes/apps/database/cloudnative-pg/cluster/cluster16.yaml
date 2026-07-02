@@ -18,6 +18,9 @@ spec:
     parameters:
       max_connections: "400"
       shared_buffers: 256MB
+      # Freeze well before the PGDatabase alert threshold (150M) so the alert
+      # only fires when autovacuum is genuinely stuck
+      autovacuum_freeze_max_age: "100000000"
   nodeMaintenanceWindow:
     inProgress: false
     reusePVC: true
