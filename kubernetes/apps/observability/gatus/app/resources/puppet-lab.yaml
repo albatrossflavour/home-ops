@@ -63,17 +63,3 @@ data:
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pushover
-
-      - name: Nessus
-        url: "https://nessus.lab.albatrossflavour.com/"
-        group: "Puppet Lab"
-        description: "Vulnerability Scanner"
-        tags: ["security", "vulnerability", "scanning", "lab"]
-        interval: 5m
-        client:
-          insecure: true
-        conditions:
-          - "[STATUS] < 400"
-          - "[RESPONSE_TIME] < 10000"
-        alerts:
-          - type: pushover
