@@ -34,7 +34,7 @@
       }
     ]
   },
-  "description": "Shit of Theseus — Rally Command Centre",
+  "description": "Shit of Theseus \u2014 Rally Command Centre",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 2,
@@ -1350,7 +1350,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "X — Lateral"
+              "options": "X \u2014 Lateral"
             },
             "properties": [
               {
@@ -1365,7 +1365,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Y — Longitudinal"
+              "options": "Y \u2014 Longitudinal"
             },
             "properties": [
               {
@@ -1380,7 +1380,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Z — Vertical"
+              "options": "Z \u2014 Vertical"
             },
             "properties": [
               {
@@ -1422,21 +1422,21 @@
         {
           "editorMode": "code",
           "expr": "shitbox_ax",
-          "legendFormat": "X — Lateral",
+          "legendFormat": "X \u2014 Lateral",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
           "expr": "shitbox_ay",
-          "legendFormat": "Y — Longitudinal",
+          "legendFormat": "Y \u2014 Longitudinal",
           "range": true,
           "refId": "B"
         },
         {
           "editorMode": "code",
           "expr": "shitbox_az",
-          "legendFormat": "Z — Vertical",
+          "legendFormat": "Z \u2014 Vertical",
           "range": true,
           "refId": "C"
         }
@@ -1956,7 +1956,7 @@
           "refId": "A"
         }
       ],
-      "title": "TPMS Temperature (°C)",
+      "title": "TPMS Temperature (\u00b0C)",
       "type": "timeseries"
     },
     {
@@ -2279,7 +2279,7 @@
               }
             ]
           },
-          "unit": "µg/m³"
+          "unit": "\u00b5g/m\u00b3"
         },
         "overrides": [
           {
@@ -2867,7 +2867,7 @@
           },
           "unit": "short",
           "decimals": 1,
-          "noValue": "—"
+          "noValue": "\u2014"
         },
         "overrides": []
       },
@@ -3498,6 +3498,113 @@
       ],
       "title": "Donations Over Time",
       "type": "timeseries"
+    },
+    {
+      "type": "row",
+      "id": 104,
+      "title": "Website Traffic",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 78
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 105,
+      "title": "Requests / sec by host",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 79
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(rate(nginx_ingress_controller_requests{host=~\"shit-of-theseus.com|grafana.shit-of-theseus.com\"}[5m])) by (host)",
+          "legendFormat": "{{host}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "id": 106,
+      "title": "Total requests (time range)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 79
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(increase(nginx_ingress_controller_requests{host=~\"shit-of-theseus.com|grafana.shit-of-theseus.com\"}[$__range])) by (host)",
+          "legendFormat": "{{host}}",
+          "range": true,
+          "refId": "A",
+          "instant": true
+        }
+      ]
     }
   ],
   "preload": false,
@@ -3525,5 +3632,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-v2",
-  "version": 2
+  "version": 3
 }
