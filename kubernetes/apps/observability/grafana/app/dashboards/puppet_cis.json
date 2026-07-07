@@ -314,6 +314,7 @@
           "options": {
             "excludeByName": {
               "Time": true,
+              "Value": true,
               "__name__": true,
               "benchmark": true,
               "cluster": true,
@@ -323,7 +324,7 @@
               "profile": true,
               "prometheus": true,
               "prometheus_replica": true,
-              "scan_timestamp": true,
+              "scan_timestamp": false,
               "scanned_benchmark": true,
               "scanned_profile": true,
               "score_type": true,
@@ -334,8 +335,21 @@
             "renameByName": {
               "Time": "",
               "Value": "Time since scan",
-              "node": "Node"
+              "node": "Node",
+              "scan_timestamp": "Scan Time"
             }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "time",
+                "targetField": "Scan Time"
+              }
+            ],
+            "fields": {}
           }
         }
       ],
