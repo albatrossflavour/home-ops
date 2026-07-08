@@ -3600,7 +3600,7 @@
           "editorMode": "code",
           "expr": "sum(increase(nginx_ingress_controller_requests{host=~\"shit-of-theseus.com|grafana.shit-of-theseus.com\"}[$__range])) by (host)",
           "legendFormat": "{{host}}",
-          "range": true,
+          "range": false,
           "refId": "A",
           "instant": true
         }
@@ -3791,5 +3791,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-v2",
-  "version": 7
+  "version": 8
 }
