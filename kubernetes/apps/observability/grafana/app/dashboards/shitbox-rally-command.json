@@ -3715,7 +3715,7 @@
     {
       "type": "timeseries",
       "id": 110,
-      "title": "Requests today by zone (all domains)",
+      "title": "shit-of-theseus.com traffic today",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -3751,10 +3751,17 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_requests_today",
-          "legendFormat": "{{zone}}",
+          "expr": "cf_zone_requests_today{zone=\"shit-of-theseus.com\"}",
+          "legendFormat": "requests",
           "range": true,
           "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "cf_zone_cached_requests_today{zone=\"shit-of-theseus.com\"}",
+          "legendFormat": "cached",
+          "range": true,
+          "refId": "B"
         }
       ]
     }
@@ -3784,5 +3791,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-v2",
-  "version": 4
+  "version": 5
 }

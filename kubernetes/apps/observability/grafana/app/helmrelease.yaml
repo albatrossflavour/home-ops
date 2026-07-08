@@ -239,6 +239,9 @@ spec:
         shitbox-trip-summary:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/shitbox-trip-summary.json
           datasource: Prometheus
+        cloudflare-zones:
+          url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/cloudflare-zones.json
+          datasource: Prometheus
         synology:
           url: https://raw.githubusercontent.com/albatrossflavour/home-ops/master/kubernetes/apps/observability/grafana/app/dashboards/synology-nfs.json
           datasource: Prometheus

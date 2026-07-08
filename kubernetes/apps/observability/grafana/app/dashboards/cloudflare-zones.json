@@ -1,0 +1,76 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "schemaVersion": 42,
+  "tags": ["cloudflare"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timezone": "Australia/Sydney",
+  "title": "Cloudflare — All Zones",
+  "uid": "cloudflare-zones",
+  "refresh": "5m",
+  "panels": [
+    {
+      "type": "stat",
+      "id": 1,
+      "title": "Exporter up",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "short", "mappings": [ { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } } ], "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
+      "targets": [ { "editorMode": "code", "expr": "cf_exporter_up", "instant": true, "refId": "A" } ]
+    },
+    {
+      "type": "stat",
+      "id": 2,
+      "title": "Total requests today (all zones)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 10, "x": 4, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "#e0a040" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "value" },
+      "targets": [ { "editorMode": "code", "expr": "sum(cf_zone_requests_today)", "instant": true, "refId": "A" } ]
+    },
+    {
+      "type": "stat",
+      "id": 3,
+      "title": "Total unique visitors today (all zones)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 10, "x": 14, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "#e0a040" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "value" },
+      "targets": [ { "editorMode": "code", "expr": "sum(cf_zone_uniques_today)", "instant": true, "refId": "A" } ]
+    },
+    {
+      "type": "timeseries",
+      "id": 4,
+      "title": "Requests today by zone",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 4 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 8, "lineWidth": 2 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "calcs": ["lastNotNull"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "editorMode": "code", "expr": "cf_zone_requests_today", "legendFormat": "{{zone}}", "range": true, "refId": "A" } ]
+    },
+    {
+      "type": "bargauge",
+      "id": 5,
+      "title": "Requests today by zone",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 11, "w": 12, "x": 0, "y": 13 },
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "continuous-BlPu" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "sortBy": "Value", "sortDescending": true },
+      "targets": [ { "editorMode": "code", "expr": "cf_zone_requests_today", "legendFormat": "{{zone}}", "instant": true, "refId": "A" } ]
+    },
+    {
+      "type": "bargauge",
+      "id": 6,
+      "title": "Unique visitors today by zone",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 11, "w": 12, "x": 12, "y": 13 },
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "continuous-GrYlRd" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "sortBy": "Value", "sortDescending": true },
+      "targets": [ { "editorMode": "code", "expr": "cf_zone_uniques_today", "legendFormat": "{{zone}}", "instant": true, "refId": "A" } ]
+    }
+  ]
+}
