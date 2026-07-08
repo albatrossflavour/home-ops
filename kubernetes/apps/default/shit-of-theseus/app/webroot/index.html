@@ -1502,9 +1502,10 @@
             return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
         }
 
-        function computeDayStats(dayISO, events, route, fuel) {
+        function computeDayStats(dayISO, events, route, fuel, breakdowns) {
             var dayEvents = (events || []).filter(function(ev) { return _dayOf(ev.timestamp) === dayISO; });
             var dayFuel   = (fuel   || []).filter(function(f)  { return _dayOf(f.timestamp_utc) === dayISO; });
+            var dayBreakdowns = (breakdowns || []).filter(function(b) { return _dayOf(b.timestamp_utc) === dayISO; });
             var daySlice  = (route && route.days && route.days[dayISO]) || null;
 
             var kmDriven = 0;
@@ -1533,7 +1534,8 @@
                 topSpeed: topSpeed,
                 fuelBurned: fuelBurned,
                 eventCount: dayEvents.length,
-                hasData: daySlice != null || dayEvents.length > 0 || dayFuel.length > 0
+                breakdownCount: dayBreakdowns.length,
+                hasData: daySlice != null || dayEvents.length > 0 || dayFuel.length > 0 || dayBreakdowns.length > 0
             };
         }
 
@@ -1906,7 +1908,8 @@
                 fetch('/captures/notes.json',        { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
                 fetch('/captures/fuel.json',         { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
                 fetch('/captures/route.json',        { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
-                fetch('/captures/driver-stats.json', { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+                fetch('/captures/driver-stats.json', { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+                fetch('/captures/breakdowns.json',   { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
             ];
             return Promise.all(p).then(function(results) {
                 if (results[0] != null) eventsData       = results[0];
@@ -1914,6 +1917,7 @@
                 if (results[2] != null) fuelData         = results[2];
                 if (results[3] != null) routeData        = results[3];
                 if (results[4] != null) driverStatsData  = results[4];
+                if (results[5] != null) breakdownsData   = results[5];
                 // Re-render only if we're still on the homepage.
                 if (window.location.pathname === '/' || window.location.pathname === '') {
                     renderHomepage();
@@ -2191,7 +2195,7 @@
 
             var agendaHtml = renderAgendaContext(agendaDay);
 
-            var stats = computeDayStats(dayISO, eventsData, routeData, fuelData);
+            var stats = computeDayStats(dayISO, eventsData, routeData, fuelData, breakdownsData);
             var statsHtml =
                 '<section class="day-stats">' +
                     '<div class="day-stat-card"><div class="stat-label">Distance</div><div class="stat-value">' + stats.km.toFixed(0) + ' km</div></div>' +
@@ -2199,6 +2203,7 @@
                     '<div class="day-stat-card"><div class="stat-label">Peak G</div><div class="stat-value">' + stats.peakG.toFixed(2) + ' g</div></div>' +
                     '<div class="day-stat-card"><div class="stat-label">Events</div><div class="stat-value">' + stats.eventCount + '</div></div>' +
                     '<div class="day-stat-card"><div class="stat-label">Fuel</div><div class="stat-value">' + stats.fuelBurned.toFixed(1) + ' L</div></div>' +
+                    '<div class="day-stat-card"><div class="stat-label">Breakdowns</div><div class="stat-value">' + stats.breakdownCount + '</div></div>' +
                 '</section>';
 
             var blogPlaceholder = '<section id="day-blog-section" style="display:none;"><h3 class="day-section-heading">From the road</h3><div id="day-blog" class="blog-body"></div></section>';
@@ -3101,6 +3106,7 @@
         var eventsData = null;
         var notesData = null;
         var fuelData = null;
+        var breakdownsData = null;
         var driverStatsData = null;
         var agendaData = null;
         var routeData = null;
@@ -3126,6 +3132,11 @@
         fetch('/captures/fuel.json', { cache: 'no-cache' })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(fuel) { if (fuel) fuelData = fuel; })
+            .catch(function() {});
+
+        fetch('/captures/breakdowns.json', { cache: 'no-cache' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(bd) { if (bd) breakdownsData = bd; })
             .catch(function() {});
 
         fetch('/captures/driver-stats.json', { cache: 'no-cache' })
