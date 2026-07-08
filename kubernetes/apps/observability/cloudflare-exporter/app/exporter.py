@@ -31,27 +31,43 @@ TIMEOUT = 15
 
 _cache = {"ts": 0.0, "text": ""}
 
-# (metric name, help text, key in the per-zone stats dict)
+# (metric name, prometheus type, help text, key in the per-zone stats dict)
+#
+# The request/byte metrics are today's running total in UTC, which climbs
+# through the day and drops to ~0 at UTC midnight. Exposed as counters so
+# Prometheus reads that drop as a counter reset: increase(<metric>[$__range])
+# then yields the count over whatever window the Grafana time picker is set
+# to, with no daily cliff. Uniques stay a gauge — a set union can't be summed
+# across days, so "uniques over an arbitrary window" isn't reconstructable.
 METRICS = [
     (
-        "cf_zone_requests_today",
-        "HTTP requests for the zone so far today (UTC)",
+        "cf_zone_requests_total",
+        "counter",
+        "HTTP requests for the zone today (UTC), resets at UTC midnight; window with increase()",
         "requests",
     ),
-    ("cf_zone_bytes_today", "Bytes served for the zone so far today (UTC)", "bytes"),
     (
-        "cf_zone_cached_requests_today",
-        "Cached HTTP requests for the zone so far today (UTC)",
+        "cf_zone_bytes_total",
+        "counter",
+        "Bytes served for the zone today (UTC), resets at UTC midnight; window with increase()",
+        "bytes",
+    ),
+    (
+        "cf_zone_cached_requests_total",
+        "counter",
+        "Cached HTTP requests for the zone today (UTC), resets at UTC midnight; window with increase()",
         "cachedRequests",
     ),
     (
-        "cf_zone_cached_bytes_today",
-        "Cached bytes served for the zone so far today (UTC)",
+        "cf_zone_cached_bytes_total",
+        "counter",
+        "Cached bytes served for the zone today (UTC), resets at UTC midnight; window with increase()",
         "cachedBytes",
     ),
     (
         "cf_zone_uniques_today",
-        "Unique visitors for the zone so far today (UTC)",
+        "gauge",
+        "Unique visitors for the zone so far today (UTC); not windowable",
         "uniques",
     ),
 ]
@@ -140,9 +156,9 @@ def render():
         "# TYPE cf_exporter_up gauge",
         "cf_exporter_up 1",
     ]
-    for name, help_text, key in METRICS:
+    for name, mtype, help_text, key in METRICS:
         lines.append(f"# HELP {name} {help_text}")
-        lines.append(f"# TYPE {name} gauge")
+        lines.append(f"# TYPE {name} {mtype}")
         # Emit every zone, defaulting idle zones (no data today) to 0 so each
         # domain always has a series rather than dropping off the dashboard.
         for tag, zone_name in zones.items():

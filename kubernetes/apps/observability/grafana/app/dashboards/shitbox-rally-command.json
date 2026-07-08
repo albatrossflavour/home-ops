@@ -3561,7 +3561,7 @@
     {
       "type": "stat",
       "id": 106,
-      "title": "Total requests (time range)",
+      "title": "Ingress requests (range) by host",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -3593,7 +3593,7 @@
         "orientation": "horizontal",
         "textMode": "value_and_name",
         "colorMode": "value",
-        "graphMode": "area"
+        "graphMode": "none"
       },
       "targets": [
         {
@@ -3668,7 +3668,7 @@
     {
       "type": "stat",
       "id": 109,
-      "title": "SoT requests (today)",
+      "title": "SoT requests (range)",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -3706,7 +3706,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_requests_today{zone=\"shit-of-theseus.com\"}",
+          "expr": "increase(cf_zone_requests_total{zone=\"shit-of-theseus.com\"}[$__range])",
           "instant": true,
           "refId": "A"
         }
@@ -3715,7 +3715,7 @@
     {
       "type": "timeseries",
       "id": 110,
-      "title": "shit-of-theseus.com traffic today",
+      "title": "shit-of-theseus.com requests",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -3751,14 +3751,14 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_requests_today{zone=\"shit-of-theseus.com\"}",
+          "expr": "increase(cf_zone_requests_total{zone=\"shit-of-theseus.com\"}[$__interval])",
           "legendFormat": "requests",
           "range": true,
           "refId": "A"
         },
         {
           "editorMode": "code",
-          "expr": "cf_zone_cached_requests_today{zone=\"shit-of-theseus.com\"}",
+          "expr": "increase(cf_zone_cached_requests_total{zone=\"shit-of-theseus.com\"}[$__interval])",
           "legendFormat": "cached",
           "range": true,
           "refId": "B"
@@ -3791,5 +3791,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-v2",
-  "version": 5
+  "version": 7
 }
