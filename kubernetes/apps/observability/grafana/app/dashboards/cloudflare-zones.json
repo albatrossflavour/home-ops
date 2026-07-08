@@ -133,7 +133,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(cf_zone_requests_24h)",
+          "expr": "sum(max by(zone)(cf_zone_requests_24h))",
           "instant": true,
           "range": false,
           "refId": "A"
@@ -180,7 +180,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(cf_zone_uniques_today)",
+          "expr": "sum(max by(zone)(cf_zone_uniques_today))",
           "instant": true,
           "range": false,
           "refId": "A"
@@ -229,7 +229,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_requests_24h",
+          "expr": "max by(zone)(cf_zone_requests_24h)",
           "legendFormat": "{{zone}}",
           "range": true,
           "instant": false,
@@ -278,7 +278,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_requests_24h",
+          "expr": "max by(zone)(cf_zone_requests_24h)",
           "legendFormat": "{{zone}}",
           "instant": true,
           "range": false,
@@ -327,7 +327,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_uniques_today",
+          "expr": "max by(zone)(cf_zone_uniques_today)",
           "legendFormat": "{{zone}}",
           "instant": true,
           "range": false,
@@ -336,5 +336,5 @@
       ]
     }
   ],
-  "version": 3
+  "version": 4
 }

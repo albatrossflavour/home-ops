@@ -3659,7 +3659,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_uniques_today{zone=\"shit-of-theseus.com\"}",
+          "expr": "max(cf_zone_uniques_today{zone=\"shit-of-theseus.com\"})",
           "instant": true,
           "range": false,
           "refId": "A"
@@ -3707,7 +3707,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_requests_24h{zone=\"shit-of-theseus.com\"}",
+          "expr": "max(cf_zone_requests_24h{zone=\"shit-of-theseus.com\"})",
           "instant": true,
           "range": false,
           "refId": "A"
@@ -3753,7 +3753,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cf_zone_requests_24h{zone=\"shit-of-theseus.com\"}",
+          "expr": "max by(zone)(cf_zone_requests_24h{zone=\"shit-of-theseus.com\"})",
           "legendFormat": "requests (24h)",
           "range": true,
           "instant": false,
@@ -3761,7 +3761,7 @@
         },
         {
           "editorMode": "code",
-          "expr": "cf_zone_cached_requests_24h{zone=\"shit-of-theseus.com\"}",
+          "expr": "max by(zone)(cf_zone_cached_requests_24h{zone=\"shit-of-theseus.com\"})",
           "legendFormat": "cached (24h)",
           "range": true,
           "instant": false,
@@ -3795,5 +3795,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-v2",
-  "version": 9
+  "version": 10
 }
