@@ -3609,7 +3609,7 @@
     {
       "type": "row",
       "id": 107,
-      "title": "Cloudflare (today, UTC)",
+      "title": "Cloudflare (last 24h)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -3621,7 +3621,7 @@
     {
       "type": "stat",
       "id": 108,
-      "title": "SoT unique visitors (today)",
+      "title": "SoT unique visitors (today, by IP)",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -3661,6 +3661,7 @@
           "editorMode": "code",
           "expr": "cf_zone_uniques_today{zone=\"shit-of-theseus.com\"}",
           "instant": true,
+          "range": false,
           "refId": "A"
         }
       ]
@@ -3668,7 +3669,7 @@
     {
       "type": "stat",
       "id": 109,
-      "title": "SoT requests (range)",
+      "title": "SoT requests (24h)",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -3706,8 +3707,9 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "increase(cf_zone_requests_total{zone=\"shit-of-theseus.com\"}[$__range])",
+          "expr": "cf_zone_requests_24h{zone=\"shit-of-theseus.com\"}",
           "instant": true,
+          "range": false,
           "refId": "A"
         }
       ]
@@ -3715,7 +3717,7 @@
     {
       "type": "timeseries",
       "id": 110,
-      "title": "shit-of-theseus.com requests",
+      "title": "shit-of-theseus.com traffic (rolling 24h)",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -3751,16 +3753,18 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "increase(cf_zone_requests_total{zone=\"shit-of-theseus.com\"}[$__interval])",
-          "legendFormat": "requests",
+          "expr": "cf_zone_requests_24h{zone=\"shit-of-theseus.com\"}",
+          "legendFormat": "requests (24h)",
           "range": true,
+          "instant": false,
           "refId": "A"
         },
         {
           "editorMode": "code",
-          "expr": "increase(cf_zone_cached_requests_total{zone=\"shit-of-theseus.com\"}[$__interval])",
-          "legendFormat": "cached",
+          "expr": "cf_zone_cached_requests_24h{zone=\"shit-of-theseus.com\"}",
+          "legendFormat": "cached (24h)",
           "range": true,
+          "instant": false,
           "refId": "B"
         }
       ]
@@ -3791,5 +3795,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-v2",
-  "version": 8
+  "version": 9
 }

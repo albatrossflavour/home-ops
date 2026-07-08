@@ -96,7 +96,7 @@
     {
       "type": "stat",
       "id": 2,
-      "title": "Total requests (range, all zones)",
+      "title": "Total requests (24h, all zones)",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -133,8 +133,9 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(increase(cf_zone_requests_total[$__range]))",
+          "expr": "sum(cf_zone_requests_24h)",
           "instant": true,
+          "range": false,
           "refId": "A"
         }
       ]
@@ -181,6 +182,7 @@
           "editorMode": "code",
           "expr": "sum(cf_zone_uniques_today)",
           "instant": true,
+          "range": false,
           "refId": "A"
         }
       ]
@@ -188,7 +190,7 @@
     {
       "type": "timeseries",
       "id": 4,
-      "title": "Requests by zone",
+      "title": "Requests (rolling 24h) by zone",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -227,9 +229,10 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "increase(cf_zone_requests_total[$__interval])",
+          "expr": "cf_zone_requests_24h",
           "legendFormat": "{{zone}}",
           "range": true,
+          "instant": false,
           "refId": "A"
         }
       ]
@@ -237,7 +240,7 @@
     {
       "type": "bargauge",
       "id": 5,
-      "title": "Requests by zone (range)",
+      "title": "Requests (24h) by zone",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -275,9 +278,10 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "increase(cf_zone_requests_total[$__range])",
+          "expr": "cf_zone_requests_24h",
           "legendFormat": "{{zone}}",
           "instant": true,
+          "range": false,
           "refId": "A"
         }
       ]
@@ -326,10 +330,11 @@
           "expr": "cf_zone_uniques_today",
           "legendFormat": "{{zone}}",
           "instant": true,
+          "range": false,
           "refId": "A"
         }
       ]
     }
   ],
-  "version": 2
+  "version": 3
 }

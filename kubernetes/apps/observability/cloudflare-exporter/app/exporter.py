@@ -3,12 +3,18 @@
 
 lablabs/cloudflare-exporter filters out free-plan zones (see their issue #32),
 so it emits nothing for an all-free account. This talks to the GraphQL
-Analytics API directly using the httpRequests1dGroups dataset, which free
-zones CAN read, and exposes per-zone daily totals in Prometheus text format.
+Analytics API directly and exposes per-zone metrics in Prometheus text format.
+
+Requests/bytes/cached are a rolling last-24h window via the
+httpRequestsAdaptiveGroups dataset (free zones can read it, and it takes an
+arbitrary datetime range) so the numbers are meaningful the moment the pod
+starts, with no daily-reset cliff. Unique visitors come from
+httpRequests1dGroups for the current UTC day — adaptive has no uniq field, and
+a set union can't be reconstructed over a rolling window anyway. Note that
+Cloudflare counts uniques by client IP, so many devices behind one connection
+(or a shared VPN exit) collapse to a single unique.
 
 Standard library only, so it runs on a stock python image with no build step.
-Values are "today so far" in UTC; the Cloudflare daily bucket rolls at UTC
-midnight (10:00 AEST), which is worth remembering when reading the graphs.
 """
 
 import json
@@ -16,7 +22,7 @@ import os
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 CF_API = "https://api.cloudflare.com/client/v4"
@@ -24,6 +30,7 @@ GRAPHQL = CF_API + "/graphql"
 TOKEN = os.environ.get("CF_API_TOKEN", "").strip()
 LISTEN_PORT = int(os.environ.get("LISTEN_PORT", "8080"))
 CACHE_TTL = int(os.environ.get("CACHE_TTL", "300"))
+WINDOW_HOURS = int(os.environ.get("WINDOW_HOURS", "24"))
 # Cloudflare's GraphQL API rejects more than ~10 zones per query ("too many
 # zones requested"), so query in chunks and merge.
 ZONE_CHUNK = int(os.environ.get("ZONE_CHUNK", "10"))
@@ -32,45 +39,53 @@ TIMEOUT = 15
 _cache = {"ts": 0.0, "text": ""}
 
 # (metric name, prometheus type, help text, key in the per-zone stats dict)
-#
-# The request/byte metrics are today's running total in UTC, which climbs
-# through the day and drops to ~0 at UTC midnight. Exposed as counters so
-# Prometheus reads that drop as a counter reset: increase(<metric>[$__range])
-# then yields the count over whatever window the Grafana time picker is set
-# to, with no daily cliff. Uniques stay a gauge — a set union can't be summed
-# across days, so "uniques over an arbitrary window" isn't reconstructable.
 METRICS = [
     (
-        "cf_zone_requests_total",
-        "counter",
-        "HTTP requests for the zone today (UTC), resets at UTC midnight; window with increase()",
+        "cf_zone_requests_24h",
+        "gauge",
+        "HTTP requests for the zone over the last 24h",
         "requests",
     ),
     (
-        "cf_zone_bytes_total",
-        "counter",
-        "Bytes served for the zone today (UTC), resets at UTC midnight; window with increase()",
+        "cf_zone_cached_requests_24h",
+        "gauge",
+        "Cached HTTP requests for the zone over the last 24h",
+        "cached",
+    ),
+    (
+        "cf_zone_bytes_24h",
+        "gauge",
+        "Bytes served for the zone over the last 24h",
         "bytes",
-    ),
-    (
-        "cf_zone_cached_requests_total",
-        "counter",
-        "Cached HTTP requests for the zone today (UTC), resets at UTC midnight; window with increase()",
-        "cachedRequests",
-    ),
-    (
-        "cf_zone_cached_bytes_total",
-        "counter",
-        "Cached bytes served for the zone today (UTC), resets at UTC midnight; window with increase()",
-        "cachedBytes",
     ),
     (
         "cf_zone_uniques_today",
         "gauge",
-        "Unique visitors for the zone so far today (UTC); not windowable",
+        "Unique visitors (by client IP) for the zone today (UTC)",
         "uniques",
     ),
 ]
+
+_CACHE_STATUSES = ["hit", "stale", "updating", "revalidated"]
+
+_QUERY = """
+query($tags: [String!], $start: Time!, $end: Time!, $today: Date!) {
+  viewer {
+    zones(filter: {zoneTag_in: $tags}) {
+      zoneTag
+      all: httpRequestsAdaptiveGroups(limit: 1, filter: {datetime_geq: $start, datetime_leq: $end}) {
+        count
+        sum { edgeResponseBytes }
+      }
+      cached: httpRequestsAdaptiveGroups(limit: 1, filter: {datetime_geq: $start, datetime_leq: $end, cacheStatus_in: %s}) {
+        count
+      }
+      day: httpRequests1dGroups(limit: 1, filter: {date_geq: $today, date_leq: $today}) {
+        uniq { uniques }
+      }
+    }
+  }
+}""" % json.dumps(_CACHE_STATUSES)
 
 
 def _api_get(path):
@@ -96,24 +111,9 @@ def list_zones():
     return zones
 
 
-_QUERY = """
-query($tags: [String!], $day: Date!) {
-  viewer {
-    zones(filter: {zoneTag_in: $tags}) {
-      zoneTag
-      httpRequests1dGroups(limit: 1, filter: {date_geq: $day, date_leq: $day}) {
-        sum { requests bytes cachedRequests cachedBytes }
-        uniq { uniques }
-      }
-    }
-  }
-}"""
-
-
-def _query_chunk(tags, today):
-    body = json.dumps(
-        {"query": _QUERY, "variables": {"tags": tags, "day": today}}
-    ).encode()
+def _query_chunk(tags, start, end, today):
+    variables = {"tags": tags, "start": start, "end": end, "today": today}
+    body = json.dumps({"query": _QUERY, "variables": variables}).encode()
     req = urllib.request.Request(
         GRAPHQL,
         data=body,
@@ -130,17 +130,24 @@ def _query_chunk(tags, today):
 
 
 def query_analytics(tags):
-    """Today's daily HTTP totals per zone, batched to respect the API's cap."""
-    today = datetime.now(timezone.utc).date().isoformat()
+    """Per-zone stats: rolling-24h requests/bytes/cached plus today's uniques."""
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    start = (now - timedelta(hours=WINDOW_HOURS)).isoformat()
+    end = now.isoformat()
+    today = now.date().isoformat()
     tags = list(tags)
     out = {}
-    for start in range(0, len(tags), ZONE_CHUNK):
-        for z in _query_chunk(tags[start : start + ZONE_CHUNK], today):
-            groups = z.get("httpRequests1dGroups") or []
-            if not groups:
-                continue
-            g = groups[0]
-            out[z["zoneTag"]] = {**g["sum"], "uniques": g["uniq"]["uniques"]}
+    for i in range(0, len(tags), ZONE_CHUNK):
+        for z in _query_chunk(tags[i : i + ZONE_CHUNK], start, end, today):
+            allg = z.get("all") or []
+            cachedg = z.get("cached") or []
+            dayg = z.get("day") or []
+            out[z["zoneTag"]] = {
+                "requests": allg[0]["count"] if allg else 0,
+                "bytes": allg[0]["sum"]["edgeResponseBytes"] if allg else 0,
+                "cached": cachedg[0]["count"] if cachedg else 0,
+                "uniques": dayg[0]["uniq"]["uniques"] if dayg else 0,
+            }
     return out
 
 
@@ -159,8 +166,8 @@ def render():
     for name, mtype, help_text, key in METRICS:
         lines.append(f"# HELP {name} {help_text}")
         lines.append(f"# TYPE {name} {mtype}")
-        # Emit every zone, defaulting idle zones (no data today) to 0 so each
-        # domain always has a series rather than dropping off the dashboard.
+        # Emit every zone, defaulting quiet zones (no data) to 0 so each domain
+        # always has a series rather than dropping off the dashboard.
         for tag, zone_name in zones.items():
             value = stats.get(tag, {}).get(key, 0)
             lines.append(f'{name}{{zone="{_esc(zone_name)}"}} {value}')
