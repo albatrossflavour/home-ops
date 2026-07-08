@@ -2944,7 +2944,7 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 6,
+        "w": 3,
         "x": 18,
         "y": 57
       },
@@ -3768,6 +3768,81 @@
           "refId": "B"
         }
       ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d29922",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "links": [
+            {
+              "title": "View on site",
+              "url": "https://shit-of-theseus.com/",
+              "targetBlank": true
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 21,
+        "y": 57
+      },
+      "id": 111,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "shitbox_breakdowns_total",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Breakdowns",
+      "type": "stat",
+      "transparent": true
     }
   ],
   "preload": false,
@@ -3795,5 +3870,5 @@
   "timezone": "browser",
   "title": "Shitbox Rally Command Centre",
   "uid": "shitbox-rally-v2",
-  "version": 10
+  "version": 11
 }
