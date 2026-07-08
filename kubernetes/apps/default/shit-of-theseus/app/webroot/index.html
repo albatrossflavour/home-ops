@@ -1071,6 +1071,24 @@
         .note-badge-link:hover .note-badge { color: #e0a040; }
         .note-card.highlighted { border-color: #e0a040; box-shadow: 0 0 12px rgba(192,96,0,0.3); }
 
+        /* Per-day blog rendered from an uploaded markdown file */
+        .blog-body { color: #c9d1d9; line-height: 1.7; font-size: 1.02rem; max-width: 760px; }
+        .blog-body h2, .blog-body h3, .blog-body h4 { color: #f0dbb8; margin: 1.2rem 0 0.5rem; }
+        .blog-body h2 { font-size: 1.3rem; }
+        .blog-body h3 { font-size: 1.1rem; }
+        .blog-body h4 { font-size: 1rem; }
+        .blog-body p { margin: 0.7rem 0; }
+        .blog-body a { color: #e0a040; }
+        .blog-body a:hover { color: #f0c060; }
+        .blog-body ul, .blog-body ol { margin: 0.6rem 0 0.6rem 1.4rem; }
+        .blog-body li { margin: 0.25rem 0; }
+        .blog-body img { max-width: 100%; height: auto; border-radius: 8px; margin: 0.8rem 0; }
+        .blog-body blockquote { border-left: 3px solid #c06000; margin: 0.8rem 0; padding: 0.2rem 0 0.2rem 1rem; color: #adb6c0; font-style: italic; }
+        .blog-body code { background: #161b22; border: 1px solid #21262d; border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.9em; }
+        .blog-body pre { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 0.8rem 1rem; overflow-x: auto; margin: 0.8rem 0; }
+        .blog-body pre code { background: none; border: none; padding: 0; }
+        .blog-body hr { border: none; border-top: 1px solid #21262d; margin: 1.2rem 0; }
+
         /* Driver cards */
         .driver-grid {
             display: grid;
@@ -2095,6 +2113,55 @@
         }
 
         // Day page scaffold (Plan 19-05 — replaces 19-03 stub).
+        // Minimal dependency-free markdown renderer for the per-day blog.
+        // Input is author-trusted (we upload it) but still HTML-escaped first,
+        // and URLs restricted to http/https/relative/mailto.
+        function renderMarkdown(src) {
+            function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+            function safeUrl(u) { u = u.trim(); return /^(https?:\/\/|\/|#|mailto:)/i.test(u) ? u : '#'; }
+            function inline(s) {
+                s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(_, a, u) { return '<img src="' + safeUrl(u) + '" alt="' + a + '" loading="lazy">'; });
+                s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, t, u) { return '<a href="' + safeUrl(u) + '" target="_blank" rel="noopener">' + t + '</a>'; });
+                s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+                s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                s = s.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+                return s;
+            }
+            var lines = src.replace(/\r\n?/g, '\n').split('\n');
+            var out = [], i = 0;
+            while (i < lines.length) {
+                var line = lines[i];
+                if (/^```/.test(line)) {
+                    var c = []; i++;
+                    while (i < lines.length && !/^```/.test(lines[i])) { c.push(lines[i]); i++; }
+                    i++; out.push('<pre><code>' + esc(c.join('\n')) + '</code></pre>'); continue;
+                }
+                var h = line.match(/^(#{1,4})\s+(.*)$/);
+                if (h) { var lvl = Math.min(h[1].length + 1, 5); out.push('<h' + lvl + '>' + inline(esc(h[2])) + '</h' + lvl + '>'); i++; continue; }
+                if (/^\s*(---+|\*\*\*+|___+)\s*$/.test(line)) { out.push('<hr>'); i++; continue; }
+                if (/^>\s?/.test(line)) {
+                    var q = [];
+                    while (i < lines.length && /^>\s?/.test(lines[i])) { q.push(lines[i].replace(/^>\s?/, '')); i++; }
+                    out.push('<blockquote>' + inline(esc(q.join(' '))) + '</blockquote>'); continue;
+                }
+                if (/^\s*[-*+]\s+/.test(line)) {
+                    var ul = [];
+                    while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) { ul.push('<li>' + inline(esc(lines[i].replace(/^\s*[-*+]\s+/, ''))) + '</li>'); i++; }
+                    out.push('<ul>' + ul.join('') + '</ul>'); continue;
+                }
+                if (/^\s*\d+\.\s+/.test(line)) {
+                    var ol = [];
+                    while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { ol.push('<li>' + inline(esc(lines[i].replace(/^\s*\d+\.\s+/, ''))) + '</li>'); i++; }
+                    out.push('<ol>' + ol.join('') + '</ol>'); continue;
+                }
+                if (/^\s*$/.test(line)) { i++; continue; }
+                var para = [];
+                while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^(#{1,4}\s|>\s?|```|\s*[-*+]\s+|\s*\d+\.\s+|\s*(---+|\*\*\*+|___+)\s*$)/.test(lines[i])) { para.push(lines[i]); i++; }
+                out.push('<p>' + inline(esc(para.join(' '))) + '</p>');
+            }
+            return out.join('\n');
+        }
+
         function renderDayPage(dayISO) {
             _stopCountdown();
             _stopLiveRefresh();
@@ -2134,6 +2201,7 @@
                     '<div class="day-stat-card"><div class="stat-label">Fuel</div><div class="stat-value">' + stats.fuelBurned.toFixed(1) + ' L</div></div>' +
                 '</section>';
 
+            var blogPlaceholder = '<section id="day-blog-section" style="display:none;"><h3 class="day-section-heading">From the road</h3><div id="day-blog" class="blog-body"></div></section>';
             var mapPlaceholder = '<section><h3 class="day-section-heading">Map</h3><div id="day-map" class="day-map-container"></div></section>';
             var spinePlaceholder = '<section><h3 class="day-section-heading">Timeline</h3><div id="day-spine"></div></section>';
             var videosPlaceholder = '<section><h3 class="day-section-heading">Video highlights</h3><div id="day-videos"></div></section>';
@@ -2143,6 +2211,7 @@
                 '<div class="day-page">' +
                     headerHtml +
                     agendaHtml +
+                    blogPlaceholder +
                     statsHtml +
                     mapPlaceholder +
                     spinePlaceholder +
@@ -2151,6 +2220,22 @@
                     '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
                 '</div>';
             showRoute(html);
+
+            // Blog: fetch an optional per-day markdown file and render it.
+            // Drop blog/<date>.md into the captures share; absent = section hidden.
+            var blogHost = document.getElementById('day-blog');
+            if (blogHost) {
+                fetch('/captures/blog/' + dayISO + '.md', { cache: 'no-cache' })
+                    .then(function(r) { return r.ok ? r.text() : null; })
+                    .catch(function() { return null; })
+                    .then(function(md) {
+                        if (md && md.trim()) {
+                            blogHost.innerHTML = renderMarkdown(md);
+                            var sec = document.getElementById('day-blog-section');
+                            if (sec) sec.style.display = '';
+                        }
+                    });
+            }
 
             // Populate #day-spine now that it is in the DOM (Plan 19-06)
             var spineHost = document.getElementById('day-spine');
