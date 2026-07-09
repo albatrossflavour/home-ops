@@ -2764,7 +2764,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_fuel_stops_total",
+          "expr": "last_over_time(shitbox_fuel_stops_total[7d])",
           "legendFormat": "Stops",
           "range": true,
           "refId": "A"
@@ -2971,7 +2971,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "shitbox_notes_total",
+          "expr": "last_over_time(shitbox_notes_total[7d])",
           "legendFormat": "Notes",
           "range": true,
           "refId": "A"
@@ -3835,7 +3835,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "shitbox_breakdowns_total",
+          "expr": "last_over_time(shitbox_breakdowns_total[7d])",
           "instant": true,
           "range": false,
           "refId": "A"
