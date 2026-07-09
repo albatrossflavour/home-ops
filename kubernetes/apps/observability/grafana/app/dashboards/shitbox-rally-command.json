@@ -2317,7 +2317,8 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "thresholds"
+                  "fixedColor": "#58a6ff",
+                  "mode": "fixed"
                 }
               },
               {
