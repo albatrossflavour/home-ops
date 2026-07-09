@@ -3157,7 +3157,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "last_over_time(shitbox_events_total[7d])",
+          "expr": "last_over_time(shitbox_events_total[7d]) > 0",
           "legendFormat": "{{type}}",
           "instant": true,
           "range": false,
