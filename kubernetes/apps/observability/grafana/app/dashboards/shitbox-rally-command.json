@@ -3219,7 +3219,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "last_over_time(shitbox_driver_time_seconds{job!=\"shitbox-mqtt-exporter\"}[7d])",
+          "expr": "last_over_time(shitbox_driver_time_seconds[7d])",
           "legendFormat": "{{name}}",
           "instant": true,
           "range": false,
