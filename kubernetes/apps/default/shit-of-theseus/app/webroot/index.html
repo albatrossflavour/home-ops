@@ -3169,6 +3169,13 @@
             if (targetId) {
                 var el = document.getElementById('event-' + targetId);
                 if (el) {
+                    // The default filter shows only the most recent day, so a shared
+                    // event from an earlier day sits in a display:none group and
+                    // scrollIntoView is a no-op. Switch the filter to its day first.
+                    if (filterToDate) {
+                        var grp = el.closest('.date-group');
+                        if (grp) filterToDate(grp.getAttribute('data-date'));
+                    }
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     el.classList.add('highlighted');
                 }
