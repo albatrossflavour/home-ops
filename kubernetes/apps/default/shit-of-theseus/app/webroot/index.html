@@ -1864,8 +1864,8 @@
                     '</div>' +
                 '</section>';
 
-            // Day grid: newest-first — sort descending by date string.
-            var sortedDays = days.slice().sort(function(a, b) { return b.date.localeCompare(a.date); });
+            // Day grid: Day 1 first — sort ascending by date string.
+            var sortedDays = days.slice().sort(function(a, b) { return a.date.localeCompare(b.date); });
             var gridParts = ['<section><h3 class="day-section-heading">Day by day</h3><div class="archive-day-grid">'];
             sortedDays.forEach(function(d) {
                 var stats = computeDayStats(d.date, eventsData, routeData, fuelData);
