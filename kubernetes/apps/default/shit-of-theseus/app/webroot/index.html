@@ -3201,8 +3201,10 @@
         var routeData = null;
         var _currentDayMap = null;
         var _countdownTimer = null;
-        // Load data sources for SPA router consumption.
-        fetch('/captures/events.json', { cache: 'no-cache' })
+        // Load data sources for SPA router consumption. events.json is gated into the
+        // router barrier below so route() never dispatches (and pages like /videos
+        // never early-return on empty data) before the events are in memory.
+        var eventsReady = fetch('/captures/events.json', { cache: 'no-cache' })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(events) {
                 if (events) {
@@ -3233,9 +3235,12 @@
             .then(function(data) { if (data) driverStatsData = data; })
             .catch(function() {});
 
-        // Wait for agenda + route to settle (success or fail), then run the SPA router.
+        // Wait for events + agenda + route to settle (success or fail), then run the SPA
+        // router. Gating on events.json means a deep-linked page (e.g. /videos?event=)
+        // has its data ready on first dispatch instead of racing the fetch and losing.
         // The other fetches keep resolving independently into renderEvents/renderNotes/etc.
         Promise.allSettled([
+            eventsReady,
             fetch('/agenda.json', { cache: 'no-cache' })
                 .then(function(r) { return r.ok ? r.json() : null; })
                 .then(function(x) { agendaData = x || agendaData; })
