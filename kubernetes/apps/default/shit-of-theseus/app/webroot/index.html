@@ -1654,10 +1654,20 @@
                       +   '<button type="button" class="evp-play" aria-label="Play video"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3.5v13l11-6.5z"/></svg></button>'
                       + '</div>';
             }
+            var actions = '';
+            if (ev.id != null || videoSrc) {
+                actions = '<div class="event-actions">';
+                if (ev.id != null) actions += '<a href="#" class="share-btn" data-event-id="' + ev.id + '">Share</a>';
+                if (videoSrc) actions += '<a href="' + escapeHtml(videoSrc) + '" download>Download</a>';
+                var _tu = _eventTelemetryUrl(ev);
+                if (_tu) actions += '<a href="' + escapeHtml(_tu) + '" target="_blank" rel="noopener">Telemetry →</a>';
+                actions += '</div>';
+            }
             return '<div class="spine-card">'
                  +   '<div class="spine-card-title" style="color:' + colour + ';">' + type + '</div>'
                  +   (metaBits.length ? '<div class="spine-card-meta">' + escapeHtml(metaBits.join(' \u00b7 ')) + '</div>' : '')
                  +   video
+                 +   actions
                  + '</div>';
         }
 
@@ -2257,6 +2267,16 @@
                 }));
                 // Lazy-load spine event videos on tap: poster placeholder → real <video>.
                 spineHost.addEventListener('click', function(e) {
+                    var share = e.target.closest('.share-btn');
+                    if (share) {
+                        e.preventDefault();
+                        var eid = share.getAttribute('data-event-id');
+                        navigator.clipboard.writeText(window.location.origin + '/videos?event=' + eid).then(function() {
+                            share.textContent = 'Copied!';
+                            setTimeout(function() { share.textContent = 'Share'; }, 2000);
+                        });
+                        return;
+                    }
                     var ph = e.target.closest('.event-video-placeholder');
                     if (!ph || !ph.getAttribute('data-video-src')) return;
                     var src = ph.getAttribute('data-video-src');
