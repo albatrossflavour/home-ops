@@ -26,6 +26,16 @@ metadata:
   namespace: observability
 spec:
   serviceAccountName: shitbox-prometheus
+  # Without this the ceph-block PVC stays root-owned and Prometheus (non-root)
+  # can't write /prometheus -> CrashLoop on queries.active. Mirrors the main
+  # kube-prometheus-stack instance.
+  securityContext:
+    fsGroup: 2000
+    runAsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
   replicas: 1
   shards: 1
   # Effectively forever for this tiny dataset (~30 series at ~1 Hz, one car).
