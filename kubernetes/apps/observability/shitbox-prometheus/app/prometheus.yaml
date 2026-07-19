@@ -46,6 +46,20 @@ spec:
   externalLabels:
     cluster: home-ops
     prometheus: shitbox
+  # Scrape nothing (remote-write only), but selectors must be DECLARED with a
+  # label that matches no monitors. Omitting them entirely puts the operator in
+  # "unmanaged config" mode, which drops external_labels from the generated
+  # config and crash-loops the Thanos sidecar ("no external labels configured").
+  serviceMonitorSelector:
+    matchLabels: { shitbox.io/scrape: "none" }
+  podMonitorSelector:
+    matchLabels: { shitbox.io/scrape: "none" }
+  probeSelector:
+    matchLabels: { shitbox.io/scrape: "none" }
+  scrapeConfigSelector:
+    matchLabels: { shitbox.io/scrape: "none" }
+  ruleSelector:
+    matchLabels: { shitbox.io/scrape: "none" }
   # Wide out-of-order window so the one-time backfill of the rally (samples up to
   # ~2 weeks old) is accepted rather than rejected as too-old.
   tsdb:
