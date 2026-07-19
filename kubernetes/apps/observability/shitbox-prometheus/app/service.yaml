@@ -1,0 +1,20 @@
+---
+# Stable ClusterIP for the remote-write ingress (the operator's own
+# `prometheus-operated` service is headless and shared across instances).
+apiVersion: v1
+kind: Service
+metadata:
+  name: shitbox-prometheus
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: shitbox-prometheus
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prometheus
+    operator.prometheus.io/name: shitbox
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+      protocol: TCP

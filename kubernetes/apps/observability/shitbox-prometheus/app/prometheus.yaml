@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shitbox-prometheus
+  namespace: observability
+---
+# Dedicated, isolated Prometheus for shitbox_* rally telemetry.
+#
+# Why a separate instance instead of the shared Thanos pipeline: Thanos retention
+# is global-by-resolution (raw 14d), with no per-metric knob. Isolating shitbox
+# into its own Prometheus makes its global retention == shitbox retention, so a
+# long retention here keeps full-granularity shitbox_* effectively forever, on its
+# own PVC (not the shared MinIO object store).
+#
+# Ingestion is remote-write only (the car pushes); it scrapes nothing — all
+# monitor selectors are intentionally omitted (nil => select none). The Thanos
+# sidecar carries NO object-storage config, so it serves only the StoreAPI and
+# never uploads. It is auto-discovered by the existing Thanos Query via the shared
+# `prometheus-operated` service (selector app.kubernetes.io/name=prometheus), so
+# Grafana sees shitbox_* through its current Thanos datasource with no changes.
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: shitbox
+  namespace: observability
+spec:
+  serviceAccountName: shitbox-prometheus
+  replicas: 1
+  shards: 1
+  # Effectively forever for this tiny dataset (~30 series at ~1 Hz, one car).
+  retention: 10y
+  enableRemoteWriteReceiver: true
+  enableAdminAPI: true
+  walCompression: true
+  externalLabels:
+    cluster: home-ops
+    prometheus: shitbox
+  # Wide out-of-order window so the one-time backfill of the rally (samples up to
+  # ~2 weeks old) is accepted rather than rejected as too-old.
+  tsdb:
+    outOfOrderTimeWindow: 720h
+  resources:
+    requests:
+      cpu: 50m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: ceph-block
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+  # Non-nil => operator injects the Thanos sidecar. No objectStorageConfig => it
+  # serves StoreAPI only and does not ship blocks to object storage.
+  thanos:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi

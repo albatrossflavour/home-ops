@@ -1,0 +1,25 @@
+---
+# Internal-only endpoint the car remote-writes to (reached over WireGuard, same as
+# the old prometheus.${SECRET_DOMAIN} target). Prometheus serves /api/v1/write here
+# because enableRemoteWriteReceiver is on.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shitbox-prometheus
+  namespace: observability
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    gethomepage.dev/enabled: "false"
+spec:
+  ingressClassName: internal
+  rules:
+    - host: "shitbox-metrics.${SECRET_DOMAIN}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: shitbox-prometheus
+                port:
+                  number: 9090
