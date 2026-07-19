@@ -2010,9 +2010,17 @@
 
             var slice = (route && route.days && route.days[dayISO]) || null;
             var hasBackdrop = route && route.days && Object.keys(route.days).length > 0;
+            var hasSlice = !!(slice && slice.points && slice.points.length > 0);
+
+            // Event pins for this day only — computed up front so they can drive the
+            // framing. route.json is frequently missing days (post-rally cache wipe),
+            // so events are usually the only per-day geometry we have to zoom to.
+            var dayEvents = (events || []).filter(function(ev) {
+                return _dayOf(ev.timestamp) === dayISO && ev.lat != null && ev.lng != null;
+            });
 
             // No data at all — render the muted placeholder.
-            if (!slice && !hasBackdrop) {
+            if (!hasSlice && !hasBackdrop && dayEvents.length === 0) {
                 host.className = 'day-map-empty';
                 host.textContent = 'No route recorded for this day yet.';
                 return;
@@ -2022,11 +2030,15 @@
             host.className = 'day-map-container';
             host.textContent = '';
 
-            // Determine initial centre. Prefer day slice midpoint; else rally centroid.
+            // Provisional centre so the map can mount. fitBounds below reframes it to
+            // the day's actual action (route + event pins). Prefer day slice midpoint,
+            // then first event, then rally centroid.
             var centreLat, centreLng, initialZoom;
-            if (slice && slice.points && slice.points.length > 0) {
+            if (hasSlice) {
                 var mid = slice.points[Math.floor(slice.points.length / 2)];
                 centreLat = mid[0]; centreLng = mid[1]; initialZoom = 10;
+            } else if (dayEvents.length > 0) {
+                centreLat = dayEvents[0].lat; centreLng = dayEvents[0].lng; initialZoom = 11;
             } else {
                 var firstDay = Object.keys(route.days)[0];
                 var fp = route.days[firstDay].points[0];
@@ -2042,7 +2054,7 @@
             }).addTo(_currentDayMap);
 
             // Backdrop: all OTHER days in muted grey.
-            Object.keys(route.days).forEach(function(otherDate) {
+            (hasBackdrop ? Object.keys(route.days) : []).forEach(function(otherDate) {
                 if (otherDate === dayISO) return;
                 var pts = route.days[otherDate].points;
                 if (pts && pts.length > 1) {
@@ -2055,20 +2067,22 @@
                 }
             });
 
+            // Accumulate everything that should be in frame: the day's route line and
+            // its event pins. We fit to this at the end so the map always frames the
+            // day's action, even when route.json has no slice for this day.
+            var frameBounds = L.latLngBounds([]);
+
             // Day slice: bright orange on top.
-            if (slice && slice.points && slice.points.length > 1) {
+            if (hasSlice && slice.points.length > 1) {
                 var line = L.polyline(slice.points, {
                     color: '#e0a040',
                     weight: 5,
                     opacity: 0.95
                 }).addTo(_currentDayMap);
-                _currentDayMap.fitBounds(line.getBounds(), { padding: [20, 20] });
+                frameBounds.extend(line.getBounds());
             }
 
             // Event pins for this day only.
-            var dayEvents = (events || []).filter(function(ev) {
-                return _dayOf(ev.timestamp) === dayISO && ev.lat != null && ev.lng != null;
-            });
             dayEvents.forEach(function(ev) {
                 var colour = BADGE_COLORS[ev.type] || '#8b949e';
                 L.circleMarker([ev.lat, ev.lng], {
@@ -2081,7 +2095,14 @@
                     '<strong>' + escapeHtml(ev.type || 'EVENT') + '</strong><br>' +
                     _formatSpineTime(ev.timestamp)
                 );
+                frameBounds.extend([ev.lat, ev.lng]);
             });
+
+            // Frame the day's action. maxZoom stops a single event (zero-size bounds)
+            // from snapping to street level; padding keeps pins off the edge.
+            if (frameBounds.isValid()) {
+                _currentDayMap.fitBounds(frameBounds, { padding: [30, 30], maxZoom: 14 });
+            }
 
             // Safety: invalidate size after a tick so Leaflet measures correctly inside a newly-mounted SPA div.
             setTimeout(function() {
