@@ -1296,6 +1296,28 @@
         var TIMEZONE = 'Australia/Sydney';
         var RALLY_START = new Date('2025-01-30T00:00:00+10:00');
 
+        // Absolute MP4 URL for an event, or null if it has none.
+        function _eventVideoUrl(ev) {
+            return ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
+        }
+
+        // Make a root-relative src shareable by prefixing the origin. Passes through
+        // anything already absolute (a full video_url).
+        function _absoluteUrl(src) {
+            if (!src) return src;
+            return /^https?:\/\//.test(src) ? src : window.location.origin + src;
+        }
+
+        // The events we surface anywhere on the site: rally-window only, and only
+        // those with an MP4. Everything downstream (videos page, day spine, map pins)
+        // consumes eventsData, so filtering here keeps every listing consistent.
+        function _usableEvents(list) {
+            if (!Array.isArray(list)) return [];
+            return list.filter(function(ev) {
+                return new Date(ev.timestamp) >= RALLY_START && _eventVideoUrl(ev);
+            });
+        }
+
         var GRAFANA_BASE = 'https://grafana.shit-of-theseus.com/d/shitbox-rally-v2/shitbox-rally-command-centre';
         var GRAFANA_LEAD_MS  = 10000; // 10 s lead-in before the event start
         var GRAFANA_TRAIL_MS = 30000; // 30 s trail-out after the event end
@@ -1670,7 +1692,7 @@
             var actions = '';
             if (ev.id != null || videoSrc) {
                 actions = '<div class="event-actions">';
-                if (ev.id != null) actions += '<a href="#" class="share-btn" data-event-id="' + ev.id + '">Share</a>';
+                if (videoSrc) actions += '<a href="#" class="share-btn" data-share-url="' + escapeHtml(videoSrc) + '">Share</a>';
                 if (videoSrc) actions += '<a href="' + escapeHtml(videoSrc) + '" download>Download</a>';
                 var _tu = _eventTelemetryUrl(ev);
                 if (_tu) actions += '<a href="' + escapeHtml(_tu) + '" target="_blank" rel="noopener">Telemetry →</a>';
@@ -1942,7 +1964,7 @@
                 fetch('/captures/breakdowns.json',   { cache: 'no-cache' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
             ];
             return Promise.all(p).then(function(results) {
-                if (results[0] != null) eventsData       = results[0];
+                if (results[0] != null) eventsData       = _usableEvents(results[0]);
                 if (results[1] != null) notesData        = results[1].slice().reverse();
                 if (results[2] != null) fuelData         = results[2];
                 if (results[3] != null) routeData        = results[3];
@@ -2319,8 +2341,8 @@
                     var share = e.target.closest('.share-btn');
                     if (share) {
                         e.preventDefault();
-                        var eid = share.getAttribute('data-event-id');
-                        navigator.clipboard.writeText(window.location.origin + '/videos?event=' + eid).then(function() {
+                        var shareUrl = _absoluteUrl(share.getAttribute('data-share-url'));
+                        navigator.clipboard.writeText(shareUrl).then(function() {
                             share.textContent = 'Copied!';
                             setTimeout(function() { share.textContent = 'Share'; }, 2000);
                         });
@@ -3105,12 +3127,12 @@
                     }
 
                     var videoHtml = '';
-                    var videoSrc = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
+                    var videoSrc = _eventVideoUrl(ev);
                     var posterUrl = ev.poster_url || '/captures/intro_poster.jpg';
-                    var actionsHtml = '<div class="event-actions">' +
-                        '<a href="#" class="share-btn" data-event-id="' + eventId + '">Share</a>';
+                    var actionsHtml = '<div class="event-actions">';
                     if (videoSrc) {
                         videoHtml = '<div class="event-video-placeholder" data-video-src="' + videoSrc + '" data-poster-url="' + posterUrl + '"></div>';
+                        actionsHtml += '<a href="#" class="share-btn" data-share-url="' + videoSrc + '">Share</a>';
                         actionsHtml += '<a href="' + videoSrc + '" download>Download</a>';
                     }
                     var telemetryUrl = _eventTelemetryUrl(ev);
@@ -3146,8 +3168,7 @@
                 var btn = e.target.closest('.share-btn');
                 if (!btn) return;
                 e.preventDefault();
-                var eid = btn.getAttribute('data-event-id');
-                var url = window.location.origin + '/videos?event=' + eid;
+                var url = _absoluteUrl(btn.getAttribute('data-share-url'));
                 navigator.clipboard.writeText(url).then(function() {
                     btn.textContent = 'Copied!';
                     setTimeout(function() { btn.textContent = 'Share'; }, 2000);
@@ -3208,9 +3229,7 @@
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(events) {
                 if (events) {
-                    eventsData = events.filter(function(ev) {
-                        return new Date(ev.timestamp) >= RALLY_START;
-                    });
+                    eventsData = _usableEvents(events);
                 }
             })
             .catch(function() {});
