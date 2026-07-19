@@ -362,6 +362,12 @@
         .spine-card {
             background: #161b22; border: 1px solid #2a1f0e; border-radius: 8px;
             padding: 0.75rem 1rem; color: #c9d1d9;
+            scroll-margin-top: 5rem;
+        }
+        .spine-card-flash { animation: spineflash 1.6s ease-out; }
+        @keyframes spineflash {
+            0%   { border-color: #e0a040; box-shadow: 0 0 0 2px rgba(224,160,64,0.55); }
+            100% { border-color: #2a1f0e; box-shadow: 0 0 0 2px rgba(224,160,64,0); }
         }
         .spine-card .spine-card-title { color: #f0dbb8; font-weight: 600; margin-bottom: 0.25rem; }
         .spine-card .spine-card-meta  { color: #8b949e; font-size: 0.8rem; }
@@ -1636,6 +1642,13 @@
             return items;
         }
 
+        // Stable per-event anchor, shared by the day spine card and the map marker so
+        // clicking a marker can scroll to the matching card. Matches the /events id scheme.
+        function _eventAnchorId(ev) {
+            var raw = ev.id != null ? ev.id : (ev.timestamp || '').replace(/[^0-9]/g, '');
+            return 'spine-event-' + raw;
+        }
+
         function _spineEventCard(ev) {
             var type = escapeHtml(ev.type || 'EVENT');
             var colour = BADGE_COLORS[ev.type] || '#8b949e';
@@ -1663,7 +1676,7 @@
                 if (_tu) actions += '<a href="' + escapeHtml(_tu) + '" target="_blank" rel="noopener">Telemetry →</a>';
                 actions += '</div>';
             }
-            return '<div class="spine-card">'
+            return '<div class="spine-card" id="' + _eventAnchorId(ev) + '">'
                  +   '<div class="spine-card-title" style="color:' + colour + ';">' + type + '</div>'
                  +   (metaBits.length ? '<div class="spine-card-meta">' + escapeHtml(metaBits.join(' \u00b7 ')) + '</div>' : '')
                  +   video
@@ -2003,6 +2016,17 @@
             }
         }
 
+        // Scroll a day-spine event card into view and flash it — used by map markers.
+        function _scrollToEventCard(anchorId) {
+            var card = document.getElementById(anchorId);
+            if (!card) return;
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.remove('spine-card-flash');
+            // Force reflow so re-adding the class restarts the animation on repeat clicks.
+            void card.offsetWidth;
+            card.classList.add('spine-card-flash');
+        }
+
         function initDayMap(dayISO, route, events) {
             _teardownDayMap();
             var host = document.getElementById('day-map');
@@ -2085,16 +2109,20 @@
             // Event pins for this day only.
             dayEvents.forEach(function(ev) {
                 var colour = BADGE_COLORS[ev.type] || '#8b949e';
-                L.circleMarker([ev.lat, ev.lng], {
+                var anchorId = _eventAnchorId(ev);
+                var marker = L.circleMarker([ev.lat, ev.lng], {
                     radius: 6,
                     color: '#0d1117',
                     weight: 1,
                     fillColor: colour,
                     fillOpacity: 0.9
-                }).addTo(_currentDayMap).bindPopup(
-                    '<strong>' + escapeHtml(ev.type || 'EVENT') + '</strong><br>' +
-                    _formatSpineTime(ev.timestamp)
+                }).addTo(_currentDayMap);
+                marker.bindTooltip(
+                    escapeHtml(ev.type || 'EVENT') + ' · ' + _formatSpineTime(ev.timestamp),
+                    { direction: 'top', offset: [0, -6] }
                 );
+                // Clicking a marker jumps to the event's card in the day spine below.
+                marker.on('click', function() { _scrollToEventCard(anchorId); });
                 frameBounds.extend([ev.lat, ev.lng]);
             });
 
