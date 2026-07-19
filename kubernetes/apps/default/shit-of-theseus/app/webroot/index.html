@@ -1521,8 +1521,13 @@
             var peakG = 0;
             var topSpeed = 0;
             dayEvents.forEach(function(ev) {
-                if (ev.peak_g != null && ev.peak_g > peakG) peakG = ev.peak_g;
-                if (ev.peak_speed_kmh != null && ev.peak_speed_kmh > topSpeed) topSpeed = ev.peak_speed_kmh;
+                // Stored peak_g is capped/broken (max 1.00, uncorrelated); reconstruct the
+                // true total-G magnitude from the surviving component peaks instead.
+                if (ev.peak_ax != null && ev.peak_ay != null && ev.peak_az != null) {
+                    var g = Math.sqrt(ev.peak_ax * ev.peak_ax + ev.peak_ay * ev.peak_ay + ev.peak_az * ev.peak_az);
+                    if (g > peakG) peakG = g;
+                }
+                if (ev.speed_kmh != null && ev.speed_kmh > topSpeed) topSpeed = ev.speed_kmh;
             });
 
             var fuelBurned = 0;
@@ -1569,12 +1574,7 @@
                 items.push({ kind: 'note', _ts: ts, ts_iso: n.timestamp_utc, payload: n });
             });
 
-            fuel.forEach(function(f) {
-                if (_dayOf(f.timestamp_utc) !== dayISO) return;
-                var ts = Date.parse(f.timestamp_utc);
-                if (isNaN(ts)) return;
-                items.push({ kind: 'fuel', _ts: ts, ts_iso: f.timestamp_utc, payload: f });
-            });
+            // Fuel markers removed — fuel tracking was never used on this rally.
 
             // Driver-change markers: derived from events[].active_driver transitions within this day.
             var driverSeq = events
@@ -1614,7 +1614,10 @@
 
             // Stage bookends: first and last event of the day = start/end markers for now.
             // (Future: derive from GPS motion transitions. Out of scope this plan — extension point.)
-            var dayEvents = items.filter(function(i) { return i.kind === 'event'; });
+            // Sort chronologically first — items isn't sorted until below, so first/last in
+            // insertion order is an arbitrary event, not the earliest/latest of the day.
+            var dayEvents = items.filter(function(i) { return i.kind === 'event'; })
+                .sort(function(a, b) { return a._ts - b._ts; });
             if (dayEvents.length > 0) {
                 items.push({
                     kind: 'stage_start', _ts: dayEvents[0]._ts - 1, ts_iso: dayEvents[0].ts_iso,
@@ -1636,12 +1639,18 @@
             var colour = BADGE_COLORS[ev.type] || '#8b949e';
             var metaBits = [];
             if (ev.peak_g != null)         metaBits.push(Number(ev.peak_g).toFixed(2) + ' g');
-            if (ev.peak_speed_kmh != null) metaBits.push(Number(ev.peak_speed_kmh).toFixed(0) + ' km/h');
+            if (ev.speed_kmh != null)      metaBits.push(Number(ev.speed_kmh).toFixed(0) + ' km/h');
             if (ev.duration_ms != null)    metaBits.push((Number(ev.duration_ms)/1000).toFixed(1) + ' s');
             var video = '';
             var videoSrc = ev.video_url || (ev.video_path ? '/captures/' + ev.video_path : null);
             if (videoSrc) {
-                video = '<video controls preload="metadata" playsinline src="' + escapeHtml(videoSrc) + '"></video>';
+                // Poster placeholder + play button, like the /videos page — swaps to <video>
+                // on click (see the #day-spine handler). Lazy: no video preloaded until tapped.
+                var posterUrl = ev.poster_url || '/captures/intro_poster.jpg';
+                video = '<div class="event-video-placeholder" data-video-src="' + escapeHtml(videoSrc) + '" data-poster-url="' + escapeHtml(posterUrl) + '">'
+                      +   '<img class="evp-poster" src="' + escapeHtml(posterUrl) + '" alt="" loading="lazy">'
+                      +   '<button type="button" class="evp-play" aria-label="Play video"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3.5v13l11-6.5z"/></svg></button>'
+                      + '</div>';
             }
             return '<div class="spine-card">'
                  +   '<div class="spine-card-title" style="color:' + colour + ';">' + type + '</div>'
@@ -1827,11 +1836,8 @@
             (fuel || []).forEach(function(f) {
                 if (f.volume_litres != null) totals.fuelLitres += f.volume_litres;
             });
-            var drivers = {};
-            (events || []).forEach(function(ev) {
-                if (ev.active_driver) drivers[ev.active_driver] = true;
-            });
-            totals.driverCount = Object.keys(drivers).length;
+            // events.json carries no driver field; driver-stats.json is the authoritative list.
+            totals.driverCount = (driverStatsData && driverStatsData.drivers) ? driverStatsData.drivers.length : 0;
             return totals;
         }
 
@@ -1852,7 +1858,6 @@
                         '<div class="day-stat-card"><div class="stat-label">Distance</div><div class="stat-value">' + totals.km.toFixed(0) + ' km</div></div>' +
                         '<div class="day-stat-card"><div class="stat-label">Days</div><div class="stat-value">' + totals.dayCount + '</div></div>' +
                         '<div class="day-stat-card"><div class="stat-label">Events</div><div class="stat-value">' + totals.eventCount + '</div></div>' +
-                        '<div class="day-stat-card"><div class="stat-label">Fuel</div><div class="stat-value">' + totals.fuelLitres.toFixed(0) + ' L</div></div>' +
                         '<div class="day-stat-card"><div class="stat-label">Drivers</div><div class="stat-value">' + totals.driverCount + '</div></div>' +
                     '</div>' +
                 '</section>';
@@ -1872,8 +1877,7 @@
                     '</div>';
                 var statsLine =
                     stats.km.toFixed(0) + ' km \u00b7 ' +
-                    stats.eventCount + ' events \u00b7 ' +
-                    stats.fuelBurned.toFixed(1) + ' L';
+                    stats.eventCount + ' events';
                 gridParts.push(
                     '<a class="archive-day-card" href="/day/' + d.date + '" onclick="event.preventDefault(); navigateToDay(\'' + d.date + '\');">' +
                         thumb +
@@ -2202,26 +2206,23 @@
                     '<div class="day-stat-card"><div class="stat-label">Top Speed</div><div class="stat-value">' + stats.topSpeed.toFixed(0) + ' km/h</div></div>' +
                     '<div class="day-stat-card"><div class="stat-label">Peak G</div><div class="stat-value">' + stats.peakG.toFixed(2) + ' g</div></div>' +
                     '<div class="day-stat-card"><div class="stat-label">Events</div><div class="stat-value">' + stats.eventCount + '</div></div>' +
-                    '<div class="day-stat-card"><div class="stat-label">Fuel</div><div class="stat-value">' + stats.fuelBurned.toFixed(1) + ' L</div></div>' +
                     '<div class="day-stat-card"><div class="stat-label">Breakdowns</div><div class="stat-value">' + stats.breakdownCount + '</div></div>' +
                 '</section>';
 
             var blogPlaceholder = '<section id="day-blog-section" style="display:none;"><h3 class="day-section-heading">From the road</h3><div id="day-blog" class="blog-body"></div></section>';
             var mapPlaceholder = '<section><h3 class="day-section-heading">Map</h3><div id="day-map" class="day-map-container"></div></section>';
             var spinePlaceholder = '<section><h3 class="day-section-heading">Timeline</h3><div id="day-spine"></div></section>';
-            var videosPlaceholder = '<section><h3 class="day-section-heading">Video highlights</h3><div id="day-videos"></div></section>';
             var timelapsePlaceholder = '<section id="day-timelapse-section"><h3 class="day-section-heading">Timelapse</h3><div id="day-timelapse"></div></section>';
 
             var html =
                 '<div class="day-page">' +
                     headerHtml +
+                    timelapsePlaceholder +
                     agendaHtml +
                     blogPlaceholder +
                     statsHtml +
                     mapPlaceholder +
                     spinePlaceholder +
-                    videosPlaceholder +
-                    timelapsePlaceholder +
                     '<section><a href="/" onclick="event.preventDefault(); navigateHome();" style="color:#c06000;">\u2190 Home</a></section>' +
                 '</div>';
             showRoute(html);
@@ -2251,13 +2252,22 @@
                     fuel:   fuelData   || [],
                     agendaDay: agendaDay
                 }));
+                // Lazy-load spine event videos on tap: poster placeholder → real <video>.
+                spineHost.addEventListener('click', function(e) {
+                    var ph = e.target.closest('.event-video-placeholder');
+                    if (!ph || !ph.getAttribute('data-video-src')) return;
+                    var src = ph.getAttribute('data-video-src');
+                    var poster = ph.getAttribute('data-poster-url') || '/captures/intro_poster.jpg';
+                    ph.innerHTML = '<video controls preload="metadata" playsinline poster="' + poster + '" src="' + src + '"></video>';
+                    ph.className = 'event-video';
+                    var v = ph.querySelector('video');
+                    if (v) { var p = v.play(); if (p && typeof p.catch === 'function') { p.catch(function(){}); } }
+                });
             }
+
 
             // Day map (Plan 19-07) — DOM is mounted, safe to init Leaflet.
             initDayMap(dayISO, routeData, eventsData);
-
-            // Video highlights — filter day events that have video
-            populateDayVideos(dayISO, eventsData);
 
             // Timelapse — embed if the file exists
             populateDayTimelapse(dayISO);
