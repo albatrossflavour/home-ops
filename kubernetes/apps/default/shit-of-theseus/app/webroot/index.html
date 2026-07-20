@@ -1081,6 +1081,8 @@
 
         /* Per-day blog rendered from an uploaded markdown file */
         .blog-body { color: #c9d1d9; line-height: 1.7; font-size: 1.02rem; max-width: 760px; }
+        .home-blog { border-top: 1px solid #21262d; margin: 1.75rem 0 0.5rem; padding-top: 1.5rem; }
+        .home-blog .blog-body h2:first-child { margin-top: 0; font-size: 1.5rem; }
         .blog-body h2, .blog-body h3, .blog-body h4 { color: #f0dbb8; margin: 1.2rem 0 0.5rem; }
         .blog-body h2 { font-size: 1.3rem; }
         .blog-body h3 { font-size: 1.1rem; }
@@ -1946,8 +1948,27 @@
             });
             gridParts.push('</div></section>');
 
-            var html = '<div class="day-page">' + overviewHtml + gridParts.join('') + '</div>';
+            // Front-page recap post. Renders only if /captures/blog/home.md exists,
+            // so removing the post is just deleting that file (no code change).
+            var homeBlogHtml = '<section id="home-blog-section" class="home-blog" style="display:none;">'
+                + '<div id="home-blog" class="blog-body"></div></section>';
+
+            var html = '<div class="day-page">' + overviewHtml + homeBlogHtml + gridParts.join('') + '</div>';
             showRoute(html);
+
+            var homeBlog = document.getElementById('home-blog');
+            if (homeBlog) {
+                fetch('/captures/blog/home.md', { cache: 'no-cache' })
+                    .then(function(r) { return r.ok ? r.text() : null; })
+                    .catch(function() { return null; })
+                    .then(function(md) {
+                        if (md && md.trim()) {
+                            homeBlog.innerHTML = renderMarkdown(md);
+                            var sec = document.getElementById('home-blog-section');
+                            if (sec) sec.style.display = '';
+                        }
+                    });
+            }
         }
 
         var _liveRefreshTimer = null;
