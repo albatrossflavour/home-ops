@@ -1873,6 +1873,10 @@
             };
             if (route && route.days) {
                 Object.keys(route.days).forEach(function(date) {
+                    // Rally distance only — the return-leg drive home (dates after
+                    // the rally end) is nav-only and shouldn't inflate the total.
+                    if (totals.startDate && date < totals.startDate) return;
+                    if (totals.endDate && date > totals.endDate) return;
                     var pts = route.days[date].points;
                     if (!pts || pts.length < 2) return;
                     for (var i = 1; i < pts.length; i++) {
