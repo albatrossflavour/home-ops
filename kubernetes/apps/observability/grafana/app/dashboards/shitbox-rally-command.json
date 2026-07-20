@@ -2661,70 +2661,6 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#238636",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "No driver set"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 6,
-        "x": 0,
-        "y": 57
-      },
-      "id": 66,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "shitbox_active_driver",
-          "legendFormat": "{{name}}",
-          "instant": true,
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Driver",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "shitbox"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
                 "color": "#da3633",
                 "value": 0
               }
@@ -2958,32 +2894,6 @@
       "title": "Drive Time",
       "type": "piechart",
       "transparent": true
-    },
-    {
-      "id": 100,
-      "type": "row",
-      "collapsed": false,
-      "title": "FUNDRAISING",
-      "panels": [],
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 71
-      }
-    },
-    {
-      "type": "row",
-      "id": 107,
-      "title": "Cloudflare (last 24h)",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 87
-      },
-      "panels": []
     }
   ],
   "preload": false,
