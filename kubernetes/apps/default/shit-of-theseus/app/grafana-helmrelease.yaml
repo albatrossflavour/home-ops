@@ -63,6 +63,17 @@ spec:
             jsonData:
               timeInterval: 1m
             isDefault: true
+          # Dedicated shitbox_* instance (10y retention). The rally dashboards
+          # were repointed to uid "shitbox"; without this datasource every panel
+          # errors ("datasource not found").
+          - name: Shitbox
+            type: prometheus
+            uid: shitbox
+            access: proxy
+            url: http://shitbox-prometheus.observability.svc.cluster.local:9090
+            jsonData:
+              timeInterval: 1m
+            isDefault: false
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
