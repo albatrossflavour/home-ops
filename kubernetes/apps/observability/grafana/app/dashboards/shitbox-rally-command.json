@@ -57,7 +57,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -133,7 +133,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -204,7 +204,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -292,7 +292,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -364,7 +364,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -428,7 +428,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -500,7 +500,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -572,7 +572,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -643,7 +643,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -715,7 +715,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -779,7 +779,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -869,7 +869,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -1016,7 +1016,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -1160,7 +1160,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -1293,7 +1293,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -1447,7 +1447,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -1601,7 +1601,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -1760,7 +1760,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -1866,7 +1866,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -1962,7 +1962,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2106,7 +2106,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2216,7 +2216,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2400,7 +2400,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2511,7 +2511,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2649,7 +2649,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2713,78 +2713,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#1f6feb",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "0",
-          "links": [
-            {
-              "title": "View Notes",
-              "url": "https://shit-of-theseus.com/#status",
-              "targetBlank": true
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 18,
-        "y": 57
-      },
-      "id": 65,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "last_over_time(shitbox_notes_total[7d])",
-          "legendFormat": "Notes",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Notes",
-      "type": "stat",
-      "transparent": true
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2848,7 +2777,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2912,7 +2841,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -2970,7 +2899,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "shitbox"
       },
       "fieldConfig": {
         "defaults": {
@@ -3044,370 +2973,6 @@
       }
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#f9826c",
-                "value": null
-              }
-            ]
-          },
-          "unit": "prefix:$",
-          "decimals": 0,
-          "displayName": "Raised so far"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 72
-      },
-      "id": 101,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "max(shitbox_donation_raised_aud)",
-          "legendFormat": "Raised so far",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Donations Raised",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "max": 100,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#da3633",
-                "value": null
-              },
-              {
-                "color": "#d29922",
-                "value": 50
-              },
-              {
-                "color": "#238636",
-                "value": 100
-              }
-            ]
-          },
-          "unit": "percent",
-          "decimals": 0
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 72
-      },
-      "id": 102,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "100 * max(shitbox_donation_raised_aud) / max(shitbox_donation_goal_aud)",
-          "legendFormat": "% of goal",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Goal Progress",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 25,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "stepAfter",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#238636",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "prefix:$",
-          "decimals": 0
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Goal"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#8b949e",
-                  "mode": "fixed"
-                }
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "dash",
-                  "dash": [
-                    8,
-                    6
-                  ]
-                }
-              },
-              {
-                "id": "custom.fillOpacity",
-                "value": 0
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 72
-      },
-      "id": 103,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "max(shitbox_donation_raised_aud)",
-          "legendFormat": "Raised",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "max(shitbox_donation_goal_aud)",
-          "legendFormat": "Goal",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "Donations Over Time",
-      "type": "timeseries"
-    },
-    {
-      "type": "row",
-      "id": 104,
-      "title": "Website Traffic",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 78
-      },
-      "panels": []
-    },
-    {
-      "type": "timeseries",
-      "id": 105,
-      "title": "Requests / sec by host",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 79
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps",
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineWidth": 2
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "sum(rate(nginx_ingress_controller_requests{host=~\"shit-of-theseus.com|grafana.shit-of-theseus.com\"}[5m])) by (host)",
-          "legendFormat": "{{host}}",
-          "range": true,
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "type": "stat",
-      "id": 106,
-      "title": "Ingress requests (range) by host",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 79
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "horizontal",
-        "textMode": "value_and_name",
-        "colorMode": "value",
-        "graphMode": "none"
-      },
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "sum(increase(nginx_ingress_controller_requests{host=~\"shit-of-theseus.com|grafana.shit-of-theseus.com\"}[$__range])) by (host)",
-          "legendFormat": "{{host}}",
-          "range": false,
-          "refId": "A",
-          "instant": true
-        }
-      ]
-    },
-    {
       "type": "row",
       "id": 107,
       "title": "Cloudflare (last 24h)",
@@ -3417,233 +2982,8 @@
         "w": 24,
         "x": 0,
         "y": 87
-      }
-    },
-    {
-      "type": "stat",
-      "id": 108,
-      "title": "SoT unique visitors (today, by IP)",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 0,
-        "y": 88
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#e0a040"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "auto",
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "area"
-      },
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "max(cf_zone_uniques_today{zone=\"shit-of-theseus.com\"})",
-          "instant": true,
-          "range": false,
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "type": "stat",
-      "id": 109,
-      "title": "SoT requests (24h)",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 6,
-        "y": 88
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#e0a040"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "auto",
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "area"
-      },
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "max(cf_zone_requests_24h{zone=\"shit-of-theseus.com\"})",
-          "instant": true,
-          "range": false,
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "type": "timeseries",
-      "id": 110,
-      "title": "shit-of-theseus.com traffic (rolling 24h)",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 88
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 8,
-            "lineWidth": 2
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "max by(zone)(cf_zone_requests_24h{zone=\"shit-of-theseus.com\"})",
-          "legendFormat": "requests (24h)",
-          "range": true,
-          "instant": false,
-          "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "max by(zone)(cf_zone_cached_requests_24h{zone=\"shit-of-theseus.com\"})",
-          "legendFormat": "cached (24h)",
-          "range": true,
-          "instant": false,
-          "refId": "B"
-        }
-      ]
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#d29922",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "0",
-          "links": [
-            {
-              "title": "View on site",
-              "url": "https://shit-of-theseus.com/",
-              "targetBlank": true
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 21,
-        "y": 57
-      },
-      "id": 111,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "last_over_time(shitbox_breakdowns_total[7d])",
-          "instant": true,
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Breakdowns",
-      "type": "stat",
-      "transparent": true
+      "panels": []
     }
   ],
   "preload": false,

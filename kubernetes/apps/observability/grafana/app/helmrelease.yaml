@@ -101,6 +101,17 @@ spec:
             jsonData:
               timeInterval: 1m
             isDefault: false
+          # Dedicated shitbox_* instance (10y retention). The rally dashboards
+          # query this directly so they get a single clean source, not the
+          # Thanos fan-out that duplicated shitbox_* across two stores.
+          - name: Shitbox
+            type: prometheus
+            uid: shitbox
+            access: proxy
+            url: http://shitbox-prometheus.observability.svc.cluster.local:9090
+            jsonData:
+              timeInterval: 1m
+            isDefault: false
           - name: Tempo
             type: tempo
             uid: tempo
