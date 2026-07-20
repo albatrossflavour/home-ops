@@ -2406,13 +2406,14 @@
             var host = document.getElementById('day-timelapse');
             if (!host || !section) return;
             var src = '/captures/' + dayISO + '/timelapse.mp4';
+            var poster = '/captures/' + dayISO + '/timelapse-poster.jpg';
             // HEAD request to check if the file exists before embedding
             var xhr = new XMLHttpRequest();
             xhr.open('HEAD', src, true);
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     host.innerHTML = '<div class="timelapse-player">'
-                        + '<video controls preload="metadata" playsinline src="' + escapeHtml(src) + '"></video>'
+                        + '<video controls preload="metadata" playsinline poster="' + escapeHtml(poster) + '" src="' + escapeHtml(src) + '"></video>'
                         + '</div>';
                 } else {
                     section.style.display = 'none';
