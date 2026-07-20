@@ -2407,13 +2407,32 @@
             if (!host || !section) return;
             var src = '/captures/' + dayISO + '/timelapse.mp4';
             var poster = '/captures/' + dayISO + '/timelapse-poster.jpg';
+            // Same player as the event clips: poster placeholder + play button,
+            // lazy-swapped to <video> on tap (mirrors the #day-spine handler).
+            if (!host._tlBound) {
+                host._tlBound = true;
+                host.addEventListener('click', function(e) {
+                    var ph = e.target.closest('.event-video-placeholder');
+                    if (!ph || !ph.getAttribute('data-video-src')) return;
+                    var vsrc = ph.getAttribute('data-video-src');
+                    var vposter = ph.getAttribute('data-poster-url') || '';
+                    ph.innerHTML = '<video controls preload="metadata" playsinline poster="' + vposter + '" src="' + vsrc + '"></video>';
+                    ph.className = 'event-video';
+                    var v = ph.querySelector('video');
+                    if (v) { var p = v.play(); if (p && typeof p.catch === 'function') { p.catch(function(){}); } }
+                });
+            }
             // HEAD request to check if the file exists before embedding
             var xhr = new XMLHttpRequest();
             xhr.open('HEAD', src, true);
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
+                    var PLAY_ICON = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3.5v13l11-6.5z"/></svg>';
                     host.innerHTML = '<div class="timelapse-player">'
-                        + '<video controls preload="metadata" playsinline poster="' + escapeHtml(poster) + '" src="' + escapeHtml(src) + '"></video>'
+                        + '<div class="event-video-placeholder" data-video-src="' + escapeHtml(src) + '" data-poster-url="' + escapeHtml(poster) + '">'
+                        +   '<img class="evp-poster" src="' + escapeHtml(poster) + '" alt="" loading="lazy">'
+                        +   '<button type="button" class="evp-play" aria-label="Play timelapse">' + PLAY_ICON + '</button>'
+                        + '</div>'
                         + '</div>';
                 } else {
                     section.style.display = 'none';
