@@ -37,7 +37,7 @@
   "description": "Shit of Theseus \u2014 Rally Command Centre",
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "graphTooltip": 2,
+  "graphTooltip": 1,
   "id": null,
   "links": [],
   "panels": [
@@ -2948,7 +2948,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "last_over_time(shitbox_driver_time_seconds[7d])",
+          "expr": "last_over_time(shitbox_driver_time_seconds[90d])",
           "legendFormat": "{{name}}",
           "instant": true,
           "range": false,
