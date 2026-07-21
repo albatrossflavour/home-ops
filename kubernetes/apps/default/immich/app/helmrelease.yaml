@@ -88,7 +88,7 @@ spec:
           machine-learning:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
-              tag: "release@sha256:a2501141440f10516d329fdfba2c68082e19eb9ba6016c061ac80d23beadf7f3"
+              tag: "release@sha256:d76fe88b69282c09a97eac4f82dafa82cfd77bce274bc742591cde974f87dacb"
             env:
               # gunicorn 25.1 enables a control socket at /usr/src/gunicorn.ctl by
               # default; the rootless ML container (uid 65534) can't write there, which
