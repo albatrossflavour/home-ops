@@ -28,7 +28,7 @@ spec:
     downloadDashboardsImage:
       registry: docker.io
       repository: alpine/curl
-      tag: "8.20.0@sha256:94e16c727ef767dab178bef606f2616c26a5bc16f94c01307b6c8aa74a8eac84"
+      tag: "8.21.0@sha256:fd7f01bc6c6caec45a8fd5b871f0f51bf3c7cee0b185830ff25b8110f7e6e77d"
     admin:
       existingSecret: grafana-admin-secret
     env:
@@ -489,7 +489,7 @@ spec:
       enabled: false
     extraContainers: |
       - name: set-folder-permissions
-        image: nicolaka/netshoot:v0.15@sha256:47b907d662d139d1e2f22bfe14f4efca1e3f1feed283572f47c970c780c03b61
+        image: nicolaka/netshoot:v0.16@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
