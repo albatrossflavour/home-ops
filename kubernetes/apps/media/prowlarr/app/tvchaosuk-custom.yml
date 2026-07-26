@@ -8,11 +8,18 @@ encoding: UTF-8
 links:
   - https://tvchaosuk.com/
 
-# NOTE: The official Prowlarr definition was removed 2026-05-18 "at the request
-# of admins", and TVChaosUK's UNIT3D upgrade killed the old torrents/filter web
-# scrape ("The torrent filter must now be submitted from the search form").
-# This custom definition uses the UNIT3D JSON API with a Bearer token instead,
-# which sidesteps the dead endpoint and the expiring-session cookie faff.
+# TVChaosUK's UNIT3D upgrade moved the torrent filter to a POST /torrents/filter
+# request carrying the session CSRF token. A plain GET (what the old definition
+# and the official one did) now redirects to /torrents ("must be submitted from
+# the search form"), and the JSON API returns "Not implemented". The official
+# definition was removed from Prowlarr 2026-05-18 at the tracker's request.
+#
+# This definition replicates the site's own faceted-search AJAX call:
+#   POST /torrents/filter  (X-Requested-With: XMLHttpRequest)
+#   body: _token, search, view=list, sorting, direction, qty, categories[]...
+# Auth is by pasted cookie; the CSRF _token is pasted separately (same pattern
+# as the hdturk definition). Both are session-bound, so re-paste them together
+# when searches start failing (the session rolls every few days).
 
 caps:
   categorymappings:
@@ -40,13 +47,16 @@ caps:
     music-search: [q]
 
 settings:
-  - name: apikey
+  - name: cookie
     type: text
-    label: APIKey
-  - name: info_key
+    label: Cookie
+  - name: csrf_token
+    type: text
+    label: CSRF Token (_token)
+  - name: info_setup
     type: info
-    label: About your API key
-    default: "Find or generate your API Token on the <a href=\"https://tvchaosuk.com/\" target=\"_blank\">TVChaosUK</a> site under your account <i>Settings</i> / <i>Security</i> page."
+    label: How to get the Cookie and CSRF Token
+    default: "<ol><li>Log in to TVChaosUK in your browser.</li><li>Cookie: DevTools → Storage/Application → Cookies → https://tvchaosuk.com. Copy at least <b>XSRF-TOKEN</b>, <b>laravel_session</b> and <b>remember_web_*</b> as '; '-separated name=value pairs into the Cookie field.</li><li>CSRF Token: in the DevTools Console run <code>document.querySelector('meta[name=csrf-token]').content</code> and paste the 40-char value here (it also appears as <code>_token=</code> in any torrent sort link).</li><li>Both are tied to the same session and expire together. Re-paste both when searches start failing.</li></ol>"
   - name: freeleech
     type: checkbox
     label: Search freeleech only
@@ -69,107 +79,119 @@ settings:
       asc: asc
 
 login:
-  path: api/torrents
-  method: get
-  inputs: {}
-  error:
-    - selector: a[href*="/login"]
-      message:
-        text: "The API key was not accepted by {{ .Config.sitelink }}."
-    - selector: :root:contains("Account is Banned")
+  method: cookie
+  inputs:
+    cookie: "{{ .Config.cookie }}"
+  test:
+    path: /
+    selector: a[href$="/logout"]
 
 search:
   paths:
-    - path: api/torrents/filter
-      response:
-        type: json
-
-  headers:
-    Authorization: ["Bearer {{ .Config.apikey }}"]
-
+    - path: torrents/filter
+      method: post
   inputs:
-    $raw: "{{ range .Categories }}&categories[]={{.}}{{end}}"
-    name: "{{ .Keywords }}"
-    imdbId: "{{ .Query.IMDBIDShort }}"
-    tmdbId: "{{ .Query.TMDBID }}"
-    tvdbId: "{{ .Query.TVDBID }}"
-    "free[]": "{{ if .Config.freeleech }}100{{ else }}{{ end }}"
-    sortField: "{{ .Config.sort }}"
-    sortDirection: "{{ .Config.type }}"
-    perPage: 100
+    $raw: "{{ range .Categories }}categories[]={{.}}&{{end}}"
+    _token: "{{ .Config.csrf_token }}"
+    search: "{{ if .Query.IMDBID }}{{ else }}{{ .Keywords }}{{ end }}" # for dashboard imdbid search
+    imdb: "{{ .Query.IMDBIDShort }}"
+    tvdb: "{{ .Query.TVDBID }}"
+    tmdb: "{{ .Query.TMDBID }}"
+    sorting: "{{ .Config.sort }}"
+    direction: "{{ .Config.type }}"
+    qty: 100
+    freeleech: "{{ if .Config.freeleech }}1{{ else }}{{ end }}"
+    view: list
+  headers:
+    X-Requested-With: [XMLHttpRequest]
+    X-CSRF-TOKEN: ["{{ .Config.csrf_token }}"]
 
   keywordsfilters:
-    # TVChaosUK names season packs "Series 1" rather than "S01"
+    # if searching for season packs switch S01 to Series 1 #14369
     - name: re_replace
       args: ["(?i)(S0)(\\d{1,2})$", "Series $2"]
     - name: re_replace
       args: ["(?i)(S)(\\d{1,3})$", "Series $2"]
-    - name: re_replace
-      args: ["\\.", " "]
 
   rows:
-    selector: data
-    attribute: attributes
+    selector: table > tbody > tr
 
   fields:
     category:
-      selector: category_id
+      selector: a[href*="/categories/"]
+      attribute: href
+      filters:
+        - name: regexp
+          args: "/categories/(\\d+)"
     title:
-      selector: name
+      selector: a.view-torrent
       filters:
         - name: re_replace
           args: ["(?i)Series[\\s]+(\\d+)", "S$1"]
-    details:
-      selector: details_link
     download:
-      selector: download_link
+      selector: a[href*="/download/"]
+      attribute: href
+    details:
+      selector: a.view-torrent
+      attribute: href
     poster:
-      selector: meta.poster
+      selector: div.torrent-poster img
+      attribute: src
+      filters:
+        - name: prepend
+          args: "https://images.weserv.nl/?url=" # for display on dashboard
+        - name: append
+          args: "&w=180&h=270" # for display on dashboard
+        - name: replace
+          args: ["https://images.weserv.nl/?url=https://via.placeholder.com/600x900&w=180&h=270", ""]
+    genre:
+      selector: td:nth-last-child(6)
       filters:
         - name: replace
-          args: ["https://via.placeholder.com/90x135", ""]
-    imdbid:
-      selector: imdb_id
-    tmdbid:
-      selector: tmdb_id
-    tvdbid:
-      selector: tvdb_id
-    genre:
-      selector: meta.genres
+          args: ["\n", ""]
+        - name: re_replace
+          args: ["(?i)(Science Fiction)", "Science_Fiction"]
+        - name: validate
+          args: "Action, Adventure, Animation, Biography, Comedy, Crime, Documentary, Drama, Family, Fantasy, Game-Show, History, Horror, Music, Musical, Mystery, News, Reality-TV, Romance, Science_Fiction, Sitcom, Sport, Talk-Show, Thriller, War, Western"
     description:
       text: "{{ .Result.genre }}"
-    seeders:
-      selector: seeders
-    leechers:
-      selector: leechers
-    grabs:
-      selector: times_completed
-    date:
-      selector: created_at
-      filters:
-        - name: append
-          args: " +00:00" # GMT
-        - name: dateparse
-          args: "MM/dd/yyyy HH:mm:ss zzz"
     size:
-      selector: size
+      selector: td:nth-last-child(4)
+    seeders:
+      selector: td:nth-last-child(3)
+    leechers:
+      selector: td:nth-last-child(2)
+    grabs:
+      selector: td:nth-last-child(1)
+    imdbid:
+      selector: a[href*="imdb.com/title/tt"]
+      attribute: href
+    tmdbid:
+      selector: a[href*="themoviedb.org/movie/"], a[href*="themoviedb.org/tv/"]
+      attribute: href
+    date:
+      selector: time
+      filters:
+        - name: timeago
     downloadvolumefactor:
-      selector: freeleech
       case:
-        0%: 1
-        25%: 0.75
-        50%: 0.5
-        75%: 0.25
-        100%: 0
-        "*": 0
+        i[class*="fa-id-badge text-orange"]: 0 # 24 Hour FreeLeech From BON Store
+        i[class*="fa-trophy text-purple"]: 0 # Special FreeLeech For Certain User Groups
+        i[class*="fa-star text-bold"]: 0 # Freeleech From Token
+        i[class*="fa-coins text-bold"]: 0 # Freeleech From Token
+        i[class*="fa-globe text-blue"]: 0 # Global Freeleech
+        i[class*="fa-star text-gold"]: 0 # Freeleech
+        i[class*="fa-certificate text-pink"]: 0 # Featured Torrent
+        "*": 1
     uploadvolumefactor:
-      selector: double_upload
       case:
-        False: 1
-        True: 2
+        i[class*="fa-gem text-green"]: 2 # Single Torrent Double Upload
+        i[class*="fa-globe text-green"]: 2 # Global Double Upload
+        i[class*="fa-certificate text-pink"]: 2 # Featured Torrent Weekly Freeleech
+        "*": 1
     minimumratio:
       text: 0.4
     minimumseedtime:
       # 1 day (as seconds = 24 x 60 x 60)
       text: 86400
-# json UNIT3D API
+# html UNIT3D POST faceted search
