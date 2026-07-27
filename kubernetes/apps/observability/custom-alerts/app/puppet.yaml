@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
 # Prometheus alerting rules for pdctng.
 #
 # MANAGED BY PUPPET. Local edits are overwritten. Change the source template in
@@ -11,127 +12,135 @@
 # than quietly serving stale data. A dashboard that has not moved in three days
 # looks identical to a fleet that has not changed in three days, and only the
 # metrics below tell you which one you are looking at.
-groups:
-  - name: pdctng-exporter
-    rules:
-      - alert: PdctngExporterDown
-        expr: up{job="puppet"} == 0
-        for: 10m
-        labels:
-          severity: critical
-        annotations:
-          summary: pdctng exporter on {{ $labels.instance }} is not responding
-          description: >-
-            Prometheus cannot scrape the pdctng exporter. Every Puppet metric
-            below is stale until this recovers.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pdctng-alerts
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: pdctng-exporter
+      rules:
+        - alert: PdctngExporterDown
+          expr: up{job="puppet"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: pdctng exporter on {{ $labels.instance }} is not responding
+            description: >-
+              Prometheus cannot scrape the pdctng exporter. Every Puppet metric
+              below is stale until this recovers.
 
-      - alert: PdctngPollCycleFailing
-        expr: puppet_exporter_scrape_success == 0
-        for: 15m
-        labels:
-          severity: critical
-        annotations:
-          summary: pdctng poll cycle on {{ $labels.instance }} has not succeeded
-          description: >-
-            The exporter is up and serving metrics, but its poll cycle is
-            failing, so it is serving increasingly stale data.
+        - alert: PdctngPollCycleFailing
+          expr: puppet_exporter_scrape_success == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: pdctng poll cycle on {{ $labels.instance }} has not succeeded
+            description: >-
+              The exporter is up and serving metrics, but its poll cycle is
+              failing, so it is serving increasingly stale data.
 
-      - alert: PdctngMetricsStale
-        expr: time() - puppet_exporter_last_scrape_timestamp > 1800
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: pdctng data on {{ $labels.instance }} is over 30 minutes old
-          description: >-
-            Last successful poll was
-            {{ $value | humanizeDuration }} ago. Compare against the configured
-            polling_interval before widening this threshold.
+        - alert: PdctngMetricsStale
+          expr: time() - puppet_exporter_last_scrape_timestamp > 1800
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: pdctng data on {{ $labels.instance }} is over 30 minutes old
+            description: >-
+              Last successful poll was
+              {{ $value | humanizeDuration }} ago. Compare against the configured
+              polling_interval before widening this threshold.
 
-  - name: pdctng-collectors
-    rules:
-      # The alert that matters most. Individual collectors used to fail silently
-      # and the only symptom was a panel that stopped moving.
-      - alert: PdctngCollectorFailing
-        expr: puppet_exporter_collector_consecutive_failures > 3
-        for: 30m
-        labels:
-          severity: warning
-        annotations:
-          summary: pdctng collector {{ $labels.collector }} is failing
-          description: >-
-            {{ $value }} consecutive failures. Everything this collector feeds
-            is stale while the rest of the exporter looks healthy. Check the
-            pdctng service log for the collector name.
+    - name: pdctng-collectors
+      rules:
+        # The alert that matters most. Individual collectors used to fail silently
+        # and the only symptom was a panel that stopped moving.
+        - alert: PdctngCollectorFailing
+          expr: puppet_exporter_collector_consecutive_failures > 3
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: pdctng collector {{ $labels.collector }} is failing
+            description: >-
+              {{ $value }} consecutive failures. Everything this collector feeds
+              is stale while the rest of the exporter looks healthy. Check the
+              pdctng service log for the collector name.
 
-      - alert: PdctngCollectorStale
-        expr: time() - puppet_exporter_collector_last_success_timestamp > 21600
-        for: 15m
-        labels:
-          severity: critical
-        annotations:
-          summary: pdctng collector {{ $labels.collector }} has not succeeded in 6 hours
-          description: >-
-            Escalation of PdctngCollectorFailing for a collector that is not
-            recovering on its own.
+        - alert: PdctngCollectorStale
+          expr: time() - puppet_exporter_collector_last_success_timestamp > 21600
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: pdctng collector {{ $labels.collector }} has not succeeded in 6 hours
+            description: >-
+              Escalation of PdctngCollectorFailing for a collector that is not
+              recovering on its own.
 
-      - alert: PdctngCollectorSlow
-        expr: puppet_exporter_collector_duration_seconds > 120
-        for: 30m
-        labels:
-          severity: warning
-        annotations:
-          summary: pdctng collector {{ $labels.collector }} is taking over 2 minutes
-          description: >-
-            A slow collector delays every collector after it in the cycle and
-            pushes out the whole polling interval.
+        - alert: PdctngCollectorSlow
+          expr: puppet_exporter_collector_duration_seconds > 120
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: pdctng collector {{ $labels.collector }} is taking over 2 minutes
+            description: >-
+              A slow collector delays every collector after it in the cycle and
+              pushes out the whole polling interval.
 
-  - name: pdctng-puppetdb
-    rules:
-      - alert: PdctngPuppetDBServerDown
-        expr: puppet_exporter_server_up == 0
-        for: 15m
-        labels:
-          severity: critical
-        annotations:
-          summary: pdctng cannot query PuppetDB server {{ $labels.server }}
-          description: >-
-            With several servers configured the exporter keeps working from the
-            others, so this will not show up as an outage anywhere else.
+    - name: pdctng-puppetdb
+      rules:
+        - alert: PdctngPuppetDBServerDown
+          expr: puppet_exporter_server_up == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: pdctng cannot query PuppetDB server {{ $labels.server }}
+            description: >-
+              With several servers configured the exporter keeps working from the
+              others, so this will not show up as an outage anywhere else.
 
-      - alert: PdctngPuppetDBErrorRate
-        expr: rate(puppet_exporter_server_errors_total[15m]) > 0.1
-        for: 30m
-        labels:
-          severity: warning
-        annotations:
-          summary: pdctng is seeing query errors against {{ $labels.server }}
-          description: >-
-            Sustained error rate. Often the first sign of PuppetDB under load or
-            an expiring certificate.
+        - alert: PdctngPuppetDBErrorRate
+          expr: rate(puppet_exporter_server_errors_total[15m]) > 0.1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: pdctng is seeing query errors against {{ $labels.server }}
+            description: >-
+              Sustained error rate. Often the first sign of PuppetDB under load or
+              an expiring certificate.
 
-  - name: pdctng-fleet
-    rules:
-      - alert: PdctngNodeCountDropped
-        expr: >-
-          puppet_node_count{environment="all"}
-          < 0.9 * (puppet_node_count{environment="all"} offset 1h)
-        for: 30m
-        labels:
-          severity: warning
-        annotations:
-          summary: Puppet node count dropped over 10% in an hour
-          description: >-
-            Either a genuine fleet change or the exporter pruning nodes it
-            should not have. Worth confirming which.
+    - name: pdctng-fleet
+      rules:
+        - alert: PdctngNodeCountDropped
+          expr: >-
+            puppet_node_count{environment="all"}
+            < 0.9 * (puppet_node_count{environment="all"} offset 1h)
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: Puppet node count dropped over 10% in an hour
+            description: >-
+              Either a genuine fleet change or the exporter pruning nodes it
+              should not have. Worth confirming which.
 
-      - alert: PdctngNoNodesReporting
-        expr: puppet_node_count{environment="all"} == 0
-        for: 15m
-        labels:
-          severity: critical
-        annotations:
-          summary: pdctng knows about zero nodes
-          description: >-
-            The exporter is running and polling successfully but PuppetDB is
-            returning no nodes at all.
+        - alert: PdctngNoNodesReporting
+          expr: puppet_node_count{environment="all"} == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: pdctng knows about zero nodes
+            description: >-
+              The exporter is running and polling successfully but PuppetDB is
+              returning no nodes at all.
