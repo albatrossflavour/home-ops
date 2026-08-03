@@ -1,0 +1,24 @@
+---
+# The operator-generated "dragonfly" NetworkPolicy allows port 6379 with a
+# bare podSelector, which only matches pods in the database namespace and
+# blocks every cross-namespace client (immich etc). NetworkPolicies are
+# additive, so this policy widens 6379 to all namespaces without touching
+# the operator's object.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dragonfly-allow-cluster-clients
+spec:
+  podSelector:
+    matchLabels:
+      app: dragonfly
+      app.kubernetes.io/name: dragonfly
+      app.kubernetes.io/part-of: dragonfly
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - port: 6379
+          protocol: TCP
