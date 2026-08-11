@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: koenkk/zigbee2mqtt
-              tag: "2.12.0@sha256:1debff565ab6841417bd9f7ce8ad44f8c5f25a8b02a24ce3fd79e4779a4763a5"
+              tag: "2.13.0@sha256:4fb4db4d49a217bed6d0204f454ce809febc565bbe051b85c556ee2bcef73d8c"
             env:
               TZ: Australia/Sydney
               ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://emqx-listeners.database.svc.cluster.local:1883
