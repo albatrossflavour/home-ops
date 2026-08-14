@@ -260,6 +260,24 @@ spec:
           for: 5m
           labels:
             severity: critical
+        # Replaces the stock NodeFilesystemFilesFillingUp for the same reason.
+        # Mirrors NodeFilesystemSpaceFillingUp above, including its device=~"/dev/.*"
+        # constraint, which on its own already excludes SMB (device is a UNC path).
+        - alert: NodeFilesystemFilesFillingUp
+          annotations:
+            summary: Filesystem on {{ $labels.device }} at {{ $labels.instance }} is running out of inodes
+            description: |
+              Filesystem on {{ $labels.device }} at {{ $labels.instance }} is predicted to run out of inodes in less than 24 hours.
+              Currently {{ $value | humanizePercentage }} of inodes remain free.
+          expr: |
+            (
+              predict_linear(node_filesystem_files_free{device=~"/dev/.*",fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"}[6h], 24 * 3600) < 0
+            and
+              node_filesystem_files_free{device=~"/dev/.*",fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} / node_filesystem_files{device=~"/dev/.*",fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"} < 0.4
+            )
+          for: 1h
+          labels:
+            severity: warning
     - name: node-disk
       rules:
         - alert: NodeDiskIOSaturation
