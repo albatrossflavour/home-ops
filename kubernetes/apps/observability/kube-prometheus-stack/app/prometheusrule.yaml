@@ -211,6 +211,55 @@ spec:
           for: 1h
           labels:
             severity: warning
+        # Replaces the stock NodeFilesystemAlmostOutOfFiles, which has no exclusions
+        # and fires constantly on the Time Machine SMB sparsebundle mounted on hex.
+        # SMB shares do not report meaningful inode counts, so the metric is noise.
+        # Exclusions match NodeFilesystemAlmostOutOfSpace above.
+        - alert: NodeFilesystemAlmostOutOfFiles
+          annotations:
+            summary: Filesystem {{ $labels.mountpoint }} on {{ $labels.instance }} has only {{ $value | humanizePercentage }} inodes left
+            description: |
+              Filesystem {{ $labels.mountpoint }} ({{ $labels.device }}) on {{ $labels.instance }} has only {{ $value | humanizePercentage }} available inodes remaining.
+          expr: |
+            (
+              node_filesystem_files_free{
+                fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",
+                mountpoint!~"/boot.*|/var/lib/kubelet.*|/run.*|/etc/(hostname|hosts|resolv\\.conf)|.*\\.timemachine.*|.*\\.backup|/System/.*|/Volumes/Local Time Machine",
+                instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"
+              }
+              /
+              node_filesystem_files{
+                fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",
+                mountpoint!~"/boot.*|/var/lib/kubelet.*|/run.*|/etc/(hostname|hosts|resolv\\.conf)|.*\\.timemachine.*|.*\\.backup|/System/.*|/Volumes/Local Time Machine",
+                instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"
+              }
+            ) < 0.05
+          for: 15m
+          labels:
+            severity: warning
+        - alert: NodeFilesystemCriticallyLowFiles
+          annotations:
+            summary: Filesystem {{ $labels.mountpoint }} on {{ $labels.instance }} critically low on inodes
+            description: |
+              Filesystem {{ $labels.mountpoint }} ({{ $labels.device }}) on {{ $labels.instance }} has only {{ $value | humanizePercentage }} available inodes remaining.
+              CRITICAL - writes will fail even with free space available.
+          expr: |
+            (
+              node_filesystem_files_free{
+                fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",
+                mountpoint!~"/boot.*|/var/lib/kubelet.*|/run.*|/etc/(hostname|hosts|resolv\\.conf)|.*\\.timemachine.*|.*\\.backup|/System/.*|/Volumes/Local Time Machine",
+                instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"
+              }
+              /
+              node_filesystem_files{
+                fstype!~"tmpfs|fuse.*|overlay|squashfs|smbfs|autofs|apfs",
+                mountpoint!~"/boot.*|/var/lib/kubelet.*|/run.*|/etc/(hostname|hosts|resolv\\.conf)|.*\\.timemachine.*|.*\\.backup|/System/.*|/Volumes/Local Time Machine",
+                instance!~"(hex\\.home|dotty)\\.albatrossflavour\\.com.*"
+              }
+            ) < 0.03
+          for: 5m
+          labels:
+            severity: critical
     - name: node-disk
       rules:
         - alert: NodeDiskIOSaturation
