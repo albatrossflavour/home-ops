@@ -24,5 +24,10 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 10Gi
+      VOLSYNC_CAPACITY: 20Gi
       VOLSYNC_SCHEDULE: "15 */4 * * *"
+      # Restic cache on ceph-block, not openebs-hostpath: hostpath has no quota,
+      # so a wedged backup grew the cache to 26GB and pushed weatherwax into
+      # DiskPressure (14 Aug 2026). ceph-block enforces the limit.
+      VOLSYNC_CACHE_SNAPSHOTCLASS: ceph-block
+      VOLSYNC_CACHE_CAPACITY: 8Gi
