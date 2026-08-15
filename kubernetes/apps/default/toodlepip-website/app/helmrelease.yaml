@@ -103,6 +103,25 @@ spec:
           - hosts:
               - staging.toodlepip.com.au
             secretName: "${SECRET_DOMAIN/./-}-production-tls"
+      external:
+        className: external
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+        hosts:
+          - host: toodlepip.com.au
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
+          - host: www.toodlepip.com.au
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
     persistence:
       contact-data:
         type: nfs

@@ -39,12 +39,6 @@ spec:
 
       server {
         listen 8080;
-        server_name www.toodlepip.com.au toodlepip.com.au;
-        return 301 $scheme://www.etsy.com/au/shop/ToodlepipdesignsAU;
-      }
-
-      server {
-        listen 8080;
         server_name www.kalooma.org kalooma.org;
         return 301 $scheme://youtube.com/pdlfeggs;
       }
@@ -189,14 +183,6 @@ spec:
               - path: /
                 pathType: Prefix
           - host: www.kalooma.org
-            paths:
-              - path: /
-                pathType: Prefix
-          - host: toodlepip.com.au
-            paths:
-              - path: /
-                pathType: Prefix
-          - host: www.toodlepipe.com.au
             paths:
               - path: /
                 pathType: Prefix

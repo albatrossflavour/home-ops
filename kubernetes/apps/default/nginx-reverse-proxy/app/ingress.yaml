@@ -32,26 +32,6 @@ spec:
                   number: 8080
             path: /
             pathType: Prefix
-    - host: toodlepip.com.au
-      http:
-        paths:
-          - backend:
-              service:
-                name: nginx-reverse-proxy
-                port:
-                  number: 8080
-            path: /
-            pathType: Prefix
-    - host: www.toodlepip.com.au
-      http:
-        paths:
-          - backend:
-              service:
-                name: nginx-reverse-proxy
-                port:
-                  number: 8080
-            path: /
-            pathType: Prefix
     - host: www.bandcamp.tv
       http:
         paths:
