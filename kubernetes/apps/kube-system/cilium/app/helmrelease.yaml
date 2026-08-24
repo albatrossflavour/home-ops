@@ -26,6 +26,12 @@ spec:
   values:
     hubble:
       enabled: true
+      tls:
+        auto:
+          # Default method is 'helm', which mints certs once at install
+          # and never rotates them. cronJob regenerates on a schedule.
+          method: cronJob
+          schedule: "0 0 1 */4 *"
       metrics:
         enabled:
           - dns:query
