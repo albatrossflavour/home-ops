@@ -42,7 +42,7 @@ spec:
               JELLYFIN_FFmpeg__probesize: 50000000
               JELLYFIN_FFmpeg__analyzeduration: 50000000
               JELLYFIN_PublishedServerUrl: jellyfin.${SECRET_DOMAIN}
-              TZ: "${TIMEZONE}"
+              TZ: "${TZ}"
             probes:
               liveness: &probes
                 enabled: true

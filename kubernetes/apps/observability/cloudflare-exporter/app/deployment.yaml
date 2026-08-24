@@ -25,7 +25,7 @@ spec:
           command: ["python", "/app/exporter.py"]
           env:
             - name: TZ
-              value: "${TIMEZONE}"
+              value: "${TZ}"
             - name: PYTHONUNBUFFERED
               value: "1"
             - name: PYTHONDONTWRITEBYTECODE

@@ -46,7 +46,7 @@ spec:
               repository: amruthpillai/reactive-resume
               tag: "v5.2.7@sha256:656a7ce0409ea1b8fcdb4985320d8b687b94da1201d10af13fd1e2c7c74f6083"
             env:
-              TZ: ${TIMEZONE}
+              TZ: ${TZ}
               PORT: "3000"
               APP_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
               DATABASE_URL: "postgresql://resume:$(RESUME_DB_PASSWORD)@postgres16-rw.database.svc.cluster.local:5432/resume"
