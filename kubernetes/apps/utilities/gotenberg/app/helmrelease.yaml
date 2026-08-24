@@ -39,7 +39,7 @@ spec:
               - --chromium-allow-insecure-localhost=true
               - --chromium-allow-list=file:///*
             env:
-              TZ: ${TIMEZONE}
+              TZ: ${TZ}
             probes:
               liveness: &probes
                 enabled: true

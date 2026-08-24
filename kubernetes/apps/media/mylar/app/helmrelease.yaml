@@ -35,7 +35,7 @@ spec:
             env:
               PUID: "911"
               PGID: "1001"
-              TZ: "${TIMEZONE}"
+              TZ: "${TZ}"
             envFrom:
               - secretRef:
                   name: mylar-secret

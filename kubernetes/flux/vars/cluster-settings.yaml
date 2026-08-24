@@ -7,3 +7,4 @@ metadata:
 data:
   SETTING_EXAMPLE: Global settings for your cluster go in this file, this file is NOT encrypted
   THEME_PARK_THEME: aquamarine
+  TZ: Australia/Sydney

@@ -23,3 +23,5 @@ configMapGenerator:
       - donation-exporter/donation_exporter.py
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
