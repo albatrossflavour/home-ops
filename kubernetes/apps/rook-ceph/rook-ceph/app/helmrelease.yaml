@@ -33,6 +33,12 @@ spec:
     csi:
       serviceMonitor:
         enabled: true
+      cephcsi:
+        # Chart v1.20.6 still defaults to v3.17.0, which predates aes256k cephx
+        # support and breaks RBD snapshot RPCs against aes256k-rotated keys
+        # (rados: ret=-22, Invalid argument). Drop this override once a rook-ceph
+        # chart release bumps its own default past v3.17.1.
+        tag: "v3.17.1@sha256:0b62db8afc9b174619186c87084a8952157daa719415c598603be22b63cc1293"
     monitoring:
       enabled: true
     resources:
