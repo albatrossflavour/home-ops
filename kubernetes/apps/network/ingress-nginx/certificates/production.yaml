@@ -12,17 +12,14 @@ spec:
   dnsNames:
     - "${SECRET_DOMAIN}"
     - "*.${SECRET_DOMAIN}"
-    - staging.toodlepip.com.au
     - www.toodlepip.com.au
     - www.bandcamp.tv
     - toodlepip.com.au
     - bandcamp.tv
-    - kalooma.org
     - puppet.lab.albatrossflavour.com
     - cd4pe.lab.albatrossflavour.com
     - scm.lab.albatrossflavour.com
     - dashboard.lab.albatrossflavour.com
-    - smarthome.pdlf.net
     - pdlf.net
     - shit-of-theseus.com
     - grafana.shit-of-theseus.com
