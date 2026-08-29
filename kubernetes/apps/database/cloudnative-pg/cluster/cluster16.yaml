@@ -16,19 +16,35 @@ spec:
   enableSuperuserAccess: true
   postgresql:
     parameters:
-      max_connections: "400"
+      max_connections: "600"
       shared_buffers: 256MB
       # Freeze well before the PGDatabase alert threshold (150M) so the alert
       # only fires when autovacuum is genuinely stuck
       autovacuum_freeze_max_age: "100000000"
+      # 2026-08-29: a weatherwax reboot rescheduled 63 pods at once; radarr and
+      # sonarr each opened their full Npgsql pool (MaxPoolSize=100 by default),
+      # prowlarr 48, authentik 22, asciinema 19. That hit the old 400 ceiling.
+      # The pods were then killed by their probes, but Postgres had no way to
+      # notice the peers were gone, so ~390 backends survived with dead sockets
+      # and the exhaustion became permanent rather than transient.
+      # Keepalives detect a dead peer in roughly two minutes;
+      # idle_session_timeout reaps sessions that are merely abandoned.
+      tcp_keepalives_idle: "60"
+      tcp_keepalives_interval: "10"
+      tcp_keepalives_count: "6"
+      idle_session_timeout: "600000"
   nodeMaintenanceWindow:
     inProgress: false
     reusePVC: true
   resources:
     requests:
       cpu: 500m
+      # Request and limit kept equal for Guaranteed QoS - this database must not
+      # be evictable. Raised from 2Gi alongside max_connections 400 -> 600: the
+      # primary's working set was already 1175Mi at 412 backends.
+      memory: 3Gi
     limits:
-      memory: 2Gi
+      memory: 3Gi
   monitoring:
     enablePodMonitor: true
   backup:
