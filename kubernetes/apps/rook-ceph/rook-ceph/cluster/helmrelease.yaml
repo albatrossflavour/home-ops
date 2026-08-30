@@ -71,9 +71,24 @@ spec:
             keyGeneration: 2
           csi:
             keyRotationPolicy: KeyGeneration
+            # keyGeneration must only ever increase. Ceph's CRD validation
+            # rejects a decrease, which puts this HelmRelease into a failed
+            # upgrade/rollback loop with no valid rollback target and blocks
+            # every dependent app through dependsOn. Currently live: 6.
             keyGeneration: 6
             keepPriorKeyCountMax: 1
-            keyType: aes256k
+            # DO NOT change to aes256k. The kernel cephx AES256K key type
+            # (CEPH_CRYPTO_AES256KRB5) only landed in Linux 7.0; every node
+            # here runs 6.12.62. krbd mounts take this key straight into the
+            # kernel, so aes256k would break every RBD mount on all six nodes
+            # at once. Rook's own guidance: "Set the CSI keyType: 'aes' until
+            # all Kubernetes nodes run Linux kernel 7.0+."
+            # https://rook.io/docs/rook/latest-release/Storage-Configuration/Advanced/cephx-key-rotation/
+            #
+            # This leaves Ceph reporting HEALTH_WARN
+            # AUTH_INSECURE_CLIENT_KEY_TYPE, and CVE-2025-30156 exposure,
+            # until Talos ships a 7.0+ kernel. That is accepted, not pending.
+            keyType: aes
           rbdMirrorPeer:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
