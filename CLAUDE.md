@@ -414,11 +414,11 @@ ingress:
 
 #### How It Works
 
-- **cert-manager** requests Let's Encrypt certificates using Cloudflare DNS validation
-- **DNS validation process** creates temporary DNS records in Cloudflare
-- **These validation records establish DNS routing** for the domain through Cloudflare
-- **Cloudflare tunnel** routes traffic to the ingress-nginx-external controller
-- **No external-dns configuration needed** for external domains
+- **cert-manager** requests Let's Encrypt certificates using Cloudflare DNS-01 validation
+- **DNS-01 validation** creates a short-lived TXT record in Cloudflare, used only to prove domain ownership for certificate issuance - it does **not** create or establish the A/CNAME record that makes the hostname actually resolve. (This distinction was the root cause behind two orphaned-DNS incidents in this repo, where a domain had a working certificate but no real public DNS record: `smarthome.pdlf.net` and `staging.toodlepip.com.au`.)
+- **A real public DNS record must exist separately**, pointing the hostname at the Cloudflare Tunnel (typically a CNAME to `<tunnel-id>.cfargotunnel.com`), before adding the hostname to `kubernetes/apps/network/cloudflared/app/configs/config.yaml`'s `ingress` list has anything to route
+- **Cloudflare tunnel** routes traffic matching that hostname to the ingress-nginx-external controller
+- **No external-dns configuration needed** for external domains - the real DNS record above is what stands in for it
 
 ### Static Website Deployment Pattern
 
@@ -733,123 +733,9 @@ ingress:
 
 Widget integration available for: Sonarr, Radarr, Grafana, Prometheus, Minio, Pihole, Home Assistant, and more.
 
-## Loki Logging Integration
+## Loki Logging Integration (historic)
 
-### Complete Logging Stack
-
-The cluster includes a comprehensive Loki logging setup for centralized log aggregation and analysis:
-
-#### Loki Components
-
-- **Loki server**: Single Binary mode with NFS storage backend
-- **Promtail DaemonSet**: Automatic log collection from all pods and nodes
-- **Grafana integration**: Loki datasource with dedicated dashboards
-- **AlertManager integration**: Prometheus metrics-based alerting for Loki service health
-
-#### Storage Strategy
-
-- **NFS storage**: Uses cost-effective bulk storage at `192.168.1.22:/volume2/apps/loki`
-- **90-day retention**: With compression for efficient storage utilization
-- **Multi-tenant**: Namespace-based log separation for organization
-
-#### Configuration Highlights
-
-**Loki Helm Chart**:
-
-```yaml
-# Use latest stable version - check for updates
-chart: loki
-version: 6.41.1
-sourceRef:
-  kind: HelmRepository
-  name: grafana
-```
-
-**Storage Configuration**:
-
-```yaml
-# NFS mount for cost-effective log storage
-extraVolumes:
-  - name: loki-data
-    nfs:
-      server: "192.168.1.22"
-      path: "/volume2/apps/loki"
-extraVolumeMounts:
-  - name: loki-data
-    mountPath: /var/loki
-```
-
-**Essential Dependencies**:
-
-```yaml
-dependsOn:
-  - name: external-secrets-stores
-  - name: prometheus-operator-crds  # Required for PrometheusRule
-```
-
-#### Log Collection Features
-
-- **Pod logs**: Automatic collection with Kubernetes metadata enrichment
-- **System logs**: Node-level systemd journal integration
-- **Audit logs**: Kubernetes API audit trail collection
-- **Enhanced parsing**: Container runtime (CRI) log parsing
-- **Label extraction**: Automatic namespace, pod, container labeling
-
-#### Grafana Integration
-
-- **Loki datasource**: Configured at `http://loki-gateway.observability.svc.cluster.local`
-- **Dashboard folder**: Dedicated "Loki" folder in Grafana
-- **Pre-configured dashboards**:
-  - Loki / Logs (general log viewing)
-  - Loki Operational (service health)
-  - Kubernetes Logs (container logs)
-  - Log Analysis (pattern analysis)
-
-#### Monitoring and Alerting
-
-- **PrometheusRule**: Service health monitoring for Loki components
-- **Metrics-based alerts**: Process restarts, request errors, latency spikes
-- **Gatus monitoring**: Health checks for Loki gateway endpoint
-- **ServiceMonitor**: Prometheus metrics collection from Loki and Promtail
-
-#### Common LogQL Queries
-
-```logql
-# Application errors across all namespaces
-{namespace=~".+"} |~ "(?i)(error|exception|fail)"
-
-# Database connection issues
-{namespace=~".+"} |~ "(?i)(connection.*error|database.*error)"
-
-# Authentication failures
-{namespace=~".+"} |~ "(?i)(authentication.*fail|login.*fail|unauthorized)"
-
-# Memory issues
-{namespace=~".+"} |~ "(?i)(out of memory|oom|memory limit)"
-```
-
-#### Deployment Commands
-
-```bash
-# Deploy complete Loki stack
-task flux:apply path=observability/loki
-task flux:apply path=observability/promtail
-
-# Monitor deployment
-kubectl get pods -n observability | grep loki
-kubectl logs -n observability deployment/loki-gateway
-
-# Access Grafana logs
-# Navigate to Grafana → Explore → Loki datasource
-```
-
-#### Loki Deployment Notes
-
-- **PrometheusRules**: Only use Prometheus metrics, not LogQL expressions
-- **Log-based alerting**: Must be configured in Loki ruler, not Prometheus
-- **Promtail deprecation**: Promtail will be LTS-only from Feb 2025, consider Alloy for new deployments
-- **Retention tuning**: Adjust retention period based on storage capacity and compliance needs
-- **1Password secrets**: Store in 'discworld' vault using account 'my.1password.com'
+A full Loki/Promtail logging stack (server, DaemonSet, Grafana datasource, dedicated dashboards, NFS-backed storage) was built and later decommissioned. It no longer exists anywhere under `kubernetes/apps` - this is not aspirational, it was real and was torn down. If logging is wanted again, treat it as a rebuild of a previously-working stack rather than new territory; check git history for the prior implementation before starting from scratch.
 
 ## Application Deployment
 
@@ -1029,5 +915,6 @@ gh api repos/:owner/:repo/branches/main/protection \
 - **1Password vault**: All backups stored in `discworld` vault for easy recovery
 - **Safe restore**: `task backup:restore` never overwrites existing files
 - **Test recovery**: Periodically verify backups work with `task backup:list`
+- **Backup freshness**: the 1Password item's `updated_at` field is the source of truth for when a backup last ran, not the attached filename - `op document edit` preserves the original filename across updates, so a dated filename can look stale even when the content behind it is current
 - When adding new cluster services, always make sure they're added to homepage if appropriate
 - make sure you validate the tag format for containers

@@ -76,6 +76,9 @@ spec:
         registry: quay.io
         repository: thanos/thanos
         tag: "v0.42.4"
+        # This chart splits the digest into its own field instead of the
+        # usual tag@sha256 pattern - it IS pinned, a future audit grepping
+        # for "@sha256" here will not find it and should check this field.
         sha: b567818fe608067eb0f1d7c2c4fe361e7ad83c8a256234c97685f1d0bf670cc8  # pragma: allowlist secret
     kubeApiServer:
       serviceMonitor:

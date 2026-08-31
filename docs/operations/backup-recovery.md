@@ -20,6 +20,12 @@ The cluster implements multiple backup strategies to ensure data protection:
 3. **Secret Management**: Automated secret backup and rotation
 4. **Configuration**: Infrastructure as Code in git
 
+### NAS Boot-Order Dependency
+
+The cluster Minio instance - Volsync's default backup/restore target - is itself NFS-backed, not Ceph-backed, running against the NAS at `192.168.1.22`. It is not fully in-cluster. 15+ HelmReleases across `default`/`media` also mount that same NFS share directly, with no Flux `dependsOn` gate on Minio or the NAS being reachable.
+
+Nothing breaks permanently from this, but on a cold start (e.g. after a power outage) those pods sit `Pending` until the NAS is back up, and Volsync restores against cluster Minio will fail until it is too. Worth remembering mid-incident: "the cluster is up" does not mean Minio or NFS-backed apps are usable yet if the NAS hasn't finished booting.
+
 ## 📋 Automated Backup Systems
 
 ### Volsync Configuration
