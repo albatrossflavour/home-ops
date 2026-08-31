@@ -27,6 +27,19 @@ spec:
       namespace: external-secrets
   values:
     installCRDs: true
+    replicaCount: 2
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: external-secrets
+              topologyKey: kubernetes.io/hostname
     serviceMonitor:
       enabled: true
       interval: 1m
