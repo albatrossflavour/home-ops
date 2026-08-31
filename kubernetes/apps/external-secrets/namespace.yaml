@@ -5,3 +5,8 @@ metadata:
   name: external-secrets
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
+    # 2026-09-01: fourth PodSecurity enforcement pass. Checked all 6 live
+    # pods (external-secrets x2, cert-controller, webhook, onepassword-connect
+    # x2) - zero Baseline violations, no CronJobs/Jobs, no Volsync usage
+    # in this namespace (so no mover-pod blind spot to check).
+    pod-security.kubernetes.io/enforce: baseline
