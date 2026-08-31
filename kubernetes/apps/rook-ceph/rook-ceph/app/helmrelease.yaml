@@ -17,12 +17,17 @@ spec:
         namespace: flux-system
   install:
     remediation:
-      retries: 3
+      # 2026-08-31: was 3. A chokepoint HelmRelease - once retries exhaust,
+      # helm-controller marks it Stalled and stops retrying on its own,
+      # blocking every dependent app via dependsOn until someone notices
+      # and manually unsticks it (exactly what happened during the cephx
+      # incident: 3 separate manual "unstick" commits).
+      retries: -1
   upgrade:
     cleanupOnFail: true
     remediation:
       strategy: rollback
-      retries: 3
+      retries: -1
   dependsOn:
     - name: snapshot-controller
       namespace: volsync-system

@@ -184,6 +184,64 @@ spec:
               replacement: $1
               sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
+      # 2026-08-31: gotk_reconcile_condition (used by the flux PrometheusRule
+      # group below) was removed from helm-controller/kustomize-controller's
+      # own metrics in this Flux version - confirmed live, its /metrics only
+      # exposes gotk_reconcile_duration_seconds now. Flux's replacement is
+      # this KSM custom-resource-state config reading .status.conditions
+      # straight off the CRDs. NOT using --custom-resource-state-only: this
+      # KSM instance also serves core resource metrics (pods/deployments/
+      # pvcs above) that other dashboards and alerts depend on.
+      rbac:
+        extraRules:
+          - apiGroups:
+              - kustomize.toolkit.fluxcd.io
+              - helm.toolkit.fluxcd.io
+            resources:
+              - kustomizations
+              - helmreleases
+            verbs: ["list", "watch"]
+      customResourceState:
+        enabled: true
+        config:
+          spec:
+            resources:
+              - groupVersionKind:
+                  group: kustomize.toolkit.fluxcd.io
+                  version: v1
+                  kind: Kustomization
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux Kustomization resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      stalled: [status, conditions, "[type=Stalled]", status]
+                      suspended: [spec, suspend]
+              - groupVersionKind:
+                  group: helm.toolkit.fluxcd.io
+                  version: v2
+                  kind: HelmRelease
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux HelmRelease resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      stalled: [status, conditions, "[type=Stalled]", status]
+                      suspended: [spec, suspend]
     grafana:
       enabled: false
       forceDeployDashboards: true

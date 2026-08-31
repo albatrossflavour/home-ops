@@ -125,15 +125,42 @@ spec:
 
     - name: flux
       rules:
+        # 2026-08-31: rewritten off gotk_resource_info. The old expr used
+        # gotk_reconcile_condition, which this Flux version's controllers no
+        # longer expose (confirmed live: helm-controller's /metrics only has
+        # gotk_reconcile_duration_seconds) - this alert could never have
+        # fired. Replacement metric comes from the kube-state-metrics
+        # customResourceState config added in
+        # observability/kube-prometheus-stack's HelmRelease.
         - alert: HelmReleaseNotReady
           expr: |
-            gotk_reconcile_condition{type="Ready", status="False", kind="HelmRelease"} == 1
+            gotk_resource_info{customresource_kind="HelmRelease", ready="False"} == 1
           for: 30m
           labels:
             severity: critical
           annotations:
-            summary: "HelmRelease {{ $labels.namespace }}/{{ $labels.name }} failing"
-            description: "HelmRelease {{ $labels.namespace }}/{{ $labels.name }} has been in a non-Ready state for more than 30 minutes."
+            summary: "HelmRelease {{ $labels.exported_namespace }}/{{ $labels.name }} failing"
+            description: "HelmRelease {{ $labels.exported_namespace }}/{{ $labels.name }} has been in a non-Ready state for more than 30 minutes."
+
+        - alert: HelmReleaseStalled
+          expr: |
+            gotk_resource_info{customresource_kind="HelmRelease", stalled="True"} == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "HelmRelease {{ $labels.exported_namespace }}/{{ $labels.name }} stalled"
+            description: "HelmRelease {{ $labels.exported_namespace }}/{{ $labels.name }} has exhausted its install/upgrade retries and stopped reconciling on its own. Everything depending on it via dependsOn is blocked until this is manually unstuck."
+
+        - alert: KustomizationStalled
+          expr: |
+            gotk_resource_info{customresource_kind="Kustomization", stalled="True"} == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Kustomization {{ $labels.exported_namespace }}/{{ $labels.name }} stalled"
+            description: "Kustomization {{ $labels.exported_namespace }}/{{ $labels.name }} is Stalled. Everything depending on it via dependsOn is blocked until this is manually resolved."
 
     - name: spegel
       rules:
