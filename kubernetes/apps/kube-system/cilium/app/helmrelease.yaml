@@ -5,6 +5,10 @@ metadata:
   name: cilium
 spec:
   interval: 30m
+  # 2026-08-31: warn (not enabled) - report drift without correcting it,
+  # until confirmed clean. See rook-ceph-cluster's helmrelease.yaml for why.
+  driftDetection:
+    mode: warn
   chart:
     spec:
       chart: cilium

@@ -7,6 +7,12 @@ metadata:
 spec:
   interval: 30m
   timeout: 15m
+  # 2026-08-31: warn (not enabled) - report drift without correcting it.
+  # Promote to enabled only after confirming no unexpected drift shows up;
+  # correcting on a wrong assumption here is what pushed aes256k onto the
+  # cluster and broke every RBD mount during the cephx incident.
+  driftDetection:
+    mode: warn
   chart:
     spec:
       chart: rook-ceph-cluster
