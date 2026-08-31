@@ -6,6 +6,18 @@ metadata:
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
     volsync.backube/privileged-movers: "true"
+  labels:
+    # 2026-09-01: PodSecurity enforcement pass - privileged, not baseline.
+    # nocodb's Volsync ReplicationSource sets moverSecurityContext at pod
+    # level (runAsUser: 568), but the mover's restic container overrides
+    # that at container level (runAsUser: 0) and adds capabilities
+    # [DAC_OVERRIDE, CHOWN, FOWNER] - driven by the privileged-movers
+    # annotation above, independent of moverSecurityContext. Confirmed by
+    # triggering a real sync and inspecting the live mover pod, not just
+    # reading the ReplicationSource spec. DAC_OVERRIDE is disallowed even
+    # at Baseline, so Baseline here would silently reject nocodb's next
+    # scheduled backup. Same annotation, same reasoning as rook-ceph.
+    pod-security.kubernetes.io/enforce: privileged
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/notification.toolkit.fluxcd.io/provider_v1beta3.json
 apiVersion: notification.toolkit.fluxcd.io/v1beta3
