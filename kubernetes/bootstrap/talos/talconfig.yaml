@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
 ---
 # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-talosVersion: v1.13.9
+talosVersion: v1.11.6
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-kubernetesVersion: v1.36.4
+kubernetesVersion: v1.34.3
 
 clusterName: "witches"
 endpoint: https://192.168.8.20:6443
@@ -72,6 +72,51 @@ nodes:
         mtu: 1500
         vip:
           ip: "192.168.8.20"
+  - hostname: "wuffles"
+    ipAddress: "192.168.8.13"
+    installDisk: "/dev/sda"
+    talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "bc:24:11:38:1a:ea"
+        dhcp: false
+        addresses:
+          - "192.168.8.13/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.8.1"
+        mtu: 1500
+  - hostname: "aching"
+    ipAddress: "192.168.8.14"
+    installDisk: "/dev/sda"
+    talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "bc:24:11:b5:59:f8"
+        dhcp: false
+        addresses:
+          - "192.168.8.14/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.8.1"
+        mtu: 1500
+  - hostname: "greebo"
+    ipAddress: "192.168.8.15"
+    installDisk: "/dev/sda"
+    talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "bc:24:11:5b:3e:b3"
+        dhcp: false
+        addresses:
+          - "192.168.8.15/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.8.1"
+        mtu: 1500
 
 # Global patches
 patches:
