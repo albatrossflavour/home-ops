@@ -7,15 +7,15 @@ metadata:
 spec:
   interval: 30m
   timeout: 15m
-  # 2026-08-31: staying on warn, not enabled. Real drift found on first
-  # check - CephCluster (11 additions, 2 changes, 1 removal), CephFilesystem,
-  # and both VolumeSnapshotClasses - plus a genuine dry-run error, separate
-  # from drift, on CephObjectStore/ceph-objectstore:
-  #   .spec.healthCheck.bucket: field not declared in schema
-  # Needs its own investigation (which side is right, and why the CRD
-  # schema doesn't recognize that field) before trusting enabled here -
-  # correcting on a wrong assumption is what pushed aes256k onto the
-  # cluster and broke every RBD mount during the cephx incident.
+  # 2026-08-31: staying on warn, not enabled. The dry-run error on
+  # CephObjectStore (.spec.healthCheck.bucket: field not declared in
+  # schema) is fixed - that field never existed in any Rook version's
+  # real CRD schema (confirmed against the v1.20.6 upstream source) and
+  # was dead, no-op config removed here. Still real drift to resolve on
+  # CephCluster (11 additions, 2 changes, 1 removal), CephFilesystem, and
+  # both VolumeSnapshotClasses before trusting enabled - correcting on a
+  # wrong assumption about which side is right is what pushed aes256k
+  # onto the cluster and broke every RBD mount during the cephx incident.
   driftDetection:
     mode: warn
   chart:
@@ -269,9 +269,6 @@ spec:
                 memory: 1536Mi
             instances: 2
             priorityClassName: system-cluster-critical
-          healthCheck:
-            bucket:
-              interval: 60s
         storageClass:
           enabled: true
           name: ceph-bucket
