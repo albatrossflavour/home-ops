@@ -49,7 +49,9 @@ spec:
               TZ: ${TZ}
               PORT: "3000"
               APP_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
-              DATABASE_URL: "postgresql://resume:$(RESUME_DB_PASSWORD)@postgres16-rw.database.svc.cluster.local:5432/resume"
+              # pgbouncer=true disables Prisma's server-side prepared statement
+              # cache, required when going through a transaction-mode pooler.
+              DATABASE_URL: "postgresql://resume:$(RESUME_DB_PASSWORD)@postgres16-pooler-rw.database.svc.cluster.local:5432/resume?pgbouncer=true"
               MAIL_FROM: "noreply@${SECRET_DOMAIN}"
               STORAGE_PROVIDER: "s3"
               STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
