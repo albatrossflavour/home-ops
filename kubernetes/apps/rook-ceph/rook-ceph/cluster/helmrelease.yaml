@@ -7,17 +7,19 @@ metadata:
 spec:
   interval: 30m
   timeout: 15m
-  # 2026-08-31: staying on warn, not enabled. The dry-run error on
-  # CephObjectStore (.spec.healthCheck.bucket: field not declared in
-  # schema) is fixed - that field never existed in any Rook version's
-  # real CRD schema (confirmed against the v1.20.6 upstream source) and
-  # was dead, no-op config removed here. Still real drift to resolve on
-  # CephCluster (11 additions, 2 changes, 1 removal), CephFilesystem, and
-  # both VolumeSnapshotClasses before trusting enabled - correcting on a
-  # wrong assumption about which side is right is what pushed aes256k
-  # onto the cluster and broke every RBD mount during the cephx incident.
+  # 2026-08-31: enabled. Manually characterized every field in the drift
+  # report (CephCluster 11 additions/2 changes/1 removal, CephFilesystem,
+  # both VolumeSnapshotClasses) since no diff tool was available (get.helm.sh
+  # unreachable, flux diff helmrelease doesn't exist in flux2 v2.9.4).
+  # Every field fits either Rook auto-defaulting an optional sub-struct
+  # git never mentions (mon.count, mgr.count, network compression/
+  # encryption/multiClusterService, healthCheck.daemonHealth, an extra
+  # part-of label on the MDS topology selector) or explicit-false-in-git
+  # vs omitted-in-live (dashboard.ssl, crashCollector.disable,
+  # healthCheck.livenessProbe.mon.disabled). The security.cephx block -
+  # the one area with real history here - matches git exactly.
   driftDetection:
-    mode: warn
+    mode: enabled
   chart:
     spec:
       chart: rook-ceph-cluster
