@@ -25,6 +25,8 @@ spec:
     controllers:
       shlink:
         strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
         initContainers:
           init-db:
             image:
