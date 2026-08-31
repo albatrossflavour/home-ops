@@ -100,7 +100,7 @@ tasks:
       - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd set noout
       - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd set norebalance
       - echo "[OK] Ceph maintenance mode enabled"
-      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph osd status | grep flags
+      - kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph status | grep -i flag
 
   ceph-maintenance-end:
     desc: Disable Ceph maintenance mode
