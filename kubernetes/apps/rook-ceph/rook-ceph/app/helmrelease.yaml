@@ -38,12 +38,32 @@ spec:
     csi:
       serviceMonitor:
         enabled: true
+      # 2026-08-31: all six of these come from the chart's own defaults,
+      # written into rook-csi-operator-image-set-configmap and pulled by the
+      # ceph-csi-drivers HelmRelease - invisible to Renovate unless overridden
+      # here (same blind spot that let the cephcsi CVE gap happen). Digests
+      # below are what was actually live on every CSI plugin pod at the time
+      # of pinning, except csiAddons - confirmed live no container running
+      # anywhere in rook-ceph uses that image, so its digest came from the
+      # registry instead.
       cephcsi:
         # Chart v1.20.6 still defaults to v3.17.0, which predates aes256k cephx
         # support and breaks RBD snapshot RPCs against aes256k-rotated keys
         # (rados: ret=-22, Invalid argument). Drop this override once a rook-ceph
         # chart release bumps its own default past v3.17.1.
         tag: "v3.17.1@sha256:0b62db8afc9b174619186c87084a8952157daa719415c598603be22b63cc1293"
+      registrar:
+        tag: "v2.17.0@sha256:f9de845b170155199f2a2a3f9531cf13d78e31235e9db6b6582a8b0db0a50dad"
+      provisioner:
+        tag: "v6.2.0@sha256:6be9f63ca4caa6c46aae55aa372500949d8a21473d72f819da1f746076b32d4e"
+      snapshotter:
+        tag: "v8.5.0@sha256:da081c27e8a6d91f36042c1942362d0515ced8d06e18c11b8f893e58c4d6d797"
+      attacher:
+        tag: "v4.12.0@sha256:b9dc9a714a484ccdeeb6f86d88d4db9b7a5ecfc5a55da6db3a60bb3fa33c278a"
+      resizer:
+        tag: "v2.1.0@sha256:589e525cddef6d768e68da1f0bc9ffd0a24bf3add3dd010648eb7189976fde79"
+      csiAddons:
+        tag: "v0.14.0@sha256:69092d026323307933fba2bed9c57d864f2a92cfd385d644b478442ded0d2886"
     monitoring:
       enabled: true
     resources:
