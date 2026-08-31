@@ -92,5 +92,9 @@ spec:
       resources:
         requests:
           cpu: 100m
+          # 2026-08-31: was limit-only (750Mi) - an OOMKill here is a
+          # visible outage with no memory baseline to see it coming. Live
+          # usage observed up to ~277Mi.
+          memory: 200Mi
         limits:
           memory: 750Mi

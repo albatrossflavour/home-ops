@@ -197,5 +197,8 @@ spec:
         cpu: 15m
         memory: 79M
       limits:
-        cpu: 15m
+        # 2026-08-31: CPU limit matched the request exactly (15m) - zero
+        # burst headroom fronting seven external hostnames. Live usage is
+        # ~1m steady-state; request stays put, limit raised for bursts.
+        cpu: 200m
         memory: 79M

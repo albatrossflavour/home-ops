@@ -436,6 +436,10 @@ spec:
         tag: 2.10.1@sha256:7eac5c4fed714a18d038fc9fea57d8744d113367935dac0ea4eb6a87cef704a3
       dashboards:
         enabled: true
+        # 2026-08-31: was default (both) - confirmed live 0 of 35
+        # dashboard/datasource sources are Secrets, dropped the
+        # cluster-wide Secret watch/RBAC grant that came with "both".
+        resource: configmap
         searchNamespace: ALL
         label: grafana_dashboard
         provider:
@@ -444,6 +448,7 @@ spec:
           folder: Kubernetes
       datasources:
         enabled: true
+        resource: configmap
         searchNamespace: ALL
         labelValue: ""
     plugins:

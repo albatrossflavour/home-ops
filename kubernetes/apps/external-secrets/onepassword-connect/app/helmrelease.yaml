@@ -25,9 +25,23 @@ spec:
   values:
     controllers:
       onepassword-connect:
+        # 2026-08-31: was 1 replica, no PDB - single point of failure
+        # upstream of external-secrets in the dependsOn graph. Stateless
+        # proxy over the 1Password Connect API, safe to run 2.
+        replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        app.kubernetes.io/name: onepassword-connect
+                    topologyKey: kubernetes.io/hostname
         containers:
           api:
             image:
@@ -66,9 +80,12 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
+            # 2026-08-31: was limit-only (256M), no memory request - live
+            # usage snapshot ~39Mi, sized with headroom.
             resources: &resources
               requests:
                 cpu: 10m
+                memory: 64M
               limits:
                 memory: 256M
           sync:
