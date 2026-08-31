@@ -51,17 +51,10 @@ key_groups:
 ### 3. Re-key all 7 files against both recipients
 
 ```bash
-for f in \
-  kubernetes/bootstrap/talos/talsecret.sops.yaml \
-  kubernetes/flux/vars/cluster-secrets.sops.yaml \
-  kubernetes/apps/external-secrets/onepassword-connect/app/onepassword-connect.secret.sops.yaml \
-  kubernetes/apps/network/external-dns/app/secret.sops.yaml \
-  kubernetes/apps/network/cloudflared/app/secret.sops.yaml \
-  kubernetes/apps/cert-manager/cert-manager/issuers/secret.sops.yaml \
-  kubernetes/apps/flux-system/webhooks/app/github/secret.sops.yaml; do
-  sops updatekeys -y "$f"
-done
+task sops:rotate-key
 ```
+
+Loops `sops updatekeys` over every `*.sops.yaml`/`*.sops.yml` file in the repo (re-deriving the list live rather than hardcoding it, so it won't silently miss a file added since this doc was written), then verifies each one still decrypts. Stops on the first file that fails - do not continue to Step 5 if it does.
 
 ### 4. Verify every file decrypts with the new key alone
 
@@ -87,7 +80,7 @@ Watch `flux get kustomizations -A` and `flux get helmreleases -A` afterward — 
 
 ### 6. Remove the old recipient, re-key again
 
-Once Step 5 is confirmed clean, edit `.sops.yaml` to remove the old public key from both `key_groups`, leaving only the new one. Re-run the same `sops updatekeys -y` loop from Step 3 — this actually drops the old key from every file's recipient list, not just from git's idea of what the recipients should be.
+Once Step 5 is confirmed clean, edit `.sops.yaml` to remove the old public key from both `key_groups`, leaving only the new one. Re-run `task sops:rotate-key` — this actually drops the old key from every file's recipient list, not just from git's idea of what the recipients should be.
 
 Commit and push.
 

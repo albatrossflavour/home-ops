@@ -31,6 +31,40 @@ tasks:
       - msg: Missing Sops Age key file
         sh: test -f {{.AGE_FILE}}
 
+  rotate-key:
+    desc: Re-key every known SOPS-encrypted file against .sops.yaml's current recipients and verify each still decrypts
+    summary: |
+      Step 3 of docs/operations/sops-age-key-rotation.md - run only after
+      adding the new recipient to .sops.yaml (dual-key transition), and
+      again after removing the old one. Loops `sops updatekeys` over every
+      *.sops.yaml/.sops.yml file in the repo, then verifies each one still
+      decrypts. Fails loudly (and stops) on the first file that doesn't -
+      do not proceed to the in-cluster secret cutover if this fails.
+    cmds:
+      - for: { var: file }
+        task: .rotate-key-file
+        vars:
+          file: "{{.ITEM}}"
+    vars:
+      # -name "*.sops.yaml" also matches the bare ".sops.yaml" config file
+      # itself (the glob matches zero characters before the dot) - that
+      # file is the encryption ruleset, not an encrypted secret, and isn't
+      # decryptable at all. Excluded explicitly, not just by depth/path,
+      # since a future nested .sops.yaml override would hit the same trap.
+      file:
+        sh: find "{{.ROOT_DIR}}" -type f \( -name "*.sops.yaml" -o -name "*.sops.yml" \) ! -name ".sops.yaml" ! -name ".sops.yml"
+
+  .rotate-key-file:
+    internal: true
+    cmds:
+      - sops updatekeys --yes {{.file}}
+      - sops --decrypt {{.file}} > /dev/null
+    requires:
+      vars: ["file"]
+    preconditions:
+      - msg: Missing Sops config file
+        sh: test -f {{.SOPS_CONFIG_FILE}}
+
   .reset:
     internal: true
     cmd: rm -rf {{.SOPS_CONFIG_FILE}}
