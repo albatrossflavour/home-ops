@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
 ---
 # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-talosVersion: v1.11.6
+talosVersion: v1.12.11
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
 kubernetesVersion: v1.34.3
 
@@ -62,7 +62,12 @@ nodes:
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
-          hardwareAddr: "bc:24:11:0b:3c:9b"
+          # 2026-08-31: corrected from bc:24:11:0b:3c:9b, which no longer
+          # matched the node's actual NIC (verified live via talosctl).
+          # The stale value was harmless until a full machine config was
+          # finally pushed via apply-config, which wiped magrat's network
+          # config entirely since the deviceSelector matched nothing.
+          hardwareAddr: "bc:24:11:e2:60:8b"
         dhcp: false
         addresses:
           - "192.168.8.12/24"
