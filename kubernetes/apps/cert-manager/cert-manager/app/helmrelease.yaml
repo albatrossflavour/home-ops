@@ -24,6 +24,14 @@ spec:
     installCRDs: true
     dns01RecursiveNameservers: https://1.1.1.1:443/dns-query,https://1.0.0.1:443/dns-query
     dns01RecursiveNameserversOnly: true
+    # 2026-08-31: was resources: {} (BestEffort QoS on a control-plane
+    # chokepoint). Sized from a 24h historical peak of ~94Mi.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
     replicaCount: 2
     podDisruptionBudget:
       enabled: true

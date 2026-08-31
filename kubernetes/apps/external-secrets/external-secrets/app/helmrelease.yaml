@@ -27,6 +27,14 @@ spec:
       namespace: external-secrets
   values:
     installCRDs: true
+    # 2026-08-31: was resources: {} (BestEffort QoS on a control-plane
+    # chokepoint). Sized from a 24h historical peak of ~102Mi.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
     replicaCount: 2
     podDisruptionBudget:
       enabled: true

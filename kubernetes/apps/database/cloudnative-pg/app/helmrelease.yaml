@@ -30,6 +30,15 @@ spec:
   values:
     crds:
       create: true
+    # 2026-08-31: was resources: {} (BestEffort QoS on a control-plane
+    # chokepoint). Sized from a 24h historical peak of ~307Mi observed
+    # during an unusually busy day (multiple postgres failovers).
+    resources:
+      requests:
+        cpu: 25m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
     monitoring:
       podMonitorEnabled: false
       grafanaDashboard:
