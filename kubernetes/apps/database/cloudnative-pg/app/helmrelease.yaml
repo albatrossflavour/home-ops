@@ -6,10 +6,9 @@ metadata:
   name: cloudnative-pg
 spec:
   interval: 30m
-  # 2026-08-31: warn (not enabled) - report drift without correcting it,
-  # until confirmed clean. See rook-ceph-cluster's helmrelease.yaml for why.
+  # 2026-08-31: confirmed Drifted=False via warn mode before enabling.
   driftDetection:
-    mode: warn
+    mode: enabled
   chart:
     spec:
       chart: cloudnative-pg

@@ -7,9 +7,14 @@ metadata:
 spec:
   interval: 30m
   timeout: 15m
-  # 2026-08-31: warn (not enabled) - report drift without correcting it.
-  # Promote to enabled only after confirming no unexpected drift shows up;
-  # correcting on a wrong assumption here is what pushed aes256k onto the
+  # 2026-08-31: staying on warn, not enabled. Real drift found on first
+  # check - CephCluster (11 additions, 2 changes, 1 removal), CephFilesystem,
+  # and both VolumeSnapshotClasses - plus a genuine dry-run error, separate
+  # from drift, on CephObjectStore/ceph-objectstore:
+  #   .spec.healthCheck.bucket: field not declared in schema
+  # Needs its own investigation (which side is right, and why the CRD
+  # schema doesn't recognize that field) before trusting enabled here -
+  # correcting on a wrong assumption is what pushed aes256k onto the
   # cluster and broke every RBD mount during the cephx incident.
   driftDetection:
     mode: warn
