@@ -4,8 +4,13 @@ kind: ClusterRole
 metadata:
   name: gatus
 rules:
+  # ClusterRole (not namespaced) is required: the k8s-sidecar discovers
+  # gatus.io/enabled=true ConfigMaps across 13 namespaces cluster-wide,
+  # not just observability. secrets was dropped 2026-08-31 - confirmed
+  # unused (gatus only ever reads its endpoint config from ConfigMaps)
+  # and unnecessary exposure on an internet-facing app.
   - apiGroups: [""]
-    resources: ["configmaps", "secrets"]
+    resources: ["configmaps"]
     verbs: ["get", "watch", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

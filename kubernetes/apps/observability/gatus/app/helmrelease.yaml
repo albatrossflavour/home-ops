@@ -44,7 +44,11 @@ spec:
               FOLDER: /config
               LABEL: gatus.io/enabled
               NAMESPACE: ALL
-              RESOURCE: both
+              # 2026-08-31: was "both" - watching Secrets too, even though
+              # every gatus.io/enabled=true object in the cluster is a
+              # ConfigMap. Matches the ClusterRole in rbac.yaml, which had
+              # this cluster's only unused Secrets RBAC grant removed.
+              RESOURCE: configmap
               UNIQUE_FILENAMES: true
               METHOD: WATCH
             restartPolicy: Always
