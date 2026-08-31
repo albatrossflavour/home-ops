@@ -5,3 +5,8 @@ metadata:
   name: cert-manager
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
+    # 2026-09-01: second PodSecurity enforcement pass (see utilities for
+    # the first). Checked all 4 live pods first - zero Baseline violations
+    # (no hostNetwork/hostPath/privileged/added capabilities), only gap was
+    # the Restricted-only runAsNonRoot requirement. No CronJobs/Jobs to miss.
+    pod-security.kubernetes.io/enforce: baseline
