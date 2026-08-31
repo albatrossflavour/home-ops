@@ -33,13 +33,24 @@ spec:
     - name: prometheus-operator-crds
       namespace: observability
   values:
+    # 2026-08-31: first guess (128Mi/256Mi) OOMKilled immediately - a cold
+    # start against ~150 pre-existing cluster-wide workloads is a much
+    # bigger initial burst than steady-state. No 24h Thanos peak exists yet
+    # for a fresh deploy; revisit once it does.
     resources:
       requests:
-        cpu: 25m
-        memory: 128Mi
-      limits:
+        cpu: 50m
         memory: 256Mi
+      limits:
+        memory: 768Mi
     serviceMonitor:
       enabled: true
     trivy:
       ignoreUnfixed: false
+    operator:
+      # Default is 10. The initial cluster-wide sweep already showed cache
+      # lock contention between sibling scan containers in the same job pod
+      # (multi-container workloads get one scan container per target
+      # container, all sharing that job pod's cache) - lower concurrency
+      # to reduce simultaneous Trivy processes fighting over the DB cache.
+      scanJobsConcurrentLimit: 3
