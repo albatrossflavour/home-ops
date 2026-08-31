@@ -162,6 +162,32 @@ spec:
             summary: "Kustomization {{ $labels.exported_namespace }}/{{ $labels.name }} stalled"
             description: "Kustomization {{ $labels.exported_namespace }}/{{ $labels.name }} is Stalled. Everything depending on it via dependsOn is blocked until this is manually resolved."
 
+        - alert: KustomizationNotReady
+          expr: |
+            gotk_resource_info{customresource_kind="Kustomization", ready="False"} == 1
+          for: 30m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Kustomization {{ $labels.exported_namespace }}/{{ $labels.name }} failing"
+            description: "Kustomization {{ $labels.exported_namespace }}/{{ $labels.name }} has been in a non-Ready state for more than 30 minutes. A Kustomization can go non-Ready independently of any HelmRelease it manages."
+
+        # 2026-08-31: external-secrets (HelmRelease) and external-secrets-stores
+        # (Kustomization) sit upstream of ~64 and ~63 transitive dependents
+        # respectively out of ~120 total Kustomizations - by far the widest
+        # blast radius of any single chokepoint in the cluster. A shorter for
+        # than the general 30m NotReady rules above, specifically on these two
+        # names, so a stuck reconciliation here pages before it cascades wide.
+        - alert: ExternalSecretsChokepointNotReady
+          expr: |
+            gotk_resource_info{name=~"external-secrets|external-secrets-stores", ready="False"} == 1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.customresource_kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} failing"
+            description: "{{ $labels.customresource_kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} has been non-Ready for more than 10 minutes. This is a dependency chokepoint - dozens of other Kustomizations depend on it and are blocked."
+
     - name: spegel
       rules:
         - alert: SpegelMirrorFailureRate
