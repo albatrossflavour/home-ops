@@ -23,9 +23,20 @@ spec:
   values:
     controllers:
       cloudflared:
+        replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        app.kubernetes.io/name: cloudflared
+                    topologyKey: kubernetes.io/hostname
         containers:
           app:
             image:
@@ -66,9 +77,13 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
+            # 2026-08-31: was missing a memory request (asymmetric shape -
+            # cpu request/no limit, memory limit/no request). Sized from a
+            # 24h historical peak of ~55Mi.
             resources:
               requests:
                 cpu: 10m
+                memory: 64Mi
               limits:
                 memory: 256Mi
     defaultPodOptions:
