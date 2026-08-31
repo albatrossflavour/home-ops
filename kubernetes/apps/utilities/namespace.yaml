@@ -5,3 +5,10 @@ metadata:
   name: utilities
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
+    # 2026-09-01: first PodSecurity enforcement pass, low-stakes namespace
+    # chosen to prove the pattern. Checked every live pod's securityContext
+    # first - zero Baseline violations (no hostNetwork/hostPath/privileged/
+    # added capabilities anywhere); the only gaps found were Restricted-only
+    # requirements (runAsNonRoot, allowPrivilegeEscalation), which Baseline
+    # doesn't require. Safe to enforce with nothing to fix first.
+    pod-security.kubernetes.io/enforce: baseline
