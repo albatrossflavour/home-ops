@@ -10,6 +10,14 @@ DATE=$(date +%Y%m%d)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# 2026-08-31: run log lives outside the repo (not git-tracked, not the
+# 1Password item itself) - a 1Password item's updated_at proves *a*
+# backup happened at some point, but says nothing about who ran it,
+# whether it completed cleanly, and would vanish entirely if the item
+# were ever deleted and recreated. This is a separate, durable record.
+RUN_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/home-ops/backup-runs.log"
+mkdir -p "$(dirname "$RUN_LOG")"
+
 # Counters for validation
 BACKUP_SUCCESS=0
 BACKUP_TOTAL=0
@@ -223,6 +231,7 @@ echo "📊 Backup Summary:"
 echo "   ✅ Successful: $BACKUP_SUCCESS/$BACKUP_TOTAL"
 
 if [ "$BACKUP_SUCCESS" -eq "$BACKUP_TOTAL" ]; then
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $(whoami)@$(hostname) SUCCESS ${BACKUP_SUCCESS}/${BACKUP_TOTAL}" >> "$RUN_LOG"
     echo "🎉 All backups completed successfully!"
     echo ""
     echo "📝 Backed up items in vault '$VAULT':"
@@ -234,8 +243,10 @@ if [ "$BACKUP_SUCCESS" -eq "$BACKUP_TOTAL" ]; then
     echo ""
     echo "💡 To verify: task backup:list"
     echo "💡 To restore: task backup:restore"
+    echo "💡 Run history: $RUN_LOG"
     exit 0
 else
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $(whoami)@$(hostname) PARTIAL ${BACKUP_SUCCESS}/${BACKUP_TOTAL}" >> "$RUN_LOG"
     echo "⚠️  Some backups failed! Check the output above for details."
     echo ""
     echo "💡 To troubleshoot:"
