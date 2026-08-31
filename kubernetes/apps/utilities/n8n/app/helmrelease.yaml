@@ -138,10 +138,15 @@ spec:
           - hosts: [*host]
     persistence:
       data:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 20Gi
-        storageClass: ceph-block
+        # 2026-08-31: was type: persistentVolumeClaim (a self-managed
+        # PVC named n8n-data). Volsync has always been backing up a PVC
+        # literally named n8n instead - correctly wired via the volsync
+        # template in kustomization.yaml, just never mounted here - so
+        # every backup for 383 days ran against an empty volume. Live
+        # data (1.1G, verified checksum-identical) copied onto n8n before
+        # this change; n8n-data is now orphaned and safe to delete once
+        # this is confirmed stable.
+        existingClaim: n8n
         globalMounts:
           - path: /data
       tmp:
