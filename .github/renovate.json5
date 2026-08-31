@@ -79,6 +79,15 @@
     },
     {
       description: [
+        'Pin GitHub Actions to a commit SHA and keep the pin current',
+      ],
+      matchManagers: [
+        'github-actions',
+      ],
+      pinDigests: true,
+    },
+    {
+      description: [
         'Auto merge Github Actions',
       ],
       matchManagers: [
