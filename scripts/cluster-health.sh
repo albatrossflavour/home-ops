@@ -267,13 +267,39 @@ check_disk_usage() {
 
 # Check Pod Status
 check_pods() {
-    local problem_pods recent_restarts
+    local problem_pods recent_restarts owners_tmpdir
 
-    # Pods in bad states (not Running, not Completed, not Succeeded)
+    # Superseded pods with a healthy replacement should not count as live
+    # outages: a Job pod that failed once but the Job itself later
+    # succeeded via a retry pod, or a dead ReplicaSet pod left behind by a
+    # completed rollout (its ReplicaSet scaled to 0, superseded by a newer
+    # one). ".status.phase != \"Completed\"" below is dead filtering on its
+    # own - "Completed" is never a real pod phase value, only a status
+    # kubectl derives for display - so it caught nothing before this fix.
+    # jobs/replicasets are passed via --slurpfile (temp files), not
+    # --argjson (inline) - a cluster-wide JSON blob is too large for argv.
+    owners_tmpdir=$(mktemp -d)
+    $KUBECTL get jobs -A -o json > "$owners_tmpdir/jobs.json" 2>/dev/null
+    [[ -s "$owners_tmpdir/jobs.json" ]] || echo '{"items":[]}' > "$owners_tmpdir/jobs.json"
+    $KUBECTL get replicasets -A -o json > "$owners_tmpdir/rs.json" 2>/dev/null
+    [[ -s "$owners_tmpdir/rs.json" ]] || echo '{"items":[]}' > "$owners_tmpdir/rs.json"
+
     problem_pods=$($KUBECTL get pods -A -o json 2>/dev/null | \
-        jq -r '.items[] | select(.status.phase != "Running" and .status.phase != "Succeeded") |
-        select(.status.phase != "Completed") |
-        "\(.metadata.namespace)/\(.metadata.name): \(.status.phase) - \(.status.conditions[]? | select(.type=="Ready") | .message // "No message")"' 2>/dev/null)
+        jq -r --slurpfile jobs "$owners_tmpdir/jobs.json" --slurpfile rs "$owners_tmpdir/rs.json" '
+        (($jobs[0].items // []) | map(select(.status.succeeded >= 1) | .metadata.namespace + "/" + .metadata.name)) as $succeededJobs |
+        (($rs[0].items // []) | map(select(.spec.replicas == 0) | .metadata.namespace + "/" + .metadata.name)) as $supersededReplicaSets |
+        .items[] | . as $pod |
+        select($pod.status.phase != "Running" and $pod.status.phase != "Succeeded") |
+        select(
+          ([$pod.metadata.ownerReferences[]? | select(.kind == "Job") | $pod.metadata.namespace + "/" + .name] | first) as $jobKey |
+          ($jobKey == null) or (($succeededJobs | index($jobKey)) == null)
+        ) |
+        select(
+          ([$pod.metadata.ownerReferences[]? | select(.kind == "ReplicaSet") | $pod.metadata.namespace + "/" + .name] | first) as $rsKey |
+          ($rsKey == null) or (($supersededReplicaSets | index($rsKey)) == null)
+        ) |
+        "\($pod.metadata.namespace)/\($pod.metadata.name): \($pod.status.phase) - \($pod.status.conditions[]? | select(.type=="Ready") | .message // "No message")"' 2>/dev/null)
+    rm -rf "$owners_tmpdir"
 
     if [[ -n "$problem_pods" ]]; then
         echo -e "\n${RED}❌ CRITICAL: Pods Not Running${NC}"
@@ -491,11 +517,13 @@ check_events() {
     fi
 
     # Get events from last 10 minutes with Warning type
-    # Filter out transient probe failures that occur during normal pod startup/restart
+    # Filter out transient probe failures that occur during normal pod startup/restart,
+    # and VolumeFailedDelete - Volsync's ephemeral cache PVCs churn through a brief
+    # "still attached to node" race on detach several times a day, always self-resolving.
     warning_events=$($KUBECTL get events -A --field-selector type=Warning -o json 2>/dev/null | \
         jq -r --arg cutoff "$ten_min_ago" \
         '.items[] | select(.lastTimestamp > $cutoff) |
-        select(.reason != "Unhealthy" and .reason != "ProbeWarning") |
+        select(.reason != "Unhealthy" and .reason != "ProbeWarning" and .reason != "VolumeFailedDelete") |
         "\(.involvedObject.namespace // "cluster")/\(.involvedObject.name): \(.message)"' 2>/dev/null | \
         head -10)
 

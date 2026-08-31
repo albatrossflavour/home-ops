@@ -18,7 +18,6 @@ resources:
   - ./ingress-nginx.yaml
   - ./grafana.yaml
   - ./authentik.yaml
-  - ./bitnami.yaml
   - ./emqx.yaml
   - ./dysnix.yaml
   - ./external-secrets.yaml
