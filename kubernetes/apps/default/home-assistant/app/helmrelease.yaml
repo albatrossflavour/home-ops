@@ -39,7 +39,7 @@ spec:
           matter-server:
             image:
               repository: ghcr.io/matter-js/python-matter-server
-              tag: "8.1.2"
+              tag: "8.1.2@sha256:6827e352011e2d8c2bde771e446fcf72acc49150ef66bad978816bac1762aad3"
             restartPolicy: Always
             args:
               - --storage-path

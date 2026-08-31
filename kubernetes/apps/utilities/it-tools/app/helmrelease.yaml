@@ -29,7 +29,7 @@ spec:
           app:
             image:
               repository: sharevb/it-tools
-              tag: "2025.8.31-13b8f041"
+              tag: "2025.8.31-13b8f041@sha256:823f70ea2bf55dea0e1a4ae23db97e6bace07bfe883d7e3b7e2900975486aa0e"
               pullPolicy: IfNotPresent
             env:
               TZ: "${TZ}"

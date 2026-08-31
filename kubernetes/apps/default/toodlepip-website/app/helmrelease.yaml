@@ -31,7 +31,9 @@ spec:
           app:
             image:
               repository: ghcr.io/albatrossflavour/toodlepip-site
-              tag: latest
+              # 2026-08-31: digest pinned so Renovate can track it - "latest"
+              # alone gives it nothing to diff against.
+              tag: "latest@sha256:01f6f5ec9fca19656ee268533c082350ec9ae7c3188003b27229ddb858699665"
               pullPolicy: Always
             resources:
               requests:
@@ -42,7 +44,7 @@ spec:
           contact-api:
             image:
               repository: ghcr.io/albatrossflavour/toodlepip-contact-api
-              tag: latest
+              tag: "latest@sha256:00847ddd409c57c4ac0402dbe910848df7661299266d947f66a05176df873f97"
               pullPolicy: Always
             env:
               PORT: "3000"
@@ -71,7 +73,7 @@ spec:
           scanner:
             image:
               repository: ghcr.io/albatrossflavour/toodlepip-scanner
-              tag: latest
+              tag: "latest@sha256:62dea32f535c1f6d6ce2c5817b0aae38de22f5fb2f24ba37865fe88c7a7b263c"
               pullPolicy: Always
             env:
               GALLERY_SOURCE: /gallery-source
