@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kubernetes.json
+# Sized from live usage 2026-09-01, right after right-sizing every app's
+# memory requests/limits from 30d real usage (see the same day's other
+# commits in this namespace). Current committed totals: ~4.8Gi requests,
+# ~11Gi limits, 520m cpu requests across 11 pods - this quota gives
+# roughly 2x/1.5x headroom above that for rolling-update overlap (old +
+# new pod briefly coexisting) and modest future growth, not a tight cap.
+#
+# No limits.cpu on purpose: every container here deliberately has a
+# memory limit but no CPU limit (cluster has spare CPU, memory is the
+# scarce resource) - a ResourceQuota only forces a field to be declared
+# on every pod for the specific resource types it lists, so omitting
+# limits.cpu here preserves that pattern rather than forcing every
+# container to set one.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: media-quota
+  namespace: media
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 10Gi
+    limits.memory: 16Gi
+    pods: "30"

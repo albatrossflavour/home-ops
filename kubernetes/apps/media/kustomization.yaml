@@ -6,6 +6,7 @@ resources:
   - ./namespace.yaml
   - ./networkpolicy-default.yaml
   - ./networkpolicy-database.yaml
+  - ./resourcequota.yaml
   # Flux-Kustomizations
   - ./sonarr/ks.yaml
   - ./radarr/ks.yaml
