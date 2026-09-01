@@ -21,8 +21,13 @@ spec:
                     name="$1"; path="$2"
                     enddate=$(openssl x509 -enddate -noout -in "$path" | cut -d= -f2)
                     epoch=$(date -u -D "%b %d %H:%M:%S %Y %Z" -d "$enddate" +%s)
-                    body=$(printf 'cert_expiry_timestamp_seconds %s\n' "$epoch")
-                    wget -q -O- --post-data="$body" \
+                    # --post-data via $(...) silently loses its trailing
+                    # newline (command substitution always strips it) and
+                    # Pushgateway's text-exposition parser requires one on
+                    # every line, last line included - write to a file
+                    # instead so the newline from printf's redirect survives.
+                    printf 'cert_expiry_timestamp_seconds %s\n' "$epoch" > /tmp/metric.txt
+                    wget -q -O- --post-file=/tmp/metric.txt \
                       "http://cert-expiry-pushgateway.kube-system.svc.cluster.local:9091/metrics/job/cert-expiry-check/instance/$name"
                     echo "$name: expires $enddate (epoch $epoch)"
                   }
@@ -39,6 +44,8 @@ spec:
                 - name: cilium-ca
                   mountPath: /certs/cilium-ca
                   readOnly: true
+                - name: tmp
+                  mountPath: /tmp
               resources:
                 requests:
                   cpu: 10m
@@ -73,6 +80,8 @@ spec:
                 items:
                   - key: ca.crt
                     path: ca.crt
+            - name: tmp
+              emptyDir: {}
           restartPolicy: OnFailure
           securityContext:
             runAsNonRoot: true
