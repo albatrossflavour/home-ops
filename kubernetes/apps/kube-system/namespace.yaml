@@ -5,3 +5,17 @@ metadata:
   name: kube-system
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
+    # 2026-09-01: PodSecurity enforcement pass. Was unlabeled and clearly
+    # relying on some exemption - confirmed live cluster-wide default is
+    # actually "baseline" (not "privileged" as first assumed; proven via
+    # dry-run tests against untouched namespaces), yet Cilium's DaemonSet
+    # (SYS_ADMIN/NET_ADMIN/DAC_OVERRIDE, mount-bpf-fs:privileged,
+    # hostNetwork, a dozen hostPath mounts), the static control-plane pods
+    # (hostNetwork + hostPath to /etc/kubernetes/secrets), and Spegel
+    # (containerd socket access) all run here unlabeled today without
+    # issue - meaning kube-system carries some undocumented exemption.
+    # Making it explicit and git-tracked rather than relying on that
+    # implicit, unverified default. Purely additive (privileged permits
+    # everything a lower level would, plus more), so this cannot newly
+    # restrict anything already running.
+    pod-security.kubernetes.io/enforce: privileged
