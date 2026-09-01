@@ -123,6 +123,29 @@ spec:
             summary: "UPS battery charge is low at {{ $value }}%"
             description: "UPS battery charge is at {{ $value | humanize }}% (threshold: 50%). System shutdown may occur soon if mains power is not restored."
 
+        # 2026-09-01: charge% alone is a poor proxy for time-to-shutdown -
+        # this UPS (CyberPower PR1000ELCD) is rated 4min runtime at full
+        # load but 16min at half load, so the same 50% charge threshold
+        # above means very different things depending on draw. There's no
+        # network_ups_tools_battery_runtime metric exported by this NUT
+        # setup to alert on directly (checked live - it isn't there).
+        # NUT's own LB ("Low Battery") status flag is the better signal:
+        # it's the UPS firmware's own runtime estimate, already factoring
+        # in actual discharge rate and load internally, not a fixed
+        # percentage - this is the standard "act now" signal upsmon-style
+        # tooling watches for.
+        - alert: UPSLowBatteryRuntime
+          expr: |
+            network_ups_tools_ups_status{flag="LB"} == 1
+          for: 30s
+          labels:
+            severity: critical
+            component: infrastructure
+            alert_group: power
+          annotations:
+            summary: "UPS reports imminent battery exhaustion"
+            description: "The UPS's own firmware has raised its Low Battery (LB) flag - its internal runtime estimate, accounting for actual load, is at the point where shutdown should begin. This is a shorter-fuse warning than UPSBatteryLow's fixed 50% charge threshold."
+
     - name: flux
       rules:
         # 2026-08-31: rewritten off gotk_resource_info. The old expr used

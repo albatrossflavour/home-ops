@@ -72,6 +72,17 @@ The cluster implements a comprehensive observability stack:
 - Certificate expiration
 - Tunnel connectivity
 
+**Power (UPS):**
+
+- Hardware: CyberPower PR1000ELCD (line-interactive, pure sine wave), serial `PSBNO2000001`
+- Rated: 1000VA / 900W
+- Rated runtime: **4 minutes at full load, 16 minutes at half load** (manufacturer spec, not measured) - live load typically sits close to half load, so 16 minutes is the realistic planning number, not 4
+- NUT host: `192.168.5.50:9199`, scraped by Prometheus as job `nut-exporters`
+- Metrics exported: `network_ups_tools_battery_charge`, `network_ups_tools_battery_voltage(_nominal)`, `network_ups_tools_input_voltage(_nominal)`, `network_ups_tools_ups_load`, `network_ups_tools_ups_status{flag=...}`, `network_ups_tools_device_info`
+- **Not exported**: any runtime-remaining metric (e.g. `battery_runtime`) - if a doc or alert assumes one exists, it's wrong; confirmed absent live 2026-09-01. Use the `ups_status{flag="LB"}` status flag instead (NUT's own firmware-computed "low battery, act now" signal, factors in actual discharge rate/load) rather than trying to derive a runtime estimate from charge% alone
+- Alerting: `UPSOnBattery` (mains lost), `UPSBatteryLow` (charge < 50%, an early warning with more lead time but a poor proxy under fast drain), `UPSLowBatteryRuntime` (the `LB` flag - the real "act now" signal) - all in `kubernetes/apps/observability/custom-alerts/app/prometheusrule.yaml`
+- No automated graceful-shutdown policy exists for critical battery (no `upsmon`/Talos automation drains or shuts down the cluster) - this is a deliberate open decision, not an oversight; see the cluster audit doc
+
 ## 🔧 Monitoring Operations
 
 ### Prometheus Management
