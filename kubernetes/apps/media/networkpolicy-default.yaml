@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Baseline policy for every pod in media, derived from a live Hubble capture
+# (2026-08-31/09-01, ~2h across all 10 apps) rather than guesswork. Default-
+# deny is Cilium's own behaviour the moment any CiliumNetworkPolicy selects
+# a pod - nothing else needs to opt in.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy media-default -n media`.
+# Zero CiliumNetworkPolicy objects means Cilium's cluster-wide
+# `enable-policy: default` falls back to fully permissive - this is the
+# entire rollback plan, no audit-mode toggle involved.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: media-default
+  namespace: media
+spec:
+  endpointSelector: {}
+  ingress:
+    # Kubelet liveness/readiness probes originate from the node's host IP,
+    # not a pod identity - without this every probe gets dropped the moment
+    # this policy takes effect.
+    - fromEntities:
+        - host
+        - remote-node
+    # Same-namespace mesh (bazarr<->sonarr/radarr metadata lookups, etc).
+    - fromEndpoints:
+        - {}
+    # ingress-nginx controllers, cloudflared, external-dns - the whole
+    # network namespace, matching what's actually observed reaching these
+    # apps' web UIs.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+    # homepage's dashboard widgets poll every app's API directly.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/name: homepage
+    # Prometheus/exporter scraping.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: observability
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Volsync mover pods for jellyfin, sabnzbd, qbittorrent, overseerr and
+    # tautulli all reach cluster Minio for backups - not scoped to specific
+    # apps since which app's mover runs varies by schedule.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/name: minio
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    - toEndpoints:
+        - {}
+    # *arr apps and download clients talk to indexers, trackers and metadata
+    # APIs at unpredictable destinations - not attempting egress filtering
+    # to the internet in this first pass.
+    - toEntities:
+        - world

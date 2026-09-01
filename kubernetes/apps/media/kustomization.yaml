@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
+  - ./networkpolicy-default.yaml
+  - ./networkpolicy-database.yaml
   # Flux-Kustomizations
   - ./sonarr/ks.yaml
   - ./radarr/ks.yaml

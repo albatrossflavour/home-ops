@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Separate from media-default deliberately - finding #13 is specifically
+# about not letting arbitrary pods reach the database, so this scopes
+# pooler egress to only the three apps actually provisioned with pooler
+# credentials (confirmed via their ExternalSecrets, not just observed
+# traffic - prowlarr's window in the Hubble capture didn't show a
+# connection but it holds the same credential shape as sonarr/radarr).
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy media-database-access -n media`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: media-database-access
+  namespace: media
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - sonarr
+          - radarr
+          - prowlarr
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: database
+            cnpg.io/poolerName: postgres16-pooler-rw
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
