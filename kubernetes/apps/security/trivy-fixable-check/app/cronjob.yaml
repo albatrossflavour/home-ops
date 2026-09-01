@@ -1,0 +1,60 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: trivy-fixable-check
+spec:
+  schedule: "15 6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: trivy-fixable-check
+          containers:
+            - name: trivy-fixable-check
+              image: alpine/k8s:1.31.3@sha256:7f485a380b3b890b8f4d0de63e242b79db728ef1e0fc5ae30d30cbe5f9e2d242
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  # Only counts vulnerabilities with a fixedVersion set -
+                  # deliberately excludes anything genuinely blocked
+                  # upstream (2026-09-01: ~150 of 262 cluster-wide CRITICAL
+                  # findings are unfixed Debian/base-image CVEs like the
+                  # Perl regex/tar CVEs present in almost every Debian-based
+                  # image - alerting on those would page on something
+                  # nobody can act on until the distro patches it).
+                  count=$(kubectl get vulnerabilityreports -A -o json | \
+                    jq '[.items[].report.vulnerabilities[]? | select(.severity=="CRITICAL" and (.fixedVersion // "") != "")] | length')
+                  printf 'trivy_critical_fixable_total %s\n' "$count" > /tmp/metric.txt
+                  wget -q -O- --post-file=/tmp/metric.txt \
+                    "http://cert-expiry-pushgateway.kube-system.svc.cluster.local:9091/metrics/job/trivy-fixable-check/instance/cluster"
+                  echo "fixable CRITICAL count: $count"
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                requests:
+                  cpu: 20m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            - name: tmp
+              emptyDir: {}
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

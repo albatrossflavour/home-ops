@@ -261,6 +261,31 @@ spec:
             summary: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} in ImagePullBackOff"
             description: "Container has been unable to pull its image for more than 10 minutes."
 
+    - name: trivy
+      rules:
+        # 2026-09-01: deliberately scoped to fixable-only. Cluster-wide
+        # CRITICAL count sits around 260+ at any given time, ~150 of which
+        # are unfixed Debian/base-image CVEs (a handful of Perl CVEs alone
+        # account for 100+, present in almost every Debian-based image
+        # whether it uses Perl or not) - genuinely nothing to act on until
+        # the distro patches them. Alerting on the raw total would mean a
+        # permanently-firing alert nobody can clear. This only counts
+        # vulnerabilities where trivy reports a fixedVersion - i.e. only
+        # things an image bump could actually resolve. Threshold (10) and
+        # for (24h) are both deliberately patient - this is a "worth a
+        # dedicated look sometime this week" signal, not a page. Metric
+        # pushed daily by trivy-fixable-check (security namespace) via the
+        # same Pushgateway cert-expiry-check already uses.
+        - alert: TrivyFixableCriticalBacklog
+          expr: |
+            trivy_critical_fixable_total > 10
+          for: 24h
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $value }} fixable CRITICAL vulnerabilities sitting unaddressed"
+            description: "{{ $value }} CRITICAL vulnerabilities across the cluster have a fix already published upstream but haven't been picked up yet - a stale image pin somewhere is the usual cause (see the postgres16/nginx-reverse-proxy fixes in the audit doc for the pattern). Check `kubectl get vulnerabilityreports -A` and cross-reference fixedVersion fields to find which image(s)."
+
     - name: thanos
       rules:
         # 2026-09-01: the Thanos bucket (cluster Minio, itself NFS-backed at

@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
   - ./authentik/ks.yaml
+  - ./trivy-fixable-check/ks.yaml
   - ./trivy-operator/ks.yaml
