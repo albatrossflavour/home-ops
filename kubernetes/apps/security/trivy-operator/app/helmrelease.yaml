@@ -54,3 +54,14 @@ spec:
       # container, all sharing that job pod's cache) - lower concurrency
       # to reduce simultaneous Trivy processes fighting over the DB cache.
       scanJobsConcurrentLimit: 3
+      # 2026-09-01: node-collector (infra/CIS-benchmark node scanning)
+      # cannot work on Talos at all - it hardcodes hostPath mounts like
+      # /etc/systemd and /lib/systemd, which don't exist on Talos (no
+      # systemd, immutable OS, different filesystem layout entirely).
+      # Confirmed live: the container runtime itself refuses to create it
+      # ("failed to mkdir /etc/systemd: read-only file system"), a deeper
+      # failure than admission control, unrelated to and unfixable by any
+      # PodSecurity level. Was retrying forever, generating pure noise.
+      # Does not affect image vulnerability scanning (the actual point of
+      # this deployment) - that's a separate scanner, unaffected.
+      infraAssessmentScannerEnabled: false
