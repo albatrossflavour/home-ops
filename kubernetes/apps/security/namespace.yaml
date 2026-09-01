@@ -5,3 +5,13 @@ metadata:
   name: security
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
+    # 2026-09-01: PodSecurity enforcement pass. authentik and
+    # trivy-operator's own steady-state pods are all clean for Baseline,
+    # but trivy-operator's node-collector Job (periodic CIS-benchmark node
+    # scanning) needs hostPID plus extensive hostPath mounts
+    # (/var/lib/etcd, /var/lib/kubelet, /etc/kubernetes, etc.) - caught
+    # live via a real node-collector Job failing repeatedly against the
+    # cluster-wide baseline default before this label existed. Namespace
+    # level has to accommodate the least-permissive workload that runs
+    # there, so privileged, not baseline.
+    pod-security.kubernetes.io/enforce: privileged
