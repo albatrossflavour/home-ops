@@ -380,7 +380,12 @@ spec:
           revision: 9
           datasource: Prometheus
         cert-manager:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/cert-manager/dashboards/overview.json
+          # 2026-09-01: upstream renamed overview.json ->
+          # cert-manager-overview.json at some point - the old path was
+          # returning a literal "404: Not Found" as the "dashboard" content,
+          # which Grafana's provisioner failed to parse (EOF). Confirmed
+          # live the new path returns a real dashboard (10 panels).
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/cert-manager/dashboards/cert-manager-overview.json
           datasource: Prometheus
         cloudflared:
           # renovate: depName="Cloudflare Tunnels (cloudflared)"
