@@ -6,7 +6,18 @@ metadata:
   name: postgres16
 spec:
   instances: 3
-  imageName: ghcr.io/cloudnative-pg/postgresql:16.4-2
+  # 2026-09-01: was frozen at 16.4-2 (2024-08-08) for the cluster's entire
+  # lifetime - confirmed via git history this field was never touched, not
+  # even a same-version build-string bump, because Renovate's default
+  # docker/kubernetes managers don't recognise CNPG's "imageName" key (only
+  # the standard "image:" key). Added a customManagers regex to
+  # .github/renovate.json5 to fix that going forward. Bumped directly to
+  # 16.15 (2026-08-13) in one jump, not staged - Postgres minor releases
+  # within the same major version are always binary-compatible, checked the
+  # 16.15 release notes for the one real gotcha (a new output_plugin_libraries
+  # allow-list affecting custom logical-decoding plugins) and confirmed live
+  # this cluster only uses CNPG's own physical replication slot, not logical.
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.15-standard-bullseye@sha256:5dac6f57826663d4eb55011a9083603f7e871ffbec9a4650b5588c3177d3f9df
   primaryUpdateStrategy: unsupervised
   storage:
     size: 20Gi

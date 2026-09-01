@@ -375,5 +375,18 @@
       datasourceTemplate: 'grafana-dashboards',
       versioningTemplate: 'regex:^(?<major>\\d+)$',
     },
+    {
+      customType: 'regex',
+      description: [
+        'CloudNativePG Cluster imageName - repo:tag combined in one value, unlike the datasource=/depName= comment convention above which needs them split. Confirmed 2026-09-01 this field was invisible to Renovate for the cluster\'s entire lifetime (never touched since the file was first committed, not even a same-version build-string bump) - CNPG\'s imageName key isn\'t the standard "image:" key the default docker/kubernetes managers look for.',
+      ],
+      managerFilePatterns: [
+        '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
+      ],
+      matchStrings: [
+        'imageName:\\s*(?<depName>[^:\\s]+):(?<currentValue>[^\\s@]+)(@(?<currentDigest>sha256:[a-fA-F0-9]+))?',
+      ],
+      datasourceTemplate: 'docker',
+    },
   ],
 }
