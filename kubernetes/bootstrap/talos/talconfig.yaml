@@ -20,10 +20,20 @@ additionalMachineCertSans: *sans
 cniConfig:
   name: none
 
+# 2026-09-01: every node's installDiskSelector matches on size (< 60GB),
+# not a raw /dev/sda path. All 6 nodes' boot disk is consistently 54GB;
+# the only other disk anywhere in this fleet (the Ceph OSD data disks on
+# weatherwax/ogg/magrat) is 537-591GB - a size selector is immune to a
+# device-enumeration-order shift the way a raw path isn't (e.g. if a 4th
+# OSD disk is ever added to a worker node - see the audit doc's
+# 4th-OSD-failure-domain finding). No serial/WWID available on these
+# virtio disks to select on instead - all report as generic "QEMU
+# HARDDISK".
 nodes:
   - hostname: "weatherwax"
     ipAddress: "192.168.8.10"
-    installDisk: "/dev/sda"
+    installDiskSelector:
+      size: "< 60GB"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: true
     networkInterfaces:
@@ -40,7 +50,8 @@ nodes:
           ip: "192.168.8.20"
   - hostname: "ogg"
     ipAddress: "192.168.8.11"
-    installDisk: "/dev/sda"
+    installDiskSelector:
+      size: "< 60GB"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: true
     networkInterfaces:
@@ -57,7 +68,8 @@ nodes:
           ip: "192.168.8.20"
   - hostname: "magrat"
     ipAddress: "192.168.8.12"
-    installDisk: "/dev/sda"
+    installDiskSelector:
+      size: "< 60GB"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: true
     networkInterfaces:
@@ -79,7 +91,8 @@ nodes:
           ip: "192.168.8.20"
   - hostname: "wuffles"
     ipAddress: "192.168.8.13"
-    installDisk: "/dev/sda"
+    installDiskSelector:
+      size: "< 60GB"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: false
     networkInterfaces:
@@ -94,7 +107,8 @@ nodes:
         mtu: 1500
   - hostname: "aching"
     ipAddress: "192.168.8.14"
-    installDisk: "/dev/sda"
+    installDiskSelector:
+      size: "< 60GB"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: false
     networkInterfaces:
@@ -109,7 +123,8 @@ nodes:
         mtu: 1500
   - hostname: "greebo"
     ipAddress: "192.168.8.15"
-    installDisk: "/dev/sda"
+    installDiskSelector:
+      size: "< 60GB"
     talosImageURL: factory.talos.dev/installer/2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
     controlPlane: false
     networkInterfaces:
