@@ -9,6 +9,18 @@ spec:
     - targets:
         - cert-expiry-pushgateway.kube-system.svc.cluster.local:9091
   metricsPath: /metrics
+  # Pushgateway's whole grouping-key model (job=cert-expiry-check,
+  # instance=<cert name>) IS the metric's identity - without honorLabels,
+  # Prometheus's own scrape-target instance label (the pushgateway's own
+  # address) silently overwrites it and every cert collapses into one
+  # indistinguishable series. Confirmed live before adding this: all three
+  # certs showed instance="cert-expiry-pushgateway...:9091" instead of
+  # their real names. honorLabels also means the metric's own pushed job
+  # label ("cert-expiry-check") wins over the relabeling below - kept the
+  # relabeling anyway, matching every other ScrapeConfig in this repo, as
+  # a defined fallback rather than leaving job unset before honorLabels
+  # resolves the collision.
+  honorLabels: true
   relabelings:
     - action: replace
       targetLabel: job
