@@ -5,3 +5,8 @@ metadata:
   name: flux-system
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
+    # 2026-09-01: PodSecurity enforcement pass. All 7 Flux controllers
+    # clean for Baseline, no CronJobs/Jobs, no Volsync usage. Already
+    # carried a warn: restricted label (advisory only) with nothing
+    # actually enforced - added the real enforce level.
+    pod-security.kubernetes.io/enforce: baseline
