@@ -8,6 +8,15 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          # No pod-level label existed at all before this - CronJob-spawned
+          # pods only get per-run job-name/controller-uid labels, nothing
+          # stable. Added specifically so the CiliumNetworkPolicy below has
+          # something durable to select; without it the policy would
+          # silently match zero pods and this CronJob would stay fully
+          # unrestricted forever, with no visible error.
+          labels:
+            app.kubernetes.io/name: trivy-fixable-check
         spec:
           serviceAccountName: trivy-fixable-check
           containers:

@@ -5,3 +5,4 @@ kind: Kustomization
 resources:
   - ./rbac.yaml
   - ./cronjob.yaml
+  - ./networkpolicy.yaml

@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Not covered by the Hubble capture at all - this CronJob runs once daily
+# at 06:15 and the capture window didn't include that. Derived from reading
+# its actual command instead: it only calls kubectl (kube-apiserver,
+# already covered by security-default) and pushes metrics to the
+# cert-expiry-pushgateway Service in kube-system. No internet egress.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy security-trivy-fixable-check -n security`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: security-trivy-fixable-check
+  namespace: security
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: trivy-fixable-check
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            app: cert-expiry-pushgateway
+      toPorts:
+        - ports:
+            - port: "9091"
+              protocol: TCP

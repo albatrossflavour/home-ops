@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Baseline policy for security, derived from a live 6h Hubble capture
+# (2026-09-01) covering authentik and trivy-operator - the two apps with
+# live pods. App-specific rules (authentik, trivy-operator/its scan jobs,
+# trivy-fixable-check) live in their own app directories, matching this
+# repo's convention (see external-secrets/onepassword-connect/app/pdb.yaml)
+# - this file is only what's genuinely common across the namespace.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy security-default -n security`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: security-default
+  namespace: security
+spec:
+  endpointSelector: {}
+  ingress:
+    # Kubelet probes (authentik :9000, trivy-operator :9090).
+    - fromEntities:
+        - host
+        - remote-node
+        - kube-apiserver
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # trivy-operator watches/writes VulnerabilityReport CRs; authentik has
+    # its own k8s outpost integration.
+    - toEntities:
+        - kube-apiserver
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP

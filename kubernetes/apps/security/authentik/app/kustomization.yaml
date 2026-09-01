@@ -4,5 +4,6 @@ kind: Kustomization
 resources:
   - ./external-secret.yaml
   - ./helm-release.yaml
+  - ./networkpolicy.yaml
   - ../../../../templates/gatus/external
   #  - ./outpost.yaml

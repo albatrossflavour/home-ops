@@ -1,0 +1,52 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Two policies, different selectors, same app family. Derived from a live
+# 6h Hubble capture (2026-09-01).
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy security-trivy-operator security-trivy-scan-jobs -n security`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: security-trivy-operator
+  namespace: security
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: trivy-operator
+  ingress:
+    # Prometheus scraping metrics (:8080) - the only ServiceMonitor in this
+    # namespace, confirmed live.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: observability
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: security-trivy-scan-jobs
+  namespace: security
+spec:
+  # Ephemeral scan Job pods get a random job-name suffix, so this can't
+  # select on a fixed name - app.kubernetes.io/managed-by=trivy-operator is
+  # durable across every scan job and doesn't match the operator's own pod
+  # (confirmed live: the controller carries app.kubernetes.io/name instead).
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: trivy-operator
+  egress:
+    # Pulling image manifests from whatever registry each scan target came
+    # from - unpredictable destinations, not attempting to enumerate them.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Occasional direct DNS resolution outside coredns (small but present,
+    # same pattern as authentik's).
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP

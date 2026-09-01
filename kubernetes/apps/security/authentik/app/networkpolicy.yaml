@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Scoped to authentik specifically (SSO for the whole cluster - maximum
+# care, same bar as the PodSecurity pass earlier this cycle). Derived from
+# a live 6h Hubble capture (2026-09-01).
+#
+# Two things NOT dropped despite being small/odd in the capture, because
+# the volume or the app's own nature argues for keeping them:
+# - world UDP/53: 7215 occurrences over 6h (~20/min) - real, not noise,
+#   authentik doing some direct DNS resolution outside coredns.
+# - world TCP/5432 (24 occurrences): NOT included - vanishingly small
+#   relative to the 525k legitimate postgres16 flows, almost certainly an
+#   identity-resolution artifact on an internal ClusterIP, not a real
+#   external database. Allowing DB-port egress to the whole internet would
+#   be a real hole for a 0.005% blip.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy security-authentik -n security`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: security-authentik
+  namespace: security
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: authentik
+  ingress:
+    # ingress-nginx serving the login/admin UI.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+  egress:
+    # Whole postgres16 cluster (instances + pooler), not just the pooler -
+    # authentik uses AUTHENTIK_POSTGRESQL__DIRECT__HOST unpooled for Django
+    # Channels' LISTEN and the Dramatiq worker's LISTEN, same lesson as the
+    # media init-db bug and utilities' proactive fix earlier tonight.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: database
+            cnpg.io/cluster: postgres16
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # Direct DNS resolution outside coredns - real, substantial volume.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+    # GeoIP/update-check/social-auth provider discovery - unpredictable
+    # destinations, not attempting to enumerate them.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Password reset / notification emails via the in-cluster SMTP relay.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/name: smtp-relay
+      toPorts:
+        - ports:
+            - port: "25"
+              protocol: TCP
