@@ -897,7 +897,7 @@ gh api repos/:owner/:repo/branches/main/protection \
 - Configured for weekend runs to minimize disruption
 - Automatic digest pinning for all container images
 - Grouped updates for related components (Flux, Talos)
-- Auto-merge enabled for minor/patch updates and digests
+- Auto-merge enabled for GitHub Actions minor/patch updates only — container images and Helm charts (including digest-only bumps) always sit for manual merge, regardless of update type
 
 ## Important Notes
 
