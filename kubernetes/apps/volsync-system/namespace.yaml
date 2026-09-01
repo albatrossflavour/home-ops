@@ -6,6 +6,16 @@ metadata:
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
     volsync.backube/privileged-movers: "true"
+  labels:
+    # 2026-09-01: PodSecurity enforcement pass, last of this round. This
+    # namespace also carries privileged-movers: "true" (same as database),
+    # but no ReplicationSource/Destination objects live here and none ever
+    # will - Volsync's movers run in the target app's own namespace where
+    # the source PVC lives, not the controller's namespace (confirmed
+    # three times tonight: n8n in utilities, nocodb in database, jellyfin
+    # in media). Only 2 pods run here (volsync manager, snapshot-controller),
+    # both clean for Baseline.
+    pod-security.kubernetes.io/enforce: baseline
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/notification.toolkit.fluxcd.io/provider_v1beta3.json
 apiVersion: notification.toolkit.fluxcd.io/v1beta3
