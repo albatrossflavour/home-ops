@@ -23,7 +23,15 @@ spec:
     image:
       registry: docker.io
       repository: bitnami/nginx
-      tag: 1.29.1-debian-12-r0@sha256:b2e803958eda5723aae1e36ed0e418f6e0c79e7ce890820eba9cad85a6381286
+      # 2026-09-01: the old X.Y.Z-debianNN-rN tag scheme is gone from this
+      # registry entirely (confirmed live - only "latest"/"latest-metadata"
+      # remain), part of Broadcom's 2025 restructuring of free Bitnami
+      # images. "latest" is still a genuinely maintained, actively-rebuilt
+      # image (this pin's build: 2026-08-22, nginx 1.31.4) - Renovate's
+      # digest-pinning tracks a floating tag's digest the same way it did
+      # the old versioned one, so this stays auto-updatable going forward,
+      # it just won't show a version-number bump in the PR title anymore.
+      tag: latest@sha256:14e3a7235f3cde1cd52e073e2eb152522167e6d893e339e42bda054cef6ff44a
     pullPolicy: IfNotPresent
     debug: false
     replicaCount: 1
