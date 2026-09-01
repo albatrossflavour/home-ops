@@ -65,6 +65,82 @@ tasks:
       - msg: Missing Sops config file
         sh: test -f {{.SOPS_CONFIG_FILE}}
 
+  verify-new-key:
+    desc: Verify every SOPS file decrypts using ONLY the new key (not the combined keyring)
+    summary: |
+      Step 4 of docs/operations/sops-age-key-rotation.md - automates the
+      "repeat for the other 6 files" instruction rather than leaving it as
+      a manual per-file loop. Points SOPS_AGE_KEY_FILE at *only* the given
+      key, proving it actually works standalone, not just that the old key
+      in your combined local keyring is still covering for it. Read-only -
+      safe to run as many times as you want.
+      Args:
+        key: path to the new age key file (required, e.g. age.key.new)
+    cmds:
+      - for: { var: file }
+        task: .verify-new-key-file
+        vars:
+          file: "{{.ITEM}}"
+          key: "{{.key}}"
+    vars:
+      file:
+        sh: find "{{.ROOT_DIR}}" -type f \( -name "*.sops.yaml" -o -name "*.sops.yml" \) ! -name ".sops.yaml" ! -name ".sops.yml"
+    requires:
+      vars: ["key"]
+    preconditions:
+      - msg: "Missing key file: {{.key}}"
+        sh: test -f {{.key}}
+
+  .verify-new-key-file:
+    internal: true
+    cmd: SOPS_AGE_KEY_FILE={{.key}} sops --decrypt {{.file}} > /dev/null
+    requires:
+      vars: ["file", "key"]
+
+  update-incluster-key:
+    desc: Cut the in-cluster flux-system/sops-age Secret over to a new key
+    summary: |
+      Step 5 of docs/operations/sops-age-key-rotation.md. This is the step
+      that was previously undiscovered/manual-only - the in-cluster secret
+      is create-only via Flux's own bootstrap task (never updates existing
+      content), so nothing else touches it on a real rotation.
+
+      Runs verify-new-key first and refuses to proceed if any file fails -
+      do NOT cut the in-cluster secret over to a key that can't actually
+      decrypt everything yet. Only ever call this AFTER the new key has
+      been added as a second recipient in .sops.yaml and every file has
+      already been re-keyed and pushed (Steps 2-3) - this task has no way
+      to verify that part, it only verifies the key itself decrypts.
+
+      Args:
+        key: path to the new age key file (required, e.g. age.key.new)
+    prompt: |
+      This deletes and recreates flux-system/sops-age, the Secret every
+      Kustomization decrypting a SOPS file depends on. A bad key here is a
+      cluster-wide decrypt failure. Continue?
+    cmds:
+      - task: verify-new-key
+        vars:
+          key: "{{.key}}"
+      - kubectl --kubeconfig {{.KUBECONFIG_FILE}} -n flux-system delete secret sops-age
+      - cat {{.key}} | kubectl --kubeconfig {{.KUBECONFIG_FILE}} -n flux-system create secret generic sops-age --from-file=age.agekey=/dev/stdin
+      - flux --kubeconfig {{.KUBECONFIG_FILE}} reconcile source git flux-system
+      - flux --kubeconfig {{.KUBECONFIG_FILE}} reconcile kustomization cluster-apps --with-source
+      - |
+        echo
+        echo "Done. Watch for decrypt failures now, not just Ready=True:"
+        echo "  flux get kustomizations -A"
+        echo "  flux get helmreleases -A"
+        echo "A stale-key failure shows up as a SOPS_AGE_KEY_FILE / secretbox error on any"
+        echo "Kustomization touching one of the re-keyed files, not a generic Ready=False."
+    requires:
+      vars: ["key"]
+    preconditions:
+      - msg: "Missing key file: {{.key}}"
+        sh: test -f {{.key}}
+      - msg: Missing kubeconfig
+        sh: test -f {{.KUBECONFIG_FILE}}
+
   .reset:
     internal: true
     cmd: rm -rf {{.SOPS_CONFIG_FILE}}

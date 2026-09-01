@@ -21,7 +21,7 @@ One age key (`age1n7n73hztvwkq43gskmeddawn5w638dh30g0jycfxvn4h7ek9yvfq8tesqz`, d
 
 Re-run `find . -iname "*.sops.yaml" -o -iname "*.sops.yml"` before starting in case new ones were added since this doc was written.
 
-The in-cluster `flux-system/sops-age` Secret is what kustomize-controller actually decrypts with. It is **not** Flux-managed — it's created once, directly via `kubectl`, by `.taskfiles/Flux/Taskfile.yaml`'s `bootstrap` task, and that task only creates it if missing. Nothing currently updates it on a rotation, so Step 5 below has to be done by hand. This is expected, not a workaround — the secret Flux needs to decrypt everything else can't itself be Flux-managed.
+The in-cluster `flux-system/sops-age` Secret is what kustomize-controller actually decrypts with. It is **not** Flux-managed — it's created once, directly via `kubectl`, by `.taskfiles/Flux/Taskfile.yaml`'s `bootstrap` task, and that task only creates it if missing, never updates it. This is expected, not a workaround — the secret Flux needs to decrypt everything else can't itself be Flux-managed. `task sops:update-incluster-key` (Step 5) automates the actual cutover, gated on `task sops:verify-new-key` (Step 4) passing first - it was undiscovered/manual-only before 2026-09-01.
 
 ## Procedure
 
@@ -61,13 +61,20 @@ Loops `sops updatekeys` over every `*.sops.yaml`/`*.sops.yml` file in the repo (
 Point `SOPS_AGE_KEY_FILE` at *only* the new key (not the combined old+new local keyring) to prove the new key actually works on its own, not just that the old one still does:
 
 ```bash
-SOPS_AGE_KEY_FILE=age.key.new sops --decrypt kubernetes/flux/vars/cluster-secrets.sops.yaml >/dev/null && echo OK
-# repeat for the other 6 files
+task sops:verify-new-key key=age.key.new
 ```
+
+Re-derives the file list live and runs this check against every one of them — automates the "repeat for the other 6 files" step rather than leaving it manual. Read-only, safe to re-run.
 
 Commit and push `.sops.yaml` plus the 7 re-keyed files before continuing — Flux needs to already be able to decrypt with the new key before the in-cluster secret changes, or a mistake here becomes a cluster-wide decrypt failure the moment Step 5 lands.
 
 ### 5. Update the in-cluster secret
+
+```bash
+task sops:update-incluster-key key=age.key.new
+```
+
+Runs `verify-new-key` again first (refuses to proceed if it fails - do not hand-run the raw `kubectl`/`flux` commands below if this task won't let you past that check), prompts for confirmation, then deletes and recreates `flux-system/sops-age` and reconciles Flux. Equivalent to, but safer than, running by hand:
 
 ```bash
 kubectl --kubeconfig kubeconfig -n flux-system delete secret sops-age
