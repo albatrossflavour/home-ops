@@ -66,6 +66,21 @@ spec:
           envFrom:
             - secretRef:
                 name: authentik-secret
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+      # Sized from 30d real usage (Thanos) 2026-09-01: max 827Mi across all
+      # 3 replicas. No CPU limit, matching the media namespace's pattern -
+      # cluster has spare CPU, memory is the scarce resource.
+      resources:
+        requests:
+          cpu: 20m
+          memory: 768Mi
+        limits:
+          memory: 1.25Gi
       metrics:
         serviceMonitor:
           enabled: true
@@ -88,6 +103,14 @@ spec:
         tls:
           - hosts:
               - *host
+    worker:
+      # Sized from 30d real usage (Thanos) 2026-09-01: max 405Mi.
+      resources:
+        requests:
+          cpu: 30m
+          memory: 384Mi
+        limits:
+          memory: 640Mi
     geoip:
       enabled: false
       existingSecret:
