@@ -236,6 +236,29 @@ spec:
             summary: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} in ImagePullBackOff"
             description: "Container has been unable to pull its image for more than 10 minutes."
 
+    - name: thanos
+      rules:
+        # 2026-09-01: the Thanos bucket (cluster Minio, itself NFS-backed at
+        # 192.168.1.22:/volume2/k3sminio) is the only copy of years of
+        # downsampled metric history - no second copy exists. Confirmed live
+        # thanos_objstore_bucket_operation_failures_total was already being
+        # scraped with real data (28 series across bucketweb/ruler/compactor/
+        # storegateway, all zero at the time) - this just wires an alert onto
+        # a metric that already existed, no new instrumentation needed.
+        - alert: ThanosBucketOperationFailures
+          expr: |
+            sum by (job, operation) (
+              rate(thanos_objstore_bucket_operation_failures_total[15m])
+            ) > 0
+          for: 15m
+          labels:
+            severity: warning
+            component: observability
+            alert_group: storage
+          annotations:
+            summary: "Thanos {{ $labels.job }} failing bucket {{ $labels.operation }} operations"
+            description: "{{ $labels.job }} has been failing object-store {{ $labels.operation }} operations against the Thanos bucket for 15+ minutes. Recent metrics keep working (served from local Prometheus), but long-term/historical queries and new compaction may be degraded. Bucket is cluster Minio, itself NFS-backed - check NAS reachability first."
+
     - name: home-sensors
       rules:
         - alert: MqttExporterDown
