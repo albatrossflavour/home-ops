@@ -34,6 +34,24 @@ spec:
   values:
     crds:
       create: true
+    # 2026-09-01: was replicaCount 1 (chart default) with no PDB - unlike
+    # rook-ceph-operator (checked and confirmed genuinely no leader-election
+    # mechanism, no Lease object exists for it), this operator explicitly
+    # runs with --leader-elect (confirmed live in its container args), the
+    # same safe multi-replica pattern already verified on the CSI controller
+    # plugins. Soft anti-affinity, not hard - two nodes down shouldn't block
+    # this operator from scheduling at all, even degraded to 1 replica.
+    replicaCount: 2
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: cloudnative-pg
+                  app.kubernetes.io/instance: cloudnative-pg
+              topologyKey: kubernetes.io/hostname
     # 2026-08-31: was resources: {} (BestEffort QoS on a control-plane
     # chokepoint). Sized from a 24h historical peak of ~307Mi observed
     # during an unusually busy day (multiple postgres failovers).
