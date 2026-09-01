@@ -17,7 +17,20 @@ spec:
   # 16.15 release notes for the one real gotcha (a new output_plugin_libraries
   # allow-list affecting custom logical-decoding plugins) and confirmed live
   # this cluster only uses CNPG's own physical replication slot, not logical.
-  imageName: ghcr.io/cloudnative-pg/postgresql:16.15-standard-bullseye@sha256:5dac6f57826663d4eb55011a9083603f7e871ffbec9a4650b5588c3177d3f9df
+  # 2026-09-01: "standard" images stopped bundling barman-cloud-* tools in
+  # CNPG's Sept 2025 image restructuring - only the deprecated "system"
+  # variant still has them, needed for the barmanObjectStore backup config
+  # below. Confirmed live: standard-bullseye's WAL archiving fails outright
+  # with "barman-cloud-wal-archive: executable file not found in $PATH".
+  # Verified system-bullseye is standard-bullseye's exact 4 layers plus one
+  # additive layer (barman 3.19.1) before switching - same entrypoint/cmd/
+  # user, only new env is a pip build flag.
+  # This is a stopgap, not a fix: native in-tree barman-cloud support
+  # (this whole backup block) is deprecated and slated for removal in CNPG
+  # 1.31 - this operator is on 1.30.0 now. Needs migrating to the Barman
+  # Cloud Plugin (ObjectStore CR + spec.plugins) before that lands, see
+  # https://cloudnative-pg.io/plugin-barman-cloud/docs/migration/
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.15-system-bullseye@sha256:34cd4159d07b3410a1b29da35072e2e927a0905e717a61afa3814624a2e8859a
   primaryUpdateStrategy: unsupervised
   storage:
     size: 20Gi
