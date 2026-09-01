@@ -33,7 +33,15 @@ kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph auth get client.csi-rbd
 
 Confirm the key material actually changed (compare against what you had before, or just confirm the command succeeds cleanly with no CRD validation error).
 
-### 3. Find every pod carrying a stale mapping
+### 3. Capture a CSI restart-count baseline
+
+`CephCluster` health (`ceph -s`) doesn't cover this — a rotation can also destabilize the CSI node-plugin pods themselves, not just leave client mappings stale. One crash observed during the 2026-08-28 incident was a fatal apiserver timeout in a cephfs node-plugin that the driver treated as unrecoverable, not the stale-mount failure mode the rest of this runbook is built around. There was no fresh `keyGeneration` bump to confirm the pattern against as of 2026-09-01 (the prior restart counts had already been reset to 0 by an unrelated CSI image-pin rollout), so this is unverified as a repeatable pattern — capture a baseline every time so the next rotation actually tests it:
+
+```bash
+kubectl get pods -n rook-ceph --no-headers | grep csi.*nodeplugin | awk '{print $1, $4}'
+```
+
+### 4. Find every pod carrying a stale mapping
 
 ```bash
 ./scripts/check-stale-cephx-mounts.sh
@@ -41,7 +49,7 @@ Confirm the key material actually changed (compare against what you had before, 
 
 This compares every RBD-backed (`ceph-block` storage class) pod's start time against the git commit date of the `csi.keyGeneration` line just changed in step 1, and lists any pod that started before the rotation — i.e. every pod that has *not* remapped its RBD device since. Exits non-zero if any are found.
 
-### 4. Restart every pod the script flags
+### 5. Restart every pod the script flags
 
 This is the step that was missing on 2026-08-28. For each flagged pod, restart its owning workload so the RBD device remaps with the current key:
 
@@ -51,13 +59,21 @@ kubectl -n <namespace> rollout restart deployment/<name>   # or statefulset/<nam
 
 For CloudNativePG-managed Postgres instances specifically, prefer a controlled switchover over a raw restart if the flagged pod is the current primary — check `kubectl -n database get cluster postgres16` for the current primary before touching it.
 
-### 5. Re-run the check
+### 6. Re-run the check, and compare the restart-count baseline
 
 ```bash
 ./scripts/check-stale-cephx-mounts.sh
 ```
 
-Confirm it reports no stale mounts before considering the rotation done. Don't skip this even if step 4 "looked like" it worked — a rollout that silently didn't trigger (unchanged pod spec, a stuck PDB, whatever) is exactly the kind of gap this whole procedure exists to catch.
+Confirm it reports no stale mounts before considering the rotation done. Don't skip this even if step 5 "looked like" it worked — a rollout that silently didn't trigger (unchanged pod spec, a stuck PDB, whatever) is exactly the kind of gap this whole procedure exists to catch.
+
+Also re-run the same command from step 3 and diff against the baseline:
+
+```bash
+kubectl get pods -n rook-ceph --no-headers | grep csi.*nodeplugin | awk '{print $1, $4}'
+```
+
+Any node-plugin pod with a restart count higher than its step 3 baseline crashed during this rotation — check its logs for the apiserver-timeout crash pattern from 2026-08-28 before writing it off as unrelated. Feed the result back into [[home-ops-cluster-audit-2026-08]] (the "CSI restart/keyGeneration correlation" finding) either way, whether or not anything crashed — this is the data point that finding has been missing.
 
 ## Related
 
