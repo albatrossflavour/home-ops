@@ -117,9 +117,15 @@ roll_token() {
     fi
 
     echo "updating 1Password item ($OP_VAULT / \"$OP_ITEM\" / $OP_FIELD) ..."
-    if OP_SERVICE_ACCOUNT_TOKEN=op item edit "$OP_ITEM" \
-        --account "$OP_ACCOUNT" --vault "$OP_VAULT" \
-        "$OP_FIELD=$new_value" >/dev/null 2>&1; then
+    # A bare "VAR= cmd" prefix is one accidental whitespace edit (e.g. an
+    # auto-formatter) away from becoming "VAR=cmd", silently changing what
+    # runs - unset explicitly in a subshell instead so that can't happen.
+    if (
+        unset OP_SERVICE_ACCOUNT_TOKEN
+        op item edit "$OP_ITEM" \
+            --account "$OP_ACCOUNT" --vault "$OP_VAULT" \
+            "$OP_FIELD=$new_value"
+    ) >/dev/null 2>&1; then
         echo "1Password item updated"
     else
         echo "WARNING: could not update 1Password - check the CLI is signed in interactively," \
@@ -137,9 +143,25 @@ Next steps (not done automatically):
      (ciphertext will look like a full rewrite - that's expected, SOPS re-encrypts the whole value)
   2. Commit and push.
   3. external-dns will auto-restart on its own (secret.reloader.stakater.com/reload is already wired up).
-  4. cert-manager has NO reloader annotation - restart it manually once the new secret has reconciled:
-       kubectl rollout restart deployment/cert-manager -n cert-manager
-  5. Confirm a real cert renewal/DNS-01 challenge still works before considering this done.
+  4. cert-manager needs NO restart - confirmed 2026-09-01 its Deployment never mounts this secret as an
+     env var or volume, it's only referenced via the ClusterIssuer's apiTokenSecretRef and fetched live
+     from the API at challenge-solve time.
+  5. Prove it actually works end-to-end rather than assuming - create a throwaway Certificate against
+     letsencrypt-staging in its own scratch namespace, confirm it reaches Ready=True (a real DNS-01
+     present/cleanup cycle against Cloudflare with the new token), then delete the namespace:
+       kubectl create namespace cf-rotation-test
+       kubectl apply -n cf-rotation-test -f - <<CERT
+       apiVersion: cert-manager.io/v1
+       kind: Certificate
+       metadata:
+         name: cf-token-rotation-test
+       spec:
+         secretName: cf-token-rotation-test-tls
+         dnsNames: ["cf-token-rotation-test.albatrossflavour.com"]
+         issuerRef: {name: letsencrypt-staging, kind: ClusterIssuer}
+       CERT
+       kubectl get certificate cf-token-rotation-test -n cf-rotation-test -w   # wait for Ready=True
+       kubectl delete namespace cf-rotation-test
   6. If the 1Password update above warned, update it by hand - the item ID is confirmed correct,
      most likely cause is the CLI not being signed in interactively, or the item's field isn't
      actually named "credential" (check what field name was set when the item was created).
