@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Separate from utilities-default deliberately - same finding #13 concern as
+# media-database-access: don't let arbitrary pods in the namespace reach the
+# database, scope it to the apps that actually hold credentials.
+#
+# Scoped to the whole postgres16 CNPG cluster (instances + pooler), not just
+# the pooler - learned the hard way earlier the same day in media (finding
+# #14's update): each app's postgres-init init container connects direct to
+# postgres16-rw to bootstrap schema, bypassing the pooler entirely. Applying
+# that lesson proactively here rather than waiting for the same failure on
+# this namespace's next pod restart.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy utilities-database-access -n utilities`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: utilities-database-access
+  namespace: utilities
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - asciinema
+          - n8n
+          - shlink
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: database
+            cnpg.io/cluster: postgres16
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: utilities-dragonfly-access
+  namespace: utilities
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: send
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: database
+            app.kubernetes.io/name: dragonfly
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP

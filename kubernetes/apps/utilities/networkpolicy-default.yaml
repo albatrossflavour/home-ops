@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Baseline policy for utilities, derived from a live 2h Hubble capture
+# (2026-09-01). No ServiceMonitor/PodMonitor exists for anything in this
+# namespace (confirmed live) so there's deliberately no observability
+# ingress rule here, unlike every other namespace done so far.
+#
+# Database access (postgres16, dragonfly) is NOT here - see
+# networkpolicy-database-access.yaml, scoped to only the apps that actually
+# hold credentials for them rather than granting the whole namespace reach.
+#
+# cyberchef/it-tools/jsoncrack showed zero traffic in the capture window
+# (genuinely idle, not missed) - ingress/egress below is unscoped per-app
+# so they're still covered once they do get used.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy utilities-default -n utilities`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: utilities-default
+  namespace: utilities
+spec:
+  endpointSelector: {}
+  ingress:
+    # Kubelet liveness/readiness probes - each app's own port, not worth
+    # enumerating individually.
+    - fromEntities:
+        - host
+        - remote-node
+    # ingress-nginx serving every app's web UI.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # n8n/node-red call back through the internal ingress controller
+    # (webhooks/HTTP-request nodes hitting other apps by public hostname).
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

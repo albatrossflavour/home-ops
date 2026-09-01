@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Separate from utilities-default deliberately - n8n's whole purpose is
+# calling arbitrary external APIs from user-defined workflows, so unlike
+# the rest of this namespace its internet egress can't be scoped to known
+# ports/destinations the way onepassword-connect's could.
+#
+# Not from the capture - found live applying utilities-default: n8n's
+# background call to api.n8n.io (its own MCP-server marketplace fetch)
+# started failing the moment the namespace default went in, since that
+# policy has no general internet egress. Same class of miss as cert-
+# manager's ACME access - an app's fundamental nature needing something the
+# capture window didn't happen to exercise.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy utilities-n8n-egress -n utilities`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: utilities-n8n-egress
+  namespace: utilities
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: n8n
+  egress:
+    - toEntities:
+        - world

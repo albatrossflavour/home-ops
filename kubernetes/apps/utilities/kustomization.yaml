@@ -4,6 +4,9 @@ kind: Kustomization
 resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
+  - ./networkpolicy-default.yaml
+  - ./networkpolicy-database-access.yaml
+  - ./networkpolicy-n8n-egress.yaml
   # Flux-Kustomizations
   - ./asciinema/ks.yaml
   - ./it-tools/ks.yaml
