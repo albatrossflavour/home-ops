@@ -81,7 +81,7 @@ The cluster implements a comprehensive observability stack:
 - Metrics exported: `network_ups_tools_battery_charge`, `network_ups_tools_battery_voltage(_nominal)`, `network_ups_tools_input_voltage(_nominal)`, `network_ups_tools_ups_load`, `network_ups_tools_ups_status{flag=...}`, `network_ups_tools_device_info`
 - **Not exported**: any runtime-remaining metric (e.g. `battery_runtime`) - if a doc or alert assumes one exists, it's wrong; confirmed absent live 2026-09-01. Use the `ups_status{flag="LB"}` status flag instead (NUT's own firmware-computed "low battery, act now" signal, factors in actual discharge rate/load) rather than trying to derive a runtime estimate from charge% alone
 - Alerting: `UPSOnBattery` (mains lost), `UPSBatteryLow` (charge < 50%, an early warning with more lead time but a poor proxy under fast drain), `UPSLowBatteryRuntime` (the `LB` flag - the real "act now" signal) - all in `kubernetes/apps/observability/custom-alerts/app/prometheusrule.yaml`
-- No automated graceful-shutdown policy exists for critical battery (no `upsmon`/Talos automation drains or shuts down the cluster) - this is a deliberate open decision, not an oversight; see the cluster audit doc
+- No `upsmon`/Talos automation drains or shuts down the cluster on critical battery - by design. The graceful-shutdown policy is handled at the Proxmox hypervisor layer, on the physical hosts, entirely outside this repo. Nothing to build here.
 
 ## 🔧 Monitoring Operations
 
