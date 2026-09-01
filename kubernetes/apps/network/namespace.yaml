@@ -5,3 +5,10 @@ metadata:
   name: network
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
+    # 2026-09-01: PodSecurity enforcement pass. Checked all 13 live pods -
+    # zero Baseline violations (ingress-nginx's NET_BIND_SERVICE capability
+    # is Baseline's one explicitly-allowed addition, for binding privileged
+    # ports). Two CronJobs (dns-export-generator, nebula-sync) both already
+    # completed cleanly today under the cluster-wide baseline default. No
+    # Volsync usage.
+    pod-security.kubernetes.io/enforce: baseline
