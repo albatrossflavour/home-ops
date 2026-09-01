@@ -7,6 +7,18 @@
 # traffic - prowlarr's window in the Hubble capture didn't show a
 # connection but it holds the same credential shape as sonarr/radarr).
 #
+# Corrected 2026-09-01: the live traffic check only exercised the main app
+# containers (already running, connecting through the pooler). It missed
+# that sonarr/radarr/prowlarr's postgres-init `init-db` init container
+# connects directly to `postgres16-rw` (the CNPG primary/replica instance
+# Service) to bootstrap the schema, bypassing the pooler entirely - a
+# genuinely different destination with different pod labels
+# (`cnpg.io/podRole: instance`, not `pooler`). Found live when a real pod
+# restart (the media resource right-sizing rollout) hit it: `init-db` sat
+# in `Init:0/1` indefinitely, DNS/connection silently dropped, not slow.
+# Widened to the whole `postgres16` CNPG cluster (instances + pooler)
+# rather than just the pooler pods.
+#
 # Rollback: `kubectl delete ciliumnetworkpolicy media-database-access -n media`.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -26,7 +38,7 @@ spec:
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: database
-            cnpg.io/poolerName: postgres16-pooler-rw
+            cnpg.io/cluster: postgres16
       toPorts:
         - ports:
             - port: "5432"
