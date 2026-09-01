@@ -87,7 +87,7 @@ spec:
           # 80 and would otherwise build http:// URLs for an https:// client.
           proxy_set_header X-Forwarded-Proto $scheme;
 
-          proxy_pass http://192.168.7.13;
+          proxy_pass https://192.168.7.13;
 
           proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
