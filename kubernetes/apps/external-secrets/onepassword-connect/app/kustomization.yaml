@@ -6,4 +6,5 @@ resources:
   - ./helmrelease.yaml
   - ./onepassword-connect.secret.sops.yaml
   - ./pdb.yaml
+  - ./networkpolicy-egress.yaml
   - ../../../../templates/gatus/guarded
