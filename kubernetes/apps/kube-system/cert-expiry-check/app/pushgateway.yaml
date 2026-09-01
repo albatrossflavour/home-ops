@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-expiry-pushgateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cert-expiry-pushgateway
+  template:
+    metadata:
+      labels:
+        app: cert-expiry-pushgateway
+    spec:
+      containers:
+        - name: pushgateway
+          image: prom/pushgateway:v1.11.1@sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48
+          args:
+            - --web.listen-address=:9091
+          ports:
+            - name: http
+              containerPort: 9091
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cert-expiry-pushgateway
+spec:
+  selector:
+    app: cert-expiry-pushgateway
+  ports:
+    - name: http
+      port: 9091
+      targetPort: http

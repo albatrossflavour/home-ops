@@ -43,6 +43,31 @@ spec:
             summary: "Certificate {{ $labels.namespace }}/{{ $labels.name }} expires in {{ $value | humanizeDuration }}"
             description: "Certificate {{ $labels.namespace }}/{{ $labels.name }} will expire in {{ $value | humanizeDuration }}"
 
+        # 2026-09-01: covers hubble-server-certs, hubble-relay-client-certs,
+        # cilium-ca - Helm-templated, not cert-manager Certificate objects,
+        # so CertificateExpiresSoon above structurally can't see them
+        # (certmanager_certificate_expiration_timestamp_seconds only exists
+        # for cert-manager-issued certs). hubble.tls.auto: helm doesn't
+        # auto-renew on any schedule tied to expiry - confirmed live the
+        # server cert has actually regenerated recently, but as an
+        # unplanned side effect of unrelated Helm activity, not a real
+        # rotation policy - so this gets a much longer lead time than the
+        # 7-day cert-manager alert above, there's no automation backstopping
+        # a late catch here. Metric pushed daily by cert-expiry-check
+        # (kube-system) via a Pushgateway - see that CronJob for the actual
+        # cert reads.
+        - alert: HubbleCiliumCertExpiresSoon
+          expr: |
+            (
+              cert_expiry_timestamp_seconds - time()
+            ) / 86400 < 30
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.instance }} cert expires in {{ $value | humanizeDuration }}"
+            description: "Cilium/Hubble mTLS cert {{ $labels.instance }} will expire in {{ $value | humanizeDuration }}. This is Helm-templated, not cert-manager - no automatic renewal is guaranteed. Check kubernetes/apps/kube-system/cilium's HelmRelease and the cert-expiry-check CronJob's logs."
+
         - alert: AuthentikServiceDown
           expr: |
             up{job="authentik-server-metrics"} == 0

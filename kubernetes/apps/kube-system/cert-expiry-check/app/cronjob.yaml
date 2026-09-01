@@ -1,0 +1,84 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cert-expiry-check
+spec:
+  schedule: "0 6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: cert-expiry-check
+              image: alpine/openssl:latest@sha256:61cec9c1f221755bf995f1f309211b222164599e2d1943b666f878ef644d3a0e
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  push() {
+                    name="$1"; path="$2"
+                    enddate=$(openssl x509 -enddate -noout -in "$path" | cut -d= -f2)
+                    epoch=$(date -u -D "%b %d %H:%M:%S %Y %Z" -d "$enddate" +%s)
+                    body=$(printf 'cert_expiry_timestamp_seconds %s\n' "$epoch")
+                    wget -q -O- --post-data="$body" \
+                      "http://cert-expiry-pushgateway.kube-system.svc.cluster.local:9091/metrics/job/cert-expiry-check/instance/$name"
+                    echo "$name: expires $enddate (epoch $epoch)"
+                  }
+                  push hubble-server-certs /certs/hubble-server-certs/tls.crt
+                  push hubble-relay-client-certs /certs/hubble-relay-client-certs/tls.crt
+                  push cilium-ca /certs/cilium-ca/ca.crt
+              volumeMounts:
+                - name: hubble-server-certs
+                  mountPath: /certs/hubble-server-certs
+                  readOnly: true
+                - name: hubble-relay-client-certs
+                  mountPath: /certs/hubble-relay-client-certs
+                  readOnly: true
+                - name: cilium-ca
+                  mountPath: /certs/cilium-ca
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  cpu: 100m
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            # Only the cert (public) key is mounted from each secret, never
+            # the private key half - this job only ever needs to read an
+            # expiry date.
+            - name: hubble-server-certs
+              secret:
+                secretName: hubble-server-certs
+                items:
+                  - key: tls.crt
+                    path: tls.crt
+            - name: hubble-relay-client-certs
+              secret:
+                secretName: hubble-relay-client-certs
+                items:
+                  - key: tls.crt
+                    path: tls.crt
+            - name: cilium-ca
+              secret:
+                secretName: cilium-ca
+                items:
+                  - key: ca.crt
+                    path: ca.crt
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
