@@ -70,9 +70,20 @@ spec:
         enabled: true
         name: rook-ceph.rbd.csi.ceph.com
         snapshotPolicy: volumeSnapshot
+        # 2026-09-01: driverSpecDefaults.controllerPlugin.replicas above is
+        # NOT enough on its own - each Driver CR already carries an explicit
+        # replicas: 1 (set by this chart at install time), and an explicit
+        # per-driver value wins over the shared OperatorConfig default.
+        # Confirmed live: resources flowed through the default fine (no
+        # per-driver override existed for that field), replicas didn't
+        # until this explicit override was added.
+        controllerPlugin:
+          replicas: 2
       cephfs:
         enabled: true
         name: rook-ceph.cephfs.csi.ceph.com
+        controllerPlugin:
+          replicas: 2
       nfs:
         enabled: false
         name: rook-ceph.nfs.csi.ceph.com
