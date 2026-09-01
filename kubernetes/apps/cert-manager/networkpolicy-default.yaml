@@ -1,0 +1,58 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Baseline policy for cert-manager, derived from a live 2h Hubble capture
+# (2026-09-01) across all three components (controller/cainjector/webhook).
+# Default-deny is Cilium's own behaviour the moment any CiliumNetworkPolicy
+# selects a pod - nothing else needs to opt in.
+#
+# DNS and internet egress are NOT in the capture (no cert renewal happened
+# in the 2h window) but are added anyway - cert-manager needs both to talk
+# to Let's Encrypt and Cloudflare's DNS-01 API (see CLAUDE.md's DNS-01
+# section), and this repo already learned once this cycle (finding #13/the
+# init-db bug) that a capture window can miss a real, occasional dependency.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy cert-manager-default -n cert-manager`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cert-manager-default
+  namespace: cert-manager
+spec:
+  endpointSelector: {}
+  ingress:
+    # Kubelet liveness/readiness probes (webhook :6080, controller :9403,
+    # webhook :10250) plus the apiserver invoking the validating/mutating
+    # webhook - both manifested as host-family identities in the capture.
+    - fromEntities:
+        - host
+        - remote-node
+        - kube-apiserver
+    # Prometheus scraping all three components' metrics (:9402).
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: observability
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # The controller talks to the k8s API to watch/update Certificate,
+    # CertificateRequest, Order, Challenge, etc.
+    - toEntities:
+        - kube-apiserver
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+    # Let's Encrypt ACME + Cloudflare DNS-01 API - not observed this window,
+    # required for the controller to actually do its job.
+    - toEntities:
+        - world
