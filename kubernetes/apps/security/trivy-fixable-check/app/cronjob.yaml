@@ -37,10 +37,15 @@ spec:
               resources:
                 requests:
                   cpu: 20m
-                  memory: 64Mi
-                limits:
-                  cpu: 200m
                   memory: 128Mi
+                limits:
+                  cpu: 500m
+                  # 2026-09-01: 128Mi OOMKilled immediately - the raw
+                  # `kubectl get vulnerabilityreports -A -o json` across
+                  # ~190 reports is ~15MB on disk, and both kubectl's JSON
+                  # decode and jq's array-comprehension processing multiply
+                  # that several times over in memory.
+                  memory: 512Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true
