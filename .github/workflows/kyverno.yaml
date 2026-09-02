@@ -5,10 +5,19 @@ name: "Kyverno Policy"
 on:
   pull_request:
     branches: ["main"]
-    paths: ["kubernetes/**"]
+    # The gate must re-run when the policies change, when the script that
+    # runs them changes, and when this workflow changes - not only when the
+    # manifests being checked change.
+    paths:
+      - "kubernetes/**"
+      - "scripts/kyverno-ci.sh"
+      - ".github/workflows/kyverno.yaml"
   push:
     branches: ["main"]
-    paths: ["kubernetes/**"]
+    paths:
+      - "kubernetes/**"
+      - "scripts/kyverno-ci.sh"
+      - ".github/workflows/kyverno.yaml"
 
 env:
   KUBERNETES_DIR: ./kubernetes
