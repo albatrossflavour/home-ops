@@ -9,6 +9,15 @@
 # networkpolicy-database-access.yaml, scoped to only the apps that actually
 # hold credentials for them rather than granting the whole namespace reach.
 #
+# CORRECTION 2026-09-02: this file was missing a minio egress rule entirely
+# since it was first written - Volsync's mover pods (shlink/n8n/node-red/
+# asciinema all have backup enabled) run in this namespace and need to
+# reach cluster minio for every backup cycle, same as media-default's own
+# minio rule. Missed originally because the 2h capture window that drafted
+# this policy didn't happen to catch a mover pod mid-backup. Caught live
+# while verifying an unrelated change (finding #18) - one scheduled backup
+# cycle (00:45 UTC) had already failed by the time this was found and fixed.
+#
 # cyberchef/it-tools/jsoncrack showed zero traffic in the capture window
 # (genuinely idle, not missed) - ingress/egress below is unscoped per-app
 # so they're still covered once they do get used.
@@ -50,4 +59,14 @@ spec:
       toPorts:
         - ports:
             - port: "443"
+              protocol: TCP
+    # Volsync mover pods (shlink/n8n/node-red/asciinema backups) reach
+    # cluster minio for every backup cycle.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/name: minio
+      toPorts:
+        - ports:
+            - port: "9000"
               protocol: TCP
