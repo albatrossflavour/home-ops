@@ -64,13 +64,15 @@ echo "=== Rendering and evaluating ==="
 for kind in hr ks; do
   out="${WORK}/rendered-${kind}.yaml"
   echo "--- flux-local build ${kind} ---"
-  # NOTE: `build` takes the path POSITIONALLY, unlike `diff` which uses
-  # --path. Passing --path here is accepted and silently renders nothing,
-  # which is how this first failed. --enable-helm is what actually inflates
-  # HelmReleases into real objects; without it there is nothing for the
-  # policies to match.
-  flux-local build "${kind}" "${KUBERNETES_DIR}/flux" \
-    --enable-helm \
+  # --all-namespaces defaults to FALSE, which scopes the build to a single
+  # namespace and silently renders nothing - no error, no warning, exit 0.
+  # That is how this first failed, and it is exactly the vacuous-green case
+  # the object-count guard below exists to catch. --sources matches the
+  # GitRepository, same as the Flux Diff workflow already passes.
+  flux-local build "${kind}" \
+    --path "${KUBERNETES_DIR}/flux" \
+    --all-namespaces \
+    --sources "home-kubernetes" \
     --output-file "${out}" 2>"${WORK}/${kind}.err" || {
     echo "flux-local build ${kind} failed:"; cat "${WORK}/${kind}.err"; exit 1
   }
