@@ -14,6 +14,16 @@ resources:
   - ./globalcontext-replicationsources.yaml
   - ./require-pvc-backup.yaml
 
+# The dashboard JSON uses Grafana's own ${var} template syntax, which
+# collides head-on with Flux's postBuild variable substitution: cluster-apps
+# patches substituteFrom onto every child Kustomization, envsubst runs over
+# the rendered ConfigMap, finds no "datasource" variable and fails the whole
+# Kustomization in strict mode. Every occurrence is therefore escaped as
+# $${...}, which envsubst emits as a literal ${...} for Grafana to consume.
+#
+# The other dashboards in this cluster (cilium, cnpg) carry ${DS_PROMETHEUS}
+# unescaped and are fine, because they are rendered by Helm and never pass
+# through Flux's postBuild at all. Only Kustomize-generated manifests do.
 configMapGenerator:
   - name: kyverno-posture-dashboard
     namespace: kyverno
