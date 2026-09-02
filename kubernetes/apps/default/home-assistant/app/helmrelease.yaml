@@ -36,46 +36,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
-          matter-server:
-            image:
-              repository: ghcr.io/matter-js/python-matter-server
-              tag: "8.1.2@sha256:6827e352011e2d8c2bde771e446fcf72acc49150ef66bad978816bac1762aad3"
-            restartPolicy: Always
-            args:
-              - --storage-path
-              - /data
-              - --paa-root-cert-dir
-              - /data/credentials
-            probes:
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: 5580
-                  initialDelaySeconds: 10
-                  periodSeconds: 10
-              liveness:
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: 5580
-                  initialDelaySeconds: 30
-                  periodSeconds: 20
-            securityContext:
-              runAsUser: 0
-              runAsNonRoot: false
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
-              capabilities:
-                drop: ["ALL"]
-                add: ["NET_ADMIN", "NET_RAW"]
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 512Mi
           code-server:
             image:
               repository: ghcr.io/coder/code-server
@@ -235,15 +195,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-      matter-data:
-        type: persistentVolumeClaim
-        size: 500Mi
-        storageClass: ceph-block
-        accessMode: ReadWriteOnce
-        advancedMounts:
-          home-assistant:
-            matter-server:
-              - path: /data
       local:
         enabled: true
         type: nfs
