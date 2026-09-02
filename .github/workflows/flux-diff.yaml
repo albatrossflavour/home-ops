@@ -3,9 +3,12 @@
 name: "Flux Diff"
 
 on:
+  # No paths filter: both matrix legs of this workflow are REQUIRED status
+  # checks, and a required check that never runs blocks the PR forever. See
+  # the note in kubeconform.yaml. With no kubernetes/ changes the diff is
+  # simply empty and no comment is posted.
   pull_request:
     branches: ["main"]
-    paths: ["kubernetes/**"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
