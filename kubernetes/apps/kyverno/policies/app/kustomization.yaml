@@ -5,3 +5,4 @@ kind: Kustomization
 resources:
   - ./require-pod-resources.yaml
   - ./exception-volsync-movers.yaml
+  - ./require-ingress-dns-target.yaml

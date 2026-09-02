@@ -1,0 +1,58 @@
+---
+# A repo-convention policy, not a benchmark one. Nothing in CIS, Essential
+# Eight, STIG or PCI contains this rule - it exists because CLAUDE.md says
+# every Ingress must carry a DNS target annotation, and because that rule
+# being enforced by nothing but memory has already cost this cluster twice.
+#
+# Both smarthome.pdlf.net and staging.toodlepip.com.au ended up with a valid
+# Let's Encrypt certificate and no real public DNS record. DNS-01 validation
+# proves domain ownership; it does not create the A/CNAME that makes a
+# hostname resolve. Missing the target annotation is how an ingress ends up
+# looking configured while resolving nowhere, or worse, colliding with the
+# other controller's records.
+#
+#   internal.${SECRET_DOMAIN}  -> 192.168.8.21, LAN only
+#   external.${SECRET_DOMAIN}  -> 192.168.8.23, via the Cloudflare tunnel
+#
+# Audit only. One live violation at time of writing: kube-system/hubble-ui,
+# created by the Cilium chart (hubble.ui.ingress in that HelmRelease) with no
+# annotations block at all, so it carries only Helm's own metadata. It
+# resolves today, but nothing in git makes that true on purpose.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: require-ingress-dns-target
+  annotations:
+    policies.kyverno.io/title: Require external-dns Target Annotation
+    policies.kyverno.io/category: Repo Conventions
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Ingress
+    policies.kyverno.io/description: >-
+      Every Ingress must set external-dns.alpha.kubernetes.io/target so
+      external-dns publishes it against the intended controller. Without it
+      the hostname may not resolve at all, or may conflict with the other
+      ingress class's records.
+spec:
+  # Ignore, consistent with every other policy here: an unreachable Kyverno
+  # must never be able to block a deploy.
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["networking.k8s.io"]
+        apiVersions: ["v1"]
+        operations: [CREATE, UPDATE]
+        resources: [ingresses]
+  variables:
+    # metadata.annotations is absent entirely on an object with none, so
+    # indexing it directly errors rather than returning false. Normalise to
+    # an empty map first - the same shape of trap as name vs generateName on
+    # the Volsync exception.
+    - name: annotations
+      expression: "has(object.metadata.annotations) ? object.metadata.annotations : {}"
+  validations:
+    - expression: "'external-dns.alpha.kubernetes.io/target' in variables.annotations"
+      message: >-
+        Ingress must set the external-dns.alpha.kubernetes.io/target
+        annotation to internal.<domain> or external.<domain>. Omitting it
+        risks an orphaned or conflicting DNS record.
+  validationActions: [Audit]
