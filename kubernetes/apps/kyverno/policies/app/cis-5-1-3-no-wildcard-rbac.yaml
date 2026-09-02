@@ -57,8 +57,15 @@ spec:
         object.metadata.name != 'edit' &&
         object.metadata.name != 'view'
   validations:
+    # `rules` can be PRESENT and null - an empty Role serialises as
+    # `rules: null`, not as an absent key. has() returns true for it, and
+    # .exists() on null then fails the whole evaluation:
+    #   error: got 'types.Null', expected iterable type
+    # That surfaced as 26 `error` results rather than pass or fail, which is
+    # its own trap: an erroring policy is neither compliant nor a finding.
     - expression: >-
         !has(object.rules) ||
+        object.rules == null ||
         !object.rules.exists(r,
           has(r.verbs) && ('*' in r.verbs) &&
           has(r.resources) && ('*' in r.resources))

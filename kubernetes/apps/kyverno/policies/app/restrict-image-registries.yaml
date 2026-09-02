@@ -20,8 +20,13 @@
 #
 # Images with no registry prefix (nginx:1.31-alpine, python:3.14-slim) resolve
 # to docker.io implicitly and are allowed on that basis rather than overlooked:
-# a reference whose first path segment contains no dot and no colon is not a
-# hostname.
+# a reference with no slash at all has no registry component, so its colon is
+# a tag separator, not a port.
+#
+# Getting that wrong is not hypothetical: testing only for a dot or colon in
+# the first segment, without first requiring a slash, reads
+# `nginx:1.31-alpine` as a registry called `nginx:1.31-alpine` and failed 13
+# pods that were always compliant.
 apiVersion: policies.kyverno.io/v1beta1
 kind: ValidatingPolicy
 metadata:
@@ -58,7 +63,8 @@ spec:
     - expression: >-
         variables.images.all(i,
           variables.allowed.exists(a, i.startsWith(a)) ||
-          !(i.split('/')[0].contains('.') || i.split('/')[0].contains(':'))
+          !(i.contains('/') &&
+            (i.split('/')[0].contains('.') || i.split('/')[0].contains(':')))
         )
       message: >-
         Container images must come from an approved registry. Allowed:
