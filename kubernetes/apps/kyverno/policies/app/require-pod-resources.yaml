@@ -1,0 +1,70 @@
+---
+# STAGE 2: the first policy. Audit only, nothing is blocked.
+#
+# Chose the new policies.kyverno.io CEL type rather than the legacy
+# kyverno.io/v1 ClusterPolicy, because upstream has already moved: the
+# official kyverno-policies bundle (chart 3.9.0) ships both forms of every
+# Pod Security Standards policy and its `policyType` now DEFAULTS to
+# ValidatingPolicy. The legacy types still work and are still the storage
+# version, but the ecosystem has flipped.
+#
+# Note the schema below is Kubernetes' own ValidatingAdmissionPolicy shape -
+# matchConstraints, validations, validationActions, failurePolicy are all
+# native VAP field names, not Kyverno inventions.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: require-pod-resources
+  annotations:
+    policies.kyverno.io/title: Require Pod Resource Requests and Limits
+    policies.kyverno.io/category: Resource Management
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Every container and init container must declare CPU and memory requests
+      and a memory limit. This is a hard prerequisite for extending
+      ResourceQuota beyond the media namespace: a quota that specifies
+      requests.cpu/requests.memory/limits.memory rejects any pod that omits
+      them, which is exactly how media-quota (commit 7cfa220e) silently
+      killed every Volsync backup job in that namespace for 12 hours on
+      2026-09-02. CPU limits are deliberately NOT required - this cluster has
+      spare CPU and throttling is worse than bursting.
+spec:
+  # Ignore, not Fail: if the admission controller is unreachable the request
+  # proceeds unchecked. Correct for an audit policy, and correct while
+  # Kyverno v1.19 runs on a Kubernetes minor (1.36) outside its tested range.
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  validations:
+    - expression: >-
+        object.spec.containers.all(c,
+          has(c.resources) &&
+          has(c.resources.requests) &&
+          'cpu' in c.resources.requests &&
+          'memory' in c.resources.requests &&
+          has(c.resources.limits) &&
+          'memory' in c.resources.limits
+        )
+      message: >-
+        Every container must declare resources.requests.cpu,
+        resources.requests.memory and resources.limits.memory.
+    - expression: >-
+        !has(object.spec.initContainers) ||
+        object.spec.initContainers.all(c,
+          has(c.resources) &&
+          has(c.resources.requests) &&
+          'cpu' in c.resources.requests &&
+          'memory' in c.resources.requests &&
+          has(c.resources.limits) &&
+          'memory' in c.resources.limits
+        )
+      message: >-
+        Every init container must declare resources.requests.cpu,
+        resources.requests.memory and resources.limits.memory.
+  # Audit: record a violation in a PolicyReport, admit the resource anyway.
+  validationActions: [Audit]
