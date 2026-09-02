@@ -94,10 +94,13 @@ spec:
     #   reports controller   -> execution_cause="background_scan"
     # Only the second sees the whole cluster; the first only sees what has
     # actually been admitted since it started.
+    # The chart's dashboard is shipped from this repo instead - see
+    # kyverno/policies/app/dashboards/kyverno-engine.json. Its `cluster`
+    # variable queries the legacy kyverno_policy_results_total metric, which a
+    # CEL-only cluster never emits, so every panel reads "No data". Forked with
+    # that one query repointed rather than disabled and lost.
     grafana:
-      enabled: true
-      annotations:
-        grafana_folder: Kyverno
+      enabled: false
 
     admissionController:
       replicas: 1

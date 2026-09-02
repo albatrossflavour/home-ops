@@ -39,3 +39,35 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana_folder: Kyverno
+  # Upstream's own dashboard, forked for one reason. Its `cluster` variable is
+  # defined as label_values(kyverno_policy_results_total, cluster) - the LEGACY
+  # ClusterPolicy metric, which emits nothing on a cluster running only CEL
+  # policies. The variable gets zero options, $cluster never resolves, and all
+  # 73 expressions filtering cluster=~"$cluster" return nothing. The whole
+  # dashboard reads "No data" with no indication why.
+  #
+  # The label itself was never missing: both Prometheus instances set
+  # externalLabels {cluster: home-ops}, and Grafana's default datasource points
+  # at Thanos, which applies them. Only the variable's query was wrong.
+  #
+  # The single change is that query, pointed at the metric we actually emit.
+  # Everything else is upstream's, untouched. uid and title are changed so this
+  # can never collide with the chart's own copy.
+  #
+  # To re-fork after a chart bump: pull the chart, take
+  # charts/grafana/dashboard/kyverno-dashboard.json, repoint the cluster
+  # variable, set uid/title, and escape every ${...} as $${...} (Flux runs
+  # envsubst over Kustomize output and fails strict-mode on unknown vars).
+  #
+  # Upstream bug worth reporting: the dashboard has CEL panels but a legacy
+  # variable query, so every CEL-only install gets a blank dashboard.
+  - name: kyverno-engine-dashboard
+    namespace: kyverno
+    files:
+      - kyverno-engine.json=./dashboards/kyverno-engine.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: Kyverno
