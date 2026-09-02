@@ -70,6 +70,15 @@ Every one of these was hit during the initial rollout. All of them fail silently
 
 **Report results are stamped at scan time, not read live.** Check `results[].timestamp` before concluding anything. This caused two wrong conclusions on day one: once that the scan did not cover Ingresses at all, once that a fix had not worked. Both were stale data. A full scan takes about five minutes and runs Deployments, DaemonSets, ReplicaSets, Pods, then Jobs and CronJobs, so reading early gives a confidently wrong answer.
 
+**`matchConditions` cannot reference `variables`.** They are evaluated *before* variables exist, so an expression there must use `object` directly. Referencing a variable fails to compile with `undefined field`, and the error points at every use site rather than explaining the ordering:
+
+```text
+spec.matchConditions[0].expression: Invalid value: "!variables.name.startsWith('system:') ..."
+ERROR: <input>:1:11: undefined field 'name'
+```
+
+Same rule as native ValidatingAdmissionPolicy. Variables are available in `validations` and `auditAnnotations` only.
+
 **Cross-resource lookups need explicit RBAC.** Kyverno ships RBAC for core resources only. `require-pvc-backup` reads Volsync CRDs through a `GlobalContextEntry`, and without a grant the entry silently never populates while the policy still reports `Webhook configured` and `Policy is ready for reporting`. The only trace is one line in a controller log:
 
 ```text
