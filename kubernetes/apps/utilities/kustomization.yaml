@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
+  - ./serviceaccount-default.yaml
   - ./networkpolicy-default.yaml
   - ./networkpolicy-database-access.yaml
   # Flux-Kustomizations
