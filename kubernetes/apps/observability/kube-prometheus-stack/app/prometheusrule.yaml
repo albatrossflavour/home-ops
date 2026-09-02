@@ -290,3 +290,49 @@ spec:
           for: 30m
           labels:
             severity: warning
+    - name: etcd
+      rules:
+        # Replaces the stock etcdDatabaseHighFragmentationRatio, which gates a
+        # bare in-use/allocated ratio on a fixed 100MiB floor. Both halves of
+        # that are wrong for a cluster this size.
+        #
+        # etcd's bbolt file settles at roughly 3x the live data and stays
+        # there - measured flat at 299.4MiB for three days (28-30 Aug 2026)
+        # against ~95MiB in use, a 31.6% ratio. Well past the stock rule's 50%
+        # trigger, and it stayed silent purely because live data sat just under
+        # the 100MiB floor. Kyverno's PolicyReports then took live data to
+        # ~205MiB, crossed the floor, and un-silenced a condition that had been
+        # there all along and was worse before.
+        #
+        # Fragmentation only matters when it is eating headroom that matters,
+        # so this gates on quota consumption instead of an absolute byte count.
+        # 205MiB in a 415MiB file at 20% of a 2GiB quota is normal and says
+        # nothing; the same ratio at 60% of quota is worth acting on.
+        #
+        # Genuine capacity risk is already covered twice by the mixin and
+        # neither is disabled: etcdDatabaseQuotaLowSpace (>95% of quota,
+        # critical) and etcdExcessiveDatabaseGrowth (4h predict_linear crossing
+        # quota, warning).
+        #
+        # With bootstrap-defrag-threshold-megabytes set in the Talos etcd patch
+        # etcd defrags itself at startup, so this should stay quiet. If it does
+        # fire, the control plane has not restarted in a long time.
+        - alert: EtcdDatabaseHighFragmentationRatio
+          annotations:
+            description: |
+              etcd on {{ $labels.instance }} has only {{ $value | humanizePercentage }} of its allocated file in use, and the database has passed half of its backend quota, so the wasted space is now consuming real headroom.
+              Defragment across the control plane, followers first and leader last, checking raft index and term stay in sync between each: `talosctl etcd defrag -n <node>`.
+            summary: etcd fragmentation is consuming meaningful backend quota.
+          expr: |
+            (
+              last_over_time(etcd_mvcc_db_total_size_in_use_in_bytes{job=~".*etcd.*"}[5m])
+              / last_over_time(etcd_mvcc_db_total_size_in_bytes{job=~".*etcd.*"}[5m])
+            ) < 0.5
+            and
+            (
+              last_over_time(etcd_mvcc_db_total_size_in_bytes{job=~".*etcd.*"}[5m])
+              / last_over_time(etcd_server_quota_backend_bytes{job=~".*etcd.*"}[5m])
+            ) > 0.5
+          for: 30m
+          labels:
+            severity: warning
