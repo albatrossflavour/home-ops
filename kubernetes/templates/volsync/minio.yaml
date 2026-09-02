@@ -33,6 +33,20 @@ spec:
   trigger:
     schedule: "${VOLSYNC_SCHEDULE:-0 * * * *}"
   restic:
+    # 2026-09-02: the media namespace's ResourceQuota (added same day, a
+    # separate change) requires every container to declare requests.cpu/
+    # requests.memory/limits.memory - this mover container never did, so
+    # every backup job in that namespace failed pod admission outright for
+    # 12+ hours before being caught by a full re-audit. This is a shared
+    # template used cluster-wide, so setting it here fixes it everywhere,
+    # not just media - restic's own working set is modest, sized from
+    # general restic guidance, not a live measurement.
+    moverResources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
     copyMethod: "${VOLSYNC_COPYMETHOD:-Snapshot}"
     pruneIntervalDays: 7
     repository: "${APP}-volsync-secret"

@@ -33,6 +33,15 @@ spec:
   trigger:
     schedule: "0 0 * * *"
   restic:
+    # 2026-09-02: see the matching comment in minio.yaml - same
+    # ResourceQuota fix, same shared-template scope, applied here too so
+    # the offsite/-r2 movers don't hit the identical admission failure.
+    moverResources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
     copyMethod: "${VOLSYNC_COPYMETHOD:-Snapshot}"
     pruneIntervalDays: 7
     repository: "${APP}-volsync-r2-secret"
