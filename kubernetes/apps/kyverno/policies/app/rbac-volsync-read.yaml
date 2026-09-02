@@ -1,0 +1,35 @@
+---
+# Kyverno's controllers ship with RBAC covering core Kubernetes resources.
+# Anything else - including Volsync's own CRDs - has to be granted explicitly,
+# and the failure when you don't is silent in a way worth recording.
+#
+# Without this, the replicationsources GlobalContextEntry applies cleanly, the
+# require-pvc-backup policy compiles cleanly, and both report
+# "Webhook configured" and "Policy is ready for reporting". They then produce
+# zero results forever. The only signal anywhere is one line in the controller
+# log:
+#
+#   failed to sync cache for volsync.backube/v1alpha1, Resource=replicationsources:
+#   informer stopped (context canceled), the resource may not exist in the cluster
+#
+# Nothing surfaces that to Flux, to the policy status, or to Policy Reporter.
+# A posture report would simply show no findings for this policy, which is
+# indistinguishable from full compliance.
+#
+# Kyverno aggregates ClusterRoles by label rather than expecting you to edit
+# its own, so this carries all three aggregation labels and is picked up
+# automatically. Read-only: get/list/watch, nothing more.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyverno:volsync-read
+  labels:
+    rbac.kyverno.io/aggregate-to-admission-controller: "true"
+    rbac.kyverno.io/aggregate-to-background-controller: "true"
+    rbac.kyverno.io/aggregate-to-reports-controller: "true"
+rules:
+  - apiGroups: ["volsync.backube"]
+    resources:
+      - replicationsources
+      - replicationdestinations
+    verbs: ["get", "list", "watch"]

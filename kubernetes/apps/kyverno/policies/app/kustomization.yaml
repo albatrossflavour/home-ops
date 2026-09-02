@@ -10,5 +10,6 @@ resources:
   - ./require-image-digest.yaml
   - ./require-homepage-decision.yaml
   - ./require-storageclass-allowlist.yaml
+  - ./rbac-volsync-read.yaml
   - ./globalcontext-replicationsources.yaml
   - ./require-pvc-backup.yaml
