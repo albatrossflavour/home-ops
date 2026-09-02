@@ -37,6 +37,23 @@ spec:
       install: true
 
     features:
+      backgroundScan:
+        # Chart default is true, meaning the background scan deliberately
+        # IGNORES the resourceFilters that admission honours - including the
+        # chart's own '[ReplicaSet,*,*]' exclusion. The effect measured here:
+        #
+        #   799 ReplicaSets exist, 663 of them scaled to 0
+        #   2,040 ReplicaSet failures, 1,698 of them from dead revisions
+        #   ...all from the same 101 distinct workloads
+        #
+        # Nothing is leaking - every Deployment sits exactly at its
+        # revisionHistoryLimit and Kubernetes GC is working. The reports are
+        # accurate; they just re-audit ten dead rollback targets per workload.
+        # Setting this false makes the scan honour the same exclusions
+        # admission already uses. Violations are still reported against the
+        # Deployment and its live Pods, so nothing actionable is lost - only
+        # the duplication, plus the bulk of the metric cardinality behind it.
+        skipResourceFilters: false
       policyExceptions:
         # OFF by default in the chart, and the failure mode is nasty: a
         # PolicyException applies cleanly, appears in `kubectl get`, and does
