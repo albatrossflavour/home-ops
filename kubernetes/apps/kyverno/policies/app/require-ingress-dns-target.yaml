@@ -24,7 +24,7 @@ metadata:
   name: require-ingress-dns-target
   annotations:
     policies.kyverno.io/title: Require external-dns Target Annotation
-    policies.kyverno.io/category: Repo Conventions
+    policies.kyverno.io/category: "Tony's Conventions"
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: Ingress
     policies.kyverno.io/description: >-
