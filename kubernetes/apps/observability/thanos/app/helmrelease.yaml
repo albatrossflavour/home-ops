@@ -95,6 +95,21 @@ spec:
       networkPolicy:
         allowExternal: false
         allowExternalEgress: false
+        # Correction (2026-09-02): allowExternal: false above also cut off
+        # Prometheus, which scrapes this component's /metrics on the same
+        # 8080 http port via the chart's own ServiceMonitor. Confirmed live
+        # via Hubble - every scrape was hitting "Policy denied DROPPED", so
+        # locking bucketweb down had silently blinded its own metrics.
+        # Scoped to the kube-prometheus-stack pod in this namespace only.
+        extraIngress:
+          - from:
+              - podSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: prometheus
+                    app.kubernetes.io/instance: kube-prometheus-stack
+            ports:
+              - port: 8080
+                protocol: TCP
         extraEgress:
           - to:
               - namespaceSelector:
