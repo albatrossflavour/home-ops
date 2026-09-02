@@ -8,3 +8,4 @@ resources:
   - ./kyverno/repositories/ks.yaml
   - ./policies/ks.yaml
   - ./pss/ks.yaml
+  - ./policy-reporter/ks.yaml
