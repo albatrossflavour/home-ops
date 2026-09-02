@@ -1,0 +1,57 @@
+---
+# Rally telemetry from the shitbox, deliberately kept out of the cluster's
+# normal metrics path. This is a designed structure, not a misconfigured
+# Prometheus, and the policy flagging it is a false positive rather than a
+# finding.
+#
+# Why it is isolated. Thanos is where every other Prometheus block ends up,
+# and Thanos' compactor is configured:
+#
+#   retentionResolutionRaw:  14d
+#   retentionResolution5m:   180d
+#   retentionResolution1h:   5y
+#
+# Raw samples are downsampled away after a fortnight. For telemetry scraped at
+# 30s, the raw resolution IS the point - 5m and 1h rollups would throw away
+# exactly the detail worth keeping. So this instance ships nothing to object
+# storage (objectStorageConfig unset) and holds 10y locally instead, with its
+# own serviceMonitorSelector (shitbox.io/scrape: none) so it never picks up
+# ordinary cluster metrics.
+#
+# What this exception accepts. Unlike the CNPG and kube-prometheus-stack
+# exceptions, this is NOT "covered by another mechanism" - the volume genuinely
+# has no backup. This records an accepted risk: losing the PVC loses the
+# telemetry. Currently 165Mi on a 10Gi ceph-block volume, so replicated across
+# OSDs but not backed up off-cluster.
+#
+# If that trade stops being acceptable, the fix is Volsync on this PVC rather
+# than Thanos - it would preserve raw resolution and satisfy the policy
+# honestly. Left as a choice rather than a recommendation.
+apiVersion: policies.kyverno.io/v1beta1
+kind: PolicyException
+metadata:
+  name: pvc-backup-shitbox-telemetry
+  namespace: kyverno
+spec:
+  policyRefs:
+    - kind: ValidatingPolicy
+      name: require-pvc-backup
+  matchConditions:
+    - name: is-shitbox-telemetry-volume
+      expression: >-
+        (has(object.metadata.namespace) && object.metadata.namespace == 'observability') &&
+        object.metadata.name.startsWith('prometheus-shitbox-db-')
+  reportResult: skip
+  properties:
+    reason: >-
+      Shitbox rally telemetry, deliberately isolated from Thanos. The
+      compactor downsamples raw samples after 14d and raw resolution is the
+      whole point of this data, so it is retained locally for 10y instead.
+    risk-accepted: >-
+      Not backed up. Losing the PVC loses the telemetry. Ceph replication
+      protects against disk loss, not against deletion or cluster loss.
+    approved-by: tgreen
+    review: >-
+      Revisit if the data becomes worth protecting off-cluster - Volsync on
+      this PVC preserves raw resolution and would satisfy the policy properly,
+      unlike shipping to Thanos.
