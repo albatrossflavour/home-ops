@@ -34,6 +34,17 @@ spec:
       tag: latest@sha256:14e3a7235f3cde1cd52e073e2eb152522167e6d893e339e42bda054cef6ff44a
     pullPolicy: IfNotPresent
     debug: false
+    # Finding #18 (2026-09-02): the chart's own default NetworkPolicy allowed
+    # ingress from anywhere. Confirmed live via ingress.yaml this app is only
+    # meant to be reached through ingress-nginx-external - scoped ingress to
+    # the network namespace instead. Egress deliberately left at the chart
+    # default (unrestricted): this proxies to a mix of true internet
+    # (bandcamp.tv) and LAN-hosted lab services (puppet.lab/cd4pe.lab/etc)
+    # whose IPs aren't worth hardcoding.
+    networkPolicy:
+      allowExternal: false
+      ingressNSMatchLabels:
+        kubernetes.io/metadata.name: network
     replicaCount: 1
     updateStrategy:
       type: RollingUpdate

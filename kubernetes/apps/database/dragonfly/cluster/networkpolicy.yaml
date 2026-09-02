@@ -2,8 +2,14 @@
 # The operator-generated "dragonfly" NetworkPolicy allows port 6379 with a
 # bare podSelector, which only matches pods in the database namespace and
 # blocks every cross-namespace client (immich etc). NetworkPolicies are
-# additive, so this policy widens 6379 to all namespaces without touching
-# the operator's object.
+# additive, so this policy widens 6379 for cross-namespace clients without
+# touching the operator's object.
+#
+# Finding #18 (2026-09-02): originally widened to any namespace at all.
+# Confirmed live via config grep the real consumer set is exactly four
+# apps - scoped down to just those. Same-namespace client (nocodb) uses a
+# bare podSelector entry, matching standard NetworkPolicy semantics where
+# an entry with no namespaceSelector means "this namespace only".
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -18,7 +24,27 @@ spec:
     - Ingress
   ingress:
     - from:
-        - namespaceSelector: {}
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: nocodb
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: utilities
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: send
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: security
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: authentik
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: immich
       ports:
         - port: 6379
           protocol: TCP
