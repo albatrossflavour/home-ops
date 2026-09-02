@@ -62,6 +62,16 @@ spec:
         ingress:
           enabled: true
           className: internal
+          # 2026-09-02: added after Kyverno's require-ingress-dns-target
+          # policy flagged this as the only Ingress of 57 without a target
+          # annotation. It resolved anyway, but by accident rather than by
+          # declaration - which is exactly how smarthome.pdlf.net and
+          # staging.toodlepip.com.au ended up with valid certificates and no
+          # real DNS record. No tls block needed: the internal controller
+          # runs --default-ssl-certificate against the production wildcard,
+          # same as grafana and files.
+          annotations:
+            external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           hosts: ["hubble.${SECRET_DOMAIN}"]
     operator:
       prometheus:
