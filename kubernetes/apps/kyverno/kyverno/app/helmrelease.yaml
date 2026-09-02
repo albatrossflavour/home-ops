@@ -68,17 +68,44 @@ spec:
     # webhooks match nothing. When policies move to Enforce, the admission
     # controller should go to 3 - at that point a restart window becomes a
     # real availability question rather than a theoretical one.
+    # Metrics. Prometheus here selects ServiceMonitors from every namespace
+    # (serviceMonitorSelector and serviceMonitorNamespaceSelector are both
+    # empty), so no extra labels are needed.
+    #
+    # Both controllers matter and they carry different data:
+    #   admission controller -> execution_cause="admission_request"
+    #   reports controller   -> execution_cause="background_scan"
+    # Only the second sees the whole cluster; the first only sees what has
+    # actually been admitted since it started.
+    grafana:
+      enabled: true
+      annotations:
+        grafana_folder: Kyverno
+
     admissionController:
       replicas: 1
+      serviceMonitor:
+        enabled: true
+        interval: 30s
 
     backgroundController:
       replicas: 1
+      serviceMonitor:
+        enabled: true
+        interval: 30s
 
     reportsController:
       # This is the controller that produces PolicyReport and
       # ClusterPolicyReport objects. For a compliance use case it is the
       # product surface, not overhead - deliberately left on.
       replicas: 1
+      # This is the one that carries whole-cluster posture. Its
+      # kyverno_validating_policy_results_total is ~5,400 series against the
+      # admission controller's ~330, because it re-evaluates every resource
+      # rather than only what passes through admission.
+      serviceMonitor:
+        enabled: true
+        interval: 60s
 
     cleanupController:
       # TTL-based resource deletion. Not needed here, and leaving it off

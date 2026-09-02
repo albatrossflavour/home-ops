@@ -13,3 +13,15 @@ resources:
   - ./rbac-volsync-read.yaml
   - ./globalcontext-replicationsources.yaml
   - ./require-pvc-backup.yaml
+
+configMapGenerator:
+  - name: kyverno-posture-dashboard
+    namespace: kyverno
+    files:
+      - kyverno-posture.json=./dashboards/kyverno-posture.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: Kyverno
