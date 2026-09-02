@@ -37,6 +37,20 @@ spec:
       install: true
 
     features:
+      policyExceptions:
+        # OFF by default in the chart, and the failure mode is nasty: a
+        # PolicyException applies cleanly, appears in `kubectl get`, and does
+        # absolutely nothing. The only signal is an apply-time warning
+        # ("PolicyException resources would not be processed until it is
+        # enabled") that Flux never surfaces - the Kustomization still goes
+        # Ready=True. Caught here by a server-side dry-run before commit.
+        enabled: true
+        # Confine exceptions to the kyverno namespace rather than "*". An
+        # exception is a permission to violate policy, so letting any
+        # namespace declare its own exemptions hands the decision to whoever
+        # can write to that namespace. Keeping them in one place is what makes
+        # them reviewable.
+        namespace: kyverno
       excludeBootstrapResources:
         # Excludes Node and CertificateSigningRequest from Fail-policy
         # webhooks. Without this, a full cluster restart with no Kyverno

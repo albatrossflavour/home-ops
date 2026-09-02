@@ -1,0 +1,84 @@
+---
+# STAGE 4: a scoped PolicyException.
+#
+# This is the object PodSecurity has no equivalent of, and the reason the
+# `database` namespace currently sits at enforce: privileged. Volsync's restic
+# mover runs for roughly ninety seconds every four hours with runAsUser: 0 and
+# capabilities [DAC_OVERRIDE, CHOWN, FOWNER], driven by the namespace's
+# volsync.backube/privileged-movers annotation. DAC_OVERRIDE is disallowed even
+# at Baseline.
+#
+# PodSecurity's unit of enforcement is the namespace, so accommodating that
+# mover means postgres16, dragonfly and emqx all run unrestricted alongside it.
+# An exception scoped to the mover alone is the alternative, and it is the
+# thing worth understanding before anyone builds a compliance product on top of
+# this: the exception, not the policy, is where the governance lives.
+apiVersion: policies.kyverno.io/v1beta1
+kind: PolicyException
+metadata:
+  name: volsync-restic-movers
+  namespace: kyverno
+spec:
+  # Narrow, not blanket. The mover needs root and three capabilities; it does
+  # not need host namespaces, hostPath, or privileged mode, so those policies
+  # deliberately still apply to it.
+  policyRefs:
+    - kind: ValidatingPolicy
+      name: disallow-capabilities
+    - kind: ValidatingPolicy
+      name: disallow-capabilities-strict
+    - kind: ValidatingPolicy
+      name: require-run-as-nonroot
+    - kind: ValidatingPolicy
+      name: require-run-as-non-root-user
+
+  matchConditions:
+    # A mover pod looks different depending on WHEN it is evaluated, and
+    # getting this wrong is the whole failure mode. Volsync creates movers via
+    # a Job, so at admission time the pod has only `generateName`
+    # ("volsync-src-nocodb-") and metadata.name is still empty - the API server
+    # has not assigned it yet. By the time the background scan sees the same
+    # pod it has a real name ("volsync-src-nocodb-589ld") and no generateName
+    # is consulted. Matching on name alone silently misses every live
+    # admission; matching on generateName alone silently misses every report.
+    #
+    # Naming confirmed from live cluster events rather than assumed:
+    #   job/volsync-src-nocodb -> pod volsync-src-nocodb-589ld  (database)
+    - name: is-volsync-mover
+      expression: >-
+        (has(object.metadata.name) &&
+          (object.metadata.name.startsWith('volsync-src-') ||
+           object.metadata.name.startsWith('volsync-dst-'))) ||
+        (has(object.metadata.generateName) &&
+          (object.metadata.generateName.startsWith('volsync-src-') ||
+           object.metadata.generateName.startsWith('volsync-dst-')))
+
+  # Report the exception as a `skip` rather than hiding the resource. An
+  # exempted workload that vanishes from the report is indistinguishable from
+  # a compliant one, which is precisely the property an auditor cares about.
+  reportResult: skip
+
+  # Free-form metadata. The CRD's own documentation suggests reason, ticket and
+  # approved-by, which tells you the Kyverno authors already understand this is
+  # a governance object and not just a filter.
+  properties:
+    reason: >-
+      Volsync restic movers require runAsUser 0 plus DAC_OVERRIDE, CHOWN and
+      FOWNER to read and restore file ownership across arbitrary PVCs. Driven
+      by the volsync.backube/privileged-movers namespace annotation, not by
+      moverSecurityContext - confirmed live on 2026-09-01 by inspecting a real
+      mover pod, which overrides the pod-level runAsUser at container level.
+    scope: >-
+      Transient Job pods only, ~90s every 4h. No long-running workload is
+      covered by this exception.
+    approved-by: tgreen
+    reviewed: "2026-09-02"
+
+  # expiresAt is deliberately NOT set, and the reasoning is worth recording.
+  # An expiring exception is good governance for a temporary workaround and a
+  # genuine footgun for a permanent structural requirement. Volsync will need
+  # these capabilities for as long as it exists; an expiry date would mean
+  # backups silently start failing policy on a date nobody remembers, and
+  # under Enforce that becomes a real backup outage rather than a report entry.
+  # Use expiresAt for "we will fix this by Q3", not for "this is how the
+  # software works".
