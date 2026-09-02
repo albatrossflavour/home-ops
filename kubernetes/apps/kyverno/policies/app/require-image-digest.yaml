@@ -21,11 +21,18 @@ apiVersion: policies.kyverno.io/v1beta1
 kind: ValidatingPolicy
 metadata:
   name: require-image-digest
+  labels:
+    compliance.home.arpa/ism: "true"
+    compliance.home.arpa/e8: "true"
   annotations:
     policies.kyverno.io/title: Require SHA256 Digest Pinning
     policies.kyverno.io/category: "Tony's Conventions"
     policies.kyverno.io/severity: medium
     policies.kyverno.io/subject: Pod
+    compliance.home.arpa/ism-controls: >-
+      application control (interpreted)
+    compliance.home.arpa/e8-strategies: >-
+      1 - application control
 spec:
   failurePolicy: Ignore
   matchConstraints:

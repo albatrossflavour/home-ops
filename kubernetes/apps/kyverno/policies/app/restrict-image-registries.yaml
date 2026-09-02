@@ -1,0 +1,70 @@
+---
+# Image provenance. The one policy that came out of thinking about ISM rather
+# than CIS, and it maps to three frameworks at once - which is exactly why the
+# compliance.home.arpa/* labels exist.
+#
+# ACSC publish no Kubernetes guidance, so "application control" (ISM's
+# allowlisting family, Essential Eight strategy one) has to be interpreted for
+# a container platform. Reading it as "images may only come from registries we
+# have decided to trust" is a judgement call, not a translation - and that
+# judgement is the part a document-ingestion tool cannot make for you.
+#
+# The allowlist is what is actually in use, measured 2026-09-02, not an
+# aspiration: quay.io 204, ghcr.io 106, registry.k8s.io 47, docker.io 56,
+# reg.kyverno.io 5, public.ecr.aws 3, mirror.gcr.io 1, docker.n8n.io 1,
+# registry.gitlab.com 1.
+#
+# So it passes everything today. It is insurance against a NEW registry
+# arriving unnoticed, in the same spirit as require-ingress-class - the value
+# is future, not a backlog to clear.
+#
+# Images with no registry prefix (nginx:1.31-alpine, python:3.14-slim) resolve
+# to docker.io implicitly and are allowed on that basis rather than overlooked:
+# a reference whose first path segment contains no dot and no colon is not a
+# hostname.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: restrict-image-registries
+  labels:
+    compliance.home.arpa/ism: "true"
+    compliance.home.arpa/e8: "true"
+  annotations:
+    policies.kyverno.io/title: Restrict Image Registries
+    policies.kyverno.io/category: Supply Chain
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    compliance.home.arpa/ism-controls: "application control (no Kubernetes-specific ISM control exists; interpreted)"
+    compliance.home.arpa/e8-strategies: "1 - application control"
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  variables:
+    - name: allowed
+      expression: >-
+        ['quay.io/', 'ghcr.io/', 'registry.k8s.io/', 'docker.io/',
+         'reg.kyverno.io/', 'public.ecr.aws/', 'mirror.gcr.io/',
+         'docker.n8n.io/', 'registry.gitlab.com/']
+    - name: images
+      expression: >-
+        (has(object.spec.containers) ? object.spec.containers.map(c, c.image) : []) +
+        (has(object.spec.initContainers) ? object.spec.initContainers.map(c, c.image) : [])
+  validations:
+    - expression: >-
+        variables.images.all(i,
+          variables.allowed.exists(a, i.startsWith(a)) ||
+          !(i.split('/')[0].contains('.') || i.split('/')[0].contains(':'))
+        )
+      message: >-
+        Container images must come from an approved registry. Allowed:
+        quay.io, ghcr.io, registry.k8s.io, docker.io, reg.kyverno.io,
+        public.ecr.aws, mirror.gcr.io, docker.n8n.io, registry.gitlab.com.
+        An unprefixed image (nginx:1.31-alpine) resolves to docker.io and is
+        fine. If a new registry is genuinely needed, add it here rather than
+        excepting the workload.
+  validationActions: [Audit]

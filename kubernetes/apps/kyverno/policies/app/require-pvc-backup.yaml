@@ -29,11 +29,18 @@ apiVersion: policies.kyverno.io/v1beta1
 kind: ValidatingPolicy
 metadata:
   name: require-pvc-backup
+  labels:
+    compliance.home.arpa/ism: "true"
+    compliance.home.arpa/e8: "true"
   annotations:
     policies.kyverno.io/title: Replicated-Tier PVCs Should Be Backed Up
     policies.kyverno.io/category: "Tony's Conventions"
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: PersistentVolumeClaim
+    compliance.home.arpa/ism-controls: >-
+      data backup and restoration (interpreted)
+    compliance.home.arpa/e8-strategies: >-
+      8 - regular backups. NOTE: this checks a ReplicationSource exists, NOT that the backup is restorable. n8n reported green for 383 days while backing up an empty PVC. E8 maturity requires tested restoration, which no admission controller can assess.
 spec:
   failurePolicy: Ignore
   matchConstraints:
