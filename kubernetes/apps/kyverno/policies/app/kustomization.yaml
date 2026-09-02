@@ -16,6 +16,7 @@ resources:
   - ./rbac-volsync-read.yaml
   - ./globalcontext-replicationsources.yaml
   - ./require-pvc-backup.yaml
+  - ./mutate-revision-history-limit.yaml
 
 # The dashboard JSON uses Grafana's own ${var} template syntax, which
 # collides head-on with Flux's postBuild variable substitution: cluster-apps

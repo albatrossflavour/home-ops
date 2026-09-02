@@ -1,0 +1,66 @@
+---
+# The first mutate policy in this cluster, and deliberately the most boring
+# thing one could mutate.
+#
+# Why. 799 ReplicaSets exist and 663 are dead revisions scaled to zero, kept
+# purely as `kubectl rollout undo` targets - a mechanism this repo does not
+# use, because a rollback here is a git revert and a Flux reconcile. All 58
+# app-template Deployments already set revisionHistoryLimit: 3; the ~75 still
+# on Kubernetes' default of 10 all belong to third-party charts. Overriding
+# each one means a different value path in 20+ HelmReleases, refought on every
+# chart upgrade. One mutate rule covers them all, including charts added later.
+#
+# Why these four are excluded. cilium, cloudnative-pg, external-secrets and
+# rook-ceph-cluster run driftDetection: enabled. Mutating a field Helm also
+# sets starts a loop: Helm renders 10, Kyverno mutates to 3, Flux detects
+# drift and corrects back to 10, Kyverno mutates again. Excluded by their Flux
+# HelmRelease label rather than by namespace, so coredns, metrics-server and
+# kubelet-csr-approver in kube-system are still covered - only Cilium's own
+# three Deployments there are skipped.
+#
+# Risk. revisionHistoryLimit only controls how many superseded ReplicaSets are
+# retained. It cannot restart a pod, cannot change a running workload, and the
+# worst case is fewer rollback targets for a rollback path already unused.
+# Mutate has no audit mode - it either applies or it does not - which is why
+# the first one is a field that cannot break anything.
+apiVersion: policies.kyverno.io/v1beta1
+kind: MutatingPolicy
+metadata:
+  name: set-revision-history-limit
+  annotations:
+    policies.kyverno.io/title: Cap Deployment Revision History at 3
+    policies.kyverno.io/category: "Tony's Conventions"
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/subject: Deployment
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        operations: [CREATE, UPDATE]
+        resources: [deployments]
+  variables:
+    - name: labels
+      expression: "has(object.metadata.labels) ? object.metadata.labels : {}"
+    - name: driftDetected
+      expression: >-
+        variables.labels['helm.toolkit.fluxcd.io/name'] in
+          ['cilium', 'cloudnative-pg', 'external-secrets', 'rook-ceph-cluster']
+    - name: current
+      expression: "has(object.spec.revisionHistoryLimit) ? object.spec.revisionHistoryLimit : 10"
+  matchConditions:
+    # Skip the drift-detected releases entirely.
+    - name: not-drift-detected
+      expression: >-
+        !(('helm.toolkit.fluxcd.io/name' in variables.labels) && variables.driftDetected)
+    # Only ever lower the value. A chart that deliberately sets 1 or 2 keeps
+    # it; this caps the default, it does not impose a number.
+    - name: above-cap
+      expression: >-
+        (has(object.spec.revisionHistoryLimit) ? object.spec.revisionHistoryLimit : 10) > 3
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: >-
+          Object{ spec: Object.spec{ revisionHistoryLimit: 3 } }
