@@ -2,5 +2,26 @@ cluster:
   etcd:
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
+      # Defragment automatically at etcd startup whenever doing so would
+      # reclaim at least this many megabytes.
+      #
+      # etcd's bbolt file never shrinks on its own. Compaction frees pages
+      # back to an internal freelist and etcd reuses them, so the file finds
+      # an equilibrium rather than growing without bound - this cluster sat
+      # at exactly 299.4MiB for three days straight before Kyverno landed.
+      # But that equilibrium is roughly 3x the live data, and the only way
+      # to reclaim the difference is a defrag, which etcd will not do by
+      # itself while running.
+      #
+      # Measured 2026-09-02: ~205MiB live data in a ~415MiB file across all
+      # three members, ~210MiB reclaimable each. The manual alternative is
+      # remembering to run `talosctl etcd defrag` against every control
+      # plane node, followers first and leader last, forever.
+      #
+      # Only fires on etcd startup, so it is not a schedule - it piggybacks
+      # on Talos upgrades and node reboots. Verified allowed: Talos 1.13's
+      # etcd denyListArgs covers only identity and TLS flags. Renamed from
+      # experimental-* in etcd 3.6; this cluster runs 3.6.12.
+      bootstrap-defrag-threshold-megabytes: "100"
     advertisedSubnets:
       - 192.168.8.0/24
