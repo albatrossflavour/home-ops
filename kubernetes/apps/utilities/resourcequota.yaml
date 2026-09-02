@@ -1,0 +1,31 @@
+---
+# Second ResourceQuota in this cluster, after media's. Sized from what the
+# namespace actually commits rather than a round number:
+#
+#   requests.cpu     505m     -> 2      (~4x headroom, CPU is not scarce here)
+#   requests.memory  2010Mi   -> 5Gi    (~2.5x, matching media's 2x approach)
+#   limits.memory    10916Mi  -> 17Gi   (~1.5x, matching media)
+#   pods             11 live  -> 30
+#
+# A quota specifying requests.cpu/requests.memory/limits.memory rejects any
+# pod that omits them. That is not theoretical: media-quota (7cfa220e) did
+# exactly that to every Volsync backup job in that namespace for 12 hours on
+# 2026-09-02, because the restic movers declared no resources. The shared
+# volsync templates now set moverResources (cfa92823), so the movers here are
+# covered - but this is the failure mode to check for before adding a quota to
+# any further namespace, and it is invisible until a Job actually runs.
+#
+# Every container and init container in utilities declares requests and a
+# memory limit as of this change; require-pod-resources reports zero failures
+# for the namespace.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: utilities-quota
+  namespace: utilities
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 5Gi
+    limits.memory: 17Gi
+    pods: "30"

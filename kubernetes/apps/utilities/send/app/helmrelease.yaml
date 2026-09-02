@@ -46,6 +46,20 @@ spec:
             # envFrom:
             #   - secretRef:
             #       name: send-secret
+            # Sized from 7d of real usage rather than guessed - 30d queries
+            # cross Thanos' 14d raw-retention boundary and return nothing
+            # useful for a gauge. Observed: memory avg 31.7Mi, p95 and max
+            # both 35.6Mi; CPU avg 1.2m, p95 2.3m, max 2.4m.
+            # Request sits just above observed peak; limit gives ~3.5x
+            # headroom for a large upload. No CPU limit, per this cluster's
+            # convention - CPU is not the scarce resource and throttling is
+            # worse than bursting.
+            resources:
+              requests:
+                cpu: 10m
+                memory: 48Mi
+              limits:
+                memory: 192Mi
     defaultPodOptions:
       securityContext:
         # runAsNonRoot: true
