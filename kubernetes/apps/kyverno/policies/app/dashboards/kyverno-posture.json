@@ -8,7 +8,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "5m",
   "time": {
     "from": "now-24h",
@@ -536,6 +536,293 @@
         "overrides": []
       },
       "options": {}
+    },
+    {
+      "id": 500,
+      "type": "row",
+      "title": "Mutations and exceptions (what the engine is changing and forgiving)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 11,
+      "title": "Resources mutated",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$${datasource}"
+      },
+      "description": "Admissions where a mutate policy actually changed the resource, last 24h. Mutate has no audit mode - it either applies or it does not - so this is the only view of what the engine has silently rewritten.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 43
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$${datasource}"
+          },
+          "expr": "sum(increase(kyverno_mutating_policy_results_total{result=\"pass\"}[24h]))",
+          "legendFormat": "mutated",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 12,
+      "title": "Matched but not mutated",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$${datasource}"
+      },
+      "description": "Resources a mutate policy matched but deliberately left alone - already below the cap, or covered by a matchCondition exclusion such as the drift-detected Helm releases.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 43
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$${datasource}"
+          },
+          "expr": "sum(increase(kyverno_mutating_policy_results_total{result=\"skip\"}[24h]))",
+          "legendFormat": "skipped",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 13,
+      "title": "Resources exempted by PolicyException",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$${datasource}"
+      },
+      "description": "Violations forgiven by a PolicyException in the last scan. These are decisions, not compliance - each one has a recorded reason and approver in its exception. An exemption that vanishes from the report is indistinguishable from a clean result, which is why reportResult is set to skip rather than pass.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 43
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$${datasource}"
+          },
+          "expr": "sum(increase(kyverno_validating_policy_results_total{result=\"skip\", execution_cause=\"background_scan\"}[70m]))",
+          "legendFormat": "exempted",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 14,
+      "title": "Mutations by policy",
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$${datasource}"
+      },
+      "description": "pass = changed, skip = matched and left alone.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 43
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$${datasource}"
+          },
+          "expr": "sum by (policy_name, result) (increase(kyverno_mutating_policy_results_total[24h]))",
+          "legendFormat": "{{policy_name}} {{result}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 15,
+      "title": "Exemptions by policy and namespace",
+      "type": "table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$${datasource}"
+      },
+      "description": "Which policies are being forgiven, and where. A number climbing here without a matching PR is worth a look - exceptions are permission to violate policy.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$${datasource}"
+          },
+          "expr": "sum by (policy_name, resource_namespace) (increase(kyverno_validating_policy_results_total{result=\"skip\", execution_cause=\"background_scan\"}[70m]))",
+          "legendFormat": null,
+          "refId": "A",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "options": {
+        "sortBy": [
+          {
+            "displayName": "Exempted",
+            "desc": true
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "policy_name": "Policy",
+              "resource_namespace": "Namespace",
+              "Value": "Exempted"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Mutation and exemption trend",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$${datasource}"
+      },
+      "description": "Mutation volume over time. A steady non-zero rate is normal while Helm re-renders third-party charts; a sudden spike means something is being rewritten repeatedly, which on a drift-detected release would be a mutate/Flux fight.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$${datasource}"
+          },
+          "expr": "sum by (policy_name) (increase(kyverno_mutating_policy_results_total{result=\"pass\"}[1h]))",
+          "legendFormat": "mutated: {{policy_name}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
     }
   ]
 }
