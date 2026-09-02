@@ -14,8 +14,12 @@ resources:
   - ./require-homepage-decision.yaml
   - ./require-storageclass-allowlist.yaml
   - ./rbac-volsync-read.yaml
+  - ./rbac-cis-read.yaml
   - ./globalcontext-replicationsources.yaml
+  - ./globalcontext-networkpolicies.yaml
   - ./require-pvc-backup.yaml
+  - ./cis-5-1-3-no-wildcard-rbac.yaml
+  - ./cis-5-3-2-namespace-networkpolicy.yaml
   - ./mutate-revision-history-limit.yaml
 
 # The dashboard JSON uses Grafana's own ${var} template syntax, which

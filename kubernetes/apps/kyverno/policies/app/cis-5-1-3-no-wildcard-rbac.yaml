@@ -1,0 +1,60 @@
+---
+# CIS Kubernetes Benchmark 5.1.3 - Minimise wildcard use in Roles and
+# ClusterRoles.
+#
+# A role granting verbs ["*"] on resources ["*"] is cluster-admin by another
+# name. The audit's RBAC sweep (2026-09-02) enumerated all 111
+# ClusterRoleBindings and 95 RoleBindings and found no accidental grants, but
+# that was a point-in-time check by a human. This is the standing version.
+#
+# Kubernetes' own built-ins are excluded rather than excepted: system:*,
+# cluster-admin, admin and edit are created and repaired by the API server, so
+# flagging them produces noise nobody can act on.
+#
+# Two live findings at time of writing, both third-party and both left visible
+# rather than pre-excepted, because they deserve a conscious decision:
+#   clusterroles/crd-controller-flux-system
+#   clusterroles/openebs-localpv-provisioner
+# Flux's CRD controller plausibly needs breadth; openebs-localpv-provisioner is
+# worth a closer look. If either is accepted, write a PolicyException with the
+# reasoning rather than widening this policy.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: cis-5-1-3-no-wildcard-rbac
+  annotations:
+    policies.kyverno.io/title: CIS 5.1.3 - No Wildcard Verbs and Resources
+    policies.kyverno.io/category: CIS Benchmark
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: ClusterRole, Role
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["rbac.authorization.k8s.io"]
+        apiVersions: ["v1"]
+        operations: [CREATE, UPDATE]
+        resources: ["clusterroles", "roles"]
+  # NOTE: matchConditions are evaluated BEFORE variables exist, so they must
+  # reference `object` directly. Referencing variables here fails to compile
+  # with "undefined field" - the same rule as native ValidatingAdmissionPolicy.
+  matchConditions:
+    - name: not-a-kubernetes-builtin
+      expression: >-
+        !object.metadata.name.startsWith('system:') &&
+        object.metadata.name != 'cluster-admin' &&
+        object.metadata.name != 'admin' &&
+        object.metadata.name != 'edit' &&
+        object.metadata.name != 'view'
+  validations:
+    - expression: >-
+        !has(object.rules) ||
+        !object.rules.exists(r,
+          has(r.verbs) && ('*' in r.verbs) &&
+          has(r.resources) && ('*' in r.resources))
+      message: >-
+        This role grants verbs ["*"] on resources ["*"], which is
+        cluster-admin under a different name. Enumerate the verbs and
+        resources actually needed, or record a PolicyException explaining
+        why the breadth is required.
+  validationActions: [Audit]

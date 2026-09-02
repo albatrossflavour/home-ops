@@ -97,6 +97,49 @@ Exceptions are confined to the `kyverno` namespace (`features.policyExceptions.n
 
 `expiresAt` is deliberately unset on the Volsync exception. Expiry is right for a temporary workaround and a footgun for a structural requirement. Volsync needs those capabilities permanently, and an expiry would mean backups start failing policy on a date nobody remembers.
 
+## CIS Benchmark coverage
+
+Worth being precise about, because "we run CIS policies" is a claim that needs qualifying.
+
+**Most of the CIS Kubernetes Benchmark is not admission-controllable.** Sections 1 to 4 cover control-plane file permissions, apiserver flags, etcd and kubelet configuration. Kyverno is an admission controller; it cannot see any of it. On Talos it is worse still, since there is no SSH, no shell and no conventional `/etc/kubernetes` - the same reason trivy's node-collector could never work here. Only Section 5 (Policies) is in scope at all, roughly 25 of about 120 controls.
+
+**Section 5.2 is already covered**, because it is the Pod Security Standards under different numbering:
+
+| CIS | Covered by |
+|---|---|
+| 5.2.2 privileged containers | `disallow-privileged-containers` |
+| 5.2.3/4/5 hostPID, hostIPC, hostNetwork | `disallow-host-namespaces` |
+| 5.2.6 allowPrivilegeEscalation | `disallow-privilege-escalation` |
+| 5.2.7 root containers | `require-run-as-nonroot` |
+| 5.2.8/9/10 capabilities | `disallow-capabilities`, `-strict` |
+| 5.2.11 hostPath | `disallow-host-path` |
+| 5.2.12 hostPorts | `disallow-host-ports` |
+| 5.7.2 seccomp RuntimeDefault | `restrict-seccomp`, `-strict` |
+
+**The remainder, measured against this cluster rather than assumed:**
+
+| CIS | Control | Found here | Verdict |
+|---|---|---|---|
+| 5.1.6 | SA tokens mounted only where needed | 218 of 228 pods auto-mount | not written - mostly third-party charts that genuinely call the API, and finding #7 already established the `default` SAs hold no RBAC |
+| 5.4.1 | Prefer secrets as files over env vars | 79 of 228 pods | not written - this repo's entire ExternalSecret pattern injects via `envFrom`; enforcing it means re-plumbing 79 workloads for a threat model (env vars in `/proc` and crash dumps) that does not apply here |
+| 5.3.2 | Every namespace has a NetworkPolicy | 7 namespaces without | **written**, as a rollout tracker |
+| 5.1.3 | No wildcard verbs and resources in RBAC | 2 non-system roles | **written** |
+| 5.7.4 | Do not use the default namespace | 18 pods | not written - `default` is used deliberately here; the control exists for multi-tenant clusters |
+
+### The two that were written
+
+`cis-5-1-3-no-wildcard-rbac` flags any Role or ClusterRole granting `verbs: ["*"]` on `resources: ["*"]`, which is cluster-admin under another name. Kubernetes' own built-ins (`system:*`, `cluster-admin`, `admin`, `edit`, `view`) are excluded in `matchConditions` rather than excepted, since the API server recreates them and flagging them produces noise nobody can act on. Two live findings, both third-party, deliberately left visible rather than pre-excepted: `crd-controller-flux-system` and `openebs-localpv-provisioner`.
+
+`cis-5-3-2-namespace-networkpolicy` is **an existence check and nothing more**. A namespace containing one empty, fully-permissive policy satisfies it completely. It cannot assess whether a policy is correct, and correctness is the entire difficulty - finding #14's rollout produced four separate outages precisely because writing a correct policy is hard and writing one that merely exists is trivial. It is here as a standing tracker for that unfinished rollout, and **should never be promoted to Enforce**: blocking namespace creation until a NetworkPolicy exists inverts the order things are built in, and would be satisfied by an empty policy anyway.
+
+Both need RBAC Kyverno does not ship (`rbac-cis-read.yaml`), and 5.3.2 needs two `GlobalContextEntry` objects because a single entry caches exactly one resource type and this cluster uses both `CiliumNetworkPolicy` and core `NetworkPolicy`.
+
+### The number worth carrying
+
+Of roughly 120 CIS Kubernetes controls, about 25 are admission-addressable, 11 of those are already covered by the PSS bundle, and of the rest exactly **two** were worth enforcing here - one of which is a checkbox that any empty policy satisfies.
+
+That is the honest ceiling for a Kyverno-backed CIS product: something under a quarter of the benchmark, and a meaningful share of that quarter is existence-checking rather than control.
+
 ## Not done
 
 **Enforce mode.** Nothing blocks. Moving a policy to `Deny` should be treated like the PodSecurity rollout: enforce only where the cluster is already compliant, and work the backlog separately.

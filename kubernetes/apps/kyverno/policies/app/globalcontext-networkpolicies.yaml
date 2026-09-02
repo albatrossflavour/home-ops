@@ -1,0 +1,31 @@
+---
+# Caches both flavours of network policy so a policy evaluating a Namespace can
+# ask whether anything selects pods in it. Two entries because a
+# GlobalContextEntry caches exactly one resource type, and this cluster uses
+# CiliumNetworkPolicy for its own rollout while some charts ship core
+# NetworkPolicy objects.
+apiVersion: kyverno.io/v2beta1
+kind: GlobalContextEntry
+metadata:
+  name: ciliumnetworkpolicies
+spec:
+  kubernetesResource:
+    group: cilium.io
+    version: v2
+    resource: ciliumnetworkpolicies
+  projections:
+    - name: namespaces
+      jmesPath: "[].metadata.namespace"
+---
+apiVersion: kyverno.io/v2beta1
+kind: GlobalContextEntry
+metadata:
+  name: networkpolicies
+spec:
+  kubernetesResource:
+    group: networking.k8s.io
+    version: v1
+    resource: networkpolicies
+  projections:
+    - name: namespaces
+      jmesPath: "[].metadata.namespace"
