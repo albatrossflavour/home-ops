@@ -16,5 +16,10 @@ spec:
     version: v1alpha1
     resource: replicationsources
   projections:
+    # The cached value is a bare list of ReplicationSources, not an object
+    # with an `items` key. "items[].join(...)" compiles, deploys, and yields
+    # null - which made require-pvc-backup fail all 36 replicated PVCs
+    # including nine that are demonstrably backed up. Caught only because an
+    # independent count said 22.
     - name: pvcs
-      jmesPath: "items[].join('/', [metadata.namespace, spec.sourcePVC])"
+      jmesPath: "[].join('/', [metadata.namespace, spec.sourcePVC])"
