@@ -7,3 +7,4 @@ resources:
   - ./kyverno/ks.yaml
   - ./kyverno/repositories/ks.yaml
   - ./policies/ks.yaml
+  - ./pss/ks.yaml

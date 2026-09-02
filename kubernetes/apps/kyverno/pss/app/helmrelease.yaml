@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kyverno-pss
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: kyverno-policies
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # STAGE 3: the Pod Security Standards bundle, audit only.
+    #
+    # 17 policies (11 Baseline + 6 Restricted) evaluated against every
+    # workload in the cluster. Nothing is blocked. The point is the posture
+    # assessment: finding out which of the six enforce:privileged namespaces
+    # are actually violating anything, and which are privileged purely
+    # because PodSecurity's unit of enforcement is the namespace rather than
+    # the workload.
+
+    # CEL types in the policies.kyverno.io group, matching stage 2 and the
+    # chart's own default. The legacy kyverno.io ClusterPolicy forms of all
+    # 17 ship in the same chart and are deprecated upstream.
+    policyType: ValidatingPolicy
+
+    # "restricted" is cumulative - the chart's own podSecurityBaseline helper
+    # returns true for both "baseline" and "restricted", so this installs all
+    # 17 rather than only the 6 Restricted ones.
+    podSecurityStandard: restricted
+
+    # OVERRIDE, and the important one. The chart ships failurePolicy: Fail.
+    # Left alone, an unreachable admission controller would block pod
+    # creation cluster-wide for every resource these 17 policies match.
+    # Kyverno does delete its own webhooks on graceful shutdown, but that
+    # does not cover a hard kill or a node disappearing at the hypervisor
+    # layer - which has already happened here once (magrat, 2026-09-01).
+    # Verified empirically on 2026-09-02: with the webhook registered and its
+    # backend unreachable, an Ignore webhook admits workloads while a Fail
+    # webhook returns "no route to host".
+    failurePolicy: Ignore
+
+    # Record violations, admit the resource. Chart default, set explicitly
+    # because it is the single setting that decides whether this deployment
+    # is an assessment or an outage.
+    validationFailureAction: Audit
+
+    # Evaluate resources that already exist, not just new admissions. Without
+    # this there would be no posture assessment at all - only pods created
+    # after install would ever appear in a report.
+    background: true
+
+    # No exclusions, deliberately. rook-ceph, kube-system, openebs-system and
+    # the Volsync movers will all light up, and that is the desired output:
+    # an unfiltered baseline of what actually violates what. Scoped
+    # PolicyExceptions come at stage 4, written against the real findings
+    # rather than guessed in advance.
