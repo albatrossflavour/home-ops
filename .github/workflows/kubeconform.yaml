@@ -3,9 +3,16 @@
 name: "Kubeconform"
 
 on:
+  # No paths filter on pull_request, deliberately. This is a REQUIRED status
+  # check, and GitHub treats a required check that never ran as pending
+  # rather than passing - so any PR not touching the filtered paths is
+  # blocked permanently and needs an admin merge. That is not hypothetical:
+  # PR #1661, which changed this very file, could not be merged normally.
+  # Running it unconditionally costs about a minute on the rare PR that
+  # touches nothing under kubernetes/, which is cheaper than a required
+  # check that silently does not apply.
   pull_request:
     branches: ["main"]
-    paths: ["kubernetes/**"]
   # Also run on direct pushes to main. Branch protection allows admins to
   # bypass the required checks (deliberately, for emergency fixes), but
   # without this trigger a bypassed push is never validated at all - it does
