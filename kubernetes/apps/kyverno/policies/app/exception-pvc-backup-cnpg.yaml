@@ -1,0 +1,42 @@
+---
+# CloudNativePG instance volumes are not backed up by Volsync, and should not
+# be. CNPG has its own mechanism and backing up a live Postgres data directory
+# with restic would produce a torn, unrestorable copy.
+#
+# Verified live before granting this, rather than taken on trust:
+#   ContinuousArchiving: True   "Continuous archiving is working"
+#   LastBackupSucceeded: True
+#   lastSuccessfulBackup:       2026-09-02T00:03:17Z
+#   destinationPath:            s3://cloudnative-pg/
+#   completed base backups:     2026-08-31, 2026-09-01, 2026-09-02
+#
+# Reported as skip rather than hidden, so these volumes stay visible in the
+# posture report as a deliberate decision instead of silently disappearing.
+apiVersion: policies.kyverno.io/v1beta1
+kind: PolicyException
+metadata:
+  name: pvc-backup-cnpg-barman
+  namespace: kyverno
+spec:
+  policyRefs:
+    - kind: ValidatingPolicy
+      name: require-pvc-backup
+  matchConditions:
+    - name: is-cnpg-instance-volume
+      expression: >-
+        (has(object.metadata.namespace) && object.metadata.namespace == 'database') &&
+        object.metadata.name.startsWith('postgres16-')
+  reportResult: skip
+  properties:
+    reason: >-
+      Covered by CloudNativePG's own barman object store: continuous WAL
+      archiving plus daily base backups to cluster Minio, 10 day retention.
+      Volsync would capture a torn copy of a live data directory.
+    verified: >-
+      2026-09-02 - ContinuousArchiving and LastBackupSucceeded both True,
+      three consecutive daily base backups completed.
+    approved-by: tgreen
+    review: >-
+      Re-check if the CNPG barman plugin migration lands - native
+      barmanObjectStore support was removed in CNPG 1.31 and that migration
+      is still open.

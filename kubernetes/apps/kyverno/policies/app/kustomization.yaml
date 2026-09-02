@@ -5,6 +5,9 @@ kind: Kustomization
 resources:
   - ./require-pod-resources.yaml
   - ./exception-volsync-movers.yaml
+  - ./exception-pvc-backup-cnpg.yaml
+  - ./exception-pvc-backup-monitoring.yaml
+  - ./exception-pvc-backup-shitbox.yaml
   - ./require-ingress-dns-target.yaml
   - ./require-ingress-class.yaml
   - ./require-image-digest.yaml

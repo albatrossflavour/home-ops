@@ -1,0 +1,46 @@
+---
+# Two monitoring volumes, two different reasons, and deliberately NOT a third.
+#
+# prometheus-kube-prometheus-stack-db-*
+#   Local retention is only 7d; the Thanos sidecar ships completed blocks to
+#   object storage, which is where the long-term data actually lives. Verified:
+#   thanos sidecar present, objectStorageConfig set.
+#
+# alertmanager-kube-prometheus-stack-db-*
+#   Holds silences and notification state, not metrics, with 120h retention.
+#   Nothing ships it anywhere and nothing needs to - losing it costs active
+#   silences, which age out within five days regardless.
+#
+# NOT covered by this exception: prometheus-shitbox-db-prometheus-shitbox-0.
+# That instance has a Thanos sidecar with objectStorageConfig unset and 10y
+# local retention, which is a deliberate choice rather than a misconfiguration.
+# Its reasoning is recorded separately in exception-pvc-backup-shitbox.yaml.
+apiVersion: policies.kyverno.io/v1beta1
+kind: PolicyException
+metadata:
+  name: pvc-backup-monitoring
+  namespace: kyverno
+spec:
+  policyRefs:
+    - kind: ValidatingPolicy
+      name: require-pvc-backup
+  matchConditions:
+    - name: is-exempt-monitoring-volume
+      expression: >-
+        (has(object.metadata.namespace) && object.metadata.namespace == 'observability') &&
+        (object.metadata.name.startsWith('prometheus-kube-prometheus-stack-db-') ||
+         object.metadata.name.startsWith('alertmanager-kube-prometheus-stack-db-'))
+  reportResult: skip
+  properties:
+    reason: >-
+      Prometheus blocks ship to object storage via the Thanos sidecar (7d
+      local retention only). Alertmanager holds short-lived silence and
+      notification state with 120h retention, worth nothing once expired.
+    verified: >-
+      2026-09-02 - thanos sidecar and objectStorageConfig confirmed on the
+      kube-prometheus-stack instance.
+    approved-by: tgreen
+    review: >-
+      Scoped by name on purpose. prometheus-shitbox is excluded from this
+      exception because its reasoning is different: see
+      exception-pvc-backup-shitbox.yaml.
