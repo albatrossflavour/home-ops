@@ -64,7 +64,14 @@ echo "=== Rendering and evaluating ==="
 for kind in hr ks; do
   out="${WORK}/rendered-${kind}.yaml"
   echo "--- flux-local build ${kind} ---"
-  flux-local build "${kind}" --path "${KUBERNETES_DIR}/flux" > "${out}" 2>"${WORK}/${kind}.err" || {
+  # NOTE: `build` takes the path POSITIONALLY, unlike `diff` which uses
+  # --path. Passing --path here is accepted and silently renders nothing,
+  # which is how this first failed. --enable-helm is what actually inflates
+  # HelmReleases into real objects; without it there is nothing for the
+  # policies to match.
+  flux-local build "${kind}" "${KUBERNETES_DIR}/flux" \
+    --enable-helm \
+    --output-file "${out}" 2>"${WORK}/${kind}.err" || {
     echo "flux-local build ${kind} failed:"; cat "${WORK}/${kind}.err"; exit 1
   }
   count="$(grep -c '^kind:' "${out}" || true)"
@@ -74,6 +81,8 @@ for kind in hr ks; do
   # which is the failure mode that makes a green tick meaningless.
   if [[ "${count}" -lt 20 ]]; then
     echo "Refusing to continue: ${kind} render produced implausibly few objects (${count})."
+    echo "--- stderr from flux-local ---"
+    cat "${WORK}/${kind}.err" || true
     exit 1
   fi
 
