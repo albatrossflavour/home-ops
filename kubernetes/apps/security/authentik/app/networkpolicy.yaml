@@ -14,6 +14,17 @@
 #   external database. Allowing DB-port egress to the whole internet would
 #   be a real hole for a 0.005% blip.
 #
+# CORRECTION 2026-09-02: missing dragonfly (redis) egress entirely - a real
+# outage, not just a gap. authentik's HelmRelease configures
+# authentik.redis.host: dragonfly.database.svc.cluster.local, but this policy
+# never had a rule for it. The 6h capture this policy was drafted from never
+# showed it, almost certainly because redis connections are long-lived and
+# established once at pod start - the capture only ever saw already-running
+# pods with an existing connection, not a fresh one being opened. Confirmed
+# live via a direct TCP connect test from a running authentik-server pod:
+# timed out. Found by a fresh full-cluster re-audit specifically looking for
+# capture-window blind spots like this one.
+#
 # Rollback: `kubectl delete ciliumnetworkpolicy security-authentik -n security`.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -41,6 +52,16 @@ spec:
       toPorts:
         - ports:
             - port: "5432"
+              protocol: TCP
+    # dragonfly (redis-compatible) - session cache, Django Channels layer,
+    # Dramatiq task queue.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: database
+            app.kubernetes.io/name: dragonfly
+      toPorts:
+        - ports:
+            - port: "6379"
               protocol: TCP
     # Direct DNS resolution outside coredns - real, substantial volume.
     - toEntities:
