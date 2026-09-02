@@ -451,6 +451,22 @@ app/
 └── kustomization.yaml
 ```
 
+## Kyverno Policy Engine
+
+**See**: `docs/operations/kyverno.md` for the full picture.
+
+Audit-only. No policy blocks anything, and the configuration is deliberately arranged so an unreachable Kyverno cannot stop a deploy: every policy is `validationActions: [Audit]` with `failurePolicy: Ignore`, and Kyverno removes its own webhooks on graceful shutdown.
+
+**Do not change `failurePolicy` to `Fail` on anything matching real workloads.** The `kyverno-policies` chart ships `Fail` as its default and it is overridden here on purpose.
+
+Policies live in `kubernetes/apps/kyverno/policies/app/`. Author against `policies.kyverno.io` (CEL), not the deprecated `kyverno.io` `ClusterPolicy`. Dry-run every new policy before committing, and then check its output against an independent count:
+
+```bash
+kubectl apply --dry-run=server -f kubernetes/apps/kyverno/policies/app/your-policy.yaml
+```
+
+A policy that compiles can still be completely wrong. `require-pvc-backup` once reported all 36 replicated PVCs as unbacked, including three with working backups, because of a single wrong JMESPath that raised no error anywhere. "It compiled" is not evidence of anything.
+
 ## Troubleshooting Workflow
 
 ### Common Issues and Resolution Steps
@@ -649,6 +665,38 @@ task backup:restore
 cp restored-*/config.yaml ./config.yaml
 cp -r restored-*/bootstrap ./bootstrap
 ```
+
+### Normal Workflow (branch and PR)
+
+**Changes should go through a pull request, not straight to main.**
+
+The reason is mechanical rather than ceremonial: the three required status checks (`Kubeconform` and both `Flux Diff` legs) only trigger `on: pull_request`. A direct push to main is not merely un-gated, the workflows never run at all, so the change is never validated by anything. Branch protection permits admins to bypass, which means the bypass is silent.
+
+```bash
+# the whole dance, via the zsh function in ~/.zshrc
+ship "fix(media): stop sonarr eating the NAS"
+```
+
+`ship` branches off main, commits, opens a PR, arms auto-merge, waits for the checks (~60s), resets back to main and runs `task flux:reconcile`. Pass `-n` to skip the reconcile.
+
+Doing it by hand is the same five steps:
+
+```bash
+git checkout -b fix/whatever
+git commit -am "wip"                       # throwaway is fine, see below
+git push -u origin HEAD
+gh pr create --title "fix(media): real message here" --body "..."
+gh pr merge --auto --squash
+git fetch origin && git reset --hard origin/main
+task flux:reconcile
+```
+
+Branch commit messages do not matter. The repo squash-merges with `squash_merge_commit_title=PR_TITLE` and `squash_merge_commit_message=PR_BODY`, so `wip` and `oops` die with the branch and main gets the PR title and body. Put the real message in the PR.
+
+Two things worth knowing:
+
+- The reconcile step is unchanged from before. `GitRepository` and `cluster-apps` both poll on a 30m interval, so without a manual reconcile a merged change waits up to half an hour. The PR adds about a minute to a path where 30 minutes was already being short-cut.
+- Required status checks deliberately carry **no** `paths` filter. GitHub treats a required check that never ran as pending rather than passing, so a path filter on a required check blocks any PR that does not touch those paths (this happened - see PR #1661, which changed a workflow file and could not be merged normally). Do not reintroduce one.
 
 ### Emergency GitOps Workflow
 
