@@ -6,3 +6,9 @@ resources:
   - ./require-pod-resources.yaml
   - ./exception-volsync-movers.yaml
   - ./require-ingress-dns-target.yaml
+  - ./require-ingress-class.yaml
+  - ./require-image-digest.yaml
+  - ./require-homepage-decision.yaml
+  - ./require-storageclass-allowlist.yaml
+  - ./globalcontext-replicationsources.yaml
+  - ./require-pvc-backup.yaml

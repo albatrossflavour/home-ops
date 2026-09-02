@@ -1,0 +1,21 @@
+---
+# Caches every ReplicationSource in the cluster so a policy evaluating a PVC
+# can ask "is this volume backed up?" - a question that needs cross-resource
+# lookup and is therefore not expressible in a plain CEL expression over the
+# object under review.
+#
+# The projection flattens each ReplicationSource to "<namespace>/<sourcePVC>",
+# which is the key require-pvc-backup matches against.
+apiVersion: kyverno.io/v2beta1
+kind: GlobalContextEntry
+metadata:
+  name: replicationsources
+  namespace: kyverno
+spec:
+  kubernetesResource:
+    group: volsync.backube
+    version: v1alpha1
+    resource: replicationsources
+  projections:
+    - name: pvcs
+      jmesPath: "items[].join('/', [metadata.namespace, spec.sourcePVC])"

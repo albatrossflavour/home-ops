@@ -1,0 +1,45 @@
+---
+# CLAUDE.md documents a three-tier storage strategy: openebs-hostpath for
+# fast local scratch, ceph-block and ceph-filesystem for replicated data that
+# is backed up, and NFS mounted directly for bulk media.
+#
+# Live reality has a fourth class in use, openebs-minio-localpv (3 PVCs),
+# which is almost certainly deliberate for Minio's own local volumes but is
+# documented nowhere. It is allowed here rather than flagged, because a policy
+# that fails a legitimate long-standing choice trains people to ignore it -
+# but the fact it needed adding is itself worth knowing, and is the kind of
+# undocumented gap every future audit sweep will re-flag.
+#
+# Currently passes on all 105 PVCs. The value is future: a typo'd or invented
+# storageClassName leaves a PVC Pending indefinitely with no obvious cause,
+# and a wrong-but-real class silently puts data that should be replicated onto
+# node-local storage with no backup.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: require-storageclass-allowlist
+  annotations:
+    policies.kyverno.io/title: Restrict PVCs to Known Storage Classes
+    policies.kyverno.io/category: "Tony's Conventions"
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: PersistentVolumeClaim
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE]
+        resources: [persistentvolumeclaims]
+  validations:
+    - expression: >-
+        has(object.spec.storageClassName) &&
+        object.spec.storageClassName in [
+          'ceph-block', 'ceph-filesystem',
+          'openebs-hostpath', 'openebs-minio-localpv'
+        ]
+      message: >-
+        PVC must use a known storage class: ceph-block or ceph-filesystem
+        for replicated data that gets backed up, openebs-hostpath for
+        scratch, openebs-minio-localpv for Minio's local volumes.
+  validationActions: [Audit]

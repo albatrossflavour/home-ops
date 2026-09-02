@@ -1,0 +1,37 @@
+---
+# Cheap insurance, currently 57/57 passing. An Ingress with a className that
+# does not match a real IngressClass is simply never served by anything - no
+# error, no event, no controller claims it. The failure looks like DNS or
+# certificates rather than a typo.
+#
+# Only two classes exist in this cluster: internal (40 ingresses, 192.168.8.21,
+# LAN only) and external (17, 192.168.8.23, via the Cloudflare tunnel).
+# A missing className is also rejected: relying on the default IngressClass
+# makes which controller serves a host implicit, and this repo's whole DNS
+# story depends on that being explicit.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: require-ingress-class
+  annotations:
+    policies.kyverno.io/title: Restrict Ingress Class to internal or external
+    policies.kyverno.io/category: "Tony's Conventions"
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Ingress
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["networking.k8s.io"]
+        apiVersions: ["v1"]
+        operations: [CREATE, UPDATE]
+        resources: [ingresses]
+  validations:
+    - expression: >-
+        has(object.spec.ingressClassName) &&
+        object.spec.ingressClassName in ['internal', 'external']
+      message: >-
+        Ingress must set spec.ingressClassName explicitly to either
+        "internal" or "external". A missing or unknown class means no
+        controller serves the ingress, silently.
+  validationActions: [Audit]

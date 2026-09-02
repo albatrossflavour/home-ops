@@ -1,0 +1,44 @@
+---
+# CLAUDE.md says HTTP services should carry homepage annotations "if
+# appropriate", and "if appropriate" is doing a lot of work. 15 of 57
+# ingresses have no gethomepage.dev/* annotations at all, but several of them
+# correctly should not appear on a dashboard: flux-webhook, onepassword-connect,
+# echo-server, blackbox-exporter, hubble-ui.
+#
+# So this does NOT require an ingress to be on the dashboard. It requires the
+# decision to have been made and recorded. gethomepage.dev/enabled must be
+# present and set to "true" or "false".
+#
+# That is not an invented convention - observability/shitbox-prometheus already
+# uses "false" deliberately, and 41 ingresses already set "true". The gap is
+# the 15 where nobody ever decided, which is exactly how hubble-ui ended up
+# missing its DNS target annotation too: not a wrong decision, an absent one.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: require-homepage-decision
+  annotations:
+    policies.kyverno.io/title: Require an Explicit Homepage Decision
+    policies.kyverno.io/category: "Tony's Conventions"
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/subject: Ingress
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["networking.k8s.io"]
+        apiVersions: ["v1"]
+        operations: [CREATE, UPDATE]
+        resources: [ingresses]
+  variables:
+    - name: annotations
+      expression: "has(object.metadata.annotations) ? object.metadata.annotations : {}"
+  validations:
+    - expression: >-
+        'gethomepage.dev/enabled' in variables.annotations &&
+        variables.annotations['gethomepage.dev/enabled'] in ['true', 'false']
+      message: >-
+        Ingress must set gethomepage.dev/enabled to "true" or "false".
+        Opting out is fine; not deciding is not. Set "false" for services
+        that should never appear on the dashboard.
+  validationActions: [Audit]

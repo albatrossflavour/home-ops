@@ -1,0 +1,78 @@
+---
+# The n8n failure class, made detectable.
+#
+# n8n's ReplicationSource reported green for 383 consecutive days while
+# backing up an empty PVC, because the app's real data lived on a
+# self-managed volume instead of the existingClaim the volsync template
+# expects. Nothing in the cluster could tell the difference between "backed
+# up" and "backing up the wrong thing", because the only signal anyone
+# watched was the ReplicationSource's own status.
+#
+# This asks the inverse question: for every PVC on a replicated storage tier -
+# the tiers CLAUDE.md reserves for data that matters and is meant to be backed
+# up - does a ReplicationSource actually reference it? The lookup goes through
+# the replicationsources GlobalContextEntry, since a CEL expression over the
+# PVC alone cannot see other objects.
+#
+# Excluded structurally: Volsync's own volsync-*-dst-dest volumes, which are
+# restore-side artifacts of the one-time restore-once trigger, not app data.
+# Everything else is left visible on purpose, including the categories that
+# are legitimately covered by a different mechanism - CNPG instance PVCs
+# (barman WAL archiving) and the monitoring TSDBs (Thanos ships blocks to
+# object storage). Those are real answers, not noise, and burying them in the
+# policy would hide the fact that a reader has to know them.
+#
+# Audit only, and it should probably stay that way: this describes a backup
+# posture, not an admission decision. Blocking PVC creation because a backup
+# does not exist yet would be circular.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: require-pvc-backup
+  annotations:
+    policies.kyverno.io/title: Replicated-Tier PVCs Should Be Backed Up
+    policies.kyverno.io/category: "Tony's Conventions"
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: PersistentVolumeClaim
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [persistentvolumeclaims]
+  variables:
+    # At background-scan time metadata.namespace is populated; at admission
+    # CREATE the API server may not have stamped it yet, so fall back to the
+    # request. Same class of trap as name vs generateName on the Volsync
+    # exception - one of the two is empty depending on when you are looking.
+    - name: ns
+      expression: >-
+        has(object.metadata.namespace) && object.metadata.namespace != ''
+          ? object.metadata.namespace : request.namespace
+    - name: key
+      expression: "variables.ns + '/' + object.metadata.name"
+    - name: backed
+      expression: "globalContext.Get('replicationsources', 'pvcs')"
+    - name: replicated
+      expression: >-
+        has(object.spec.storageClassName) &&
+        object.spec.storageClassName in ['ceph-block', 'ceph-filesystem']
+    - name: isVolsyncInternal
+      expression: >-
+        object.metadata.name.startsWith('volsync-') &&
+        object.metadata.name.endsWith('-dst-dest')
+  validations:
+    - expression: >-
+        !variables.replicated ||
+        variables.isVolsyncInternal ||
+        (variables.backed != null && variables.key in variables.backed)
+      message: >-
+        This PVC is on a replicated storage tier but no ReplicationSource
+        references it, so nothing is backing it up. Either add the volsync
+        template, or move it to openebs-hostpath if the data is genuinely
+        disposable. If it is covered by another mechanism (CNPG barman,
+        Thanos object storage), record that with a PolicyException rather
+        than leaving it looking unprotected.
+  validationActions: [Audit]
