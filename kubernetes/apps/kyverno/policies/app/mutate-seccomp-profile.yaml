@@ -1,0 +1,79 @@
+---
+# Declares seccompProfile: RuntimeDefault on pods that do not set one.
+#
+# READ THIS BEFORE ASSUMING IT HARDENS ANYTHING. Talos already sets
+# `seccompDefault: true` on the kubelet - verified on all six nodes, and it is
+# Talos's own default rather than anything in this repo's machine config. So
+# every one of the 127 pods that "fail" restrict-seccomp-strict is ALREADY
+# running under the RuntimeDefault seccomp profile. The syscall filter is on.
+# What is missing is the declaration in the pod spec.
+#
+# That makes this mutation:
+#   - zero runtime risk, because it states what the kubelet already does
+#   - zero security improvement, for exactly the same reason
+#   - worth doing anyway, because a pod spec that does not say what it relies
+#     on is one kubelet config change away from silently losing it
+#
+# It is also the clearest example this cluster has produced of an admission
+# controller reporting a control as failed while the control is fully
+# satisfied one layer down. Kyverno cannot see kubelet configuration, the same
+# blind spot that puts most of the CIS benchmark out of reach. A compliance
+# report built only on admission data would show 127 violations of a control
+# that is, in fact, enforced everywhere.
+#
+# Exclusions. Storage and CNI workloads are left alone: they are the ones
+# plausibly needing syscalls outside the default profile, and unlike the rest
+# they are not simply inheriting a default they never asked for. kube-system is
+# already globally excluded via Kyverno's resourceFilters, so it needs no rule
+# here. rook-ceph and openebs-system are excluded explicitly.
+apiVersion: policies.kyverno.io/v1beta1
+kind: MutatingPolicy
+metadata:
+  name: set-seccomp-profile
+  labels:
+    compliance.home.arpa/cis: "true"
+    compliance.home.arpa/ism: "true"
+  annotations:
+    policies.kyverno.io/title: Declare RuntimeDefault Seccomp Profile
+    policies.kyverno.io/category: "Tony's Conventions"
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/subject: Pod
+    compliance.home.arpa/cis-controls: >-
+      5.7.2 - ensure seccomp profile is set to docker/default or
+      runtime/default in pod definitions
+    compliance.home.arpa/ism-controls: >-
+      system hardening (interpreted). NOTE: the runtime protection is already
+      applied by the kubelet's seccompDefault setting; this only makes the
+      pod spec declare it.
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  # matchConditions reference `object` directly - variables do not exist yet
+  # at this point in evaluation.
+  matchConditions:
+    - name: not-storage-or-cni
+      expression: >-
+        object.metadata.namespace != 'rook-ceph' &&
+        object.metadata.namespace != 'openebs-system'
+    - name: no-pod-level-seccomp-set
+      expression: >-
+        !has(object.spec.securityContext) ||
+        !has(object.spec.securityContext.seccompProfile)
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: >-
+          Object{
+            spec: Object.spec{
+              securityContext: Object.spec.securityContext{
+                seccompProfile: Object.spec.securityContext.seccompProfile{
+                  type: "RuntimeDefault"
+                }
+              }
+            }
+          }
