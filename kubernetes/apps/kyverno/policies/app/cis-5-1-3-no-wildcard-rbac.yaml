@@ -22,11 +22,21 @@ apiVersion: policies.kyverno.io/v1beta1
 kind: ValidatingPolicy
 metadata:
   name: cis-5-1-3-no-wildcard-rbac
+  labels:
+    compliance.home.arpa/cis: "true"
+    compliance.home.arpa/ism: "true"
+    compliance.home.arpa/e8: "true"
   annotations:
     policies.kyverno.io/title: CIS 5.1.3 - No Wildcard Verbs and Resources
     policies.kyverno.io/category: CIS Benchmark
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: ClusterRole, Role
+    compliance.home.arpa/cis-controls: >-
+      5.1.3
+    compliance.home.arpa/ism-controls: >-
+      privileged access management (interpreted; no Kubernetes-specific ISM control exists)
+    compliance.home.arpa/e8-strategies: >-
+      5 - restrict administrative privileges
 spec:
   failurePolicy: Ignore
   matchConstraints:

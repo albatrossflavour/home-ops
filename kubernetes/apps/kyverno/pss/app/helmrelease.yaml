@@ -54,6 +54,32 @@ spec:
     # is an assessment or an outage.
     validationFailureAction: Audit
 
+    # Framework tags. CIS Section 5.2 IS the Pod Security Standards under
+    # different numbering, so all 17 of these carry the CIS label; ISM's
+    # system hardening family maps the same way, interpreted, since ACSC
+    # publish no Kubernetes guidance. Applied via the chart's customLabels
+    # rather than forking the policies.
+    #
+    # Reporting paths, because they differ:
+    #   kubectl  - labels work directly:
+    #              kubectl get validatingpolicy -l compliance.home.arpa/cis=true
+    #   reports  - PolicyReport results carry category and severity, not
+    #              labels, so group by category there
+    #   Grafana  - the metric exposes policy_name but NOT category or labels,
+    #              so a framework panel has to regex on policy_name or use a
+    #              recording rule. Noted rather than solved.
+    customLabels:
+      compliance.home.arpa/cis: "true"
+      compliance.home.arpa/ism: "true"
+    customAnnotations:
+      compliance.home.arpa/cis-controls: >-
+        5.2.x - Section 5.2 of the CIS Kubernetes Benchmark is the Pod
+        Security Standards; see docs/operations/kyverno.md for the
+        control-by-control mapping.
+      compliance.home.arpa/ism-controls: >-
+        system hardening (interpreted; no Kubernetes-specific ISM control
+        exists)
+
     # Evaluate resources that already exist, not just new admissions. Without
     # this there would be no posture assessment at all - only pods created
     # after install would ever appear in a report.

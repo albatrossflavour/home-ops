@@ -143,6 +143,40 @@ Worth being precise about, because "we run CIS policies" is a claim that needs q
 
 Both need RBAC Kyverno does not ship (`rbac-cis-read.yaml`), and 5.3.2 needs two `GlobalContextEntry` objects because a single entry caches exactly one resource type and this cluster uses both `CiliumNetworkPolicy` and core `NetworkPolicy`.
 
+### Framework tagging and how to report on it
+
+Policies carry `compliance.home.arpa/*` labels for framework membership and annotations naming the specific controls. A policy can belong to several frameworks at once, which is why this is labels rather than the single `category` field.
+
+```bash
+kubectl get validatingpolicy -l compliance.home.arpa/cis=true
+kubectl get validatingpolicy -l compliance.home.arpa/ism=true
+kubectl get validatingpolicy -l compliance.home.arpa/e8=true
+```
+
+The three reporting paths behave differently, which is worth knowing before promising anyone a compliance report:
+
+| Path | Can filter by | Notes |
+|---|---|---|
+| `kubectl` | labels | works directly, as above |
+| PolicyReport / Policy Reporter | `category`, `severity`, `source` | results carry these three fields; **labels are not propagated into results** |
+| Grafana | `policy_name` only | the metric exposes no category and no labels, so a framework panel must regex on `policy_name` or use a recording rule |
+
+That last row is a real limitation rather than an oversight. `kyverno_validating_policy_results_total` carries `policy_name`, `resource_kind`, `resource_namespace`, `result` and a few operational labels, and nothing else. Grouping a dashboard by framework means either naming policies with a framework prefix (as `cis-5-1-3-*` does) or adding a recording rule that joins policy name to framework.
+
+### ISM specifically
+
+ACSC publish **no** Kubernetes or container guidance. The ISM is applied to platforms through vendor-authored mappings (AWS Config and Audit Manager both ship ACSC ISM conformance packs), none of them authoritative. So every ISM tag in this repo is an interpretation, and the annotations say so explicitly rather than implying a citation.
+
+Three structural problems make ISM materially harder to automate than CIS:
+
+- **Classification-dependence.** Obligations differ at OFFICIAL, PROTECTED, SECRET and TOP SECRET. The same document yields different policy sets depending on a classification the document does not state.
+- **Quarterly updates.** The current edition is March 2026, adding AI governance, cryptographic agility and OT isolation. A generated policy set goes stale on a schedule, and every regeneration is another opportunity for non-deterministic output. This is why a freeze-and-review step is not optional for ISM.
+- **Mostly non-technical.** Of roughly a thousand controls, the admission-addressable slice is smaller than CIS's already-thin 25.
+
+The one genuinely new policy to come out of an ISM reading was `restrict-image-registries`, mapping ISM's application control family and Essential Eight strategy one. Nine registries were in use when it was written and the allowlist matches them, so it passes today and exists to catch a new one arriving unnoticed.
+
+**Worth carrying to any compliance-product conversation**: ISM is simultaneously the best case for document ingestion (a thousand pages of prose, no machine-readable form, updated quarterly) and the worst case for verifying it (no ground truth to diff against, interpretive mapping, and a correct answer that depends on a classification the document does not contain).
+
 ### The number worth carrying
 
 Of roughly 120 CIS Kubernetes controls, about 25 are admission-addressable, 11 of those are already covered by the PSS bundle, and of the rest exactly **two** were worth enforcing here - one of which is a checkbox that any empty policy satisfies.

@@ -28,11 +28,18 @@ apiVersion: policies.kyverno.io/v1beta1
 kind: ValidatingPolicy
 metadata:
   name: cis-5-3-2-namespace-networkpolicy
+  labels:
+    compliance.home.arpa/cis: "true"
+    compliance.home.arpa/ism: "true"
   annotations:
     policies.kyverno.io/title: CIS 5.3.2 - Namespaces Should Have Network Policies
     policies.kyverno.io/category: CIS Benchmark
     policies.kyverno.io/severity: medium
     policies.kyverno.io/subject: Namespace
+    compliance.home.arpa/cis-controls: >-
+      5.3.2
+    compliance.home.arpa/ism-controls: >-
+      network segmentation and segregation (interpreted)
 spec:
   failurePolicy: Ignore
   matchConstraints:
