@@ -1,0 +1,66 @@
+---
+# CIS Kubernetes Benchmark 5.3.2 - Ensure that all Namespaces have Network
+# Policies defined.
+#
+# Be honest about what this is: an EXISTENCE check. A namespace containing one
+# empty, fully-permissive policy satisfies it completely. It cannot tell you
+# whether the policy is correct, and correctness is the hard part - the
+# NetworkPolicy rollout in finding #14 produced four separate outages precisely
+# because writing a correct policy is difficult and writing one that merely
+# exists is trivial.
+#
+# It earns its place here for a different reason: it is a standing tracker for
+# that unfinished rollout. Seven namespaces run pods with nothing selecting
+# them at all:
+#
+#   flux-system, kube-system, kyverno, network,
+#   openebs-system, rook-ceph, volsync-system
+#
+# `network` and `rook-ceph` had Hubble captures running; the other five were
+# never scoped into finding #14. As each gets a policy this count goes down,
+# which is a better progress signal than remembering.
+#
+# Do NOT promote this to Enforce. Blocking namespace creation until a
+# NetworkPolicy exists inverts the order things are actually built in, and
+# would be satisfied by an empty policy anyway - compliance theatre with a
+# deployment blocker attached.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: cis-5-3-2-namespace-networkpolicy
+  annotations:
+    policies.kyverno.io/title: CIS 5.3.2 - Namespaces Should Have Network Policies
+    policies.kyverno.io/category: CIS Benchmark
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Namespace
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: [CREATE, UPDATE]
+        resources: ["namespaces"]
+  # Kubernetes' own namespaces are excluded: kube-system is globally excluded
+  # from Kyverno anyway (resourceFilters), and kube-public/kube-node-lease run
+  # no pods, so a policy there would protect nothing.
+  matchConditions:
+    - name: not-a-kubernetes-namespace
+      expression: >-
+        !object.metadata.name.startsWith('kube-') &&
+        object.metadata.name != 'default'
+  variables:
+    - name: cnp
+      expression: "globalContext.Get('ciliumnetworkpolicies', 'namespaces')"
+    - name: np
+      expression: "globalContext.Get('networkpolicies', 'namespaces')"
+  validations:
+    - expression: >-
+        (variables.cnp != null && object.metadata.name in variables.cnp) ||
+        (variables.np != null && object.metadata.name in variables.np)
+      message: >-
+        No CiliumNetworkPolicy or NetworkPolicy selects anything in this
+        namespace, so every pod in it is reachable from every other pod in
+        the cluster. See finding #14 - the rollout is namespace by namespace,
+        driven by a Hubble capture rather than guesswork.
+  validationActions: [Audit]
