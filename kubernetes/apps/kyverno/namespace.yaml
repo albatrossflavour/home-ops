@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kyverno
+  labels:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+    # Kyverno's own chart defaults are already Restricted-compliant for every
+    # controller: runAsNonRoot, runAsUser 65534, readOnlyRootFilesystem,
+    # allowPrivilegeEscalation false, and a seccompProfile - verified by
+    # reading chart 3.9.0's values.yaml directly, not assumed. So unlike the
+    # nine namespaces done in the 2026-09-01 PodSecurity pass, this one can
+    # start at the strictest level rather than settling for baseline.
+    #
+    # If a future Kyverno component genuinely needs more, that is a signal
+    # worth stopping on, not a reason to relax the namespace.
+    pod-security.kubernetes.io/enforce: restricted

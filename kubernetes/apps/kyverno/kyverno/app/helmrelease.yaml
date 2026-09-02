@@ -1,0 +1,80 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kyverno
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: kyverno
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # STAGE 1: the engine only. No policies are installed anywhere in this
+    # commit, deliberately.
+    #
+    # Kyverno rewrites its OWN ValidatingWebhookConfiguration based on the
+    # policies that exist (features.autoUpdateWebhooks below). With zero
+    # policies it registers webhook rules matching essentially nothing, so
+    # this deployment cannot reject a workload even in principle. That is
+    # what makes it a safe first step on an untested Kubernetes minor.
+
+    crds:
+      # The chart ships 26 CRDs. Note the chart's own values.yaml flags the
+      # legacy kyverno.io types (ClusterPolicy, Policy, PolicyException) as
+      # deprecated in favour of the policies.kyverno.io group's CEL-based
+      # types. Both groups install; which one we author against is a real
+      # decision, deferred to stage 2.
+      install: true
+
+    features:
+      excludeBootstrapResources:
+        # Excludes Node and CertificateSigningRequest from Fail-policy
+        # webhooks. Without this, a full cluster restart with no Kyverno
+        # pods running can deadlock: nodes cannot register because the
+        # webhook is unreachable, and the webhook cannot start because no
+        # node will schedule it.
+        #
+        # Off by default in the chart. Turned on here specifically because
+        # this cluster has already had a control-plane VM disappear at the
+        # hypervisor level once (magrat, 2026-09-01) and boot-order
+        # behaviour under total power loss is a known-untested area.
+        enabled: true
+
+    # Single replica per controller while everything is in audit and the
+    # webhooks match nothing. When policies move to Enforce, the admission
+    # controller should go to 3 - at that point a restart window becomes a
+    # real availability question rather than a theoretical one.
+    admissionController:
+      replicas: 1
+
+    backgroundController:
+      replicas: 1
+
+    reportsController:
+      # This is the controller that produces PolicyReport and
+      # ClusterPolicyReport objects. For a compliance use case it is the
+      # product surface, not overhead - deliberately left on.
+      replicas: 1
+
+    cleanupController:
+      # TTL-based resource deletion. Not needed here, and leaving it off
+      # means one fewer controller and one fewer webhook in the cluster.
+      enabled: false
+
+    # Resource requests/limits, pod and container securityContexts, and the
+    # default resourceFilters are all left at chart defaults on purpose.
+    # Verified by reading chart 3.9.0's values.yaml directly:
+    #   - securityContexts are already Restricted-compliant
+    #   - resourceFilters already exclude kube-system, kube-public,
+    #     kube-node-lease and all of Kyverno's own resources
+    # Overriding either would be changing something already correct.
