@@ -8,6 +8,9 @@ resources:
   - ./exception-pvc-backup-cnpg.yaml
   - ./exception-pvc-backup-monitoring.yaml
   - ./exception-pvc-backup-shitbox.yaml
+  - ./exception-rook-ceph.yaml
+  - ./exception-kube-system-node-infrastructure.yaml
+  - ./exception-openebs-local-storage.yaml
   - ./require-ingress-dns-target.yaml
   - ./require-ingress-class.yaml
   - ./require-image-digest.yaml

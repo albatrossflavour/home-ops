@@ -1,0 +1,74 @@
+---
+# Ceph storage infrastructure.
+#
+# Namespace-wide, and that is a deliberate choice rather than laziness. Every
+# workload in rook-ceph is part of the storage stack: OSDs and osd-prepare Jobs
+# need block device access, CSI node plugins need host mount propagation to
+# attach volumes into other pods' namespaces, mons/mgrs/mds/rgw run as root
+# against /var/lib/rook, and the crashcollector and exporter read host paths by
+# design. 82 distinct workloads, all Ceph. Enumerating them would produce a
+# list that goes stale every time Rook adds a daemon, and would fail open when
+# it did.
+#
+# What this deliberately does NOT cover is the point. require-pod-resources,
+# require-homepage-decision and require-image-digest still apply here. Those
+# are hygiene and convention, not "the software physically cannot work without
+# it", and exempting them would hide fixable problems behind a security
+# exception. Rook's Helm values can set resource requests; nothing about Ceph
+# prevents it.
+apiVersion: policies.kyverno.io/v1beta1
+kind: PolicyException
+metadata:
+  name: rook-ceph-storage-infrastructure
+  namespace: kyverno
+spec:
+  policyRefs:
+    - {kind: ValidatingPolicy, name: disallow-capabilities}
+    - {kind: ValidatingPolicy, name: disallow-capabilities-strict}
+    - {kind: ValidatingPolicy, name: disallow-host-namespaces}
+    - {kind: ValidatingPolicy, name: disallow-host-path}
+    - {kind: ValidatingPolicy, name: disallow-host-ports}
+    - {kind: ValidatingPolicy, name: disallow-privileged-containers}
+    - {kind: ValidatingPolicy, name: disallow-privilege-escalation}
+    - {kind: ValidatingPolicy, name: disallow-selinux}
+    - {kind: ValidatingPolicy, name: require-run-as-nonroot}
+    - {kind: ValidatingPolicy, name: require-run-as-non-root-user}
+    - {kind: ValidatingPolicy, name: restrict-apparmor-profiles}
+    - {kind: ValidatingPolicy, name: restrict-seccomp}
+    - {kind: ValidatingPolicy, name: restrict-seccomp-strict}
+    - {kind: ValidatingPolicy, name: restrict-volume-types}
+
+  matchConditions:
+    - name: in-rook-ceph-namespace
+      expression: >-
+        has(object.metadata.namespace) &&
+        object.metadata.namespace == 'rook-ceph'
+
+  reportResult: skip
+
+  properties:
+    reason: >-
+      Ceph is a storage system that manages raw block devices and mounts
+      volumes into other pods' mount namespaces. OSDs require device access,
+      CSI node plugins require privileged mode and bidirectional mount
+      propagation, and the Ceph daemons run as root against host-backed state
+      in /var/lib/rook. None of this is configurable away without ceasing to
+      be a working storage layer.
+    scope: >-
+      All workloads in the rook-ceph namespace, for the PodSecurity family of
+      policies only. require-pod-resources, require-homepage-decision and
+      require-image-digest deliberately still apply and still report.
+    residual-risk: >-
+      A compromised Ceph component has host-level access on every node. This is
+      accepted because the alternative is no replicated storage. Mitigations
+      are elsewhere: rook-ceph is a dedicated namespace, the operator is the
+      only thing that can create these workloads, and images are pinned by
+      digest and restricted by registry allowlist.
+    approved-by: tgreen
+    reviewed: "2026-09-03"
+
+  # No expiresAt, same reasoning as the volsync mover exception. Ceph will
+  # need these privileges for as long as it exists. An expiry date on a
+  # permanent structural requirement means storage silently starts failing
+  # policy on a date nobody remembers. Use expiresAt for "we will fix this by
+  # Q3", not for "this is how the software works".
