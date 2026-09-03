@@ -36,6 +36,44 @@ spec:
       # decision, deferred to stage 2.
       install: true
 
+    config:
+      # Kyverno's default resourceFilters exclude kube-system outright. Combined
+      # with features.backgroundScan.skipResourceFilters=false (#1667), that
+      # meant kube-system stopped being scanned entirely at 11:12 UTC on
+      # 2026-09-02. Its 112 PolicyReports froze that morning and never updated
+      # again - by 2026-09-03 they sat ~1.1 million resourceVersions behind the
+      # cluster while every other namespace tracked within a few thousand. The
+      # violations they displayed were historical fiction, and the dashboard
+      # showed 222 kube-system failures that Kyverno was not tracking at all.
+      #
+      # Excluding the namespace holding the CNI and the control plane from a
+      # compliance posture is a weak claim to make to anyone. It was also
+      # hiding two genuinely fixable findings: coredns running as root with no
+      # seccomp profile, and reloader permitting privilege escalation. Neither
+      # has any reason to be true.
+      #
+      # The components that genuinely CANNOT be fixed - cilium (eBPF, host
+      # network and PID), spegel (containerd content store), and the
+      # Talos-generated static control plane pods, which cannot be edited from
+      # inside the cluster at all - are covered by the scoped
+      # kube-system-node-infrastructure PolicyException instead. Naming them in
+      # an exception with a written justification is the honest representation;
+      # a namespace-wide filter that silently covers everything is not.
+      #
+      # resourceFiltersExclude removes ONE entry from the chart's default list
+      # rather than replacing it, so the other ~60 defaults (Event, Node,
+      # ReplicaSet, TokenReview, Kyverno's own resources) stay exactly as
+      # upstream ships them. Replacing the whole list would mean maintaining a
+      # copy of it, including its Helm-templated entries, forever.
+      #
+      # Cost: more report objects and more etcd write churn. That is not
+      # theoretical here - Kyverno's reports pipeline is what took etcd's file
+      # from a flat 299MiB to 414MiB in 42 hours on 2026-09-02. Offset in the
+      # same change by deleting 674 frozen reports carrying 2067 phantom
+      # failures, which is a net reduction in both objects and churn.
+      resourceFiltersExclude:
+        - "[*/*,kube-system,*]"
+
     features:
       backgroundScan:
         # Chart default is true, meaning the background scan deliberately
