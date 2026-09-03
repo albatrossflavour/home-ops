@@ -47,6 +47,7 @@ spec:
         NodeFilesystemAlmostOutOfSpace: true # Custom rule with better exclusions for non-critical filesystems
         NodeFilesystemAlmostOutOfFiles: true # Custom rule with same exclusions; stock rule fires on Time Machine SMB mounts
         NodeFilesystemFilesFillingUp: true # Custom rule with same exclusions; stock rule has the same SMB exposure
+        etcdDatabaseHighFragmentationRatio: true # Bare ratio + fixed 100MiB floor fires permanently on a cluster this small
     alertmanager:
       ingress:
         enabled: true
