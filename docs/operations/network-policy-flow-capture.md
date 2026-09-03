@@ -112,15 +112,35 @@ The consequence for policy authoring is the important part: **a pod-selector pol
 
 ## Findings
 
-### prowlarr is being actively denied, right now
+### prowlarr was being actively denied (resolved 2026-09-03)
 
 ```text
 22  media/prowlarr-767b478bd6-5wkzb -> network/ingress-nginx-internal-controller  TCP/80  POLICY_DENIED
 ```
 
-The only `DROPPED` verdict in either capture. The `media-default` CiliumNetworkPolicy is blocking prowlarr's egress to the internal ingress controller on port 80. Prowlarr is presumably resolving an internal hostname and trying to reach a service through the ingress rather than directly.
+The only `DROPPED` verdict in either capture, and it turned out not to be a policy problem at all.
 
-This is a real gap, not capture noise, and it has been silently failing since the `media` policies went in. Either prowlarr needs an egress rule to the internal ingress, or whatever it is reaching for should be addressed by its service DNS name instead.
+Prowlarr's application list held three entries. Sonarr and Radarr were configured correctly against in-cluster names (`http://sonarr`, `http://radarr`, both resolving to Services on port 80 in the same namespace, which `media-default` already permits). The third was **Mylar**, at `http://mylar.albatrossflavour.com` - an ingress hostname, which resolves to the internal ingress VIP and lands on `ingress-nginx-internal-controller:80`. That egress is not covered by `media-default`, hence the denial.
+
+Mylar was commented out of `kubernetes/apps/media/kustomization.yaml` on 2025-12-23 in commit `ebd5a629` ("remove mylarr for now"). It has not run since. Prowlarr had been attempting a full indexer sync to a dead application for over eight months, and had been saying so:
+
+```text
+[warning] Applications unavailable due to failures for more than 6 hours: Mylar
+```
+
+Fixed by deleting the stale application (`DELETE /api/v1/applications/34`), not by widening the network policy. Adding an egress rule would have made the symptom disappear while leaving prowlarr syncing indexers into a void. Verified afterwards: the health warning cleared and no prowlarr drops appear in Hubble's ring buffer.
+
+Two things worth carrying from this. First, the network policy was correct - it surfaced a real configuration error that had been invisible for eight months, which is the argument for default-deny in a sentence. Second, if Mylar ever returns it should be configured as `http://mylar` like its siblings, not via an ingress hostname. Hairpinning through the ingress to reach a pod in the same namespace is slower, and it needs a policy exception that the direct path does not.
+
+### qbittorrent drops inbound BitTorrent traffic
+
+Not a policy denial and not related to the above, but visible in the same ring buffer:
+
+```text
+187.14.243.221:60540 (world) <> media/qbittorrent:50413 (world) Service backend not found DROPPED (UDP)
+```
+
+External peers are reaching UDP/50413 and finding no service backend. Worth a look separately.
 
 ### The busiest flow in the namespace is tracing
 
@@ -132,7 +152,7 @@ Three of the top six ingress tuples are Prometheus scraping metrics ports from O
 
 ## What to do next
 
-1. Fix the prowlarr denial. It is an existing production gap, unrelated to any future policy work.
+1. ~~Fix the prowlarr denial.~~ Done 2026-09-03 - it was a stale Mylar application entry, not a policy gap. See findings.
 2. Write `network-default` from the tables above. The egress list is long but it is a closed set, and `ingress-nginx` is the only workload with meaningful fan-out.
 3. Treat `rook-ceph` as a separate exercise with node-CIDR rules, and test it in audit mode first. The hostNetwork behaviour means the usual pod-selector approach silently fails to describe what Ceph actually does.
 4. If another capture is ever needed, run it as a `Job` with a PVC rather than a bare `Pod` with `emptyDir`. Four of the original six captures were lost to a node eviction, and these two only survived long enough because nobody noticed them for two days.
