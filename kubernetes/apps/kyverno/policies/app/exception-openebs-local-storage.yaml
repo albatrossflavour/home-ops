@@ -1,0 +1,73 @@
+---
+# OpenEBS local path provisioner and its log collector.
+#
+# Nine workloads, two of them distinct:
+#
+#   openebs-localpv-provisioner  Creates PersistentVolumes as directories on
+#                                the node filesystem. Host path access is the
+#                                entire feature, not an implementation detail.
+#   openebs-alloy                Grafana Alloy DaemonSet collecting node and
+#                                container telemetry. Reads /var/log and the
+#                                container runtime state on each host.
+#
+# Matched by name prefix rather than by namespace so that anything else that
+# lands in openebs-system later has to justify itself on its own terms instead
+# of inheriting an exemption it was never assessed for. That is the failure
+# mode of namespace-wide exceptions: they silently cover workloads nobody
+# reviewed, including ones added years after the exception was approved.
+apiVersion: policies.kyverno.io/v1beta1
+kind: PolicyException
+metadata:
+  name: openebs-local-storage
+  namespace: kyverno
+spec:
+  policyRefs:
+    - {kind: ValidatingPolicy, name: disallow-capabilities}
+    - {kind: ValidatingPolicy, name: disallow-capabilities-strict}
+    - {kind: ValidatingPolicy, name: disallow-host-namespaces}
+    - {kind: ValidatingPolicy, name: disallow-host-path}
+    - {kind: ValidatingPolicy, name: disallow-privileged-containers}
+    - {kind: ValidatingPolicy, name: disallow-privilege-escalation}
+    - {kind: ValidatingPolicy, name: require-run-as-nonroot}
+    - {kind: ValidatingPolicy, name: require-run-as-non-root-user}
+    - {kind: ValidatingPolicy, name: restrict-seccomp}
+    - {kind: ValidatingPolicy, name: restrict-seccomp-strict}
+    - {kind: ValidatingPolicy, name: restrict-volume-types}
+
+  matchConditions:
+    - name: is-openebs-component
+      expression: >-
+        has(object.metadata.namespace) &&
+        object.metadata.namespace == 'openebs-system' &&
+        (
+          (
+            has(object.metadata.name) &&
+            object.metadata.name.startsWith('openebs-')
+          ) ||
+          (
+            has(object.metadata.generateName) &&
+            object.metadata.generateName.startsWith('openebs-')
+          )
+        )
+
+  reportResult: skip
+
+  properties:
+    reason: >-
+      The local path provisioner's job is to turn directories on the node
+      filesystem into PersistentVolumes, which requires host path access and
+      root to set ownership on the created directories. Alloy reads host log
+      and container runtime paths to collect telemetry.
+    scope: >-
+      Workloads named openebs-* in openebs-system, PodSecurity family only.
+      require-pod-resources still applies and still reports; both components
+      could declare resources and currently do not.
+    residual-risk: >-
+      openebs-hostpath volumes are node-local and unreplicated by design, and
+      this storage class is only used for cache and scratch data where that is
+      already understood. Loss of a node loses the data either way, so the
+      privilege here does not change the blast radius materially.
+    approved-by: tgreen
+    reviewed: "2026-09-03"
+
+  # No expiresAt. Host path access is what a local path provisioner is.

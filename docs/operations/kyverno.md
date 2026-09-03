@@ -106,6 +106,18 @@ Exceptions are confined to the `kyverno` namespace (`features.policyExceptions.n
 
 `expiresAt` is deliberately unset on the Volsync exception. Expiry is right for a temporary workaround and a footgun for a structural requirement. Volsync needs those capabilities permanently, and an expiry would mean backups start failing policy on a date nobody remembers.
 
+## Managing exceptions, and where the vendors draw the line
+
+[Policy Reporter](https://kyverno.io/docs/subprojects/policy-reporter/) 3.10.0 runs here with its UI and Kyverno plugin, on `policy-reporter.${SECRET_DOMAIN}`. It is worth being clear about what it is: an observability tool for the `PolicyReport` CRD. It reads reports and draws them. It does not create, approve or expire exceptions, and the upstream docs do not claim it does. The UI v2 work in progress is a more generic plugin system, not write operations.
+
+The exception *lifecycle* is a commercial product. [Nirmata Control Hub](https://nirmata.com/2024/06/26/multi-cluster-policy-exception-management-with-nirmata/), from the company that created Kyverno, sells exactly that: request, review, deploy and audit exceptions across a fleet, with a Policy Exceptions view showing name, target namespace, state and expiry.
+
+That split is the most useful thing in this document for anyone building on Kyverno.
+
+Writing policy is the easy half. A document-ingestion pipeline that turns a written standard into CEL is automating the part that was already tractable. Every real cluster then produces hundreds of legitimate deviations, and the actual product question is whether you can prove each one was seen by a human, justified, scoped to something narrower than a namespace, and given an end date. The company that invented the engine gave the engine away and monetised the deviation workflow. That is a considered opinion about where the value sits, from the people best placed to have one.
+
+The counter-argument, which applies to this repository specifically: exceptions here are YAML in git, the justification lives in `properties`, and the approval *is* the pull request. Approver, timestamp, diff and review discussion are already immutable and already exist. A workflow UI reimplements, less well, what version control gives for free. It earns its keep when there are many clusters, many teams, and approvers who will never touch a git repository - which is precisely the enterprise case Nirmata is selling into, and precisely not this one.
+
 ## CIS Benchmark coverage
 
 Worth being precise about, because "we run CIS policies" is a claim that needs qualifying.
