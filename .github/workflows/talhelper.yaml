@@ -1,0 +1,73 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Talhelper"
+
+# Validates kubernetes/bootstrap/talos/talconfig.yaml.
+#
+# Exists because of PR #1653 (2026-09-02), a routine Renovate kubelet bump to
+# v1.37.0. Talos 1.13.9 cannot run Kubernetes 1.37, so `talhelper genconfig`
+# refused to render anything at all - but all four required checks passed,
+# because none of them has ever looked at talconfig.yaml. The breakage sat
+# undetected until someone next needed to change machine config.
+#
+# The bump also landed on top of pre-existing drift: talconfig said v1.35.4
+# while every node had been running v1.36.3 since the 31 August upgrade, so
+# rendering and applying would have silently DOWNGRADED kube-apiserver,
+# controller-manager, scheduler and kubelet on whichever control plane node
+# was touched first. Kubernetes does not support control plane downgrades.
+#
+# This check catches both directions: a version too new for the Talos release,
+# and a talconfig that has drifted from what the cluster actually runs.
+
+on:
+  # No paths filter on pull_request, deliberately, same reasoning as
+  # kubeconform.yaml. GitHub treats a required status check that never ran as
+  # pending rather than passing, so a paths filter on a required check blocks
+  # every PR that does not touch those paths. That is not hypothetical - see
+  # PR #1661. This job takes a few seconds, which is cheaper than a required
+  # check that silently does not apply.
+  pull_request:
+    branches: ["main"]
+  # Also run on direct pushes to main. Branch protection lets admins bypass
+  # required checks on purpose, for emergency fixes, but without this trigger
+  # a bypassed push is never validated at all.
+  push:
+    branches: ["main"]
+    paths: ["kubernetes/bootstrap/talos/**"]
+
+env:
+  # renovate: datasource=github-releases depName=budimanjojo/talhelper
+  TALHELPER_VERSION: v3.1.17
+  TALCONFIG: ./kubernetes/bootstrap/talos/talconfig.yaml
+
+jobs:
+  talhelper:
+    name: Talhelper
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install talhelper
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAR="talhelper_linux_amd64.tar.gz"
+          BASE="https://github.com/budimanjojo/talhelper/releases/download/${TALHELPER_VERSION}"
+          curl -sfLO "${BASE}/${TAR}"
+          curl -sfL "${BASE}/checksums.txt" -o checksums.txt
+          grep " ${TAR}\$" checksums.txt | sha256sum -c -
+          tar -xzf "${TAR}" talhelper
+          sudo install -m 0755 talhelper /usr/local/bin/talhelper
+          talhelper --version
+
+      # Deliberately `validate talconfig` and not `genconfig`. genconfig needs
+      # to decrypt talsecret.sops.yaml, which would mean putting the age key
+      # into GitHub Actions secrets - the one key that decrypts every secret in
+      # the cluster and cannot be recovered if lost. Validating the config file
+      # catches the version and schema failures that have actually bitten,
+      # without that exposure. It does not inspect the contents of the patch
+      # files under patches/, which is the accepted gap.
+      - name: Validate talconfig
+        shell: bash
+        run: talhelper validate talconfig "${TALCONFIG}"
