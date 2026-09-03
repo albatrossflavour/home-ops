@@ -82,12 +82,23 @@ spec:
       # at. There is no way to scan the namespace without also admitting it to
       # the webhook path.
       #
-      # An empty map here is deliberate and is read by the chart's own
-      # conditional: `if and .Values.config.webhooks
-      # .Values.config.excludeKyvernoNamespace` is false for an empty map, so
-      # it falls through to the excludeKyvernoNamespace branch and emits a
-      # selector excluding the kyverno namespace ONLY. Kyverno still does not
-      # police itself, which is the part of the default worth keeping.
+      # The shape below is fiddly and was arrived at by rendering the chart,
+      # not by reading it. `webhooks: {}` looks like it should work and does
+      # nothing at all: Helm merges maps, so an empty map contributes no keys
+      # and the chart's default selector survives untouched. The value has to
+      # reach down to the matchExpressions LIST, because Helm replaces lists
+      # rather than merging them.
+      #
+      # An empty list is then handled by the chart's kyverno.config.webhooks
+      # helper, which APPENDS the kyverno-namespace exclusion to whatever it is
+      # given. Supplying [] therefore yields a selector excluding the kyverno
+      # namespace and nothing else, which is exactly right - Kyverno still does
+      # not police itself, and that is the part of the default worth keeping.
+      #
+      # Confirmed by `helm template` before committing:
+      #   {"namespaceSelector":{"matchExpressions":[{"key":
+      #    "kubernetes.io/metadata.name","operator":"NotIn",
+      #    "values":["kyverno"]}]}}
       #
       # The bootstrap question, since this genuinely is one. Cilium lives in
       # kube-system, so the CNI now passes through a Kyverno webhook on
@@ -102,7 +113,9 @@ spec:
       # This is the setting to revisit first if anything ever moves to
       # failurePolicy Fail. Under Fail, this line becomes a cluster that
       # cannot boot its own network.
-      webhooks: {}
+      webhooks:
+        namespaceSelector:
+          matchExpressions: []
 
     features:
       backgroundScan:
