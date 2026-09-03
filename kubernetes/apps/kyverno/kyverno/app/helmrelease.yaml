@@ -74,6 +74,36 @@ spec:
       resourceFiltersExclude:
         - "[*/*,kube-system,*]"
 
+      # The second kube-system exclusion, and the one that actually mattered.
+      # Removing the resourceFilters entry above changed nothing on its own,
+      # because config.webhooks carries its own namespaceSelector excluding
+      # kube-system, and Kyverno uses that single setting for BOTH the
+      # admission webhook configuration and what the background scan will look
+      # at. There is no way to scan the namespace without also admitting it to
+      # the webhook path.
+      #
+      # An empty map here is deliberate and is read by the chart's own
+      # conditional: `if and .Values.config.webhooks
+      # .Values.config.excludeKyvernoNamespace` is false for an empty map, so
+      # it falls through to the excludeKyvernoNamespace branch and emits a
+      # selector excluding the kyverno namespace ONLY. Kyverno still does not
+      # police itself, which is the part of the default worth keeping.
+      #
+      # The bootstrap question, since this genuinely is one. Cilium lives in
+      # kube-system, so the CNI now passes through a Kyverno webhook on
+      # creation. That is safe here specifically because of choices already
+      # made elsewhere in this file: every policy is failurePolicy Ignore,
+      # Kyverno removes its own webhooks on graceful shutdown, and
+      # excludeBootstrapResources covers Node and CertificateSigningRequest.
+      # A cold boot with Kyverno down means cilium hits an unreachable webhook
+      # and is admitted regardless. The residual cost is webhook timeout
+      # latency in the CNI startup path.
+      #
+      # This is the setting to revisit first if anything ever moves to
+      # failurePolicy Fail. Under Fail, this line becomes a cluster that
+      # cannot boot its own network.
+      webhooks: {}
+
     features:
       backgroundScan:
         # Chart default is true, meaning the background scan deliberately
