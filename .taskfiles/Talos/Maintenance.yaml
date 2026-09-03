@@ -6,6 +6,7 @@ vars:
   SCHEMATIC: "2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757"
   TALOSCONFIG: "{{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig/talosconfig"
   KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
+  CONTROLPLANE: "192.168.8.10,192.168.8.11,192.168.8.12"
 
 tasks:
   pre-flight:
@@ -281,23 +282,54 @@ tasks:
       - echo "[OK] Cluster upgrade complete"
 
   apply-config:
-    desc: Apply Talos config to node
+    desc: Apply Talos config to a node, after showing what will change
+    # Silent so the dry-run diff is readable. Task's command echo doubles
+    # the output and buries the thing the operator is meant to be reading.
+    silent: true
     summary: |
-      Applies Talos configuration to a node.
+      Applies Talos configuration to a node. Shows a dry-run diff of exactly
+      what would change on that node and asks for confirmation before doing
+      anything.
 
       Usage:
-        task talos:maintenance:apply-config node=ogg ip=192.168.8.11 [insecure=true]
+        task talos:maintenance:apply-config node=ogg ip=192.168.8.11
+        task talos:maintenance:apply-config node=ogg ip=192.168.8.11 yes=true
 
       Parameters:
-        node: Node hostname (e.g., ogg)
-        ip: Node IP address (e.g., 192.168.8.11)
-        insecure: Use --insecure flag for fresh installs (default: false)
+        node:     Node hostname (e.g., ogg)
+        ip:       Node IP address (e.g., 192.168.8.11)
+        insecure: Use --insecure for fresh installs (default: false)
+        yes:      Skip the confirmation prompt (default: false)
 
-      Use insecure=true for fresh installs or nodes with certificate issues.
+      WHY THE DIFF IS NOT OPTIONAL
+
+      On 2026-09-03 a routine etcd change would also have silently deleted
+      the cluster's PodSecurity admission config, because a patch in git
+      (patches/controller/disable-admission-controller.yaml) had drifted
+      from what the nodes actually run. Four namespaces would have dropped
+      from 'baseline' to 'privileged' with no warning and no error.
+
+      CI cannot catch that class of problem. The Talhelper check validates
+      schema and version compatibility against talconfig.yaml, but it has
+      no idea what is running on the nodes. Only a diff against the live
+      node reveals "git says delete a thing the cluster is using".
+
+      CONTROL PLANE ORDER
+
+      Apply to etcd followers first and the leader last. Identify the
+      leader with:
+
+        talosctl etcd status -n 192.168.8.10,192.168.8.11,192.168.8.12
+
+      The member whose MEMBER id matches the LEADER column is the leader.
+      This task prints etcd status automatically after touching a control
+      plane node. Before moving to the next one, confirm every member
+      shares the same RAFT INDEX and RAFT TERM, and that ERRORS is empty.
     vars:
       NODE_NAME: '{{.node | default ""}}'
       NODE_IP: '{{.ip | default ""}}'
       INSECURE: '{{.insecure | default "false"}}'
+      ASSUME_YES: '{{.yes | default "false"}}'
       CONFIG_FILE: "{{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig/witches-{{.NODE_NAME}}.yaml"
       INSECURE_FLAG: '{{if eq .INSECURE "true"}}--insecure{{end}}'
     preconditions:
@@ -306,21 +338,55 @@ tasks:
       - sh: '[ -n "{{.NODE_IP}}" ]'
         msg: "ip parameter required (e.g., ip=192.168.8.11)"
       - sh: '[ -f "{{.CONFIG_FILE}}" ]'
-        msg: "Config file not found: {{.CONFIG_FILE}}"
+        msg: "Config not found: {{.CONFIG_FILE}} - run talhelper genconfig first"
+      # Guards against handing a node another node's config, which would
+      # rewrite its hostname and network identity. Skipped for insecure
+      # applies, where the node is in maintenance mode and has no identity yet.
+      - sh: '[ "{{.INSECURE}}" = "true" ] || [ "$(talosctl --talosconfig {{.TALOSCONFIG}} --nodes {{.NODE_IP}} get hostname -o jsonpath=''{.spec.hostname}'' 2>/dev/null)" = "{{.NODE_NAME}}" ]'
+        msg: "{{.NODE_IP}} does not report hostname {{.NODE_NAME}} - refusing to apply the wrong node's config"
     cmds:
-      - echo "Applying config to {{.NODE_NAME}} ({{.NODE_IP}})"
-      - echo 'Config file{{":"}} {{.CONFIG_FILE}}'
-      - echo 'Insecure mode{{":"}} {{.INSECURE}}'
+      - |
+        echo "Node:        {{.NODE_NAME}} ({{.NODE_IP}})"
+        echo "Config file: {{.CONFIG_FILE}}"
+        echo "Insecure:    {{.INSECURE}}"
+        echo ""
+        echo "=== DRY RUN - what would change on {{.NODE_NAME}} ==="
+      - |
+        talosctl --talosconfig {{.TALOSCONFIG}} \
+          apply-config --dry-run \
+          {{.INSECURE_FLAG}} \
+          --nodes {{.NODE_IP}} \
+          --file {{.CONFIG_FILE}}
+      - |
+        if [ "{{.ASSUME_YES}}" != "true" ]; then
+          printf '\nApply the above to {{.NODE_NAME}} ({{.NODE_IP}})? [y/N] '
+          read -r reply
+          case "$reply" in
+            y|Y|yes|YES) ;;
+            *) echo "Aborted. Nothing was applied."; exit 1 ;;
+          esac
+        fi
       - |
         talosctl --talosconfig {{.TALOSCONFIG}} \
           apply-config \
           {{.INSECURE_FLAG}} \
           --nodes {{.NODE_IP}} \
           --file {{.CONFIG_FILE}}
-      - echo "Waiting for node to apply config..."
+      - echo "Waiting for the node to settle..."
       - sleep 60
       - kubectl --kubeconfig {{.KUBECONFIG}} wait --for=condition=Ready node/{{.NODE_NAME}} --timeout=10m
-      - echo "[OK] Config applied successfully"
+      # Control plane nodes only: surface etcd state so the operator can
+      # confirm quorum is intact before touching the next one.
+      - |
+        if talosctl --talosconfig {{.TALOSCONFIG}} --nodes {{.NODE_IP}} etcd status >/dev/null 2>&1; then
+          echo ""
+          echo "=== control plane node - etcd across all members ==="
+          talosctl --talosconfig {{.TALOSCONFIG}} --nodes {{.CONTROLPLANE}} etcd status
+          echo ""
+          echo "Before the next node: every member must share RAFT INDEX and"
+          echo "RAFT TERM, and the ERRORS column must be empty."
+        fi
+      - echo "[OK] Config applied to {{.NODE_NAME}}"
 
   fix-stuck-cilium:
     desc: Fix stuck Cilium pod on node
