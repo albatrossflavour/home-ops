@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: pushgateway
-          image: prom/pushgateway:v1.11.1@sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48
+          image: prom/pushgateway:v1.11.1@sha256:03738d278e082ee9821df730c741b3b465c251fc2b68a85883def301a55a6215
           args:
             - --web.listen-address=:9091
           ports:
