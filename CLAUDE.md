@@ -890,19 +890,48 @@ docker pull repository/image:tag && docker inspect repository/image:tag --format
 2. Add protection rule for `main` branch
 3. **Minimum required settings**:
    - ✅ **Require status checks to pass before merging**
-   - ✅ **Require branches to be up to date before merging**
-   - ✅ Add status checks: `pre-commit` (if using pre-commit hooks)
+   - ❌ **Do NOT** require branches to be up to date (`strict`), see below
    - ❌ **Do NOT** enforce on administrators (allows emergency fixes)
 
-**Alternative: GitHub CLI setup**:
+**The four required contexts** are the ones that exist as workflows:
+
+| Context | Workflow |
+| --------- | ---------- |
+| `Kubeconform` | `.github/workflows/kubeconform.yaml` |
+| `Flux Diff (kubernetes, kustomization)` | `.github/workflows/flux-diff.yaml` |
+| `Flux Diff (kubernetes, helmrelease)` | `.github/workflows/flux-diff.yaml` |
+| `Talhelper` | `.github/workflows/talhelper.yaml` |
+
+`pre-commit` is **not** one of them, despite what this file used to claim. It runs locally from `.pre-commit-config.yaml` and has no workflow, so naming it as a required context blocks every PR forever, waiting on a check that never reports.
+
+#### Why `strict` must stay false
+
+`strict` is "require branches to be up to date before merging". It deadlocks the Renovate queue, because `.github/renovate.json5` sets `rebaseWhen: 'conflicted'`. A branch that is merely behind main is not conflicted, so Renovate never refreshes it, and GitHub then refuses to merge it because it is not current. One merge knocks every other open PR out of date and nothing breaks the loop.
+
+This happened on 2026-09-05. 37 open Renovate PRs, 33 of them reporting `mergeStateStatus: BEHIND` alongside `mergeable: MERGEABLE` and four green checks. `strict` had been switched on as a side effect of re-applying protection to add the `Talhelper` context.
+
+Leaving it off costs nothing here. Checks run against `refs/pull/N/merge`, the PR already merged into main, so they validate the merge result rather than the branch in isolation. `strict` only guards the case where two PRs pass separately and fail together, which for independent digest bumps in separate files is close to a non-risk, and the next PR's Flux Diff would catch it.
+
+#### Changing the required checks
+
+**PATCH the sub-resource. Do not PUT the whole protection object**, which rewrites every field and is how `strict` got turned on in the first place.
 
 ```bash
-gh api repos/:owner/:repo/branches/main/protection \
-  --method PUT \
-  --field required_status_checks='{"strict":true,"contexts":["pre-commit"]}' \
-  --field enforce_admins=false \
-  --field required_pull_request_reviews='{"required_approving_review_count":0}' \
-  --field restrictions=null
+# back up first, so a mistake is one command to undo
+gh api repos/:owner/:repo/branches/main/protection > /tmp/protection-backup.json
+
+# look before touching
+gh api repos/:owner/:repo/branches/main/protection/required_status_checks
+
+# add a context, leaving strict and everything else alone
+gh api repos/:owner/:repo/branches/main/protection/required_status_checks \
+  --method PATCH --input - <<'EOF'
+{"contexts": ["Kubeconform",
+              "Flux Diff (kubernetes, kustomization)",
+              "Flux Diff (kubernetes, helmrelease)",
+              "Talhelper",
+              "Your New Check"]}
+EOF
 ```
 
 ### Renovate Troubleshooting
@@ -910,8 +939,9 @@ gh api repos/:owner/:repo/branches/main/protection \
 **Common issues and solutions**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
 | "Error updating branch" | Unprotected main branch | Enable branch protection |
+| All Renovate PRs stuck on `BEHIND` | `strict` enabled while `rebaseWhen: 'conflicted'` | Set `strict=false`, see branch protection above |
 | "Excess registryUrls found" | Conflicting Helm repo configs | Check fileMatch patterns in renovate.json5 |
 | No PRs created | Schedule restrictions | Check `schedule: ["every weekend"]` in config |
 | YAML syntax errors | Unquoted @sha256 digests | Always quote: `tag: "version@sha256:digest"` |
@@ -929,7 +959,8 @@ gh api repos/:owner/:repo/branches/main/protection \
 **Branch protection is required for Renovate to function**:
 
 - Main branch must have protection rules enabled
-- Required status checks should include pre-commit hooks
+- Required status checks are the four CI workflows listed above, not pre-commit
+- `strict` (require branches up to date) must stay off, or the Renovate queue deadlocks
 - Allows automated PR creation and merging
 - Prevents accidental force pushes or deletions
 
