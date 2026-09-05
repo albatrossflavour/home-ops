@@ -30,7 +30,7 @@ spec:
   # 1.31 - this operator is on 1.30.0 now. Needs migrating to the Barman
   # Cloud Plugin (ObjectStore CR + spec.plugins) before that lands, see
   # https://cloudnative-pg.io/plugin-barman-cloud/docs/migration/
-  imageName: ghcr.io/cloudnative-pg/postgresql:16.15-system-bullseye@sha256:34cd4159d07b3410a1b29da35072e2e927a0905e717a61afa3814624a2e8859a
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-system-bullseye@sha256:899d3ed526b659d77935dde0e6bf2d69dbbf17d3d8c6486ca8cfd04bd3c18533
   primaryUpdateStrategy: unsupervised
   storage:
     size: 20Gi
