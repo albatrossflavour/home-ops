@@ -21,7 +21,7 @@ spec:
           serviceAccountName: trivy-fixable-check
           containers:
             - name: trivy-fixable-check
-              image: alpine/k8s:1.31.3@sha256:7f485a380b3b890b8f4d0de63e242b79db728ef1e0fc5ae30d30cbe5f9e2d242
+              image: alpine/k8s:1.37.0@sha256:b421c2e9419edb98db39b6ab641669f4db7bb2acf354f22450c6b7e7176d1ff4
               command:
                 - /bin/sh
                 - -c
