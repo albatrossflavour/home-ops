@@ -1,0 +1,107 @@
+---
+# Sets resources.requests on containers that declare none at all.
+#
+# REQUESTS ONLY. This policy deliberately does NOT set memory limits, and the
+# reason is measured rather than theoretical. Every OOM kill in this cluster
+# over the seven days to 2026-09-06 happened to a container that already had a
+# memory limit, and happened because that limit was too low:
+#
+#   media/sabnzbd                      limit 1Gi    OOMKilled 02 Sep
+#   observability/thanos-storegateway  limit 2Gi    OOMKilled 01 Sep
+#   security/trivy-operator            limit 768Mi  OOMKilled 03 Sep
+#
+# Not one was a node-pressure kill. Defaulting a memory limit onto the 35
+# containers that currently have none would be manufacturing more of the only
+# memory failure this cluster actually suffers from. Note that thanos-
+# storegateway died at 2Gi, so there is no "generous enough" blanket number
+# either - the safe limit is per-workload and a mutation cannot know it.
+#
+# What requests do instead, and why they are worth setting:
+#   - A container with no requests is BestEffort, first in line for eviction
+#     under node pressure. Requests move it to Burstable.
+#   - A ResourceQuota specifying requests.cpu/requests.memory rejects any pod
+#     that omits them. That is how media-quota (commit 7cfa220e) silently
+#     killed every Volsync backup job in that namespace for 12 hours on
+#     2026-09-02. This closes that trap for requests.
+#   - Requests cannot kill a running container. The worst case of a wrong
+#     value is imperfect scheduling, against a current value of zero.
+#
+# The numbers are deliberately small. Too-large requests fail scheduling;
+# too-small ones merely under-account, which is the status quo. 10m x 35
+# containers is 350m of CPU across a six-node cluster.
+#
+# All-or-nothing per container. A container with ANY requests set is left
+# completely alone, rather than having missing keys topped up. Measured
+# 2026-09-06: 35 containers have no requests at all and exactly 1 has a
+# partial set, so topping up would add real complexity to cover one case.
+#
+# Exclusions. kube-system, rook-ceph and openebs-system are skipped. They hold
+# the control plane and both storage layers, they are the workloads where
+# resource behaviour is least understood here, and kube-apiserver alone peaks
+# at 5.2GiB. Flux driftDetection needs no exclusion, unlike
+# set-revision-history-limit: drift detection compares HelmRelease-managed
+# objects such as Deployments, and nothing manages Pods directly.
+apiVersion: policies.kyverno.io/v1beta1
+kind: MutatingPolicy
+metadata:
+  name: set-default-pod-requests
+  annotations:
+    policies.kyverno.io/title: Default Pod Resource Requests
+    policies.kyverno.io/category: Resource Management
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Sets requests.cpu and requests.memory on containers and init containers
+      that declare no requests at all, so a namespace ResourceQuota cannot
+      reject them. Does not set limits, by design.
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  matchConditions:
+    - name: not-control-plane-or-storage
+      expression: >-
+        object.metadata.namespace != 'kube-system' &&
+        object.metadata.namespace != 'rook-ceph' &&
+        object.metadata.namespace != 'openebs-system'
+    - name: some-container-lacks-requests
+      expression: >-
+        object.spec.containers.exists(c,
+          !has(c.resources) || !has(c.resources.requests)
+        ) ||
+        (has(object.spec.initContainers) &&
+         object.spec.initContainers.exists(c,
+           !has(c.resources) || !has(c.resources.requests)
+        ))
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: >-
+          Object{
+            spec: Object.spec{
+              containers: object.spec.containers.map(c,
+                Object.spec.containers{
+                  name: c.name,
+                  resources: Object.spec.containers.resources{
+                    requests: (has(c.resources) && has(c.resources.requests))
+                      ? c.resources.requests
+                      : {"cpu": "10m", "memory": "64Mi"}
+                  }
+                }),
+              ?initContainers: has(object.spec.initContainers)
+                ? optional.of(object.spec.initContainers.map(c,
+                    Object.spec.initContainers{
+                      name: c.name,
+                      resources: Object.spec.initContainers.resources{
+                        requests: (has(c.resources) && has(c.resources.requests))
+                          ? c.resources.requests
+                          : {"cpu": "10m", "memory": "64Mi"}
+                      }
+                    }))
+                : optional.none()
+            }
+          }
