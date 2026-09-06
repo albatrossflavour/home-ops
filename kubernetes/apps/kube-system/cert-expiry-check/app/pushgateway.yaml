@@ -1,10 +1,49 @@
 ---
+# Persistence is not optional here, despite the data being regenerated daily.
+#
+# Pushgateway keeps everything in memory unless --persistence.file is set. This
+# deployment ran without it until 2026-09-06, and the consequence was not a
+# gap in a graph: BOTH alerts that depend on pushed metrics went silently
+# blind on every pod restart.
+#
+#   HubbleCiliumCertExpiresSoon  <- cert_expiry_timestamp_seconds
+#   TrivyFixableCriticalBacklog  <- trivy_critical_fixable_total
+#
+# Both were confirmed absent from Prometheus on 2026-09-06 with both alerts
+# not firing, while the trivy job had logged "fixable CRITICAL count: 112"
+# that same morning against an alert threshold of 10. The Cilium one is the
+# worse of the two: those mTLS certs are Helm-templated with no cert-manager
+# renewal behind them, so that alert is the only thing watching them.
+#
+# TrivyFixableCriticalBacklog carries `for: 24h` against a metric pushed once
+# daily, so without persistence any restart inside a 24-hour window resets the
+# clock and the alert can effectively never fire.
+#
+# ceph-block rather than openebs-hostpath. hostpath would pin this pod to one
+# node, and a node loss would leave the pushgateway permanently Pending rather
+# than merely losing a day of samples. Talos upgrades reboot nodes here often
+# enough for that to matter.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cert-expiry-pushgateway
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cert-expiry-pushgateway
 spec:
   replicas: 1
+  # RWO volume on a Deployment: a RollingUpdate would deadlock, because the
+  # new pod cannot attach the volume while the old one still holds it.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: cert-expiry-pushgateway
@@ -18,6 +57,10 @@ spec:
           image: prom/pushgateway:v1.11.3@sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48
           args:
             - --web.listen-address=:9091
+            - --persistence.file=/data/pushgateway.store
+            # Default is 5m. These are daily pushes, so the window where a
+            # crash could lose the newest sample is what matters, not volume.
+            - --persistence.interval=1m
           ports:
             - name: http
               containerPort: 9091
@@ -32,10 +75,20 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cert-expiry-pushgateway
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
         runAsGroup: 65534
+        # readOnlyRootFilesystem stays true; the persistence file lives on the
+        # mounted volume. fsGroup is what makes that volume writable by 65534.
+        fsGroup: 65534
         seccompProfile:
           type: RuntimeDefault
 ---

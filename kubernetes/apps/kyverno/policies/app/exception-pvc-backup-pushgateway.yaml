@@ -1,0 +1,35 @@
+---
+# cert-expiry-pushgateway holds two gauge values, each rewritten daily by a
+# CronJob that reads live cluster state. There is nothing historical in it.
+#
+# The volume exists so the values survive a pod restart, not so they survive a
+# disaster: after a total loss the next 06:00 and 06:15 runs regenerate both
+# from scratch, and the CertExpiryMetricAbsent / TrivyFixableMetricAbsent
+# alerts cover the window in between. A Volsync ReplicationSource here would
+# back up a file whose entire contents are reconstructed every morning.
+apiVersion: policies.kyverno.io/v1beta1
+kind: PolicyException
+metadata:
+  name: pvc-backup-pushgateway
+  namespace: kyverno
+spec:
+  policyRefs:
+    - kind: ValidatingPolicy
+      name: require-pvc-backup
+  matchConditions:
+    - name: is-pushgateway-volume
+      expression: >-
+        (has(object.metadata.namespace) && object.metadata.namespace == 'kube-system') &&
+        object.metadata.name == 'cert-expiry-pushgateway'
+  reportResult: skip
+  properties:
+    reason: >-
+      Holds two daily-regenerated gauge values, no history. The volume exists
+      to survive pod restarts, which is what the alerts depend on; a backup
+      would preserve nothing the next CronJob run does not rebuild.
+    verified: >-
+      2026-09-06 - both metrics confirmed absent after a pushgateway restart,
+      which is the failure this volume exists to prevent.
+    approved-by: tgreen
+    review: >-
+      Revisit if anything ever pushes non-regenerable data into this gateway.
