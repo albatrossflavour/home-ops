@@ -40,10 +40,21 @@ metadata:
   name: cert-expiry-pushgateway
 spec:
   replicas: 1
-  # RWO volume on a Deployment: a RollingUpdate would deadlock, because the
-  # new pod cannot attach the volume while the old one still holds it.
+  # RWO volume on a Deployment: the default RollingUpdate deadlocks, because
+  # the new pod cannot attach the volume while the old one still holds it.
+  #
+  # maxSurge: 0 is what fixes that - the old pod terminates and releases the
+  # volume before a replacement is created. `type: Recreate` expresses the
+  # same intent more directly and was tried first, but it cannot be applied
+  # in place here: the live Deployment already carries the defaulted
+  # spec.strategy.rollingUpdate block, and the API rejects that field
+  # alongside type: Recreate, so switching would mean deleting and recreating
+  # the Deployment. Not worth a manual step for an identical outcome.
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: cert-expiry-pushgateway
