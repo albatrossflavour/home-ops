@@ -144,10 +144,15 @@ spec:
         size: 10Gi
       resources:
         requests:
+          # p50 sits at 1.0-1.6GiB, so 256Mi under-requested by roughly 4x.
           cpu: 10m
-          memory: 256Mi
+          memory: 1Gi
         limits:
-          memory: 2Gi
+          # 14d peak 1785MiB and p99 1923MiB against the old 2Gi ceiling,
+          # which is 94% of the limit. OOMKilled 01 Sep. Store gateway memory
+          # scales with the index headers it holds for the blocks in the
+          # bucket, so this grows as retention does.
+          memory: 3Gi
 
     # Compactor - Downsamples and compacts object storage data
     compactor:

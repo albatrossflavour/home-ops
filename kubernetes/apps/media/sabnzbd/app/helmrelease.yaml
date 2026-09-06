@@ -70,9 +70,16 @@ spec:
             resources:
               requests:
                 cpu: 100m
-                memory: 256Mi
+                memory: 512Mi
               limits:
-                memory: 1Gi
+                # Restored to 4Gi, the value before 401a07bf. That commit
+                # right-sized media from "30d real usage" and read 957Mi for
+                # sabnzbd; Thanos over the 14d to 2026-09-06 shows a 3141MiB
+                # peak and p99 of 1960MiB on the busiest pod incarnation.
+                # Cut to 1Gi on 01 Sep, OOMKilled on 02 Sep. Unpack and par2
+                # repair are the spikes, and they do not show up in an idle
+                # capture window.
+                memory: 4Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
