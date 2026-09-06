@@ -23,5 +23,43 @@ cluster:
       # etcd denyListArgs covers only identity and TLS flags. Renamed from
       # experimental-* in etcd 3.6; this cluster runs 3.6.12.
       bootstrap-defrag-threshold-megabytes: "100"
+      # Raised from etcd's 1000ms default so the cluster tolerates the fsync
+      # latency it actually has, rather than calling an election every time a
+      # disk stalls.
+      #
+      # THE PROBLEM. Over the week to 2026-09-06 this cluster averaged around
+      # ten leader elections a day (67-69 per member over 7 days) with 86k-98k
+      # slow applies. A healthy etcd sits near zero elections. Each one is a
+      # window where the API server cannot commit writes, and it is the
+      # mechanism behind the intermittent kube-state-metrics /livez failures
+      # and KustomizationNotReady bursts.
+      #
+      # WHY 2500. A follower calls an election when it has not heard from the
+      # leader for election-timeout, and a leader stalled on fsync cannot send
+      # heartbeats. Counting 5m windows over 10 days where p99 commit duration
+      # exceeded each candidate value:
+      #
+      #   threshold   weatherwax  ogg  magrat   total
+      #   1000ms (old)        28   18       3      49
+      #   1500ms              17   10       1      28
+      #   2000ms               5    7       1      13
+      #   2500ms               3    4       1       8
+      #   3000ms               2    4       0       6
+      #
+      # 2500ms removes 84% of the stalls that could trigger an election, and
+      # returns flatten past it. The cost is failover after a genuine leader
+      # loss going from 1s to 2.5s, which is a fair trade here.
+      #
+      # heartbeat-interval is deliberately LEFT at its 100ms default. etcd
+      # sizes that against round-trip time between members, which on this LAN
+      # is sub-millisecond. The problem being solved is disk stalls, not
+      # network latency, and election-timeout is the knob for that. 2500/100
+      # is 25x, comfortably inside etcd's requirement that election timeout be
+      # at least 5x the heartbeat interval.
+      #
+      # This treats the symptom. The underlying fsync latency is tracked in
+      # docs/operations/etcd-disk-cache-mode.md, where the evidence points at
+      # host IO contention rather than anything inside Kubernetes.
+      election-timeout: "2500"
     advertisedSubnets:
       - 192.168.8.0/24
