@@ -32,6 +32,7 @@ Welcome to the comprehensive documentation for this Kubernetes homelab setup. Th
 - **[DNS & Networking](./operations/dns-networking.md)** - Traffic flow and troubleshooting
 - **[Backup & Recovery](./operations/backup-recovery.md)** - Data protection
 - **[Monitoring](./operations/monitoring.md)** - Observability and alerting
+- **[etcd Disk Cache Mode](./operations/etcd-disk-cache-mode.md)** - Why etcd fsync latency spikes on the Proxmox control plane
 - **[Updates & Upgrades](./operations/updates.md)** - Keeping the system current
 
 ### 🏛 Architecture & Design
