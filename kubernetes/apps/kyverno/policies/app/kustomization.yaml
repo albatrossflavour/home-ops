@@ -7,6 +7,7 @@ resources:
   - ./exception-volsync-movers.yaml
   - ./exception-pvc-backup-cnpg.yaml
   - ./exception-pvc-backup-monitoring.yaml
+  - ./exception-pvc-backup-pushgateway.yaml
   - ./exception-pvc-backup-shitbox.yaml
   - ./exception-rook-ceph.yaml
   - ./exception-kube-system-node-infrastructure.yaml

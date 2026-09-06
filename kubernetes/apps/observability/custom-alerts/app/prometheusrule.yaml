@@ -256,6 +256,39 @@ spec:
         # dedicated look sometime this week" signal, not a page. Metric
         # pushed daily by trivy-fixable-check (security namespace) via the
         # same Pushgateway cert-expiry-check already uses.
+        # Both pushed-metric alerts in this file depend on
+        # cert-expiry-pushgateway holding a value between daily CronJob runs.
+        # Until 2026-09-06 that gateway had no --persistence.file, so every
+        # pod restart emptied it and both alerts went blind with no signal at
+        # all: on 2026-09-06 both metrics were absent, neither alert was
+        # firing, and the trivy job had logged 112 fixable CRITICALs that
+        # morning against a threshold of 10.
+        #
+        # Persistence is now configured. These two exist so that if it fails
+        # again - PVC lost, pod Pending, CronJob broken - the failure is loud
+        # instead of looking like good news. An alert that stops firing
+        # because its input vanished is indistinguishable from a fixed
+        # problem, which is the whole trap.
+        - alert: CertExpiryMetricAbsent
+          expr: |
+            absent(cert_expiry_timestamp_seconds)
+          for: 2h
+          labels:
+            severity: warning
+          annotations:
+            summary: "cert_expiry_timestamp_seconds has vanished, HubbleCiliumCertExpiresSoon is blind"
+            description: "No cert expiry metric has been present for 2h, so HubbleCiliumCertExpiresSoon cannot fire regardless of the real cert state. These Cilium/Hubble mTLS certs are Helm-templated with no cert-manager renewal behind them, so this alert is the only thing watching them. Check the cert-expiry-pushgateway pod in kube-system and the cert-expiry-check CronJob."
+
+        - alert: TrivyFixableMetricAbsent
+          expr: |
+            absent(trivy_critical_fixable_total)
+          for: 2h
+          labels:
+            severity: warning
+          annotations:
+            summary: "trivy_critical_fixable_total has vanished, TrivyFixableCriticalBacklog is blind"
+            description: "No fixable-CRITICAL metric has been present for 2h, so TrivyFixableCriticalBacklog cannot fire. Check the cert-expiry-pushgateway pod in kube-system and the trivy-fixable-check CronJob in security; the job logs the count it computed even when the push does not survive."
+
         - alert: TrivyFixableCriticalBacklog
           expr: |
             trivy_critical_fixable_total > 10
