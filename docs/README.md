@@ -33,6 +33,7 @@ Welcome to the comprehensive documentation for this Kubernetes homelab setup. Th
 - **[Backup & Recovery](./operations/backup-recovery.md)** - Data protection
 - **[Monitoring](./operations/monitoring.md)** - Observability and alerting
 - **[etcd Disk Cache Mode](./operations/etcd-disk-cache-mode.md)** - Why etcd fsync latency spikes on the Proxmox control plane
+- **[Proxmox Health Audit](./operations/proxmox-health-audit.md)** - Hypervisor hardware, capacity, backup coverage and patch state
 - **[Updates & Upgrades](./operations/updates.md)** - Keeping the system current
 
 ### 🏛 Architecture & Design
