@@ -127,6 +127,27 @@ ps -o args= -C kvm | tr ' ' '\n' | grep -A0 'vm-300-disk-0'
 # want "cache":{"direct":true ...} and "aio":"native"
 ```
 
+## A correction, and what came after
+
+An earlier version of this document said Talos upgrades would apply the cache
+mode change "naturally". They do not. A Talos upgrade reboots the guest OS;
+the QEMU process on the host keeps running and holds the disk backend it
+opened at launch. Proof: on 2026-09-07 the QEMU processes for VMs 300 and 301
+had been running since **29 December 2025**, while the guests inside them last
+booted on 31 August 2026, having been through several Talos upgrades in
+between.
+
+Applying it needs the QEMU process restarted, which means `qm shutdown` then
+`qm start`, or `qm reboot` at the Proxmox level. Nothing initiated from inside
+Talos will do it. The hypervisor itself never needs to go down.
+
+The [Proxmox health audit](./proxmox-health-audit.md) later found two things
+that bear on the latency more than cache mode does: the `pve` volume groups on
+ankh and morpork are worn QLC DRAM-less drives at 143% and 150% of rated
+endurance, and ankh was carrying a year-old LVM snapshot of the control plane
+VM that was doubling its write load through copy-on-write. The snapshot was
+removed on 2026-09-07.
+
 ## Related
 
 This configuration lives on the Proxmox hosts, not in this repository, so
