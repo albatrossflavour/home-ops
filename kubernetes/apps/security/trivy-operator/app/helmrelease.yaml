@@ -40,9 +40,12 @@ spec:
     resources:
       requests:
         cpu: 50m
-        memory: 256Mi
+        memory: 384Mi
       limits:
-        memory: 768Mi
+        # 14d peak 763MiB against the old 768Mi limit, which is 99.3% of it.
+        # OOMKilled 03 Sep. p99 is ~593MiB, so the spikes are scan bursts
+        # rather than steady growth.
+        memory: 1536Mi
     serviceMonitor:
       enabled: true
     trivy:
