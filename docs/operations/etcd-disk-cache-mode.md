@@ -137,3 +137,55 @@ Host memory pressure is a separate and genuine problem. stolat sitting at 2G
 available of 62G is what `NodeMemoryHighUtilization` has been reporting since
 2026-09-02. It is a true alert, and low available memory makes host page cache
 behaviour worse, so the two interact.
+
+## etcd snapshots
+
+`task talos:maintenance:etcd-snapshot` takes a verified snapshot and writes it
+to the NAS.
+
+This cluster is GitOps-managed, so a snapshot is not what makes it
+recoverable. Everything under `kubernetes/` is rebuilt by Flux and PVC data is
+covered by Volsync. What a snapshot buys is speed, plus the things git does
+not hold: resource UIDs, cert-manager state, and Volsync replication state. It
+is also the only way back from etcd corruption that raft cannot repair, which
+is not hypothetical given the leader-election rate above.
+
+```bash
+task talos:maintenance:etcd-snapshot                       # default node, NAS
+task talos:maintenance:etcd-snapshot node=192.168.8.11     # from a follower
+task talos:maintenance:etcd-snapshot keep=30               # deeper retention
+```
+
+Measured 2026-09-06: 425MB, about 6 seconds, 16705 keys. A snapshot is a local
+read of one member's bbolt file, so it does not need the leader and does not
+disturb raft, but it does read the whole database.
+
+### Where it writes, and the guard that matters
+
+`/mnt/nas-backups/etcd`, which is `192.168.1.22:/volume2/Backups` on the
+Synology, the same share family backups already use. The `/etc/fstab` entry
+carries `nofail` and `_netdev` so a NAS outage cannot block boot:
+
+```text
+192.168.1.22:/volume2/Backups  /mnt/nas-backups  nfs  vers=3,soft,timeo=100,retrans=3,_netdev,nofail  0  0
+```
+
+The task refuses to run if that path is not a mount point. Without the guard,
+writing to an unmounted `/mnt/nas-backups/etcd` silently creates a local
+directory, reports success, and fills the workstation disk while looking
+exactly like a working backup. Verified by pointing the task at a plain
+directory: it fails the precondition and writes nothing.
+
+Not in `task backup:create`, which pushes to the 1Password `discworld` vault.
+That suits `age.key` and `config.yaml`; a 425MB snapshot does not belong
+there.
+
+Retention keeps the newest 14, roughly 6GB against 3.5TB free.
+
+### Still manual
+
+This is a task, not a schedule. Automating it in-cluster would mean putting
+`talosconfig` into a Kubernetes Secret, and that credential is node-level root
+across the whole control plane, so it is a security decision rather than a
+plumbing one. A timer on a trusted host is the lower-risk option if scheduling
+is wanted.
