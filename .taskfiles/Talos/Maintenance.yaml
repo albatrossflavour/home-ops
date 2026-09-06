@@ -414,6 +414,109 @@ tasks:
       - echo "[OK] Cilium pod recovered"
       - kubectl --kubeconfig {{.KUBECONFIG}} describe node {{.NODE_NAME}} | grep -A 2 Taint
 
+  etcd-snapshot:
+    desc: Take and verify an etcd snapshot
+    summary: |
+      Takes a point-in-time etcd snapshot via the Talos API and verifies it
+      before declaring success.
+
+      Usage:
+        task talos:maintenance:etcd-snapshot
+        task talos:maintenance:etcd-snapshot node=192.168.8.11
+        task talos:maintenance:etcd-snapshot keep=30
+
+      WHERE IT WRITES
+
+      Defaults to /mnt/nas-backups/etcd, which is 192.168.1.22:/volume2/Backups
+      on the Synology, the same share family backups already live on. The
+      fstab entry uses nofail and _netdev so a NAS outage cannot block boot.
+
+      If the share is not mounted the task REFUSES to run. That guard matters:
+      without it, writing to an unmounted /mnt/nas-backups/etcd silently
+      creates a local directory, reports success, and fills the workstation
+      disk while looking exactly like a working backup.
+
+      Keeps the newest 14 snapshots by default. At ~425MB each that is about
+      6GB against 3.5TB free.
+
+      WHAT THIS IS AND IS NOT FOR
+
+      This cluster is GitOps-managed, so everything under kubernetes/ is
+      rebuilt by Flux and PVC data is covered by Volsync. A snapshot is not
+      what makes the cluster recoverable; it makes recovery FAST, and it
+      covers the things git does not hold: resource UIDs, cert-manager
+      state, and Volsync replication state.
+
+      It is also the only way back from etcd corruption that raft cannot
+      repair itself. That is not hypothetical here: over the week to
+      2026-09-06 the cluster averaged around ten leader elections a day
+      (see docs/operations/etcd-disk-cache-mode.md).
+
+      WHY THIS IS NOT IN task backup:create
+
+      backup:create pushes to the 1Password discworld vault, which suits
+      age.key and config.yaml. A snapshot is ~425MB and does not belong
+      there. Put these on the NAS alongside the Volsync repositories.
+
+      ANY MEMBER WILL DO
+
+      A snapshot is a local read of one member's bbolt file, so it does not
+      need to come from the leader and does not disturb raft. It does read
+      the whole database, so expect a few seconds of extra IO on the node
+      you pick. Prefer a follower if the cluster is already unhappy.
+
+      VERIFICATION
+
+      talosctl prints hash, revision and total keys on success. This task
+      additionally fails if the file is missing or implausibly small, so a
+      truncated snapshot cannot be mistaken for a good one.
+    vars:
+      NODE: '{{.node | default "192.168.8.10"}}'
+      DIR: '{{.dir | default "/mnt/nas-backups/etcd"}}'
+      KEEP: '{{.keep | default "14"}}'
+      STAMP:
+        sh: date -u +%Y%m%dT%H%M%SZ
+    cmds:
+      - talosctl --talosconfig {{.TALOSCONFIG}} -n {{.NODE}} etcd snapshot "{{.DIR}}/etcd-{{.STAMP}}.snap"
+      # A snapshot smaller than 8MB means something went wrong: the live
+      # database has never been near that small. Fail loudly rather than
+      # leaving a useless file that looks like a backup.
+      - |
+        SNAP="{{.DIR}}/etcd-{{.STAMP}}.snap"
+        test -f "$SNAP" || { echo "FAILED: $SNAP was not created"; exit 1; }
+        SIZE=$(wc -c < "$SNAP")
+        if [ "$SIZE" -lt 8388608 ]; then
+          echo "FAILED: $SNAP is only $SIZE bytes, that is not a real snapshot"
+          exit 1
+        fi
+        echo "OK: $SNAP ($SIZE bytes)"
+      # Retention. At ~425MB each these add up, and an unbounded directory on
+      # a share nobody looks at is how a NAS quietly fills.
+      - |
+        cd "{{.DIR}}" || exit 1
+        COUNT=$(ls -1 etcd-*.snap 2>/dev/null | wc -l)
+        if [ "$COUNT" -gt {{.KEEP}} ]; then
+          ls -1 etcd-*.snap | sort | head -n "$((COUNT - {{.KEEP}}))" | while read -r OLD; do
+            echo "pruning $OLD"
+            rm -f "$OLD"
+          done
+        fi
+        echo "retained $(ls -1 etcd-*.snap 2>/dev/null | wc -l) of max {{.KEEP}} snapshots"
+    preconditions:
+      - msg: Missing talosconfig
+        sh: test -f {{.TALOSCONFIG}}
+      - msg: talosctl not found
+        sh: command -v talosctl
+      # The important one. If the NFS share is not mounted, writing to
+      # {{.DIR}} silently creates a local directory and the task "succeeds",
+      # filling the workstation disk while looking like a backup. Refuse to
+      # run unless the target is a real mount point. Pass dir= to override
+      # for a deliberate local snapshot.
+      - msg: "{{.DIR}} is not a mount point - is 192.168.1.22:/volume2/Backups mounted?"
+        sh: mountpoint -q "$(dirname {{.DIR}})" || mountpoint -q "{{.DIR}}"
+      - msg: "{{.DIR}} does not exist"
+        sh: test -d "{{.DIR}}"
+
   backup-health:
     desc: Check Volsync backup health
     summary: |
