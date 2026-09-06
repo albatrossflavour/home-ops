@@ -5,3 +5,22 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./networkpolicy.yaml
+
+# The dashboard JSON uses Grafana's own ${var} template syntax, which collides
+# with Flux's postBuild variable substitution: cluster-apps patches
+# substituteFrom onto every child Kustomization, envsubst runs over the
+# rendered ConfigMap, finds no "datasource" variable and fails the whole
+# Kustomization in strict mode. Every occurrence is therefore escaped as
+# $${...}, which envsubst emits as a literal ${...} for Grafana to consume.
+# Same reasoning as kubernetes/apps/kyverno/policies/app/kustomization.yaml.
+configMapGenerator:
+  - name: trivy-vulnerabilities-dashboard
+    namespace: security
+    files:
+      - trivy-vulnerabilities.json=./dashboards/trivy-vulnerabilities.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: Security
