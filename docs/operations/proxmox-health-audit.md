@@ -119,6 +119,107 @@ There is no headroom though. stolat has 2.3 GiB available of 62 GiB, which is
 what `NodeMemoryHighUtilization` has been reporting since 2026-09-02. That
 alert is true.
 
+## Finding 3b: guest memory audit, 2026-09-07
+
+A full audit of all 32 running guests across the three hosts, prompted by
+stolat's memory pressure. It produced one method correction and three findings.
+
+### `pve_memory_usage_bytes` cannot be used for right-sizing
+
+Every running guest reports a 7-day peak within **0-3% of its allocation**.
+That is not guests needing their full RAM; it is Linux filling free memory
+with page cache, which the host sees as backed. The metric converges on the
+allocation regardless of real demand.
+
+An earlier reading of this metric produced the claim "magrat is allocated 30G
+but only uses 8G". That 8G was a post-reboot snapshot; its 7-day peak is
+29.8G. **Do not size guests from this metric.**
+
+What does work: the balloon device reports real in-guest figures, and for the
+Kubernetes nodes `node-exporter` gives them directly.
+
+```text
+qm monitor 301 <<< "info balloon"
+balloon: actual=30720 max_mem=30720 total_mem=30055 free_mem=5543
+```
+
+```text
+weatherwax  29.3G total   12.3G used        ogg     29.3G   12.4G used
+magrat      29.3G total    5.3G used        wuffles 15.5G    4.8G used
+aching      15.5G total    3.8G used        greebo  15.5G    7.7G used
+```
+
+### Only stolat is genuinely over-allocated
+
+```text
+ankh      86.8G allocated / 125G physical =  69%
+morpork  117.0G allocated / 125G physical =  94%
+stolat    69.7G allocated /  62G physical = 112%
+```
+
+ankh and morpork have room. stolat does not, and it is the host carrying two
+Kubernetes nodes on half the RAM of its peers.
+
+### ankh's real problem is ZFS ARC, not guests
+
+At 69% allocated, ankh should not have been sitting at 93-98% through late
+August. ARC explains it:
+
+```text
+c_max        124.6 G     <- ARC may grow to essentially all host RAM
+zfs_arc_max  0 (unset)
+```
+
+The pool holds 10.1T in a single flat dataset with **no guest disks on it**,
+so it is bulk data, but reads still warm ARC. ARC does shrink under pressure,
+but it competes with guests and makes the host look full.
+
+Proxmox's rule of thumb is 2GB plus 1GB per TB of storage, so roughly 16GB
+here. Capping `zfs_arc_max` is a module parameter, needs no guest disruption,
+and is the single highest-value change available on ankh.
+
+### 17 running guests have ballooning disabled
+
+`balloon: 0` does not merely set a floor, it omits the device entirely:
+
+```text
+qm monitor 501 <<< "info balloon"
+Error: No balloon device has been activated
+```
+
+The host can never reclaim from those guests. Affected: `puppet` (24G),
+`cd4pe` (8G), `dashboard` (8G), `scm` (12G) and every puppet lab VM.
+
+```text
+ankh     32.8G un-reclaimable of 125G physical
+morpork  36.6G un-reclaimable of 125G physical
+stolat   12.0G un-reclaimable of  62G physical
+```
+
+Proxmox auto-balloons at 80% host memory by default, which is exactly where
+morpork has been sitting. Enabling ballooning needs a restart per guest, since
+the device is added at QEMU launch.
+
+### CPU overcommit
+
+```text
+ankh      46 vCPU on 28 cores = 164%
+morpork   90 vCPU on 28 cores = 321%
+stolat    24 vCPU on 12 cores = 200%
+```
+
+Not currently causing problems: host load averages are 3-8 against 28 and 12
+cores. Recorded for awareness rather than action.
+
+### Where to start
+
+1. Cap `zfs_arc_max` on ankh. Biggest win, no guest disruption.
+2. Move a 12G guest off stolat to ankh, which has the most headroom.
+   `openvas` is the natural candidate: 12G, and its `onboot` is unset so it
+   does not survive a host reboot anyway.
+3. Enable ballooning on the `balloon: 0` guests, most usefully the puppet lab
+   VMs. Needs a restart each, so fold it into other maintenance.
+
 ## Finding 4: backup coverage
 
 The vzdump job covers eight guests: `102, 500, 501, 502, 503, 700, 851,
@@ -577,8 +678,9 @@ and is worth its own look rather than being folded into this change.
    the staged `cache=none` change.
 4. **Re-measure.** If commit p99 has come down, no hardware purchase is
    needed.
-5. Reduce overcommit on stolat. LXC 701/702 need no backup change, they are
-   clones of 700.
+5. Memory work from the guest audit, in order: cap `zfs_arc_max` on ankh,
+   move a 12G guest off stolat, then enable ballooning on the `balloon: 0`
+   guests. LXC 701/702 need no backup change, they are clones of 700.
 6. ~~Fix UPS shutdown~~. Done 2026-09-07, see Finding 6.
 7. ~~Ceph readdress.~~ Deferred 2026-09-07 to the next time the cluster is
    down for real work, see the decision above. Phase 1 is done; the second
