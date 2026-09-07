@@ -38,7 +38,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - puppet.lab.albatrossflavour.com:9100
+        - puppet.lab.albatrossflavour.com:10050
   metricsPath: /metrics
   relabelings:
     - action: replace
