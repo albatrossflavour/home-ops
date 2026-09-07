@@ -14,11 +14,34 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
+  # disableWait on both, because immich legitimately takes a long time to
+  # become ready and Helm's readiness wait turns that into a deadlock.
+  #
+  # 2026-09-07: a Postgres image bump moved the pgvector extension 0.7.4 ->
+  # 0.8.6, which invalidates immich's vector indexes. On the next start it
+  # rebuilds clip_index and face_index, and stops answering /api/server/ping
+  # while it does. Helm waited for readiness, gave up on the "stalled"
+  # Deployment, and rolled back to the previous release - which could not
+  # become ready either, for the same reason. Flux then looped:
+  #
+  #   Released=False   UpgradeFailed    failed early due to stalled resources
+  #   Remediated=False RollbackFailed   timeout waiting for Deployment
+  #
+  # The fix for the probe itself could not be applied, because applying it
+  # required the app to already be healthy. Not waiting breaks that circle:
+  # Helm applies the manifest and lets Kubernetes converge, which is what the
+  # probes are there to police.
+  #
+  # The trade is that a genuinely broken deploy is no longer caught by Helm.
+  # Pod status and the Kubernetes alerts catch it instead, and for this app
+  # that is a better division of labour than a rollback loop.
   install:
+    disableWait: true
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
+    disableWait: true
     remediation:
       strategy: rollback
       retries: 3
