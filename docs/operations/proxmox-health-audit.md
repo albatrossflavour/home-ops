@@ -27,11 +27,19 @@ the write volume below comes from.
 ## Finding 1: two NVMe drives are past rated endurance
 
 ```text
-host      drive                        type            % used   TB written   POH
-ankh      Crucial CT1000P3SSD8         QLC, no DRAM      143%     158 TB     18,210
-morpork   Crucial CT1000P3SSD8         QLC, no DRAM      150%     172 TB     18,385
-stolat    Samsung 970 EVO Plus 250GB   TLC, DRAM          36%     146 TB     18,267
+host      drive                        serial            % used   TB written   POH
+ankh      Crucial CT1000P3SSD8         240646E767DB        143%     158 TB     18,210
+morpork   Crucial CT1000P3SSD8         240646E76700        150%     172 TB     18,385
+stolat    Samsung 970 EVO Plus 250GB   S4EUNX0R715109T      36%     146 TB     18,267
 ```
+
+Both Crucial drives are QLC with no DRAM cache; the Samsung is TLC with DRAM.
+
+**Identify these by serial, never by device name.** NVMe enumeration is not
+stable across reboots. Observed on 2026-09-07: before morpork's reboot the
+Crucial was `/dev/nvme1n1` and the Samsung 990 PRO was `/dev/nvme0n1`;
+afterwards they had swapped. Anything that pins a drive to `nvme0n1` will
+eventually be pointing at the wrong disk.
 
 Similar power-on hours and similar total writes across all three, so the
 difference is drive class rather than workload. Roughly 80 TB/year each.
@@ -129,7 +137,84 @@ cannot be safely restored, and the recovery path for a lost OSD is to remove
 it and let Ceph backfill. The `backup=0` flags on those disks are right, even
 though they are currently inert because none of those VMs are in the job.
 
-## Finding 5: patch debt
+## Finding 5: corosync runs one link, over the VM bridge
+
+The cluster heartbeat has no redundancy, and two of three nodes carry it on
+the bridge that also carries all guest traffic.
+
+```text
+ankh     ring5_addr 192.168.5.10  ->  vmbr0    (VM bridge, ~11 guests)
+morpork  ring5_addr 192.168.5.11  ->  vmbr0    (VM bridge, ~19 guests)
+stolat   ring5_addr 192.168.6.12  ->  enp7s0   (dedicated NIC, no guests)
+```
+
+`totem` declares two `interface` blocks, linknumber 5 and 0. Under knet those
+are corosync-2 legacy and are ignored: link addresses come from the nodelist's
+`ringX_addr` entries, and no node has a `ring0_addr`. So link 0 does not
+exist. `corosync-cfgtool -s` and `-n` both report LINK 5 only. The giveaway
+that those blocks are dead is that link 5's `bindnetaddr` is `192.168.6.0`
+while ankh and morpork use `192.168.5.x`.
+
+This matters because HA is live with fencing armed:
+
+```text
+fencing armed (CRM watchdog active), softdog
+lrm morpork  watchdog active    vm:501, vm:503
+lrm stolat   watchdog active    vm:502
+```
+
+A traffic burst on `vmbr0` that delays heartbeats past the token timeout costs
+quorum, and the watchdog hard-resets the node. On morpork that takes roughly
+nineteen guests with it, including a Kubernetes control plane node and a Ceph
+OSD.
+
+The second path already exists and is idle. Every host has a dedicated NIC on
+`192.168.6.x` carrying no guest traffic, and it is clean: 0.21-0.23ms between
+all three. Moving corosync onto it and keeping `192.168.5.x` as a second link
+gives a quiet primary plus a fallback.
+
+## Finding 6: no hypervisor has working UPS shutdown protection
+
+All three run `upsmon` as a netclient, and none of them can talk to a UPS.
+
+```text
+ankh     /etc/nut/upsmon.conf MISSING (only .dpkg-dist)   service failed
+morpork  config present, service running                  connect fails every 8s
+stolat   config present                                   service not running
+```
+
+All three pointed at `pr1000elcd@192.168.2.143`, which is unreachable from the
+hypervisor networks - routed via the gateway and returning `No route to host`.
+morpork's `upsmon` had been logging connect failures continuously.
+
+The UPS is reachable, just at a different address. `192.168.5.50`
+(`nut.albatrossflavour.com`) has port 3493 open and serves the same device:
+
+```text
+pr1000elcd   model PR1000ELCD   status OL   battery 100%   load 52%
+```
+
+That is the host feeding the `network_ups_tools_ups_status` metric behind the
+`UPSOnBattery` alert, so UPS *monitoring* works. What does not work is UPS
+*shutdown*, which is a separate mechanism and the one that matters during a
+power cut.
+
+Repointing morpork at `192.168.5.50` on 2026-09-07 got past the routing
+problem and hit the next one:
+
+```text
+Login on UPS [pr1000elcd@192.168.5.50] failed - got [ERR ACCESS-DENIED]
+```
+
+The `upsmon_local` credentials in the local config are not accepted by that
+server, so completing this needs a user with `upsmon secondary` rights in
+`upsd.users` on `nut.albatrossflavour.com`. That host does not accept SSH from
+the usual accounts, so the change has to be made by someone with access to it.
+
+Worth finishing: the drives record 69 unsafe shutdowns on ankh and 39 on
+morpork's Crucial.
+
+## Finding 7: patch debt
 
 ```text
 ankh     332 pending updates    uptime 37 weeks
@@ -153,6 +238,25 @@ applies both in one window.
 - No SMART errors, no media errors, `Available Spare` 100% everywhere.
 - Storage pools between 13% and 70% used.
 
+## Alerting and mail (done 2026-09-07)
+
+`NvmeAvailableSpareLow` (warning, below 90%) and `NvmeAvailableSpareCritical`
+(critical, at or below the drive's own published threshold) now exist in
+`custom-alerts`. Endurance is deliberately not alerted on: it is a warranty
+counter that only climbs, and two drives are already past 100%, so a rule on
+it would fire permanently while saying nothing new. Available spare is the
+metric that actually predicts failure, and every drive still reads 100%, so
+any movement is genuinely new information.
+
+Note the alerts label by `device`, which as above is not stable across
+reboots. They still identify the correct host, and `smartctl` gives the serial.
+
+Postfix on all three hypervisors now relays through the cluster's
+`smtp-relay` LoadBalancer at `192.168.8.24:25`, and `root` is aliased to a
+real address. smartd sends to `root`, so without the alias its warnings landed
+in a local mailbox nobody reads. Direct-to-MX delivery had been working but
+slowly, at 462s of queue delay against 0.06s through the relay.
+
 ## Suggested order
 
 1. **Delete the stale snapshot.** Done 2026-09-07. Re-measure before spending
@@ -166,3 +270,12 @@ applies both in one window.
    needed.
 5. Reduce overcommit on stolat, and add LXC 701/702 to the backup job or
    record why they differ from 700.
+6. Finish the UPS client fix: add a user with `upsmon secondary` rights to
+   `upsd.users` on `nut.albatrossflavour.com`, then point all three
+   hypervisors at it and `systemctl enable --now nut-monitor`. The service is
+   currently `disabled` at boot on every host, so even a working config would
+   not survive a reboot.
+7. Complete the second corosync link. Higher risk than the rest of this list,
+   since a botched corosync change splits a cluster: bump `config_version`,
+   apply to all nodes together, and verify with `corosync-cfgtool -n` that
+   both links show connected before trusting it.
