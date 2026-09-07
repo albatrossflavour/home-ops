@@ -298,6 +298,71 @@ real address. smartd sends to `root`, so without the alias its warnings landed
 in a local mailbox nobody reads. Direct-to-MX delivery had been working but
 slowly, at 462s of queue delay against 0.06s through the relay.
 
+## Roadmap: the 192.168.6.0/24 subnet collision
+
+Two VLANs share one subnet. From the network diagram:
+
+```text
+VLAN 3   192.168.6.0/24   Cameras Network
+VLAN 6   192.168.6.0/24   CEPH Network
+```
+
+**Benign today, verified rather than assumed.** The Ceph network is isolated
+on the Proxmox nodes: no gateway on any of the three interfaces, and the only
+reachable neighbours are the other two hypervisors.
+
+```text
+ankh     enp8s0  no gateway  neighbours 6.11, 6.12   REACHABLE
+morpork  enp8s0  no gateway  neighbours 6.10, 6.12   REACHABLE
+stolat   enp7s0  no gateway  neighbours 6.10, 6.11   REACHABLE
+```
+
+No route exists between the two VLANs, so nothing has broken and nothing is
+expected to. One wrinkle: stolat also carries STALE ARP entries for
+`192.168.5.10` and `192.168.5.11` on its Ceph NIC. Those are management
+addresses, and they are there because stolat's corosync link is the only one
+using the Ceph network, so it talks to peers on management from that NIC. It
+resolves itself once corosync is made symmetric.
+
+### Which side to renumber
+
+By the estate's own convention, VLAN *n* maps to `192.168.n.0/24`. On that
+reading Ceph on VLAN 6 with `192.168.6.0/24` is the correct one, and Cameras
+on VLAN 3 with `192.168.6.0/24` is the anomaly that should be
+`192.168.3.0/24`.
+
+The practical argument runs the other way. Renumbering Ceph touches three
+addresses on three hypervisors; renumbering cameras touches every camera. That
+is the preferred direction, at the cost of Ceph no longer matching the
+VLAN-to-subnet convention. Worth deciding deliberately rather than by
+whichever is easiest on the day.
+
+### Scope, if Ceph moves
+
+Smaller than it first appears. `192.168.6.0/24` is used **only** as the Ceph
+`cluster_network`, which is OSD-to-OSD replication. Monitors and client
+traffic are elsewhere:
+
+```text
+cluster_network = 192.168.6.12/24
+public_network  = 192.168.9.12/24
+mon_host        = 192.168.9.10 192.168.9.11 192.168.9.12
+```
+
+So the work is three interface addresses in `/etc/network/interfaces`, one
+line in `/etc/pve/ceph.conf`, and an OSD restart per node. No monitor
+reconfiguration, which is the part that would normally make this risky.
+
+Sequence it after the corosync work, since corosync currently has stolat on
+this network and moving both at once would make a failure hard to attribute.
+
+### Adjacent observation
+
+`public_network` and `mon_host` sit on `192.168.9.0/24`, the VM Network, which
+carries every guest on the estate. Ceph client and monitor traffic sharing the
+busiest network is a larger performance question than the subnet collision,
+and is worth its own look rather than being folded into this change.
+
 ## Suggested order
 
 1. **Delete the stale snapshot.** Done 2026-09-07. Re-measure before spending
@@ -312,7 +377,10 @@ slowly, at 462s of queue delay against 0.06s through the relay.
 5. Reduce overcommit on stolat, and add LXC 701/702 to the backup job or
    record why they differ from 700.
 6. ~~Fix UPS shutdown~~. Done 2026-09-07, see Finding 6.
-7. Complete the second corosync link. Higher risk than the rest of this list,
+7. Renumber the Ceph `cluster_network` off `192.168.6.0/24`, or renumber the
+   cameras. Not urgent, see the roadmap section above. Do it after the
+   corosync work, not alongside it.
+8. Complete the second corosync link. Higher risk than the rest of this list,
    since a botched corosync change splits a cluster: bump `config_version`,
    apply to all nodes together, and verify with `corosync-cfgtool -n` that
    both links show connected before trusting it.
