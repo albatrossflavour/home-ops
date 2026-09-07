@@ -54,7 +54,27 @@ spec:
               IMMICH_PORT: "3001"
             envFrom: *envFrom
             probes:
-              liveness: &probes
+              # Liveness is deliberately far more tolerant than readiness, and
+              # no longer shares readiness' anchor.
+              #
+              # Upgrading the pgvector extension invalidates immich's vector
+              # indexes, so the next start logs "Reindexing clip_index (This
+              # may take a while)" and stops answering /api/server/ping while
+              # it rebuilds. At failureThreshold 5 x periodSeconds 10 the
+              # kubelet SIGTERMs it after 50s, the restart discards the
+              # progress, and it can never finish.
+              #
+              # That happened on 2026-09-07: a Postgres image bump moved
+              # vector 0.7.4 -> 0.8.6, and immich crash-looped 112 times over
+              # nine hours. It was not memory (985Mi of an 8Gi limit) and not
+              # Kyverno (audit-only, blocks nothing) - just a probe too tight
+              # for the work the app legitimately does on first start after an
+              # extension change.
+              #
+              # 60 x 10s gives ten minutes. The cost is a slower reaction to a
+              # genuinely hung app, which is the right trade for something
+              # that reindexes a photo library.
+              liveness:
                 enabled: true
                 custom: true
                 spec:
@@ -64,8 +84,21 @@ spec:
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 5
+                  failureThreshold: 60
+              # Readiness stays tight on purpose: while reindexing, immich
+              # genuinely cannot serve traffic and should be pulled from the
+              # Service. That is correct behaviour, unlike killing it.
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/server/ping
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 5
                   failureThreshold: 5
-              readiness: *probes
               startup:
                 enabled: true
                 custom: true
