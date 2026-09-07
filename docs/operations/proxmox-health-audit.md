@@ -464,6 +464,51 @@ it cannot distinguish the two states. It was used as the safety gate on
 permanently regardless of HA state; it is the LRM that arms fencing, so
 `systemctl is-active pve-ha-lrm` is the check that means something.
 
+### Validate corosync config before it reaches a running cluster
+
+`corosync -t -c <file>` parses a config and exits without touching anything.
+It catches exactly the class of error that caused the 2026-09-07 outage:
+
+```text
+$ corosync -t -c /tmp/known-bad.conf
+error [MAIN] parse error in config: Not all nodes have the same number of links
+error [MAIN] Corosync Cluster Engine exiting with status 8
+
+$ corosync -t -c /etc/pve/corosync.conf
+notice [MAIN] Corosync Cluster Engine exiting normally
+```
+
+Run it against every corosync change before installing. It is the single
+cheapest safeguard available and it was the one missing that day.
+
+### Adding a link works on reload; changing an address does not
+
+These are not the same operation, and the difference matters.
+
+**Changing** an existing link's address is refused:
+
+```text
+[TOTEM] new config has different address for link 5. Internal value was NOT changed.
+[CFG  ] Cannot configure new interface definitions: To reconfigure an
+        interface it must be deleted and recreated.
+```
+
+Config and running state then diverge silently until corosync restarts.
+
+**Adding** a new link is applied live. On 2026-09-07 a second link was added at
+`config_version: 15` and every node picked it up on reload, including two that
+were never restarted. Verified from all three nodes, six paths in total:
+
+```text
+LINK: 5 udp (192.168.5.10->192.168.5.11) connected     management
+LINK: 6 udp (192.168.6.10->192.168.6.11) connected     ceph NIC
+LINK: 5 udp (192.168.5.10->192.168.5.12) connected
+LINK: 6 udp (192.168.6.10->192.168.6.12) connected
+```
+
+An earlier note in this document predicted a restart would be needed for this.
+It was not.
+
 ### Corosync will not change a link address on reload
 
 Editing `ring5_addr` and bumping `config_version` distributes the file and
@@ -538,10 +583,9 @@ and is worth its own look rather than being folded into this change.
 7. ~~Ceph readdress.~~ Deferred 2026-09-07 to the next time the cluster is
    down for real work, see the decision above. Phase 1 is done; the second
    corosync link can proceed independently whenever wanted.
-8. Second corosync link on the Ceph NICs, giving redundancy. Independent of
-   the Ceph readdress; if the readdress happens first the link simply uses the
-   new addresses. Stop HA first, bump `config_version`, and verify with
-   `corosync-cfgtool -n` that every link shows connected before trusting it.
+8. ~~Second corosync link.~~ Done 2026-09-07 at `config_version: 15`. Link 5
+   on management, link 6 on the Ceph NICs. Its addresses will need updating
+   whenever the Ceph readdress happens, which is free during that window.
 
 Parked: replacing the two Crucial P3s. They are past rated endurance but
 `Available Spare` is still 100% with zero media errors on both, and the
