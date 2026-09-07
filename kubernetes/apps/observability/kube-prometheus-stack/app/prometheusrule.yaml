@@ -89,14 +89,33 @@ spec:
           for: 5m
           labels:
             severity: critical
+        # Scoped to exclude the AUTH_INSECURE_* warnings, which are a
+        # permanent and accepted condition rather than something to act on.
+        #
+        # cephx keyType is pinned to `aes` because the kernel AES256K type
+        # (CEPH_CRYPTO_AES256KRB5) only landed in Linux 7.0 and every node
+        # runs 6.12.62. krbd takes this key straight into the kernel, so
+        # aes256k would break every RBD mount on all six nodes at once. See
+        # the comment in rook-ceph/cluster/helmrelease.yaml: "accepted, not
+        # pending", until Talos ships a 7.0+ kernel.
+        #
+        # The consequence is that ceph_health_status is permanently 1, so the
+        # previous `ceph_health_status == 1` fired continuously and paged for
+        # a condition nobody can clear. That is how alerts get ignored.
+        #
+        # ceph_health_detail breaks the status down per warning, so this
+        # ignores the three accepted ones and fires on anything else. When
+        # written, BLUESTORE_SLOW_OP_ALERT was set and had been invisible
+        # behind the permanent warning.
         - alert: CephClusterHealthWarningSustained
           annotations:
-            summary: Ceph cluster HEALTH_WARN persists for over 2 hours
+            summary: Ceph reports a warning other than the accepted AUTH_INSECURE ones
             description: |
-              Ceph cluster health status has been HEALTH_WARN for over 2 hours.
-              This indicates a sustained issue beyond transient BlueStore compaction
-              or hypervisor storage variance. Check 'ceph health detail' for root cause.
-          expr: ceph_health_status == 1
+              Ceph has had a HEALTH_WARN condition set for over 2 hours that is
+              not one of the accepted AUTH_INSECURE_* warnings. Run
+              'ceph health detail' - the AUTH_INSECURE lines are expected and
+              can be ignored; anything else is the reason this fired.
+          expr: count(ceph_health_detail{name!~"AUTH_INSECURE_.*"} == 1) > 0
           for: 2h
           labels:
             severity: warning
