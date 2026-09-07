@@ -128,8 +128,10 @@ Excluding roughly 35 templates, about 25 real guests are uncovered. Most are
 defensible: the Talos nodes are cattle rebuilt from `talconfig.yaml`, the
 puppet lab VMs are disposable, and VM 201 is the PBS server itself.
 
-One is not. **LXC 700 (pihole) is backed up while 701 and 702 (pihole1,
-pihole2) are not.** Same role, same importance, no apparent reason.
+LXC 700 (pihole) is backed up while 701 and 702 (pihole1, pihole2) are not,
+which looked like an oversight. It is not: **701 and 702 are clones of 700**.
+Backing up one of three identical clones is the correct call, and backing up
+all three would triple the cost for nothing. No action needed.
 
 Backing up the rook-ceph OSD volumes is deliberately *not* wanted, and that is
 correct. A vzdump of one OSD is a fragment of a striped, replicated store; it
@@ -353,8 +355,62 @@ So the work is three interface addresses in `/etc/network/interfaces`, one
 line in `/etc/pve/ceph.conf`, and an OSD restart per node. No monitor
 reconfiguration, which is the part that would normally make this risky.
 
-Sequence it after the corosync work, since corosync currently has stolat on
-this network and moving both at once would make a failure hard to attribute.
+### Sequencing: three phases, Ceph before corosync
+
+The obvious order is corosync first, then Ceph. That is wrong, because the
+planned second corosync link is *on* the Ceph network: configure corosync
+first and it has to be redone once Ceph moves.
+
+Doing Ceph first has its own snag, since stolat's current corosync link is
+`192.168.6.12`, so readdressing Ceph pulls the address out from under it.
+
+Three phases resolve both:
+
+1. **Minimal corosync fix.** Move stolat's `ring5_addr` from `192.168.6.12`
+   to `192.168.5.12`. One node, one address, no new links. This decouples
+   corosync from the Ceph network entirely.
+2. **Ceph readdress.** Now purely a Ceph and migration operation with nothing
+   depending on it.
+3. **Add the second corosync link** on the final Ceph addresses, configured
+   once rather than twice.
+
+### Full scope of the readdress
+
+Four touchpoints, not two. The migration network is easy to miss:
+
+```text
+/etc/network/interfaces   three interface addresses, one per host
+/etc/pve/ceph.conf        cluster_network = 192.168.6.12/24
+/etc/pve/datacenter.cfg   migration: network=192.168.6.10/24,type=secure
+/etc/pve/corosync.conf    stolat ring5_addr (removed by phase 1 above)
+```
+
+Plus a rolling restart of three OSDs, one per node, with `noout` set. Roughly
+an hour. No monitor reconfiguration, because mons and `public_network` are on
+`192.168.9.x`, which is the part that would normally make this risky.
+
+### Editing corosync safely
+
+Fencing is armed with `softdog`, so any corosync edit needs HA stopped first
+or a node that fails to rejoin will hard-reset itself. Verified procedure:
+
+```bash
+# on every node, in this order
+systemctl stop pve-ha-lrm     # wait for all three
+systemctl stop pve-ha-crm
+
+# confirm nothing can fence before touching corosync
+ls /run/watchdog-mux.active/ | wc -l    # must be 0 on every node
+
+# ... edit /etc/pve/corosync.conf, bump config_version ...
+
+systemctl start pve-ha-crm    # reverse order
+systemctl start pve-ha-lrm
+```
+
+`ha-manager status` keeps reporting "fencing armed" from a stale status file
+after the services stop, so it is not a reliable check. The watchdog client
+count is.
 
 ### Adjacent observation
 
@@ -374,13 +430,17 @@ and is worth its own look rather than being folded into this change.
    the staged `cache=none` change.
 4. **Re-measure.** If commit p99 has come down, no hardware purchase is
    needed.
-5. Reduce overcommit on stolat, and add LXC 701/702 to the backup job or
-   record why they differ from 700.
+5. Reduce overcommit on stolat. LXC 701/702 need no backup change, they are
+   clones of 700.
 6. ~~Fix UPS shutdown~~. Done 2026-09-07, see Finding 6.
-7. Renumber the Ceph `cluster_network` off `192.168.6.0/24`, or renumber the
-   cameras. Not urgent, see the roadmap section above. Do it after the
-   corosync work, not alongside it.
-8. Complete the second corosync link. Higher risk than the rest of this list,
-   since a botched corosync change splits a cluster: bump `config_version`,
-   apply to all nodes together, and verify with `corosync-cfgtool -n` that
-   both links show connected before trusting it.
+7. Corosync and Ceph networking, in the three-phase order set out above:
+   stolat's ring address onto management first, then the Ceph readdress, then
+   the second corosync link. Higher risk than the rest of this list, since a
+   botched corosync change splits a cluster. Stop HA first, bump
+   `config_version`, and verify with `corosync-cfgtool -n` that every link
+   shows connected before trusting it.
+
+Parked: replacing the two Crucial P3s. They are past rated endurance but
+`Available Spare` is still 100% with zero media errors on both, and the
+`NvmeAvailableSpareLow` alert now watches the metric that actually predicts
+failure. Revisit if that fires.
