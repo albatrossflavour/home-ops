@@ -163,13 +163,33 @@ for row in "${PLAN[@]}"; do
     echo
   fi
 
-  # Verify the device actually exists now. This is the whole point of the
-  # restart, so a failure here matters more than the config being written.
-  sleep 5
-  if qm monitor "$vmid" <<< "info balloon" 2>/dev/null | grep -q 'actual='; then
-    echo "    OK: balloon device active"
+  # Verify the device is actually live. This is the whole point of the restart,
+  # so a failure here matters more than the config having been written.
+  #
+  # Retry rather than checking once: `qm start` returns as soon as QEMU
+  # launches, well before the guest has loaded its virtio-balloon driver, and
+  # the monitor does not answer during that window. A single check five
+  # seconds after start reports a false failure on a guest that is fine.
+  # Verify against the QEMU command line, NOT `qm monitor`.
+  #
+  # `qm monitor` opens /dev/tty directly when a terminal exists, so it ignores
+  # redirected stdin and sits at an interactive `qm>` prompt, blocking the
+  # script. It only appears to work when run without a tty, which is how it
+  # passed testing and then hung on first interactive use.
+  #
+  # The process check is definitive about whether the balloon device was
+  # created, needs no monitor, and cannot block.
+  printf '    verifying balloon'
+  ok=0
+  for _ in $(seq 1 12); do
+    if ps -o args= -C kvm 2>/dev/null | grep -- "-id $vmid " | grep -q 'id=balloon0'; then ok=1; break; fi
+    printf '.'; sleep 5
+  done
+  echo
+  if [ "$ok" -eq 1 ]; then
+    echo "    OK: balloon device present, floor ${floor}M of ${mem}M"
   else
-    echo "    WARNING: no balloon device reported for $vmid" >&2
+    echo "    WARNING: no balloon device for $vmid after 60s" >&2
     FAILED=$(( FAILED + 1 ))
   fi
 done
