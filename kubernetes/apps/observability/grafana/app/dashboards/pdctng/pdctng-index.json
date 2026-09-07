@@ -38,16 +38,6 @@
   "templating": {
     "list": [
       {
-        "name": "DS_PROMETHEUS",
-        "type": "datasource",
-        "query": "prometheus",
-        "current": {},
-        "options": [],
-        "refresh": 1,
-        "hide": 0,
-        "includeAll": false
-      },
-      {
         "name": "pdctng_job",
         "type": "textbox",
         "query": "puppet",
