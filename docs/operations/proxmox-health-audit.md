@@ -355,6 +355,48 @@ So the work is three interface addresses in `/etc/network/interfaces`, one
 line in `/etc/pve/ceph.conf`, and an OSD restart per node. No monitor
 reconfiguration, which is the part that would normally make this risky.
 
+### Decision 2026-09-07: deferred to a planned maintenance window
+
+Not doing this as a standalone piece of work. It is a latent inconsistency on
+a network verified to be isolated, it has never caused a problem, and the
+migration's failure mode is disproportionate to the benefit.
+
+The blast radius is the reason. All three Kubernetes **workers** boot from the
+Proxmox Ceph pool:
+
+```text
+weatherwax (300)  local-lvm   control plane   unaffected
+ogg        (301)  local-lvm   control plane   unaffected
+magrat     (302)  local-lvm   control plane   unaffected
+greebo     (304)  ceph        worker          root disk on Ceph
+wuffles    (305)  ceph        worker          root disk on Ceph
+aching     (306)  ceph        worker          root disk on Ceph
+```
+
+Alongside `puppet`, `ponder`, `cd4pe`, `dashboard`, `scm`, the Windows
+production VM and roughly fifteen puppet lab VMs. 1.1 TiB across 394k objects.
+The control plane survives any Ceph outage, so etcd and the API stay up, but
+every workload pod loses its node simultaneously.
+
+With `size 3 min_size 2`, restarting a second OSD before the first is fully
+back stalls I/O, and that is exactly when three worker root disks disappear.
+The rolling procedure below manages that with gates, but the gates are the
+kind of thing that gets rushed.
+
+**Do it during cluster work when everything is already down.** At that point
+it is a ten-minute change with nothing running on it: renumber three
+interfaces, edit `ceph.conf` and `datacenter.cfg`, start everything up. None
+of the rolling-migration complexity applies.
+
+The zero-downtime procedure is kept below in case it is ever needed without a
+window. It works, and the mechanism is sound: with every host holding an
+address on both subnets, an OSD on the new network can still reach one on the
+old, because the host has an interface on both.
+
+Also still open is whether to move Ceph or the cameras. Renumbering the
+cameras is more addresses but no camera outage can take down a Kubernetes
+node, which is not true in the other direction.
+
 ### Sequencing: three phases, Ceph before corosync
 
 The obvious order is corosync first, then Ceph. That is wrong, because the
@@ -493,12 +535,13 @@ and is worth its own look rather than being folded into this change.
 5. Reduce overcommit on stolat. LXC 701/702 need no backup change, they are
    clones of 700.
 6. ~~Fix UPS shutdown~~. Done 2026-09-07, see Finding 6.
-7. Corosync and Ceph networking, in the three-phase order set out above:
-   stolat's ring address onto management first, then the Ceph readdress, then
-   the second corosync link. Higher risk than the rest of this list, since a
-   botched corosync change splits a cluster. Stop HA first, bump
-   `config_version`, and verify with `corosync-cfgtool -n` that every link
-   shows connected before trusting it.
+7. ~~Ceph readdress.~~ Deferred 2026-09-07 to the next time the cluster is
+   down for real work, see the decision above. Phase 1 is done; the second
+   corosync link can proceed independently whenever wanted.
+8. Second corosync link on the Ceph NICs, giving redundancy. Independent of
+   the Ceph readdress; if the readdress happens first the link simply uses the
+   new addresses. Stop HA first, bump `config_version`, and verify with
+   `corosync-cfgtool -n` that every link shows connected before trusting it.
 
 Parked: replacing the two Crucial P3s. They are past rated endurance but
 `Available Spare` is still 100% with zero media errors on both, and the
