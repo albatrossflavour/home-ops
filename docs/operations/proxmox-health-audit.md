@@ -211,6 +211,42 @@ stolat    24 vCPU on 12 cores = 200%
 Not currently causing problems: host load averages are 3-8 against 28 and 12
 cores. Recorded for awareness rather than action.
 
+### Nothing on the estate is currently reclaimable
+
+`balloon: 0` is the obvious half of the problem, but `balloon` *unset* is no
+better. Proxmox treats an unset floor as equal to `memory`, so the device
+exists with no range to shrink into. Measured across every enabled guest:
+
+```text
+VM 301  actual=30720 max_mem=30720   balloon=(unset)
+VM 100  actual=32768 max_mem=32768   balloon=(unset)
+VM 305  actual=16384 max_mem=16384   balloon=(unset)
+VM 201  actual=2048  max_mem=2048    balloon=(unset)
+```
+
+`actual == max_mem` everywhere. Auto-ballooning at the 80% host threshold had
+nothing to work with, which is why ankh and stolat could climb past it into
+swap rather than reclaiming.
+
+Setting a floor below `memory` is what enables reclaim. A `balloon: 0` guest
+additionally needs a restart, because the device is added at QEMU launch.
+
+`scripts/enable-vm-ballooning.sh` does both. Dry run by default, `--apply` to
+execute, prompting per guest unless `--yes`. Run it on each node in turn.
+
+```text
+ankh      7 guests   10G reclaimable    6 restart, 1 live
+morpork  17 guests   17G reclaimable   15 restart, 2 live
+stolat    2 guests    5G reclaimable    1 restart, 1 live
+                     32G across 26 guests
+```
+
+It excludes the six Kubernetes nodes deliberately. The kubelet advertises
+capacity from what it saw at start and does not renegotiate, so shrinking a
+node underneath it gets pods OOM-killed rather than rescheduled. It also
+handles the three HA-managed guests via `ha-manager` rather than `qm`, since
+stopping an HA service with `qm` races the resource manager.
+
 ### Where to start
 
 1. Cap `zfs_arc_max` on ankh. Biggest win, no guest disruption.
