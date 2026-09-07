@@ -18,9 +18,18 @@ Three things happen:
   * Job-name textboxes are retargeted at our scrape config, which names its
     node exporter job `node-exporter` rather than the module's `node`.
 
-`${DS_PROMETHEUS}` is deliberately left alone: the Grafana chart's own
-`datasource:` key seds it at download time, the same way every other board in
-this repo is wired.
+`${DS_PROMETHEUS}` is resolved here rather than by the chart. The chart's
+`datasource:` key does the job with
+
+    sed '/-- .* --/! s/"datasource":.*,/"datasource": "Prometheus",/g'
+
+which needs the whole datasource on one line ending in a comma. pdctng writes
+pretty-printed JSON, so `"datasource": {` matches nothing and the variable
+survives into the provisioned board. Verified on the cluster: 27 surviving
+references in pdctng-estate.json after a real download. Baking the UID in is
+also the better answer regardless, because it removes a picker that would
+otherwise default to whichever Prometheus Grafana happened to list first, and
+this cluster has three.
 
 The guard rails matter more than the transforms. This is a fork by
 transformation of someone else's build artefact, so a pdctng release that adds
@@ -46,6 +55,12 @@ KNOWN_DATASOURCES = {
 }
 
 DEFAULT_DROP = ["DS_LOKI", "DS_YESOREYERAM_INFINITY_DATASOURCE"]
+
+# The datasource variable to resolve to a real UID, and what to resolve it to.
+# `prometheus` is the Thanos-backed default; `prometheus-local` and `shitbox`
+# are the other two, which is exactly why this is not left to a picker.
+RESOLVE_DATASOURCE = "DS_PROMETHEUS"
+DEFAULT_UID = "prometheus"
 
 # Our scrape config's job names, where they differ from the module's defaults.
 # `pdctng_job` already matches (`puppet`), and `windows_job` is left alone: we
@@ -222,6 +237,31 @@ def set_textboxes(board, overrides, name):
     return changed
 
 
+def resolve_datasource(board, variable, uid):
+    """Replace a datasource variable with a real UID, then drop the variable.
+
+    A `${DS_...}` reference is only a picker, and a picker with three
+    Prometheus datasources to choose from is a coin toss dressed up as
+    configuration.
+    """
+    text = json.dumps(board)
+    before = text.count("${%s}" % variable)
+    if before:
+        board.clear()
+        board.update(json.loads(text.replace("${%s}" % variable, uid)))
+    # The variable goes even when nothing referenced it. The index board is all
+    # text and links, so it has the declaration and no queries, and leaving it
+    # would put an orphan datasource picker on the one board that exists to be
+    # the front door.
+    variables = board.get("templating", {}).get("list", [])
+    board["templating"]["list"] = [
+        v
+        for v in variables
+        if not (v.get("type") == "datasource" and v.get("name") == variable)
+    ]
+    return before
+
+
 def verify(board, drop, name):
     """Nothing we dropped may survive anywhere in the document."""
     text = json.dumps(board)
@@ -235,7 +275,7 @@ def verify(board, drop, name):
             )
 
 
-def process(path, drop, overrides):
+def process(path, drop, overrides, uid):
     name = path.stem
     board = json.loads(path.read_text())
     check_datasources(board, name)
@@ -247,7 +287,13 @@ def process(path, drop, overrides):
         compact(board)
     pruned = prune_variables(board, drop)
     retargeted = set_textboxes(board, overrides, name)
+    resolved = resolve_datasource(board, RESOLVE_DATASOURCE, uid)
     verify(board, drop, name)
+    if "${DS_" in json.dumps(board):
+        raise BoardError(
+            f"{name}: an unresolved datasource reference survived. Grafana "
+            "would provision this with a picker rather than a datasource."
+        )
     after = sum(1 for _ in walk_panels(board))
 
     return board, {
@@ -258,6 +304,7 @@ def process(path, drop, overrides):
         "rows": rows,
         "variables": pruned,
         "retargeted": retargeted,
+        "resolved": resolved,
     }
 
 
@@ -268,7 +315,6 @@ def helm_values(names, repo, branch, path, datasource):
     for name in names:
         lines.append(f"        {name}:")
         lines.append(f"          url: {base}/{name}.json")
-        lines.append(f"          datasource: {datasource}")
     return "\n".join(lines)
 
 
@@ -319,7 +365,11 @@ def main():
     )
     parser.add_argument("--repo", default="albatrossflavour/home-ops")
     parser.add_argument("--branch", default="master")
-    parser.add_argument("--datasource", default="prometheus")
+    parser.add_argument(
+        "--datasource",
+        default=DEFAULT_UID,
+        help=f"datasource UID to bake in for {RESOLVE_DATASOURCE} (default {DEFAULT_UID})",
+    )
     args = parser.parse_args()
 
     drop = args.drop_datasource if args.drop_datasource is not None else DEFAULT_DROP
@@ -337,7 +387,7 @@ def main():
     boards, reports, failures = {}, [], []
     for path in sources:
         try:
-            board, report = process(path, drop, overrides)
+            board, report = process(path, drop, overrides, args.datasource)
         except BoardError as exc:
             failures.append(str(exc))
             continue
@@ -358,6 +408,8 @@ def main():
             bits.append(f"-{report['rows']} empty rows")
         if report["variables"]:
             bits.append(f"-{report['variables']} vars")
+        if report["resolved"]:
+            bits.append(f"{report['resolved']} ds refs resolved")
         for name, (was, now) in report["retargeted"].items():
             bits.append(f"{name} {was}->{now}")
         if report.get("skipped"):
