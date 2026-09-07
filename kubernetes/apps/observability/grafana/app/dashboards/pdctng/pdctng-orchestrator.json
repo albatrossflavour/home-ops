@@ -1,0 +1,2189 @@
+{
+  "uid": "pdctng-orchestrator",
+  "title": "Orchestrator",
+  "tags": [
+    "pdctng",
+    "pdctng-health"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "interval",
+        "type": "interval",
+        "query": "5m,10m,30m,1h,6h,12h,1d",
+        "refresh": 2,
+        "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval_interval"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          }
+        ],
+        "auto": true,
+        "auto_count": 30,
+        "auto_min": "5m",
+        "current": {
+          "text": "auto",
+          "value": "$__auto_interval_interval"
+        },
+        "label": "Interval"
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "host",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_orchestrator_jvm_heap_bytes,host)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_orchestrator_jvm_heap_bytes,host)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Host"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Failed Jobs",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_jobs_by_state{state=\"failed\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Task and deploy jobs that failed, within the window the collector tracks. PDCTNG Tasks names them and links each one to its page in the console.",
+      "id": 1267063976
+    },
+    {
+      "title": "Failed Plans",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_plans_by_state{state=\"failure\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Plan runs that failed. The orchestrator calls this state \"failure\" for a plan and \"failed\" for a job, which is worth knowing before writing a query here.",
+      "id": 1914928859
+    },
+    {
+      "title": "Longest Running Job",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "time() - min(puppet_orchestrator_job_start_timestamp{alias=~\"${pe}\",job=~\"${pdctng_job}\"} and on(job_id, alias) puppet_orchestrator_job_info{state=\"running\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1800
+              },
+              {
+                "color": "#d03b3b",
+                "value": 7200
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "Nothing running, or not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How long the oldest in-flight job has been running. A job that never leaves this state is the classic symptom of the broker not delivering to agents, which is the section below. Empty means nothing is in flight.",
+      "id": 1873842235
+    },
+    {
+      "title": "Jobs Running",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_orchestrator_job_info{state=\"running\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Jobs in flight right now.",
+      "id": 1147066730
+    },
+    {
+      "title": "Jobs Finished",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_jobs_by_state{state=\"finished\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Jobs that completed successfully in the tracked window. The denominator for the failure count.",
+      "id": 1266987174
+    },
+    {
+      "title": "Nodes Failed",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_job_nodes_by_state{state=\"failed\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Machines the work failed on, across every job in the tracked window. This is not Failed Jobs: PE calls a job finished whether every node succeeded or a tenth of them errored, so a run that half failed reads as a clean job and shows up here instead.",
+      "id": 1224642320
+    },
+    {
+      "title": "Plans Succeeded",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_plans_by_state{state=\"success\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Plan runs that completed successfully in the tracked window.",
+      "id": 1587036372
+    },
+    {
+      "title": "Slowest Recent Jobs: $pe",
+      "type": "barchart",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(10, label_join(puppet_orchestrator_job_duration_seconds{alias=~\"${pe}\",job=~\"${pdctng_job}\"}, \"job_label\", \" #\", \"task_name\", \"job_id\"))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "gradientMode": "none"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "auto",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "The ten longest job durations the collector is still tracking. A task that has always been slow is capacity; one that just became slow is a change.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(job_label|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "job_label": "Job",
+              "Value": "Seconds"
+            },
+            "indexByName": {
+              "job_label": 0,
+              "Value": 1
+            }
+          }
+        }
+      ],
+      "repeat": "pe",
+      "repeatDirection": "h",
+      "id": 580109729
+    },
+    {
+      "title": "Job Outcomes",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_orchestrator_jobs_by_state{alias=~\"${pe}\",job=~\"${pdctng_job}\"} or puppet_orchestrator_job_status_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "jobs {{state}} {{alias}}",
+          "refId": "A"
+        },
+        {
+          "expr": "puppet_orchestrator_plans_by_state{alias=~\"${pe}\",job=~\"${pdctng_job}\"} or puppet_orchestrator_plan_status_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "plans {{state}} {{alias}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^jobs failed.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^plans failure.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ec835a"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^jobs finished.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^plans success.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Cumulative job and plan outcomes. Failures climbing while successes stay flat is a fleet that has stopped accepting work.",
+      "id": 43659174
+    },
+    {
+      "title": "Is the broker delivering?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "panels": [],
+      "id": 1739312730
+    },
+    {
+      "title": "Fleet Disconnected",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_pcp_disconnected_nodes{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Fleet nodes the orchestrator cannot reach on a broker. Always emitted, so zero is a reading rather than an absence. This is what PcpNodesDisconnected fires on; PDCTNG Triage names the individual machines. A disconnected node accepts no task or plan run, and every other panel in this section stays healthy through it, because the broker is working fine and has nobody to talk to.",
+      "id": 1627931372
+    },
+    {
+      "title": "Fleet Connected",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_pcp_connected_nodes{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Fleet nodes currently connected to a broker. The denominator for the tile beside it, and the reason it is here rather than inferred: forty disconnected out of forty-five is an outage and forty out of four thousand is a Tuesday, and no other panel on this board supplies the fleet size.",
+      "id": 980621292
+    },
+    {
+      "title": "Work Waiting",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_orchestrator_pending{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{queue}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^websocket.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^requests.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^task_jobs.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d55181"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^plan_jobs.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9085e9"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Work accepted and not yet done, at four points along the orchestration path: messages queued on the broker, requests waiting on the orchestrator, and task and plan jobs started but not running. Zero is the healthy resting state and these should return to it between jobs. A count that climbs and stays up is a backlog, and it is the one shape here that a hanging task run makes and a failing one does not: the job never reports, so nothing on the jobs section above ever goes red.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 367692932
+    },
+    {
+      "title": "Broker Events",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "rate(puppet_pcp_messages_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])",
+          "legendFormat": "{{event}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^on-close.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^on-send.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^on-message.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^on-connect.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d55181"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Messages the broker sent and received, and agents connecting and disconnecting. on-send and on-message flat at zero while jobs are queued is the broker not delivering. A sustained on-close rate is agents dropping their connection, which looks identical to a slow fleet from the job side.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 474022466
+    },
+    {
+      "title": "Message Handling Time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_pcp_message_duration_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{event}} p{{quantile}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "How long the broker takes to handle each event type, by quantile. These are microseconds at source, not Dropwizard milliseconds, so the numbers are smaller than the equivalent puppetserver timers and that is correct.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 359887772
+    },
+    {
+      "title": "Is the service healthy?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "panels": [],
+      "id": 1682696909
+    },
+    {
+      "title": "JVM Heap",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 41
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_orchestrator_jvm_heap_bytes{area=~\"used|max\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{area}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Used against max. A rising sawtooth floor is the out-of-memory precursor, same shape as the other JVM boards.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1827298885
+    },
+    {
+      "title": "GC Pressure",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 41
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (host) (rate(puppet_orchestrator_jvm_gc_time_seconds_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "{{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Seconds of collection per second of life. Rising is the JVM in trouble before the heap panel shows it.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 831109788
+    },
+    {
+      "title": "Route Times",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_orchestrator_http_request_duration_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{route}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Orchestrator API routes. The command endpoints are what the console and puppet job run talk to.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 548483596
+    },
+    {
+      "title": "Route Rates",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "rate(puppet_orchestrator_http_requests_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])",
+          "legendFormat": "{{route}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "reqps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Request rate per route. Useful mostly as the denominator for the panel beside it.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 566522625
+    },
+    {
+      "title": "Where The CPU Goes",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_orchestrator_cpu_percent{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{kind}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Orchestrator process CPU against collection CPU. **Pinned and idle look identical on every other panel in this section**: heap tells you about memory, route times tell you about latency, and neither says whether the service is working or waiting.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1943275822
+    },
+    {
+      "title": "Jobs Lost",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 64
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_jobs_lost_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_orchestrator_jobs_lost_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "In-flight jobs that ended where nothing was watching, so their outcome was never counted. Above zero means the job counts on this board are missing work that actually ran. Since the exporter last restarted.",
+      "id": 755821211
+    },
+    {
+      "title": "Walks Cut Short",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 64
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_catch_up_incomplete_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_orchestrator_catch_up_incomplete_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Polls where the catch-up walk stopped with work still unseen. **Above zero, every job count on this board is undercounting** and the estate is running jobs faster than the walk can follow them. Since the exporter last restarted.",
+      "id": 1253306581
+    },
+    {
+      "title": "Job Ids Forgotten",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 64
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_jobs_forgotten_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_orchestrator_jobs_forgotten_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Job ids dropped from the dedup set to keep it inside its bound. Above zero the same job can be counted twice, so the counts read high rather than low. Since the exporter last restarted.",
+      "id": 658684135
+    },
+    {
+      "title": "Where the work actually runs",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 72
+      },
+      "panels": [],
+      "id": 1329067718
+    },
+    {
+      "title": "Thread Pool Saturation",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 73
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (service) (puppet_puma_busy_threads{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) / sum by (service) (puppet_puma_max_threads{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "noValue": "No pools reporting, or not collected",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Busy threads over the pool size, per service. **A ratio rather than a count on purpose**: bolt-server ships with 100 threads and ace-server with 10, so the raw numbers are not comparable and only this travels. Sustained near 1 is a pool that cannot keep up, which shows nowhere else in this family.",
+      "id": 1975417349
+    },
+    {
+      "title": "Deepest Queue Since Restart",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 73
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (service) (puppet_puma_backlog_max{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{service}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "displayName": "${__field.labels.service}",
+          "noValue": "No pools reporting, or not collected",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "The high-water mark of the request backlog, per service. **Read this rather than the instantaneous backlog**, which a poll every few minutes will read as zero straight through the event it exists to catch: a request queues for milliseconds and the sample lands somewhere else. Non-zero here means work has queued for a thread at some point since the service started, which is the answer to \"why did that task run take so long\". It resets on restart, so read it against how long each service has been up.",
+      "id": 410330448
+    },
+    {
+      "title": "Requests",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 73
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (service) (rate(puppet_puma_requests_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "reqps",
+          "noValue": "No pools reporting, or not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Request rate per service. A counter underneath, so a restart shows as a gap rather than as a spike. Useful mostly as the denominator for the saturation panel: a pool at capacity with no traffic is a different problem from one at capacity under load.",
+      "id": 1178368782
+    },
+    {
+      "title": "Pool State",
+      "type": "table",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 81
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (service) (puppet_puma_max_threads{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (service) (puppet_puma_running{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "B",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (service) (puppet_puma_pool_capacity{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "C",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (service) (time() - puppet_puma_started_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "D",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (service, puma_version, ruby_version) (puppet_puma_info{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "E",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "n/a"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Service"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pool Size"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Running"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Threads Free"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Uptime (s)"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Puma"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Ruby"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "description": "Each Puma service as it stands now. **Uptime is not decoration here**: both the deepest-queue mark and the request counter reset when the service restarts, so a suspiciously healthy backlog on a service that started ten minutes ago means nothing yet. Threads Free at zero is the pool at capacity.",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "service",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(service|Value\\ \\#A|Value\\ \\#B|Value\\ \\#C|Value\\ \\#D|puma_version|ruby_version)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "service": "Service",
+              "Value #A": "Pool Size",
+              "Value #B": "Running",
+              "Value #C": "Threads Free",
+              "Value #D": "Uptime (s)",
+              "puma_version": "Puma",
+              "ruby_version": "Ruby"
+            },
+            "indexByName": {
+              "service": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4,
+              "puma_version": 5,
+              "ruby_version": 6
+            }
+          }
+        }
+      ],
+      "id": 364326757
+    }
+  ],
+  "description": "Are jobs getting through, is the PCP broker delivering, and is the service healthy. Job panels need enable_orchestrator_metrics; service and PCP panels need enable_service_metrics and are PE only."
+}

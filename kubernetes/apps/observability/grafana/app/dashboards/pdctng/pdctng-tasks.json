@@ -1,0 +1,1858 @@
+{
+  "uid": "pdctng-tasks",
+  "title": "Tasks",
+  "tags": [
+    "pdctng",
+    "pdctng-enforcement"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "interval",
+        "type": "interval",
+        "query": "5m,10m,30m,1h,6h,12h,1d",
+        "refresh": 2,
+        "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval_interval"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          }
+        ],
+        "auto": true,
+        "auto_count": 30,
+        "auto_min": "5m",
+        "current": {
+          "text": "auto",
+          "value": "$__auto_interval_interval"
+        },
+        "label": "Interval"
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "task",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_orchestrator_job_info,task_name)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_orchestrator_job_info,task_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Task"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Failed Tasks",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_orchestrator_job_info{command=\"task\",state=\"failed\",task_name=~\"${task}\",alias=~\"${pe}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Failed task runs still inside the tracked window (the 50 most recent per orchestrator), not the dashboard time range.",
+      "id": 1373662087
+    },
+    {
+      "title": "Failed Plans",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_orchestrator_plan_info{state=\"failure\",alias=~\"${pe}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Failed plan runs in the tracked window. Note the orchestrator calls this state \"failure\" for a plan and \"failed\" for a job.",
+      "id": 1914928859
+    },
+    {
+      "title": "Tasks Running",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_orchestrator_job_info{command=\"task\",state=\"running\",task_name=~\"${task}\",alias=~\"${pe}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Task runs in flight right now.",
+      "id": 609909689
+    },
+    {
+      "title": "Plans Running",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_orchestrator_plan_info{state=\"running\",alias=~\"${pe}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"orchestrator\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Plan runs in flight. Plans can run for a long time, so one sitting here is not necessarily stuck.",
+      "id": 1585597082
+    },
+    {
+      "title": "Tasks Tracked",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_orchestrator_job_info{command=\"task\",task_name=~\"${task}\",alias=~\"${pe}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "The orchestrator jobs window the collector keeps: the 50 most recent per orchestrator. The size of what every other tile here is counting, not a fleet figure.",
+      "id": 1447002983
+    },
+    {
+      "title": "History Window",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "time() - min(puppet_orchestrator_job_start_timestamp{alias=~\"${pe}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Age of the oldest run the collector is still tracking. Nothing on this board can show you anything older, whatever the time picker says. If this is shorter than the period you care about, raise the orchestrator jobs limit.",
+      "id": 1310124661
+    },
+    {
+      "title": "Task runs",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "panels": [],
+      "id": 969933630
+    },
+    {
+      "title": "Recent Task Runs",
+      "type": "table",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "(1000 * puppet_orchestrator_job_start_timestamp{task_name=~\"${task}\",alias=~\"${pe}\"} * on(job_id, task_name, alias) group_left(environment, owner, state) puppet_orchestrator_job_info{command=\"task\",task_name=~\"${task}\",alias=~\"${pe}\"}) >= ${__from} <= ${__to}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Job ID"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "unit",
+                "value": "string"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open in PE console",
+                    "url": "https://${puppetserver}/#/orchestration/tasks/task/${__data.fields[\"Job ID\"]}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Owner"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 112
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "State"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "finished": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "success": {
+                        "color": "green",
+                        "index": 1
+                      },
+                      "failed": {
+                        "color": "red",
+                        "index": 2
+                      },
+                      "failure": {
+                        "color": "red",
+                        "index": 3
+                      },
+                      "running": {
+                        "color": "blue",
+                        "index": 4
+                      },
+                      "stopping": {
+                        "color": "orange",
+                        "index": 5
+                      },
+                      "stopped": {
+                        "color": "orange",
+                        "index": 6
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 170
+              },
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Started",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Runs started inside the dashboard time range. The collector tracks the 50 most recent per orchestrator, which caps how far back this reaches.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(job_id|task_name|owner|environment|state|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "job_id": "Job ID",
+              "task_name": "Task",
+              "owner": "Owner",
+              "environment": "Environment",
+              "state": "State",
+              "Value": "Started"
+            },
+            "indexByName": {
+              "job_id": 0,
+              "task_name": 1,
+              "owner": 2,
+              "environment": 3,
+              "state": 4,
+              "Value": 5
+            }
+          }
+        }
+      ],
+      "id": 382381950
+    },
+    {
+      "title": "Plan runs",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "panels": [],
+      "id": 191295934
+    },
+    {
+      "title": "Recent Plan Runs",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "(1000 * puppet_orchestrator_plan_start_timestamp{alias=~\"${pe}\"} * on(job_id, plan_name, alias) group_left(environment, owner, state) puppet_orchestrator_plan_info{alias=~\"${pe}\"}) >= ${__from} <= ${__to}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Job ID"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "unit",
+                "value": "string"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open in PE console",
+                    "url": "https://${puppetserver}/#/orchestration/plans/plan/${__data.fields[\"Job ID\"]}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Owner"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 112
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "State"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "finished": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "success": {
+                        "color": "green",
+                        "index": 1
+                      },
+                      "failed": {
+                        "color": "red",
+                        "index": 2
+                      },
+                      "failure": {
+                        "color": "red",
+                        "index": 3
+                      },
+                      "running": {
+                        "color": "blue",
+                        "index": 4
+                      },
+                      "stopping": {
+                        "color": "orange",
+                        "index": 5
+                      },
+                      "stopped": {
+                        "color": "orange",
+                        "index": 6
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 170
+              },
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Started",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Runs started inside the dashboard time range. The collector tracks the 50 most recent per orchestrator, which caps how far back this reaches.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(job_id|plan_name|owner|environment|state|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "job_id": "Job ID",
+              "plan_name": "Plan",
+              "owner": "Owner",
+              "environment": "Environment",
+              "state": "State",
+              "Value": "Started"
+            },
+            "indexByName": {
+              "job_id": 0,
+              "plan_name": 1,
+              "owner": 2,
+              "environment": 3,
+              "state": 4,
+              "Value": 5
+            }
+          }
+        }
+      ],
+      "id": 843194331
+    },
+    {
+      "title": "What is scheduled",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "panels": [],
+      "id": 457176117
+    },
+    {
+      "title": "Scheduled",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_orchestrator_scheduled_jobs{alias=~\"${pe}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"scheduled_jobs\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Scheduled tasks and plans configured on the orchestrator. Taken from the API's own pagination total, so it counts the whole set rather than the page. Zero is a normal reading on an estate that schedules nothing; what it cannot tell you is whether that was always true.",
+      "id": 695230326
+    },
+    {
+      "title": "Overdue",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_orchestrator_scheduled_job_next_run_epoch{alias=~\"${pe}\"} < time()) or (vector(0) and on() (count(puppet_orchestrator_scheduled_job_next_run_epoch{alias=~\"${pe}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Schedules whose next run is already in the past. **The orchestrator moves that time forward every time it fires**, so a date behind us is a schedule that has stopped firing rather than one that is about to. Nothing else on this board can see it: a job that never started produces no row.",
+      "id": 1512063528
+    },
+    {
+      "title": "What Is Scheduled, And When It Next Runs",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "1000 * puppet_orchestrator_scheduled_job_next_run_epoch{alias=~\"${pe}\"} * on(job_id, alias) group_left(type, task, environment, owner) puppet_orchestrator_scheduled_job_info{alias=~\"${pe}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Nothing is scheduled, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Job ID"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "unit",
+                "value": "string"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open in PE console",
+                    "url": "https://${puppetserver}/#/orchestration/tasks/scheduled-task/${__data.fields[\"Job ID\"]}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Kind"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 145
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Owner"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Next run"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 170
+              },
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Next run",
+            "desc": false
+          }
+        ]
+      },
+      "description": "One row per schedule. **A date in the past is a schedule that has stopped firing.** The Job ID is the orchestrator's own, which is a number rather than a name \u2014 the task or plan being run is the column beside it, and the two are easy to confuse because the API calls the first one `name`.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(job_id|task|type|owner|environment|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "job_id": "Job ID",
+              "task": "Runs",
+              "type": "Kind",
+              "owner": "Owner",
+              "environment": "Environment",
+              "Value": "Next run"
+            },
+            "indexByName": {
+              "job_id": 0,
+              "task": 1,
+              "type": 2,
+              "owner": 3,
+              "environment": 4,
+              "Value": 5
+            }
+          }
+        }
+      ],
+      "id": 1972182764
+    },
+    {
+      "title": "How Often Each Runs",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 43
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_orchestrator_scheduled_job_interval_seconds{alias=~\"${pe}\"} * on(job_id, alias) group_left(task) puppet_orchestrator_scheduled_job_info{alias=~\"${pe}\"}",
+          "legendFormat": "{{task}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "displayName": "${__field.labels.task}",
+          "noValue": "Nothing is scheduled, or not collected",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "How often each schedule is set to fire. Read beside the list above: a next run further away than the schedule's own interval has missed at least one turn. A schedule whose interval the orchestrator reports in a unit pdctng has not seen is absent here rather than converted on a guess.",
+      "id": 1941002224
+    },
+    {
+      "title": "Trends",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "panels": [],
+      "id": 1172540848
+    },
+    {
+      "title": "Runs Per Task",
+      "type": "piechart",
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count by (task_name) ((1000 * puppet_orchestrator_job_start_timestamp{task_name=~\"${task}\",alias=~\"${pe}\"} * on(job_id, task_name, alias) group_left() puppet_orchestrator_job_info{command=\"task\",task_name=~\"${task}\",alias=~\"${pe}\"}) >= ${__from} <= ${__to})",
+          "legendFormat": "{{task_name}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "pieType": "pie",
+        "legend": {
+          "displayMode": "list",
+          "placement": "right"
+        }
+      },
+      "description": "Runs started inside the dashboard time range, from the tracked window.",
+      "id": 1957710938
+    },
+    {
+      "title": "Slowest Tasks",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 6,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(10, avg by (task_name) (puppet_orchestrator_job_duration_seconds{task_name=~\"${task}\",alias=~\"${pe}\"} * on(job_id, task_name, alias) group_left() puppet_orchestrator_job_info{command=\"task\",task_name=~\"${task}\",alias=~\"${pe}\"}))",
+          "legendFormat": "{{task_name}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "displayName": "${__field.labels.task_name}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "Mean duration of completed runs in the tracked window. The join keeps deploy jobs out.",
+      "id": 1322725542
+    },
+    {
+      "title": "Slowest Plans",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 12,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(10, avg by (plan_name) (puppet_orchestrator_plan_duration_seconds{alias=~\"${pe}\"}))",
+          "legendFormat": "{{plan_name}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "displayName": "${__field.labels.plan_name}",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "Mean duration of completed plan runs, by plan. **The pair to Slowest Tasks:** a plan that runs a task is slower than the task by whatever it does around it, and the gap between the two panels is that overhead.",
+      "id": 25866715
+    },
+    {
+      "title": "Jobs By State",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (state) (puppet_orchestrator_jobs_by_state{alias=~\"${pe}\"} or puppet_orchestrator_job_status_total{alias=~\"${pe}\"})",
+          "legendFormat": "{{state}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "finished"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#0ca30c"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "success"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#0ca30c"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "failed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "failure"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "running"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stopping"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ec835a"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stopped"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ec835a"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "All orchestrator job types, not only tasks: the aggregate carries no command label.",
+      "id": 154838709
+    },
+    {
+      "title": "Nodes By Outcome",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (node_state) (increase(puppet_orchestrator_job_node_outcomes_total{alias=~\"${pe}\"}[$interval]))",
+          "legendFormat": "{{node_state}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "finished"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#0ca30c"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "failed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "skipped"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ec835a"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "How the machines those jobs targeted actually came out. The panel beside this one counts jobs, and a job PE calls finished can still carry failed nodes. Follows the time picker. The counter behind it resets when the daemon restarts, so a deploy shows as a spike.",
+      "id": 438370682
+    }
+  ],
+  "description": "Orchestrator task and plan runs: outcome, owner, timing, and a link to each run in the PE console. Requires enable_orchestrator_metrics. The headline stats read the collector's tracked window as of now and do not follow the time picker; the tables and trends do."
+}

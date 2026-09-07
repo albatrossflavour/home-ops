@@ -1,0 +1,1290 @@
+{
+  "uid": "pdctng-noc",
+  "title": "NOC",
+  "tags": [
+    "pdctng",
+    "pdctng-health"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "30s",
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Patch windows",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "green",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:patch"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Critical Alerts",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(ALERTS{alertstate=\"firing\",severity=\"critical\"}) or vector(0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2a2f38",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Prometheus-evaluated alerts firing at critical, across every PE this Prometheus scrapes.",
+      "id": 922121747
+    },
+    {
+      "title": "Warning Alerts",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(ALERTS{alertstate=\"firing\",severity=\"warning\"}) or vector(0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2a2f38",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Firing at warning. Look soon rather than now.",
+      "id": 1443270164
+    },
+    {
+      "title": "Failed Nodes",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_status{state=\"failed\"} == 1) or (vector(0) and on() (count(puppet_status) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2a2f38",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes whose most recent Puppet run failed, estate-wide. Named in the work list below.",
+      "id": 1590024746
+    },
+    {
+      "title": "Silent Nodes",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count((time() - puppet_report_timestamp_epoch) > 7200) or (vector(0) and on() (count(puppet_report_timestamp_epoch) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2a2f38",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "No report in over two hours: several missed run intervals, drifting unmanaged. Named in the work list below.",
+      "id": 1913064701
+    },
+    {
+      "title": "Data Age",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "(time() - max(puppet_exporter_last_scrape_timestamp)) or vector(31536000)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2a2f38",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 300
+              },
+              {
+                "color": "#d03b3b",
+                "value": 900
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How long since the freshest exporter poll, across every PE. This is the tile that says whether the four above mean anything: they read zero both when nothing is wrong and when nothing is reporting, and this one tells the difference. A reading of about a year means no data at all.",
+      "id": 1852710728
+    },
+    {
+      "title": "Targets Down",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(up == 0) or (vector(0) and on() (count(up) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2a2f38",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Scrape targets Prometheus cannot reach, including the exporters feeding this screen. Prometheus synthesises this per configured target, so it survives the target itself disappearing, which is exactly when the rest of the board goes quiet. Which targets is on Nodes Needing Attention below, and on PDCTNG Triage under Scrape Targets Down for the full set with room to read it (R232).",
+      "id": 234426301
+    },
+    {
+      "title": "Collectors Failing",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "(count(puppet_exporter_collector_success == 0) or (vector(0) and on() (count(puppet_exporter_collector_success) > 0))) + (count(puppet_exporter_source_success == 0) or (vector(0) and on() (count(puppet_exporter_collector_success) > 0)))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2a2f38",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Exporter collectors whose last run raised, plus service collectors that could not read one of the hosts they poll, counted the instant it happens. The poll loop can keep completing while collectors inside it fail, so this is not the same question as Data Age: that one says the exporter is alive, this one says what it is still able to see. Operations names the offenders.",
+      "id": 1333930305
+    },
+    {
+      "title": "PE Services Down",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_infra_service_up{state!=\"running\"}) or (vector(0) and on() (count(puppet_infra_service_up) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2a2f38",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Puppet Enterprise services not in the running state, across every PE host this exporter reads. Not pdctng and not the estate: PE itself, the thing everything else on this screen depends on. One is an incident, which is why there is no amber step. The service and the host are on the alert in Firing Alerts below; PDCTNG Puppetserver, PuppetDB and Orchestrator carry the internals of each.",
+      "id": 1109647215
+    },
+    {
+      "title": "Firing Alerts",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "ALERTS{alertstate=\"firing\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 240
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 240
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Alert"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 170
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "critical": {
+                        "text": "Critical",
+                        "color": "#d03b3b",
+                        "index": 0
+                      },
+                      "warning": {
+                        "text": "Warning",
+                        "color": "#fab219",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Severity",
+            "desc": false
+          }
+        ]
+      },
+      "description": "Prometheus-evaluated alerts currently firing, via the ALERTS series.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(alertname|severity|host|node|instance|environment|alias)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "alertname": "Alert",
+              "severity": "Severity",
+              "host": "Host",
+              "node": "Node",
+              "instance": "Instance",
+              "environment": "Environment",
+              "alias": "PE"
+            },
+            "indexByName": {
+              "alertname": 0,
+              "severity": 1,
+              "host": 2,
+              "node": 3,
+              "instance": 4,
+              "environment": 5,
+              "alias": 6
+            }
+          }
+        }
+      ],
+      "id": 1344630638
+    },
+    {
+      "title": "Nodes Needing Attention",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(200, label_replace(label_replace(puppet_status{state=\"failed\"} == 1, \"instance\", \"\", \"\", \"\"), \"reason\", \"Run failed\", \"\", \"\") or label_replace(label_replace((time() - puppet_report_timestamp_epoch) > 7200, \"instance\", \"\", \"\", \"\"), \"reason\", \"No report in over two hours\", \"\", \"\") or label_replace(label_replace(up == 0, \"alias\", \"\", \"\", \"\"), \"reason\", \"Scrape target down\", \"\", \"\"))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Nothing needs attention, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              },
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              },
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              },
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 230
+              },
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Target"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 290
+              },
+              {
+                "id": "noValue",
+                "value": ""
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Node",
+            "desc": false
+          }
+        ]
+      },
+      "description": "Everything the three tiles above are counting, and which of them it is: failed runs, silent nodes, and targets Prometheus cannot reach. At fleet scale this is a list to glance at rather than read: the tiles carry the authoritative counts, and PDCTNG Triage is where the full set belongs. A down target fills Target rather than Node, because `up` comes from Prometheus rather than from a report and names an instance: that row is a host Prometheus cannot reach, which is not the same statement as a node with something wrong on it. Why it is down is on Prometheus's own Targets page; the usual answer is a firewall (R232).",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|instance|reason|environment|alias)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "instance": "Target",
+              "reason": "Reason",
+              "environment": "Environment",
+              "alias": "PE"
+            },
+            "indexByName": {
+              "node": 0,
+              "instance": 1,
+              "reason": 2,
+              "environment": 3,
+              "alias": 4
+            }
+          }
+        }
+      ],
+      "id": 505470107
+    },
+    {
+      "title": "Alerts Firing Over Time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
+          "legendFormat": "total",
+          "refId": "A"
+        },
+        {
+          "expr": "count by (severity) (ALERTS{alertstate=\"firing\"})",
+          "legendFormat": "{{severity}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 40,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "axisSoftMax": 5
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "critical"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Critical"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warning"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Warning"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "total"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Total"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8e949f"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "id": 1821771521
+    },
+    {
+      "title": "Run States",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 6,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (state) (puppet_state_overview)",
+          "legendFormat": "{{state}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 40,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unchanged"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unchanged"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#0ca30c"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "intentional"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Intentional"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "corrective"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Corrective"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "failed"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Failed"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "noop"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "NoOp"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8e949f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unknown"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Unknown"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ec835a"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Every node by the outcome of its last run, stacked. Deploy markers overlaid: a band of failures appearing under one is its own explanation.",
+      "id": 1465889370
+    },
+    {
+      "title": "Recent Deployments",
+      "type": "annolist",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 20
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "onlyFromThisDashboard": false,
+        "onlyInTimeRange": false,
+        "tags": [
+          "pdctng:deploy"
+        ],
+        "limit": 10,
+        "showTags": false,
+        "showTime": true,
+        "showUser": false
+      },
+      "description": "The last ten code deployments, newest first, regardless of the dashboard time range.",
+      "id": 1178447267
+    }
+  ],
+  "description": "Is anything wrong, can this screen be believed, and which host. Wall screen: no variables and no interaction by design, display it in kiosk mode."
+}

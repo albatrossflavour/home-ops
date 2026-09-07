@@ -1,0 +1,3626 @@
+{
+  "uid": "pdctng-patching",
+  "title": "Patching",
+  "tags": [
+    "pdctng",
+    "pdctng-compliance"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Patch windows",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "green",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:patch",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_report_timestamp_epoch,environment)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_report_timestamp_epoch,environment)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^(?!rolling_deployment_).*$/",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Environment"
+      },
+      {
+        "name": "patch_group",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_patching_data,patch_group)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_patching_data,patch_group)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Patch group"
+      },
+      {
+        "name": "security",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_patching_detail,security)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_patching_detail,security)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Security only"
+      },
+      {
+        "name": "rank",
+        "type": "custom",
+        "query": "Worst : topk,Best : bottomk",
+        "options": [
+          {
+            "selected": true,
+            "text": "Worst",
+            "value": "topk"
+          },
+          {
+            "selected": false,
+            "text": "Best",
+            "value": "bottomk"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "Worst",
+          "value": "topk"
+        },
+        "label": "Ranking"
+      },
+      {
+        "name": "rank_count",
+        "type": "custom",
+        "query": "20 : 20,10 : 10,5 : 5",
+        "options": [
+          {
+            "selected": true,
+            "text": "20",
+            "value": "20"
+          },
+          {
+            "selected": false,
+            "text": "10",
+            "value": "10"
+          },
+          {
+            "selected": false,
+            "text": "5",
+            "value": "5"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "20",
+          "value": "20"
+        },
+        "label": "Show"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Security Patches",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Outstanding security patches across the selected patch group and environment. The number this dashboard exists to answer.",
+      "id": 644268843
+    },
+    {
+      "title": "Critical Vulnerabilities",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_vrs_vulnerabilities{severity=\"Critical\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Distinct critical vulnerabilities VRS knows about, fleet-wide: the threat the patching on this board is closing. Scoped by the PE selector but not by environment: VRS reports per PE instance and carries no environment label, so an estate-wide figure is the only honest one within a PE. Undated (VRS exposes no scan time anywhere in its API, so a feed that stopped a month ago shows the same number; the vrs collector on PDCTNG Internal Operations says whether it is still current). Needs a PE Advanced licence, so it is blank on a Standard install. The full breakdown is the Known vulnerabilities row below.",
+      "id": 1201320401
+    },
+    {
+      "title": "All Patches",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Every outstanding patch, security or not, across the same selection.",
+      "id": 1772860726
+    },
+    {
+      "title": "Machines Awaiting Patches",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) or (vector(0) and on() (count(puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Machines carrying at least one outstanding patch. The same figure PDCTNG Work Done reports under the same name; this one narrows to the pickers above, which is the only difference between them.",
+      "id": 1083333541
+    },
+    {
+      "title": "Longest Security Exposure",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(1, (((time() - max by (node) (last_over_time(timestamp(puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 0)[30d:1h]))) and on(node) (max by (node) (puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0)) or ((max by (node) (puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0) * 0 + (30 * 86400))))",
+          "legendFormat": "{{node}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 604800
+              },
+              {
+                "color": "#d03b3b",
+                "value": 2592000
+              }
+            ]
+          },
+          "unit": "s",
+          "links": [
+            {
+              "title": "This node in detail",
+              "url": "/d/pdctng-node-detail?var-node=${__field.labels.node}&${__url_time_range}",
+              "targetBlank": false
+            }
+          ],
+          "noValue": "Nothing exposed"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How long the worst-exposed machine has carried at least one outstanding security patch, counted from the last time it read zero. Capped at 30 days, which is how far back the query looks: a node at the cap has been exposed for at least that long and possibly much longer. Empty is the answer you want and means no machine in the selection is carrying a security patch at all.",
+      "id": 1917725061
+    },
+    {
+      "title": "Blocked",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_patching_blocked{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) or (vector(0) and on() (count(puppet_patching_blocked{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Hosts where patching cannot proceed. The one figure on this dashboard that is a call to action; the Blocked section below names them.",
+      "id": 1264805662
+    },
+    {
+      "title": "Reboot",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_restart_required{type=\"reboot\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) or (vector(0) and on() (count(puppet_restart_required{type=\"reboot\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Hosts with a pending reboot. Scheduling information rather than exposure, so it stays neutral.",
+      "id": 320161745
+    },
+    {
+      "title": "App Restart",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_restart_required{type=\"app\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) or (vector(0) and on() (count(puppet_restart_required{type=\"app\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Hosts where a service needs restarting to pick up an applied patch.",
+      "id": 1192104634
+    },
+    {
+      "title": "Failed Patch Runs",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_patch_run{return_code!~\"0|unknown\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_patch_run{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes whose last patch run exited non-zero. Not \"has patches outstanding\": tried to patch and could not. Which Nodes Failed Their Patch Run, below, names them.",
+      "id": 1518063247
+    },
+    {
+      "title": "Patch Data Age",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_fact_staleness_seconds{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 7200
+              },
+              {
+                "color": "#d03b3b",
+                "value": 86400
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Age of the stalest fact set behind these counts. The patch numbers come from facts, so a node that stopped submitting them keeps reporting the patch level it had when it stopped, and this board keeps counting it as though it were current.",
+      "id": 372100974
+    },
+    {
+      "title": "Where we stand",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "panels": [],
+      "id": 8006557
+    },
+    {
+      "title": "Patch Debt Over Time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "Security",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "All patches",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Security"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "All patches"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Fleet-wide outstanding patches over the dashboard time range. Direction matters more than the absolute number: flat means patching is keeping pace with disclosure, climbing means it is not.",
+      "id": 1412954513
+    },
+    {
+      "title": "Patch Group Overview",
+      "type": "piechart",
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count by (patch_group) (puppet_patching_group{patch_group=~\".+\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{patch_group}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "pieType": "donut",
+        "legend": {
+          "displayMode": "list",
+          "placement": "right"
+        }
+      },
+      "description": "Nodes per patch group, part to whole across maintenance windows. Legitimate at this segment count; past about six groups this wants to be a bar chart.",
+      "id": 1289719162
+    },
+    {
+      "title": "Nodes by Patch Debt",
+      "type": "barchart",
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) by (node) and ${rank}(${rank_count}, sum(puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) by (node) > 0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "(sum(puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) by (node) - sum(puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) by (node)) and ${rank}(${rank_count}, sum(puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) by (node) > 0)",
+          "legendFormat": "",
+          "refId": "B",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "gradientMode": "none"
+          },
+          "unit": "locale",
+          "links": [
+            {
+              "title": "This node in detail",
+              "url": "/d/pdctng-node-detail?var-node=${__data.fields.node}&${__url_time_range}",
+              "targetBlank": false
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Security"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Other"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "stacking": "normal",
+        "xField": "node"
+      },
+      "description": "Hosts ranked by outstanding patches, security shown against the remainder. The Ranking toggle flips between the most indebted and the least, and Show sets how many. Absorbs the old Top Clients panel.",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "node",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time 1": true,
+              "Time 2": true
+            },
+            "renameByName": {
+              "Value #A": "Security",
+              "Value #B": "Other"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "alias": "Total",
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Total",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "id": 1164717013
+    },
+    {
+      "title": "Patching Over Time",
+      "type": "heatmap",
+      "gridPos": {
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(20, max by (node) (puppet_patching_data{type=\"all\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}))",
+          "legendFormat": "{{node}}",
+          "refId": "A",
+          "interval": "5m"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "calculate": false,
+        "cellGap": 0,
+        "legend": {
+          "show": true
+        },
+        "filterValues": {
+          "le": -1
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "color": {
+          "mode": "opacity",
+          "fill": "#d03b3b",
+          "scale": "exponential",
+          "exponent": 0.5,
+          "steps": 16
+        }
+      },
+      "description": "The twenty nodes carrying the most outstanding patches. Fully patched nodes are not drawn.",
+      "id": 913547828
+    },
+    {
+      "title": "What we did",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 61
+      },
+      "panels": [],
+      "id": 46348605
+    },
+    {
+      "title": "Machines Patched In This Period",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 62
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_patch_run{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > (time() - $__range_s)) or (vector(0) and on() (count(puppet_patch_run{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Machines whose most recent patch run falls inside the selected time range. Follows the time picker, so widening the range counts more of them.",
+      "id": 890582820
+    },
+    {
+      "title": "Machines Patched, By Group",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 62
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count by (patch_group) (puppet_patch_run{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > (time() - $__range_s))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Nothing recorded in this window"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Patch group"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Machines",
+            "desc": true
+          }
+        ]
+      },
+      "description": "The same count split by patch group. A group sitting at zero across a wide range is one that nothing has reached.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(patch_group|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "patch_group": "Patch group",
+              "Value": "Machines"
+            },
+            "indexByName": {
+              "patch_group": 0,
+              "Value": 1
+            }
+          }
+        }
+      ],
+      "id": 1520054197
+    },
+    {
+      "title": "Patch Runs Recorded, By Group",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 70
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (patch_group, result) (puppet_patch_runs_total{patch_group=~\"${patch_group}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{patch_group}} {{result}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "displayName": "${__field.labels.patch_group} ${__field.labels.result}",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*failure.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "Patch runs observed per group, split by outcome. The panels above count machines and this counts runs, so a machine patched every week appears once there and weekly here. **Since the exporter last restarted**, which is not the selected range: the counter lives in memory and a deploy sets it back to zero.",
+      "id": 935227406
+    },
+    {
+      "title": "When it is meant to happen",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 77
+      },
+      "panels": [],
+      "id": 346963003
+    },
+    {
+      "title": "Maintenance Windows",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 78
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_patching_maintenance_windows{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0
+              },
+              {
+                "color": "#0ca30c",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Windows configured for patching to run in. **Zero means nothing is scheduled to patch at all**, which produces no failed run and no alert on its own \u2014 the whole reason this row exists.",
+      "id": 393178929
+    },
+    {
+      "title": "Blackout Windows",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 78
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_patching_blackout_windows{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Periods patching is forbidden. Not a fault in itself, and worth reading beside the count on the left: a blackout nobody remembers setting is one explanation for patching that quietly stopped.",
+      "id": 1072947672
+    },
+    {
+      "title": "Next Patch Windows",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 78
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "1000 * puppet_patching_maintenance_window_next_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "No windows configured, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Window"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Next opens"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Next opens",
+            "desc": false
+          }
+        ]
+      },
+      "description": "When each window next opens, and for how long. **A date in the past is a schedule that has stopped firing.** Read the duration beside the patch run times on this board: a window shorter than the work does not fail, it leaves nodes unpatched until the next one.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(name|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "name": "Window",
+              "Value": "Next opens"
+            },
+            "indexByName": {
+              "name": 0,
+              "Value": 1
+            }
+          }
+        }
+      ],
+      "id": 1698245974
+    },
+    {
+      "title": "How Long Each Window Stays Open",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 84
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_patching_maintenance_window_duration_seconds{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{name}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "displayName": "${__field.labels.name}",
+          "noValue": "No windows configured, or not collected",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "The length of each maintenance window. A window shorter than a patch run takes does not fail: it closes with nodes still outstanding, and they wait for the next one.",
+      "id": 257422831
+    },
+    {
+      "title": "Known vulnerabilities",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 90
+      },
+      "panels": [],
+      "id": 1956426801
+    },
+    {
+      "title": "Longest Exposed, And By How Long",
+      "type": "table",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 91
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(20, (((time() - max by (node) (last_over_time(timestamp(puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 0)[30d:1h]))) and on(node) (max by (node) (puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0)) or ((max by (node) (puppet_patching_data{type=\"security\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0) * 0 + (30 * 86400))))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No machine is carrying a security patch, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Exposed for"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Exposed for",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Machines carrying at least one outstanding security patch, ranked by how long they have been carrying it, counted from the last time they read zero. Capped at 30 days, which is how far back the query looks: a node at the cap has been exposed for at least that long and possibly much longer, and it is capped rather than dropped because the machines that have been exposed longest are exactly the ones a work list must not lose. **This is history rather than a stored fact**: it reads the exposure straight out of the patch counts Prometheus has already kept, so it is bounded by retention and by the lookback, and it needs nothing on the node.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "Value": "Exposed for"
+            },
+            "indexByName": {
+              "node": 0,
+              "Value": 1
+            }
+          }
+        }
+      ],
+      "id": 1304454147
+    },
+    {
+      "title": "Vulnerabilities By Severity",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 100
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_vrs_vulnerabilities{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{severity}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "displayName": "${__field.labels.severity}"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ec835a"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8e949f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unknown"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8e949f"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        },
+        "showUnfilled": true,
+        "namePlacement": "top"
+      },
+      "description": "Distinct vulnerabilities by severity across the selected PE, unscoped by environment because VRS carries no environment label. One count per vulnerability however many nodes carry it.",
+      "id": 1514119954
+    },
+    {
+      "title": "Node Exposures By Severity",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 100
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_vrs_node_exposures{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{severity}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "displayName": "${__field.labels.severity}"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ec835a"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8e949f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unknown"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8e949f"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        },
+        "showUnfilled": true,
+        "namePlacement": "top"
+      },
+      "description": "Node-vulnerability pairs by severity across the selected PE, unscoped by environment because VRS carries no environment label: a node counts once per vulnerability it carries, so this is blast radius where the panel beside it is variety. Not distinct affected nodes, which the VRS list endpoint does not expose, so it cannot be deduped to a node count.",
+      "id": 628626130
+    },
+    {
+      "title": "How Bad Are They, Really",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 107
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_vrs_cvss_score_max{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "Worst {{severity}} (CVSS {{cvss_version}})",
+          "refId": "A"
+        },
+        {
+          "expr": "puppet_vrs_cvss_score_mean{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "Average {{severity}} (CVSS {{cvss_version}})",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "noValue": "Nothing recorded in this window",
+          "min": 0,
+          "max": 10
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "The worst and the average CVSS score inside each severity bucket, per version of the CVSS scale. The bargauges above say how many; this says whether they are borderline or all as bad as the label allows. **A mean sitting on its max is a bucket with no easy wins in it.** CVSS 2.0 and 3.0 are different scales and are kept apart rather than averaged.",
+      "id": 1162838346
+    },
+    {
+      "title": "Vulnerabilities With No Score",
+      "type": "stat",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 107
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_vrs_cvss_score_absent{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_vrs_cvss_score_absent{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Known vulnerabilities the feed gave no CVSS score at all. They are absent from every panel that ranks by score, including the one beside this, so a board that read only scores would report a smaller problem than the estate has. **Not the same as a score of zero**, which is a real CVSS value meaning no impact.",
+      "id": 133451019
+    },
+    {
+      "title": "Exposures With A Fix Available",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 116
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_vrs_vulnerability_patch_available{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_vrs_vulnerability_patch_available{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Node-vulnerability pairs the feed says a fix exists for. Read against Node Exposures By Severity above: the gap between them is the part of the estate that cannot be patched yet however much anybody wants to. Empty where the VRS feed returns no patch status.",
+      "id": 389560384
+    },
+    {
+      "title": "And Already Scheduled",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 116
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_vrs_vulnerability_node_scheduled{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_vrs_vulnerability_node_scheduled{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Of the fixable exposures beside this, how many already have a patch scheduled against them. **The difference between the two tiles is the work nobody has booked yet**, which is the only number on this row anybody can act on. Empty where the VRS feed returns no patch status.",
+      "id": 1171988078
+    },
+    {
+      "title": "Records Beyond The Cap",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 116
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(max(puppet_vrs_vulnerability_overflow{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max(puppet_vrs_cve_detail_overflow{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max(puppet_vrs_patch_status_overflow{alias=~\"${pe}\",job=~\"${pdctng_job}\"})) or (vector(0) and on() (count(puppet_vrs_vulnerability_overflow{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Whether the lists in this section are the whole picture. VRS records are capped at 25 in three places -- the ranked list below, the CVE detail beneath it, and the patch-status detail behind Exposures With A Fix Available -- and this is the worst of the three overflows. **Zero means every list here is complete.** Above zero, that many records were dropped from the worst-affected list and the ranking below is a subset rather than the estate: the headline tiles at the top of this board count everything and are still whole.",
+      "id": 426041246
+    },
+    {
+      "title": "Worst Vulnerabilities, Ranked",
+      "type": "table",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 122
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (name, severity, cvss_version) (puppet_vrs_vulnerability_cvss_score{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (name) (puppet_vrs_vulnerability_nodes_affected{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "B",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Vulnerability"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CVSS Version"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CVSS"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Nodes"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "CVSS",
+            "desc": true
+          }
+        ]
+      },
+      "description": "The highest-scoring known vulnerabilities, worst first within each CVSS Version, with the number of nodes carrying each. Severity says which bucket a vulnerability is in and CVSS says which of them to do first, which is the question a maintenance window actually asks. Grouped by CVSS Version and ranked inside each group, because scores across versions do not compare: v3 rescaled the vectors and moved the bucket boundaries, and real feeds mix versions. Capped at the 25 worst; the Critical Vulnerabilities tile in the header counts the whole estate. Scoped by the PE selector and unscoped by environment, like the rest of this row, and undated for the same reason: VRS exposes no scan time anywhere in its API.",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "name",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(name|severity|cvss_version|Value\\ \\#A|Value\\ \\#B)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "name": "Vulnerability",
+              "severity": "Severity",
+              "cvss_version": "CVSS Version",
+              "Value #A": "CVSS",
+              "Value #B": "Nodes"
+            },
+            "indexByName": {
+              "name": 0,
+              "severity": 1,
+              "cvss_version": 2,
+              "Value #A": 3,
+              "Value #B": 4
+            }
+          }
+        }
+      ],
+      "id": 937677086
+    },
+    {
+      "title": "Which CVEs These Are",
+      "type": "table",
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 0,
+        "y": 136
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (cve, name, severity) (puppet_vrs_vulnerability_cve{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CVE"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Vulnerability",
+            "desc": false
+          }
+        ]
+      },
+      "description": "CVE identifiers for the vulnerabilities in the ranked table above, one row per CVE. An advisory can carry several, and one CVE can appear in several advisories, so this is longer than the list above and neither number is the other. This is the column that makes the feed joinable: a ticketing system, a SIEM or a vendor advisory is keyed on the CVE and on nothing else here. Needs `enable_vrs_cve_metrics`, which costs one request per vulnerability against VRS and is capped at the worst 25.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(cve|name|severity)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "cve": "CVE",
+              "name": "Vulnerability",
+              "severity": "Severity"
+            },
+            "indexByName": {
+              "cve": 0,
+              "name": 1,
+              "severity": 2
+            }
+          }
+        }
+      ],
+      "id": 15559779
+    },
+    {
+      "title": "Findings No CVE Describes",
+      "type": "stat",
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 136
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_vrs_vulnerabilities_without_cve{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_vrs_cves{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "No CVE",
+          "refId": "A",
+          "instant": true
+        },
+        {
+          "expr": "sum(puppet_vrs_cves{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_vrs_cves{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "Distinct CVEs",
+          "refId": "B",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Vulnerabilities in the detailed set that carry no CVE identifier. These are real findings \u2014 weak SSH MAC algorithms, a missing HttpOnly cookie attribute, ICMP timestamp replies \u2014 that no CVE describes, so the table beside this one is a subset of the estate's exposure rather than all of it. Five of the lab's fourteen. Beside it, the distinct CVE count, which is not the vulnerability count in either direction.",
+      "id": 734657812
+    },
+    {
+      "title": "Watched packages",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 145
+      },
+      "panels": [],
+      "id": 1601390435
+    },
+    {
+      "title": "Version Spread",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 146
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (package) (puppet_package_versions{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{package}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "displayName": "${__field.labels.package}",
+          "noValue": "No packages watched",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "How many distinct versions of each watched package are installed across the estate. **One is the good answer**: it means a question about \"the\" version has one. More than one is a rollout in progress or a fleet nobody finished patching, and the panel beside this says which versions and how many machines each. Estate-wide: the count is aggregated in PuppetDB, which is what keeps it cheap and what costs it the node dimension.",
+      "id": 1490030333
+    },
+    {
+      "title": "Who Is On What",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 146
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (package, version) (puppet_package_nodes{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "No packages watched",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Package"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "custom.width",
+                "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Nodes"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "description": "Every installed version of every watched package, and how many machines carry it. **This counts installed copies rather than pending updates**, which is the difference between this and the patching families above: a package with no fix published yet has no pending update and is precisely the one worth counting after an advisory lands. Version strings are exactly as the distribution reports them, epochs and all, because normalising them would merge builds that are genuinely different machines.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(package|version|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "package": "Package",
+              "version": "Version",
+              "Value": "Nodes"
+            },
+            "indexByName": {
+              "package": 0,
+              "version": 1,
+              "Value": 2
+            }
+          }
+        }
+      ],
+      "id": 470301788
+    },
+    {
+      "title": "Blocked",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 154
+      },
+      "panels": [],
+      "id": 1264805663
+    },
+    {
+      "title": "Blocked Nodes",
+      "type": "table",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 155
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_patching_blocked{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Nothing blocked, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Patch group"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Node",
+            "desc": false
+          }
+        ]
+      },
+      "description": "Hosts where patching cannot proceed. Something is in the way and patching has not been attempted.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|patch_group)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "patch_group": "Patch group"
+            },
+            "indexByName": {
+              "node": 0,
+              "patch_group": 1
+            }
+          }
+        }
+      ],
+      "id": 1893832599
+    },
+    {
+      "title": "Which Nodes Failed Their Patch Run",
+      "type": "table",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 164
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(20, puppet_patch_run{return_code!~\"0|unknown\",patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} * 1000)",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Every patch run succeeded, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Exit code"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Patch group"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last attempt"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 170
+              },
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Last attempt",
+            "desc": true
+          }
+        ]
+      },
+      "description": "The twenty most recent hosts whose last patch run exited non-zero, and when it ran. These were attempted and failed, which is a different problem from blocked and reads identically on an exposure count: both leave patches outstanding and neither says why. Every one is a work item on PDCTNG Triage.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|return_code|patch_group|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "return_code": "Exit code",
+              "patch_group": "Patch group",
+              "Value": "Last attempt"
+            },
+            "indexByName": {
+              "node": 0,
+              "return_code": 1,
+              "patch_group": 2,
+              "Value": 3
+            }
+          }
+        }
+      ],
+      "id": 1657486202
+    },
+    {
+      "title": "Detail",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 173
+      },
+      "panels": [],
+      "id": 747318976
+    },
+    {
+      "title": "By Server",
+      "type": "table",
+      "gridPos": {
+        "h": 12,
+        "w": 10,
+        "x": 0,
+        "y": 174
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_patching_detail{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\",security=~\"${security}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Server"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "environment",
+                "node",
+                "package",
+                "patch_group"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Server",
+              "package": "Package",
+              "environment": "Environment",
+              "patch_group": "Patch Group"
+            }
+          }
+        },
+        {
+          "id": "groupToNestedTable",
+          "options": {
+            "fields": {
+              "Server": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Package": {
+                "aggregations": []
+              },
+              "Environment": {
+                "aggregations": []
+              },
+              "Patch Group": {
+                "aggregations": []
+              }
+            }
+          }
+        }
+      ],
+      "id": 587193955
+    },
+    {
+      "title": "By Patch",
+      "type": "table",
+      "gridPos": {
+        "h": 12,
+        "w": 10,
+        "x": 10,
+        "y": 174
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_patching_detail{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\",security=~\"${security}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Server"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "environment",
+                "node",
+                "package",
+                "patch_group"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Server",
+              "package": "Package",
+              "environment": "Environment",
+              "patch_group": "Patch Group"
+            }
+          }
+        },
+        {
+          "id": "groupToNestedTable",
+          "options": {
+            "fields": {
+              "Server": {
+                "aggregations": []
+              },
+              "Package": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Environment": {
+                "aggregations": []
+              },
+              "Patch Group": {
+                "aggregations": []
+              }
+            }
+          }
+        }
+      ],
+      "id": 438994023
+    },
+    {
+      "title": "By Patch Group",
+      "type": "table",
+      "gridPos": {
+        "h": 12,
+        "w": 4,
+        "x": 20,
+        "y": 174
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_patching_detail{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\",security=~\"${security}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Server"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "environment",
+                "node",
+                "package",
+                "patch_group"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Server",
+              "package": "Package",
+              "environment": "Environment",
+              "patch_group": "Patch Group"
+            }
+          }
+        },
+        {
+          "id": "groupToNestedTable",
+          "options": {
+            "fields": {
+              "Server": {
+                "aggregations": []
+              },
+              "Package": {
+                "aggregations": []
+              },
+              "Environment": {
+                "aggregations": []
+              },
+              "Patch Group": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        }
+      ],
+      "id": 1390670547
+    },
+    {
+      "title": "By Patch Type",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 186
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "group by (package, security) (puppet_patching_detail{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\",security=~\"${security}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "package",
+                "security"
+              ]
+            }
+          }
+        },
+        {
+          "id": "groupToNestedTable",
+          "options": {
+            "fields": {
+              "security": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "package": {
+                "aggregations": []
+              }
+            },
+            "showSubframeHeaders": true
+          }
+        }
+      ],
+      "id": 948904382
+    },
+    {
+      "title": "Detail Rows Dropped",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 194
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_patching_detail_dropped{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_patching_detail{patch_group=~\"${patch_group}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\",security=~\"${security}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Series dropped at `pdctng::patching_detail_cap` (50,000 by default). **Above zero, all four tables below are a subset of the estate** and there is no ordering to the part you can see, so a package missing from them is not evidence that nothing needs it. The tiles at the top of this board count whole nodes and are unaffected. Raise the cap, or narrow the environment and PE selectors until this reads zero.",
+      "id": 1721802381
+    }
+  ],
+  "description": "Fleet patching status, per-package detail, and blocked nodes."
+}

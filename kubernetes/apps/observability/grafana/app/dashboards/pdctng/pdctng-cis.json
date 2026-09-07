@@ -1,0 +1,1371 @@
+{
+  "uid": "pdctng-cis",
+  "title": "CIS",
+  "tags": [
+    "pdctng",
+    "pdctng-compliance"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Which rules, and how many nodes",
+      "url": "/d/pdctng-cis-rules/cis-rules",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_report_timestamp_epoch,environment)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_report_timestamp_epoch,environment)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^(?!rolling_deployment_).*$/",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Environment"
+      },
+      {
+        "name": "benchmark",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_cis_compliance_score,benchmark)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_cis_compliance_score,benchmark)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Benchmark"
+      },
+      {
+        "name": "profile",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_cis_compliance_score,profile)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_cis_compliance_score,profile)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Level"
+      },
+      {
+        "name": "score_type",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_cis_compliance_score,score_type)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_cis_compliance_score,score_type)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Score type"
+      },
+      {
+        "name": "rank",
+        "type": "custom",
+        "query": "Worst : sort(bottomk,Best : sort_desc(topk",
+        "options": [
+          {
+            "selected": true,
+            "text": "Worst",
+            "value": "sort(bottomk"
+          },
+          {
+            "selected": false,
+            "text": "Best",
+            "value": "sort_desc(topk"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "Worst",
+          "value": "sort(bottomk"
+        },
+        "label": "Ranking"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "What this board can tell you, and what it cannot",
+      "type": "text",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**A score is only as current as the scan behind it.** A node whose scanner stopped keeps displaying its last result indefinitely and looks identical to one scanned this morning. Oldest Scan and Scan Freshness below are how you tell; nothing else on this board knows the difference.\n\n**The average spans whatever the Benchmark picker is showing.** Left on All it averages across every benchmark in the estate, which are different exams: on a mixed fleet the spread between the best and worst platform is routinely twenty points or more, and one platform in real trouble disappears inside a healthy-looking mean. Pick a benchmark before quoting a number.\n\n**These averages include every scanned node, whatever state it is in.** Nodes in noop, nodes whose last run failed, nodes whose scan predates their last catalogue change \u2014 all of them count here exactly as much as a healthy node does. **PDCTNG Evidence Quality** exists to say how many of these numbers can actually be claimed.\n\n**Which rules are failing is not on this board.** It answers which *nodes*; **PDCTNG CIS Rules** answers which rules, and on how many nodes each. The link is at the top of this board.\n"
+      },
+      "id": 510649388
+    },
+    {
+      "title": "Below 90%",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_cis_compliance_score{score_type=\"base\",benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90) or (vector(0) and on() (count(puppet_cis_compliance_score{benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes scoring under ninety percent, read against Nodes Scanned for the denominator. The size of the remediation backlog, which an average hides: a fleet averaging 92 can still have a dozen nodes at 60.",
+      "id": 1538052034
+    },
+    {
+      "title": "Worst Node",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "bottomk(1, puppet_cis_compliance_score{score_type=\"base\",benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{node}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 80
+              },
+              {
+                "color": "#0ca30c",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "The lowest-scoring node in scope, named. Second rather than first on purpose: it names a machine on a small estate and becomes a constant near zero on a large one, where the count beside it is the number that still means something.",
+      "id": 1150032219
+    },
+    {
+      "title": "Compliance",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "avg(puppet_cis_compliance_score{score_type=\"base\",benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 80
+              },
+              {
+                "color": "#0ca30c",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Mean CIS score across scanned nodes, before any agreed exceptions. A supporting number: it says where the middle of the estate sits and nothing at all about the nodes that need work. Worst Node and the below-target count are the ones to lead with.",
+      "id": 1414076973
+    },
+    {
+      "title": "With Exceptions",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "avg(puppet_cis_compliance_score{score_type=\"adjusted\",benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 80
+              },
+              {
+                "color": "#0ca30c",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "The same average once agreed exceptions are allowed for, and the same caveat applies. A wide gap between this and the tile beside it means a lot of the estate is compliant by exception rather than by configuration.",
+      "id": 770765160
+    },
+    {
+      "title": "Oldest Scan",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "time() - min(puppet_cis_scan_timestamp_epoch{benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 604800
+              },
+              {
+                "color": "#d03b3b",
+                "value": 2592000
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Age of the stalest scan on the board. Every score here is only as true as its scan: a node that stopped being scanned keeps displaying its last result indefinitely, and it looks exactly like a node that was scanned this morning. Scan Freshness below names them.",
+      "id": 1717787293
+    },
+    {
+      "title": "Unscanned Nodes",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "(sum(puppet_node_count{environment=\"all\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) - (count(puppet_cis_compliance_score{score_type=\"base\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or vector(0))) and on() (count(puppet_exporter_per_node_metrics{alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1) > 0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0ca30c",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "**The environment and benchmark pickers do not reach this panel.** It subtracts a scored count from a fleet total and neither half can carry those filters: narrowing the scored half by benchmark would count every node running a different operating system as unscanned. Nodes PuppetDB knows about with no compliance score at all. Not the same problem as a stale scan, and usually means the scanner was never classified onto them.",
+      "id": 567144935
+    },
+    {
+      "title": "Nodes Scanned",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_cis_compliance_score{score_type=\"base\",benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_cis_compliance_score{benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes with a compliance score in the selected scope. The denominator for everything else on this row.",
+      "id": 1114928335
+    },
+    {
+      "title": "Bought By Exception",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "(avg(puppet_cis_compliance_score{score_type=\"adjusted\",benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) - avg(puppet_cis_compliance_score{score_type=\"base\",benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})) or (vector(0) and on() (count(puppet_cis_compliance_score{benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Percentage points the estate average gains from agreed exceptions: the tile two along less the one before it. A wide gap is not automatically wrong, it is a question \u2014 PDCTNG CIS Rules names every exception in force and how many nodes each one covers.",
+      "id": 864774969
+    },
+    {
+      "title": "Who needs work?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "panels": [],
+      "id": 1929463810
+    },
+    {
+      "title": "Servers by Compliance",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "${rank}(5, puppet_cis_compliance_score{benchmark=~\"${benchmark}\",profile=~\"${profile}\",score_type=~\"${score_type}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}))",
+          "legendFormat": "{{node}} ({{score_type}})",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d03b3b",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 80
+              },
+              {
+                "color": "#0ca30c",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent",
+          "links": [
+            {
+              "title": "This node in detail",
+              "url": "/d/pdctng-node-detail?var-node=${__field.labels.node}&${__url_time_range}",
+              "targetBlank": false
+            }
+          ],
+          "displayName": "${__field.labels.node} (${__field.labels.score_type})"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "The five worst scores in the selected benchmark and level, worst at the top, which is the order somebody remediating works in. The Ranking toggle flips it to the five best, for showing what good looks like rather than what needs fixing.",
+      "id": 514338579
+    },
+    {
+      "title": "Scan Freshness",
+      "type": "table",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(20, time() - (puppet_cis_scan_timestamp_epoch{benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Since last scan"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Benchmark"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 310
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Since last scan",
+            "desc": true
+          }
+        ]
+      },
+      "description": "The twenty stalest scans, oldest first. A node at the top of this list has a score on this board that nobody should be relying on. Every node past a month unscanned is a work item on PDCTNG Triage.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|Value|benchmark|environment)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "Value": "Since last scan",
+              "benchmark": "Benchmark",
+              "environment": "Environment"
+            },
+            "indexByName": {
+              "node": 0,
+              "Value": 1,
+              "benchmark": 2,
+              "environment": 3
+            }
+          }
+        }
+      ],
+      "id": 755632319
+    },
+    {
+      "title": "How it is spread",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "panels": [],
+      "id": 393613818
+    },
+    {
+      "title": "CIS Compliance Levels",
+      "type": "heatmap",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "bottomk(20, max by (node) (puppet_cis_compliance_score{score_type=\"base\",benchmark=~\"${benchmark}\",profile=~\"${profile}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}))",
+          "legendFormat": "{{node}}",
+          "refId": "A",
+          "interval": "1h"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "legend": {
+          "show": true
+        },
+        "filterValues": {
+          "le": -1
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "cellValues": {
+          "unit": "percent"
+        },
+        "color": {
+          "mode": "scheme",
+          "scheme": "RdYlGn",
+          "steps": 16,
+          "reverse": true
+        }
+      },
+      "description": "The twenty lowest-scoring nodes over time, base scores. The shape to look for is a band that stops moving, which is a node whose scans stopped rather than a node whose score is stable. Base rather than the score type selector, for the same reason the two headline averages are separate tiles: a base row beside an adjusted row for the same node is not a comparison.",
+      "id": 583413765
+    },
+    {
+      "title": "How current is any of this?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 50
+      },
+      "panels": [],
+      "id": 1871870559
+    },
+    {
+      "title": "Last Successful Export",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 51
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(time() - puppet_scm_export_last_success_timestamp{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 86400
+              },
+              {
+                "color": "#d03b3b",
+                "value": 172800
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "Never succeeded"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How long since compliance data was last pulled from SCM successfully. Every number on this board is as old as this, whatever the per-node scan times say. Past two days PdctngScmExportStale is firing.",
+      "id": 1913135277
+    },
+    {
+      "title": "Export Failing",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 51
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_scm_export_success{alias=~\"${pe}\",job=~\"${pdctng_job}\"} == bool 0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "bool_yes_no"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Whether the last export ran and failed, as opposed to not running at all. Yes with a recent age above means it is trying and erroring, and the daemon journal and scm_export_status.json carry the reason; No with a climbing age means the job stopped rather than broke.",
+      "id": 479834809
+    },
+    {
+      "title": "Nodes In Last Export",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 51
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_scm_export_nodes_count{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes the last export carried. Read it against the estate size: the scores on this board describe these nodes and no others, and an export that quietly covers a subset makes every average here a sample rather than a fleet figure.",
+      "id": 510173154
+    }
+  ],
+  "description": "Where compliance stands, which nodes need work, and whether the scan data is current enough to believe."
+}

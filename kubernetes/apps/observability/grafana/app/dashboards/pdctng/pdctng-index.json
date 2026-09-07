@@ -1,0 +1,346 @@
+{
+  "uid": "pdctng-index",
+  "title": "Index",
+  "tags": [
+    "pdctng"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Start here",
+      "type": "text",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "The pdctng boards, grouped by the question they answer. Pick an area below, or use the **PDCTNG boards** dropdown at the top of any board to jump straight to another one without coming back here."
+      },
+      "id": 739984619
+    },
+    {
+      "title": "Estate",
+      "type": "text",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 4
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**What the estate is, and what it is made of.** Start here: the fleet at a glance, how it is classified, which environments hold what, module version spread, and how the population is changing."
+      },
+      "id": 1185928087
+    },
+    {
+      "title": "Estate boards",
+      "type": "dashlist",
+      "gridPos": {
+        "h": 7,
+        "w": 16,
+        "x": 8,
+        "y": 4
+      },
+      "options": {
+        "showStarred": false,
+        "showRecentlyViewed": false,
+        "showSearch": true,
+        "showHeadings": false,
+        "showFolderNames": false,
+        "maxItems": 30,
+        "tags": [
+          "pdctng-estate"
+        ]
+      },
+      "id": 1607376228
+    },
+    {
+      "title": "Health",
+      "type": "text",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 11
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Is Puppet itself well.** The infrastructure services the fleet depends on (Puppetserver, PuppetDB, the CA, File Sync, the orchestrator) and the module's own collection internals. The NOC wall screen answers the same question at a glance and sits at the top of the tree."
+      },
+      "id": 487384965
+    },
+    {
+      "title": "Health boards",
+      "type": "dashlist",
+      "gridPos": {
+        "h": 7,
+        "w": 16,
+        "x": 8,
+        "y": 11
+      },
+      "options": {
+        "showStarred": false,
+        "showRecentlyViewed": false,
+        "showSearch": true,
+        "showHeadings": false,
+        "showFolderNames": false,
+        "maxItems": 30,
+        "tags": [
+          "pdctng-health"
+        ]
+      },
+      "id": 642919322
+    },
+    {
+      "title": "Compliance",
+      "type": "text",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 18
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Is the fleet in the state an outside standard requires.** Patch status across the estate, then the formal frameworks: CIS benchmark scores and what can be evidenced against the Essential Eight. Whether Puppet's own enforcement is working is the Enforcement area, not this one."
+      },
+      "id": 1414076973
+    },
+    {
+      "title": "Compliance boards",
+      "type": "dashlist",
+      "gridPos": {
+        "h": 7,
+        "w": 16,
+        "x": 8,
+        "y": 18
+      },
+      "options": {
+        "showStarred": false,
+        "showRecentlyViewed": false,
+        "showSearch": true,
+        "showHeadings": false,
+        "showFolderNames": false,
+        "maxItems": 30,
+        "tags": [
+          "pdctng-compliance"
+        ]
+      },
+      "id": 1147008041
+    },
+    {
+      "title": "Nodes",
+      "type": "text",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 25
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Which nodes need work.** Triage the failing and the drifted, find a node by name, and read one node end to end."
+      },
+      "id": 1407576733
+    },
+    {
+      "title": "Nodes boards",
+      "type": "dashlist",
+      "gridPos": {
+        "h": 7,
+        "w": 16,
+        "x": 8,
+        "y": 25
+      },
+      "options": {
+        "showStarred": false,
+        "showRecentlyViewed": false,
+        "showSearch": true,
+        "showHeadings": false,
+        "showFolderNames": false,
+        "maxItems": 30,
+        "tags": [
+          "pdctng-nodes"
+        ]
+      },
+      "id": 51146613
+    },
+    {
+      "title": "Enforcement",
+      "type": "text",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 32
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Is desired state being applied, and is it holding.** Whether runs are converging, what Puppet is correcting back when something drifts, the tasks run to make it so on demand, and the code being enforced."
+      },
+      "id": 760394353
+    },
+    {
+      "title": "Enforcement boards",
+      "type": "dashlist",
+      "gridPos": {
+        "h": 7,
+        "w": 16,
+        "x": 8,
+        "y": 32
+      },
+      "options": {
+        "showStarred": false,
+        "showRecentlyViewed": false,
+        "showSearch": true,
+        "showHeadings": false,
+        "showFolderNames": false,
+        "maxItems": 30,
+        "tags": [
+          "pdctng-enforcement"
+        ]
+      },
+      "id": 1978435766
+    },
+    {
+      "title": "Reports",
+      "type": "text",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 39
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Things you show somebody else.** Read once and handed over rather than watched: the customer-facing TAM check, upgrade readiness before a version bump, and what Puppet actually did over a period."
+      },
+      "id": 737449880
+    },
+    {
+      "title": "Reports boards",
+      "type": "dashlist",
+      "gridPos": {
+        "h": 7,
+        "w": 16,
+        "x": 8,
+        "y": 39
+      },
+      "options": {
+        "showStarred": false,
+        "showRecentlyViewed": false,
+        "showSearch": true,
+        "showHeadings": false,
+        "showFolderNames": false,
+        "maxItems": 30,
+        "tags": [
+          "pdctng-reports"
+        ]
+      },
+      "id": 428615805
+    }
+  ],
+  "description": "Every pdctng board, grouped by the question it answers. Every board also carries a \"PDCTNG boards\" dropdown at the top to jump straight between them."
+}

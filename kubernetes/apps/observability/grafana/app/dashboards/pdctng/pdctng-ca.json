@@ -1,0 +1,1677 @@
+{
+  "uid": "pdctng-ca",
+  "title": "Certificate Authority",
+  "tags": [
+    "pdctng",
+    "pdctng-health"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_report_timestamp_epoch,environment)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_report_timestamp_epoch,environment)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^(?!rolling_deployment_).*$/",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Environment"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "CA Expires In",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "min by (alias) (puppet_ca_expires_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) - time()",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": -3153600000
+              },
+              {
+                "color": "#fab219",
+                "value": 2592000
+              },
+              {
+                "color": "#0ca30c",
+                "value": 7776000
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "No CA metrics"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Time until the soonest CA certificate expiry, root or intermediate. When the CA expires, everything it signed stops working at once. Amber at ninety days, because replacing a CA is a project with lead time. One value per PE (R93): a min without by (alias) would report only the soonest across the estate at All.",
+      "id": 951886890
+    },
+    {
+      "title": "CRL Valid For",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "min by (alias) (puppet_crl_next_update_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) - time()",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": -3153600000
+              },
+              {
+                "color": "#fab219",
+                "value": 0
+              },
+              {
+                "color": "#0ca30c",
+                "value": 2592000
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "No CRL metrics"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Time until the soonest CRL nextUpdate. An expired CRL presents as the whole estate refusing to authenticate at once. One value per PE (R93).",
+      "id": 477711776
+    },
+    {
+      "title": "CA Certificates",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_ca_expires_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"} - time()",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No CA metrics"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Certificate"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expires in"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Expires in",
+            "desc": false
+          }
+        ]
+      },
+      "description": "Every certificate in the CA bundle and its time to expiry. The tile shows the soonest; the renewal plan needs to know which one that is.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(subject|alias|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "subject": "Certificate",
+              "alias": "PE",
+              "Value": "Expires in"
+            },
+            "indexByName": {
+              "subject": 0,
+              "alias": 1,
+              "Value": 2
+            }
+          }
+        }
+      ],
+      "id": 479828936
+    },
+    {
+      "title": "CRLs",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_crl_next_update_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"} - time()",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No CRL metrics"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Issuer"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Valid for"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Valid for",
+            "desc": false
+          }
+        ]
+      },
+      "description": "Every CRL in the bundle and how long it stays valid. One per CA on PE.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(issuer|alias|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "issuer": "Issuer",
+              "alias": "PE",
+              "Value": "Valid for"
+            },
+            "indexByName": {
+              "issuer": 0,
+              "alias": 1,
+              "Value": 2
+            }
+          }
+        }
+      ],
+      "id": 39184864
+    },
+    {
+      "title": "Is signing working?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "panels": [],
+      "id": 306668307
+    },
+    {
+      "title": "CSRs Waiting",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (alias) (puppet_ca_certificate_count{state=\"requested\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No CA metrics"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Certificate signing requests waiting to be signed. On an autosign estate anything sitting here means autosign is broken and the node cannot join; on a manual-signing estate this is the work queue. One value per PE (R93); the registry always emits this state, so a healthy PE reads a green zero rather than needing a synthesised one.",
+      "id": 371132206
+    },
+    {
+      "title": "Signed",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (alias) (puppet_ca_certificate_count{state=\"signed\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No CA metrics"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Certificates the CA has signed and not revoked. Roughly the fleet plus the infrastructure. One value per PE (R93).",
+      "id": 1211891309
+    },
+    {
+      "title": "Revoked, Not Cleaned",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (alias) (puppet_ca_certificate_count{state=\"revoked\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No CA metrics"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Certificates the CA registry lists as revoked but still present in its signed directory: revoked and not yet cleaned. `puppetserver ca clean` revokes and deletes, so a cleaned node leaves the listing and zero is the healthy steady state. A count here is a tidy-up queue, not an alarm, and not comparable to the CRL tile. One value per PE (R93).",
+      "id": 3491179
+    },
+    {
+      "title": "CRL Entries (Lifetime)",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (alias) (puppet_crl_revoked{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No CRL metrics"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Serials the CRL enforces. A lifetime total that only ever grows: one entry for every serial ever revoked over the life of the CA, so it does not track the CA tile and is not meant to. A revocation the CRL never enforced shows on CRL Freshness below, a stale last_update beside recent revocations. One value per PE (R93).",
+      "id": 296337576
+    },
+    {
+      "title": "CSRs Waiting To Be Signed",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 11,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_ca_pending_csr{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Nothing waiting, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CSR"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "CSR",
+            "desc": false
+          }
+        ]
+      },
+      "description": "The certificate signing requests sitting unsigned, first fifty by name; the CSRs Waiting tile is the true count. Each is a machine that cannot join the estate until somebody or autosign acts.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(name|alias)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "name": "CSR",
+              "alias": "PE"
+            },
+            "indexByName": {
+              "name": 0,
+              "alias": 1
+            }
+          }
+        }
+      ],
+      "id": 49867963
+    },
+    {
+      "title": "CRL Freshness",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 13,
+        "x": 11,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "time() - puppet_crl_last_update_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No CRL metrics"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Issuer"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Since refresh"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Since refresh",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Time since each CRL was regenerated. An old refresh alongside recent revocations means the CRL update machinery has stopped, which is how a revoked certificate keeps working.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(issuer|alias|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "issuer": "Issuer",
+              "alias": "PE",
+              "Value": "Since refresh"
+            },
+            "indexByName": {
+              "issuer": 0,
+              "alias": 1,
+              "Value": 2
+            }
+          }
+        }
+      ],
+      "id": 357700258
+    },
+    {
+      "title": "When do node certs run out?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "panels": [],
+      "id": 53751233
+    },
+    {
+      "title": "Auto-Renewal",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (alias) (puppet_ca_auto_renewal_enabled{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "number"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "On",
+                        "color": "#0ca30c",
+                        "index": 0
+                      },
+                      "0": {
+                        "text": "Off",
+                        "color": "#d03b3b",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Whether the CA will issue a renewed certificate to an agent that asks (`allow-auto-renewal`). Off means every certificate in the estate is a manual job, and the expiry buckets below should then be read as real deadlines rather than as a rotation. One value per PE (R93).",
+      "id": 777467100
+    },
+    {
+      "title": "Alt Names Allowed",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (alias) (puppet_ca_allow_subject_alt_names{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "number"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "On",
+                        "color": "#8e949f",
+                        "index": 0
+                      },
+                      "0": {
+                        "text": "Off",
+                        "color": "#0ca30c",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Whether the CA will sign a certificate carrying a subject alternative name (`allow-subject-alt-names`). **On means a certificate can be issued bearing a name other than the one that requested it**, so anything trusting a certname -- an `auth.conf` rule, a `pp_auth_role` extension, an allowlist on this module's own API -- is trusting a name the CA is willing to hand to somebody else. **PE ships this on**, which is why On is neutral here rather than amber: it is the default, not a fault. Green is Off, because Off means somebody chose. Note the colours are the opposite way round from Auto-Renewal beside this, where On is the healthy answer. One value per PE (R93).",
+      "id": 1344625283
+    },
+    {
+      "title": "Renewed Cert Life",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (alias) (puppet_ca_auto_renewal_cert_ttl_seconds{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) / 86400",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "suffix: days",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How long a renewed certificate is valid for (`auto-renewal-cert-ttl`). The upper edge of the band every healthy certificate cycles through, and where the Expiry Spread's busiest bucket should sit on a working estate. One value per PE (R93).",
+      "id": 1358208405
+    },
+    {
+      "title": "Agents Renew At",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (alias) (puppet_agent_cert_renewal_interval_seconds{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) / 86400",
+          "legendFormat": "{{alias}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "suffix: days",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How close to expiry an agent renews its own certificate (`hostcert_renewal_interval`). The lower edge of that band, and the line a certificate warning has to sit below to mean renewal has failed rather than that it is merely due. PdctngCertWarningAboveRenewal fires when the configured warning is not below it. One value per PE (R93).",
+      "id": 50643709
+    },
+    {
+      "title": "Expiry Spread",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) < 0) or (vector(0) and on() (count(puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "Expired",
+          "refId": "A",
+          "instant": true
+        },
+        {
+          "expr": "count((((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) >= 0) < (7 * 86400)) or (vector(0) and on() (count(puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "Under 7 days",
+          "refId": "B",
+          "instant": true
+        },
+        {
+          "expr": "count((((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) >= (7 * 86400)) < (14 * 86400)) or (vector(0) and on() (count(puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "7 to 14 days",
+          "refId": "C",
+          "instant": true
+        },
+        {
+          "expr": "count((((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) >= (14 * 86400)) < (30 * 86400)) or (vector(0) and on() (count(puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "14 to 30 days",
+          "refId": "D",
+          "instant": true
+        },
+        {
+          "expr": "count((((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) >= (30 * 86400)) < 7776000) or (vector(0) and on() (count(puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "30 to 90 days",
+          "refId": "E",
+          "instant": true
+        },
+        {
+          "expr": "count(((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) >= 7776000) or (vector(0) and on() (count(puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "Over 90 days",
+          "refId": "F",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expired"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Under 7 days"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "7 to 14 days"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ec835a"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "Node certificates bucketed by time to expiry. **On an auto-renewing estate the middle two buckets are the healthy steady state, not a warning**: an agent renews its own certificate once it is within hostcert_renewal_interval of expiry and the CA reissues for auto-renewal-cert-ttl, so every working certificate cycles forever between the two. Only the buckets below the renewal interval mean renewal was due and has not happened. A tall near bucket is a cert cliff: a batch signed together expires together, and that renewal work wants scheduling before it arrives.",
+      "id": 990312557
+    },
+    {
+      "title": "Soonest To Expire",
+      "type": "table",
+      "gridPos": {
+        "h": 10,
+        "w": 16,
+        "x": 0,
+        "y": 44
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "bottomk(20, ((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No certificate metrics"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expires in"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Expires in",
+            "desc": false
+          }
+        ]
+      },
+      "description": "The twenty node certificates closest to expiry. The node name links through to that node's board.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|alias|environment|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "alias": "PE",
+              "environment": "Environment",
+              "Value": "Expires in"
+            },
+            "indexByName": {
+              "node": 0,
+              "alias": 1,
+              "environment": 2,
+              "Value": 3
+            }
+          }
+        }
+      ],
+      "id": 98547925
+    },
+    {
+      "title": "Closest Expiry Over Time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 54
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "min by (alias) (((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()))",
+          "legendFormat": "Closest cert {{alias}}",
+          "refId": "A"
+        },
+        {
+          "expr": "avg by (alias) (((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()))",
+          "legendFormat": "Fleet average {{alias}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Closest cert.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Fleet average.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Time to the soonest node cert expiry, over the dashboard range. Healthy renewal is a sawtooth: the line climbs when a cert is reissued. A line that only descends is a fleet where nothing is renewing.",
+      "id": 733141868
+    }
+  ],
+  "description": "Is certificate infrastructure going to bite us, and when: CA and CRL lifetime, whether signing and revocation are working, and when node certificates run out."
+}

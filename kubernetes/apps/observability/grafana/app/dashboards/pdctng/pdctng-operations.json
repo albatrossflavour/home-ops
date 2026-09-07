@@ -1,0 +1,2710 @@
+{
+  "uid": "pdctng-operations",
+  "title": "Internal Operations",
+  "tags": [
+    "pdctng",
+    "pdctng-health"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "interval",
+        "type": "interval",
+        "query": "5m,10m,30m,1h,6h,12h,1d",
+        "refresh": 2,
+        "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval_interval"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          }
+        ],
+        "auto": true,
+        "auto_count": 30,
+        "auto_min": "5m",
+        "current": {
+          "text": "auto",
+          "value": "$__auto_interval_interval"
+        },
+        "label": "Interval"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Can these numbers be believed?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": [],
+      "id": 522120264
+    },
+    {
+      "title": "Last Poll",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(time() - puppet_exporter_last_scrape_timestamp)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 600
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1200
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Since the poll loop last completed, on the slowest exporter. The loop completing does not mean the collectors inside it succeeded: that is the next tile along.",
+      "id": 1846640598
+    },
+    {
+      "title": "Poll Cycle Load",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_scrape_duration_seconds / puppet_exporter_polling_interval_seconds) * 100",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 50
+              },
+              {
+                "color": "#d03b3b",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "description": "The last poll cycle as a fraction of the configured poll interval, on the exporter with the least headroom. A cycle approaching its interval cannot keep up, and stale data and evictions follow. R71 gave the exporter its own interval, so this is an honest ratio now rather than a raw duration you had to size against 300s in your head.",
+      "id": 1788920100
+    },
+    {
+      "title": "Ceiling Used",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_nodes / puppet_exporter_recommended_node_ceiling) * 100",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 70
+              },
+              {
+                "color": "#d03b3b",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "This exporter's fleet as a fraction of the node count it is recommended to serve from one scrape target. The ceiling is extrapolated linearly from a 10,002-node measurement and the exposition body is what binds first, so this is a recommendation rather than a wall: past 100 the answer is a second scrape target or `pdctng::enable_per_node_metrics: false`, not an outage.",
+      "id": 977334655
+    },
+    {
+      "title": "Per-Node",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "min(puppet_exporter_per_node_metrics)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "number"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "On",
+                        "color": "#0ca30c",
+                        "index": 0
+                      },
+                      "0": {
+                        "text": "Off",
+                        "color": "#8e949f",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Whether families carrying a node label are emitted. Off is the large-estate emission profile: every fleet aggregate kept, per-node identity given up, and the boards that draw nothing else not provisioned. Set with `pdctng::enable_per_node_metrics`. If a per-node board is missing or a per-node panel is empty, read this before anything else.",
+      "id": 691085214
+    },
+    {
+      "title": "Collectors Failing",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "(count(puppet_exporter_collector_success == 0) or (vector(0) and on() (count(puppet_exporter_collector_success) > 0))) + (count(puppet_exporter_source_success == 0) or (vector(0) and on() (count(puppet_exporter_collector_success) > 0)))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Collectors whose last run raised, plus service collectors that could not read one of the hosts they poll. Read it as exactly that and no wider: twelve of the eighteen collectors handle their own query failures without raising, so the poll loop records a success. A zero here is not a promise that every collector saw anything: the freshness table below is where that question gets answered. R70, R64.",
+      "id": 1333930305
+    },
+    {
+      "title": "Never Succeeded",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_exporter_collector_last_success_timestamp == 0) or (vector(0) and on() (count(puppet_exporter_collector_last_success_timestamp) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Enabled collectors with no successful run behind them, usually a configuration fault rather than an outage. Every collector runs on the first cycle after a restart, so this clears within one interval or it is real.",
+      "id": 516149992
+    },
+    {
+      "title": "Servers Down",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_exporter_server_up == 0) or (vector(0) and on() (count(puppet_exporter_server_up) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Configured PuppetDB servers not responding. With several configured the exporter keeps working from the survivors, so a dead one shows up nowhere else at all.",
+      "id": 26818192
+    },
+    {
+      "title": "Targets Down",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(up == 0) or (vector(0) and on() (count(up) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Scrape targets Prometheus cannot reach, including the exporters feeding this board. On a dedicated dashboard node that is the pdctng exporters; on a shared Prometheus it counts everything, which errs loud.",
+      "id": 234426301
+    },
+    {
+      "title": "Plugin Collectors",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_plugins_loaded)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Plugin collectors loaded from the plugin directory and registered. Zero is the normal answer on a stock install and says nothing is wrong; it is here as the denominator for the tile beside it, because an estate that runs no plugins and one that lost the plugins it had read the same everywhere else.",
+      "id": 1587454330
+    },
+    {
+      "title": "Plugins Refused",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_plugin_load_failures)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Plugin collectors refused at startup. A refused plugin is not a collector that failed, it is one that never existed: no failure is counted, no timestamp ages, and no row appears in the freshness table below, so the boards fed by its families simply render empty. puppet_exporter_plugin_load_failed names each one and its reason.",
+      "id": 497312092
+    },
+    {
+      "title": "Which Plugins Were Refused, And Why",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_exporter_plugin_load_failed",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Every plugin collector loaded"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Plugin"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "description": "One row per plugin collector the exporter refused at startup, with the reason it gave. Plugins Refused above counts these. Nothing else on any board can show them: a refused plugin never becomes a collector, so it reports no failure, ages no timestamp and appears in no freshness table.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(plugin|reason|alias)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "plugin": "Plugin",
+              "reason": "Reason",
+              "alias": "PE"
+            },
+            "indexByName": {
+              "plugin": 0,
+              "reason": 1,
+              "alias": 2
+            }
+          }
+        }
+      ],
+      "id": 773695961
+    },
+    {
+      "title": "Is the monitoring stack itself working?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "panels": [],
+      "id": 1800803508
+    },
+    {
+      "title": "Rule Evaluations Failing",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 23
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(prometheus_rule_evaluation_failures_total)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Prometheus not self-scraping"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Rule evaluations that have errored since Prometheus started, across every group including pdctng's own. Above zero means some rule is not producing what it claims to: a recording rule feeding a board, or an alert that will never fire. Nothing else on any board can see this, because a rule that fails to evaluate leaves the series it should have written simply absent.",
+      "id": 309459855
+    },
+    {
+      "title": "Alert Notifications Dropped",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 23
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(prometheus_notifications_dropped_total)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Prometheus not self-scraping"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Alert notifications Prometheus gave up on since it started. Above zero means an alert fired and nobody was told, which is the failure mode the rest of this board cannot see: every panel still renders, and the estate looks exactly as healthy as it did before the notification was lost.",
+      "id": 446300337
+    },
+    {
+      "title": "Notification Queue",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 23
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(prometheus_notifications_queue_length)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Prometheus not self-scraping"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Notifications waiting to be delivered. A queue that is not draining is Alertmanager unreachable or refusing, and it precedes the dropped count above rather than following it.",
+      "id": 379985049
+    },
+    {
+      "title": "Rules Config Loaded",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "min(prometheus_config_last_reload_successful)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0
+              },
+              {
+                "color": "#0ca30c",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Prometheus not self-scraping"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Whether Prometheus accepted its configuration on the last reload. Zero means it is still running the previous one, so a rule or scrape job this module just deployed is on disk and not in effect, and every board carries on looking normal. The agent run that wrote the file reports success either way.",
+      "id": 1611918551
+    },
+    {
+      "title": "Scrape Targets Discovered",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(prometheus_sd_discovered_targets)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Prometheus not self-scraping"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Targets service discovery is offering, across every job. Read against Targets Down above: this counts what Prometheus knows it should be scraping, so a fall here is a target that stopped being offered rather than one that started failing, and the two have completely different causes.",
+      "id": 674945893
+    },
+    {
+      "title": "Unsent Alerts",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "(sum(alertmanager_alerts_received_total) > 0) and (sum(alertmanager_notifications_total) == 0) and (sum(alertmanager_integrations) > 0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Nothing undelivered"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Alerts Alertmanager has accepted on an install with at least one destination configured that has delivered none of them -- a receiver that is wired up and broken, not one that was never wired up at all. Empty is the healthy answer and means either something is being delivered, nothing has fired, or no destination is configured yet, which is your decision rather than a fault; a number here means the rules are working, a real destination exists, and it is not receiving anything.",
+      "id": 305040675
+    },
+    {
+      "title": "Notices Sent",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 33
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(alertmanager_notifications_total)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Alertmanager not scraped"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Notifications Alertmanager has dispatched since it started, across every configured receiver. Read it beside the panel to its left rather than on its own: zero is correct on an estate where nothing has fired, and is the whole problem on one where things have.",
+      "id": 737705167
+    },
+    {
+      "title": "Send Failures",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 33
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(alertmanager_notifications_failed_total)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Alertmanager not scraped"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Notifications that were attempted and rejected by the destination. Distinct from the two panels beside it: this is a receiver that is configured and broken, where those are a receiver that was never configured at all. Both end with nobody being told, and they want completely different fixes.",
+      "id": 1053385245
+    },
+    {
+      "title": "WAL Corruptions",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 33
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(prometheus_tsdb_wal_corruptions_total)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Prometheus not self-scraping"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Write-ahead-log corruptions since start. Above zero means Prometheus has lost data it had already accepted, so a gap in any board on this stack is the store rather than the collector, which is the one question this board otherwise sends people round in circles on.",
+      "id": 1457053088
+    },
+    {
+      "title": "Is it blind, or is it behind?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "panels": [],
+      "id": 989572177
+    },
+    {
+      "title": "Collectors Needing Attention",
+      "type": "table",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "label_replace(puppet_exporter_collector_consecutive_failures > 0, \"reason\", \"Last run raised\", \"\", \"\") or label_replace(puppet_exporter_collector_partial_failures > 0, \"reason\", \"Serving stale data\", \"\", \"\") or label_replace(puppet_exporter_source_consecutive_failures > 0, \"reason\", \"Source unreachable\", \"\", \"\")",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Every collector is seeing everything"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Count"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Count",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Collectors that raised on their last run, collectors that ran but could not refresh everything they publish, and service collectors that could not read one of the hosts they poll. Collectors disabled by configuration emit nothing at all, so anything listed here ran. The value is failures in a row, except for the stale-data rows where it is the number of subjects.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(collector|reason|Value|alias|host)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "collector": "Collector",
+              "reason": "Reason",
+              "Value": "Count",
+              "alias": "PE",
+              "host": "Host"
+            },
+            "indexByName": {
+              "collector": 0,
+              "reason": 1,
+              "Value": 2,
+              "alias": 3,
+              "host": 4
+            }
+          }
+        }
+      ],
+      "id": 220014671
+    },
+    {
+      "title": "Slowest Collectors: $pe",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(8, puppet_exporter_collector_duration_seconds{alias=~\"$pe\"})",
+          "legendFormat": "{{collector}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "The eight slowest collectors on this PE at each point in time, so the set changes as the load does. If Poll Duration is climbing, its explanation is on this panel. A service collector's line is its whole run across every host it polls. One panel per instance, which stays readable to about five of them.",
+      "repeat": "pe",
+      "repeatDirection": "h",
+      "id": 1365706012
+    },
+    {
+      "title": "What is stale, and what depends on it?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "panels": [],
+      "id": 348544450
+    },
+    {
+      "title": "Collector Freshness, and What Goes Stale With It",
+      "type": "table",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"fleet\"} > 0), \"feeds\", \"Convergence, Fleet Composition, NOC, Node Detail\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"facts\"} > 0), \"feeds\", \"Fleet Composition, Patching, Node Detail\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"cis\"} > 0), \"feeds\", \"CIS\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"vrs\"} > 0), \"feeds\", \"Patching, the vulnerabilities row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"rbac_state\"} > 0), \"feeds\", \"Console Activity, the access-state row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"patching_windows\"} > 0), \"feeds\", \"Patching, the schedule row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"code_manager\"} > 0), \"feeds\", \"Code Releases, the deploy queue\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"puma_services\"} > 0), \"feeds\", \"Orchestrator, the thread pools\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"package_watch\"} > 0), \"feeds\", \"Patching, the watched-packages row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"console_activity\"} > 0), \"feeds\", \"Console Activity, the change rate\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"class_adoption|classes_per_node\"} > 0), \"feeds\", \"Fleet Composition, the classification row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"code_deploys|deploy_observed\"} > 0), \"feeds\", \"Code Releases\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"deploy_impact\"} > 0), \"feeds\", \"Impact Analysis\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"cd4pe_events\"} > 0), \"feeds\", \"Code Releases, and annotations on every board\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"patch_events\"} > 0), \"feeds\", \"Patching, the Patch windows annotation layer\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"orchestrator\"} > 0), \"feeds\", \"Tasks, Orchestrator\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"pcp_inventory\"} > 0), \"feeds\", \"Triage, the PCP work-list row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"scheduled_jobs\"} > 0), \"feeds\", \"Tasks, the scheduled row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"status_service\"} > 0), \"feeds\", \"Puppetserver, File Sync, Orchestrator\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"puppetserver_limits\"} > 0), \"feeds\", \"Puppetserver, the Queue Ceiling tile\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"puppetdb_internals|postgres\"} > 0), \"feeds\", \"PuppetDB\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"infrastructure_config\"} > 0), \"feeds\", \"Console links on every board\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"discovery\"} > 0), \"feeds\", \"The service collectors, not a board\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"certificate_expiry\"} > 0), \"feeds\", \"Alert rules only\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"license|ca|pe|backup|module_versions|infra_platform\"} > 0), \"feeds\", \"TAM Check\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"environments\"} > 0), \"feeds\", \"Environments\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"classifier\"} > 0), \"feeds\", \"Classification\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"node_lifecycle\"} > 0), \"feeds\", \"Fleet Churn, TAM Check\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"scm_export\"} > 0), \"feeds\", \"CIS Rules, Internal Operations\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"change_types\"} > 0), \"feeds\", \"Convergence, Enforcement, the change-type row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"resource_types\"} > 0), \"feeds\", \"Evidence Quality, the resource-types tile\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"e8_macro\"} > 0), \"feeds\", \"Essential Eight, the macro row\", \"\", \"\") or label_replace(time() - (puppet_exporter_collector_last_success_timestamp{collector=~\"infra_assistant\"} > 0), \"feeds\", \"No dashboard yet\", \"\", \"\")",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Since last success"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              },
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Since last success",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Every collector that has ever succeeded, oldest first, and which boards read what it collects. This is the panel to check against the figure that sent you here: if the board you distrust is named on a row with a large age, the figure is stale rather than wrong. Collectors with no successful run at all are counted by Never Succeeded above rather than listed here.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(collector|Value|feeds|alias|host)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "collector": "Collector",
+              "Value": "Since last success",
+              "feeds": "Boards it feeds",
+              "alias": "PE",
+              "host": "Host"
+            },
+            "indexByName": {
+              "collector": 0,
+              "Value": 1,
+              "feeds": 2,
+              "alias": 3,
+              "host": 4
+            }
+          }
+        }
+      ],
+      "id": 1542931170
+    },
+    {
+      "title": "Source Freshness, Per Host Behind Each Collector",
+      "type": "table",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 67
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "time() - (puppet_exporter_source_last_success_timestamp > 0)",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Since last success"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Since last success",
+            "desc": true
+          }
+        ]
+      },
+      "description": "How long since each host behind each collector last answered. A collector reports one success for itself however many hosts it polls, so the table above reads fresh while one compiler or one PuppetDB has been failing for a day; this is where that shows. PdctngSourceStale fires on exactly this. On a single-host install it mirrors Collector Freshness, which is the healthy and boring case.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(collector|host|Value|alias)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "collector": "Collector",
+              "host": "Host",
+              "Value": "Since last success",
+              "alias": "PE"
+            },
+            "indexByName": {
+              "collector": 0,
+              "host": 1,
+              "Value": 2,
+              "alias": 3
+            }
+          }
+        }
+      ],
+      "id": 1868904659
+    },
+    {
+      "title": "PuppetDB Servers",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 74
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "time() - (puppet_exporter_server_last_success_timestamp > 0)",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Server"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Since last success"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Since last success",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Every configured server and how long since it last answered. A number climbing past your polling interval is a server on its way out. Everything on every board comes through these, so one failing is the widest blindness the exporter has.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(server|Value|alias)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "server": "Server",
+              "Value": "Since last success",
+              "alias": "PE"
+            },
+            "indexByName": {
+              "server": 0,
+              "Value": 1,
+              "alias": 2
+            }
+          }
+        }
+      ],
+      "id": 1916591708
+    },
+    {
+      "title": "Are the board dimensions actually dimensions?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 80
+      },
+      "panels": [],
+      "id": 46683893
+    },
+    {
+      "title": "Board Dimensions",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 81
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (dimension) (puppet_exporter_filter_fact_nodes)",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (dimension) (puppet_exporter_filter_fact_values)",
+          "legendFormat": "",
+          "refId": "B",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (dimension) (puppet_exporter_filter_fact_values_per_node)",
+          "legendFormat": "",
+          "refId": "C",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (dimension) (rate(puppet_exporter_filter_fact_value_changes_total[$interval]) * 3600)",
+          "legendFormat": "",
+          "refId": "D",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Dimension"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Nodes"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Distinct"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Values per node"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#0ca30c",
+                      "value": null
+                    },
+                    {
+                      "color": "#fab219",
+                      "value": 0.5
+                    },
+                    {
+                      "color": "#d03b3b",
+                      "value": 0.9
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Moves per hour"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "description": "Each dimension configured in pdctng::filter_facts, and whether it groups machines or identifies them. Values per node near 1 means the picker gains an entry per node and filters nothing; near 0 is a real grouping. Empty means no dimension is configured, which is the default. **Moves per hour is the column values per node cannot replace.** A fact taking three values across the fleet reads a healthy ratio and still mints a series per node per poll if those three values move, which is indistinguishable from a good dimension at any single instant. A dimension that groups machines sits at zero here. pdctng-ctl filter-fact answers the same question before a Hiera change rather than after one.",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "dimension",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(dimension|Value\\ \\#A|Value\\ \\#B|Value\\ \\#C|Value\\ \\#D)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "dimension": "Dimension",
+              "Value #A": "Nodes",
+              "Value #B": "Distinct",
+              "Value #C": "Values per node",
+              "Value #D": "Moves per hour"
+            },
+            "indexByName": {
+              "dimension": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Values per node",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "id": 61043256
+    },
+    {
+      "title": "Will it hold as the estate grows? ($pe)",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 87
+      },
+      "panels": [],
+      "repeat": "pe",
+      "id": 971751693
+    },
+    {
+      "title": "Nodes in Store",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 88
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_exporter_nodes{alias=~\"$pe\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "description": "Nodes held in this PE's metric store. Scale, not health: this number going up is the estate growing, and it is the denominator for the two tiles beside it. One tile per instance, because a summed node count answers nothing about which store is filling.",
+      "id": 331373401
+    },
+    {
+      "title": "Store Memory",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 88
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_store_estimated_mb{alias=~\"$pe\"} / puppet_exporter_store_ceiling_mb{alias=~\"$pe\"}) * 100",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 70
+              },
+              {
+                "color": "#d03b3b",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "description": "Metric-store size as a fraction of its configured ceiling, on this PE's exporter. The store tracks node count by construction, and the exporter evicts when it reaches this ceiling, so this is the headroom left before evictions start. Eviction happens when one exporter hits its own ceiling rather than when the total does, which is why this is a tile per instance. R71 gave the exporter its ceiling; before it, this could only show raw megabytes with no sense of how close was close.",
+      "id": 1746340002
+    },
+    {
+      "title": "Store Refusing Nodes",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 88
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_store_at_ceiling{alias=~\"$pe\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "bool_yes_no"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Whether this PE's store is over its ceiling with nothing left to shed. Yes means new nodes are being turned away and the fleet view is missing machines, which no other tile on this board will tell you: Nodes in Store simply stops growing, which looks like an estate that stopped growing. puppet_exporter_store_refused_total counts what has been turned away.",
+      "id": 1445281498
+    },
+    {
+      "title": "Nodes Refused Since Restart",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 93
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_store_refused_total{alias=~\"$pe\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes turned away because the store was full, counted since the exporter last restarted rather than over the board range: this is an in-memory counter and it resets to zero whenever the daemon does. Above zero means the fleet view has been missing machines, whether or not Store Refusing Nodes says it still is.",
+      "id": 1567583123
+    },
+    {
+      "title": "Render Time",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 93
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_render_duration_seconds{alias=~\"$pe\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 5
+              },
+              {
+                "color": "#d03b3b",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "description": "How long this PE's exporter takes to render its metrics, which happens inside the Prometheus scrape. Past the scrape timeout, 10s by default, the scrape fails and every board in the family goes blank rather than wrong. This is the reading that has to hold as the store grows, and it is per instance because each renders its own estate.",
+      "id": 217389163
+    },
+    {
+      "title": "Render Sections Failed",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 93
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_exporter_render_sections_failed{alias=~\"$pe\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "description": "Sections of the exposition that raised while rendering on this PE's exporter. Anything above zero means the scrape succeeded and returned less than it should have, so the boards fed by those families go blank rather than wrong. Read the daemon log for which section: the metric counts them and cannot name them.",
+      "id": 384198003
+    },
+    {
+      "title": "PuppetDB Query Rate",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 98
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (server) (rate(puppet_exporter_server_queries_total{alias=~\"$pe\"}[$interval]))",
+          "legendFormat": "{{server}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Queries this PE's exporter makes against its PuppetDB. Should track the poll cadence and nothing else: a line that climbs with the node count is a collector doing per-node work, which is the thing the collector design forbids. One panel per instance, since the promise is per exporter and a merged rate hides the one breaking it.",
+      "id": 914823158
+    },
+    {
+      "title": "Errors and Evictions",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 103
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(puppet_exporter_scrape_errors_total{alias=~\"$pe\"}[$interval]))",
+          "legendFormat": "Poll errors",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(puppet_exporter_collector_failures_total{alias=~\"$pe\"}[$interval]))",
+          "legendFormat": "Collector failures",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(puppet_exporter_server_errors_total{alias=~\"$pe\"}[$interval]))",
+          "legendFormat": "Server errors",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(rate(puppet_exporter_evictions_total{alias=~\"$pe\"}[$interval]))",
+          "legendFormat": "Evictions",
+          "refId": "D"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "axisSoftMax": 1
+          },
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Poll errors"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Collector failures"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Server errors"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Evictions"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c98500"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Anything non-zero here wants explaining. Evictions sit with the errors because a store dropping nodes to stay inside its bound is losing fleet data, whatever the reason, and at scale it is the first thing to go. One panel per instance: summed across primaries, a healthy one dilutes a failing one.",
+      "id": 1539396449
+    }
+  ],
+  "description": "Whether the numbers on the other boards can be believed, and if not, whether the exporter is blind or behind."
+}

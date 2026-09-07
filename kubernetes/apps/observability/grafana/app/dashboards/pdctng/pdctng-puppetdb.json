@@ -1,0 +1,3137 @@
+{
+  "uid": "pdctng-puppetdb",
+  "title": "PuppetDB",
+  "tags": [
+    "pdctng",
+    "pdctng-health"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Patch windows",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "green",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:patch",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "interval",
+        "type": "interval",
+        "query": "5m,10m,30m,1h,6h,12h,1d",
+        "refresh": 2,
+        "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval_interval"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          }
+        ],
+        "auto": true,
+        "auto_count": 30,
+        "auto_min": "5m",
+        "current": {
+          "text": "auto",
+          "value": "$__auto_interval_interval"
+        },
+        "label": "Interval"
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "host",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_db_queue_depth,host)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_db_queue_depth,host)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "Host"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Is it keeping up?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": [],
+      "id": 396777763
+    },
+    {
+      "title": "Queue Depth",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_db_queue_depth{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 100
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Commands waiting to be processed. The headline PuppetDB health number. A burst that drains is normal; read it with the trend beside it.",
+      "id": 1899866317
+    },
+    {
+      "title": "Queue Trend",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(delta(puppet_db_queue_depth{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": -1000000
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Change in queue depth over the interval. Positive means ingestion is losing to processing, which is the condition the queue alert fires on.",
+      "id": 265256623
+    },
+    {
+      "title": "Awaiting Retry",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_db_commands_awaiting_retry{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_db_commands_awaiting_retry{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Commands queued for another attempt. Usually a constraint violation or postgres distress, and it is what happens just before commands start being discarded.",
+      "id": 600134879
+    },
+    {
+      "title": "Discarded",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(puppet_db_commands_discarded_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) or (vector(0) and on() (count(puppet_db_commands_discarded_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.0001
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Commands given up on after exhausting retries. Any rate above zero is silent data loss: reports or catalogues that will never be stored.",
+      "id": 841799007
+    },
+    {
+      "title": "Fatal",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(puppet_db_commands_fatal_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) or (vector(0) and on() (count(puppet_db_commands_fatal_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.0001
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Commands rejected outright rather than retried. Also data loss, and usually a malformed or oversized submission rather than a busy database.",
+      "id": 775220189
+    },
+    {
+      "title": "Replica Sync Age",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_db_ha_last_sync_age_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 900
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "Not an HA estate, or not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How far behind the HA replica is. The metric is absent on estates without a replica, which is what Not an HA estate means here.",
+      "id": 1045245552
+    },
+    {
+      "title": "Queue Depth Over Time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_queue_depth{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "axisSoftMax": 5
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "A sawtooth that returns to zero each run interval is a healthy fleet. A floor that keeps rising is ingestion losing.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1411908211
+    },
+    {
+      "title": "Commands In and Out",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (host) (rate(puppet_db_commands_seen_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Seen {{host}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (host) (rate(puppet_db_commands_processed_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Processed {{host}}",
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (host) (rate(puppet_db_commands_retried_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Retried {{host}}",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Seen.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Processed.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Retried.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Commands arriving against commands processed. They track each other when PuppetDB is keeping up; a gap that opens and stays open is the queue filling.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1707895278
+    },
+    {
+      "title": "Query Threads",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_http_threads{state=~\"busy|queued\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{state}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^queued.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^busy.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "The Jetty pool serving the query API. Queued above zero means queries are waiting for a thread, which stalls catalogue compiles with nothing showing in the command pipeline. The pool ceiling is 200 by default and set in the PuppetDB config, not here.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1923187441
+    },
+    {
+      "title": "Is it the JVM or the database?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "panels": [],
+      "id": 176088063
+    },
+    {
+      "title": "Waiting on Postgres",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_db_pool_connections{pool=\"write\",state=\"pending\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_db_pool_connections{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Connections queued for the write pool. Above zero, PuppetDB is waiting on the database rather than the other way round, and the answer to this section is the left hand column.",
+      "id": 881080117
+    },
+    {
+      "title": "Heap Used",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_db_jvm_heap_bytes{area=\"used\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} / ignoring(area) puppet_db_jvm_heap_bytes{area=\"max\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.9
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.95
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Heap in use against the maximum, the same expression the heap pressure alert fires on. Sustained above 90 percent after a collection is an undersized heap or a leak, and the answer is the right hand column.",
+      "id": 617966728
+    },
+    {
+      "title": "Pool Wait",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_pool_wait_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{pool}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "How long a thread waits to get a connection. Rising wait with the pool at maximum is the increase-the-pool-or-fix-postgres decision point.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 797983114
+    },
+    {
+      "title": "GC Time Fraction",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "rate(puppet_db_jvm_gc_time_seconds_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])",
+          "legendFormat": "{{collector}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Share of wall clock spent collecting garbage. A rising fraction is the JVM about to fall over, and it climbs before the heap tile does.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 224473797
+    },
+    {
+      "title": "Pool Connections",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 33
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_pool_connections{state=~\"active|pending|max\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{pool}} {{state}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Write and read pools. Active pinned at max with anything pending is saturation; the read pool starving affects queries rather than ingestion.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 380293716
+    },
+    {
+      "title": "Heap",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 33
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_jvm_heap_bytes{area=~\"used|max\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{area}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Used against max. The shape to look for is the sawtooth floor rising: each collection recovering less than the last.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 48832242
+    },
+    {
+      "title": "Where The CPU Goes",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 41
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_cpu_percent{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{kind}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "PuppetDB process CPU against collection CPU. **Read the two together**: process high and GC low is a database doing work, GC climbing toward process is a heap too small for the load, and both idle while the queue grows means PuppetDB is waiting on postgres rather than on itself.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1943275822
+    },
+    {
+      "title": "How Long A Connection Is Held",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 41
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_pool_usage_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{pool}} pool {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Mean time a database connection stays checked out, by pool. **Pool Wait above says a caller queued; this says why.** A pool runs dry either because too many workers want a connection or because each holds it too long, and the two have different fixes.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1518746805
+    },
+    {
+      "title": "What is it working on?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "panels": [],
+      "id": 1526487115
+    },
+    {
+      "title": "Per-command Duration",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 50
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_command_duration_seconds{command!=\"all\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{command}} v{{version}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Slow replace catalog with store report still fast is a catalogue size or dedup problem. Everything slow together is the database, and sends you back up a section.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 292168000
+    },
+    {
+      "title": "Pipeline Stage Times",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 50
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_command_stage_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{stage}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Where a command spends its life. Queue time growing is a throughput problem; persistence growing is the database; parse growing means the submissions themselves got bigger.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 540674104
+    },
+    {
+      "title": "Catalogue Dedup Rate",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (host) (rate(puppet_db_catalogs_duplicate_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) / (sum by (host) (rate(puppet_db_catalogs_duplicate_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) + sum by (host) (rate(puppet_db_catalogs_new_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])))",
+          "legendFormat": "Duplicate share {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Share of catalogues PuppetDB recognised and skipped storing. High is healthy and cheap. Falling means catalogues are churning every run, which multiplies write load before anything else on this board moves.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 4439241
+    },
+    {
+      "title": "Command Size",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_command_size_bytes{command!=\"all\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{command}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Average submission size per command type. A replace catalog climbing means the catalogues themselves grew; replace facts climbing is fact bloat, usually a new structured fact.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 165915783
+    },
+    {
+      "title": "Storage Operation Latency",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_storage_duration_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{operation}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "The database side of each command, broken out by what it was storing.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1784127706
+    },
+    {
+      "title": "Catalogue Hash Check Cost",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 65
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_catalog_hash_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{result}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^miss.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "How long the catalogue hash check takes, split by whether it matched. **A miss costs far more than a match** -- roughly 35x on a quiet estate -- so this is the cost side of the Catalogue Dedup Rate panel above: that one says how often the shortcut works, this says what it is worth.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 865847864
+    },
+    {
+      "title": "Command Threads In Use",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 65
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_command_concurrency{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "In use {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Command-processing threads currently holding work. Zero at rest is healthy and means the pipeline is draining as fast as it fills. **Sitting at its ceiling while Queue Depth grows is the shape that says PuppetDB is the bottleneck** rather than whatever is feeding it.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 717120349
+    },
+    {
+      "title": "Throughput By Command Type",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 73
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (command, host) (rate(puppet_db_command_processed_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Processed {{command}} {{host}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (command, host) (rate(puppet_db_command_retried_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Retried {{command}} {{host}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Retried.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Commands processed per second, split by command type, with retries on the same axis. The panels above say how long each command type takes and how big it is; this says how many there are, which is what turns a slow command into a busy estate or a rare one. Retries sitting on zero is the healthy shape -- they matter as a fraction of the throughput beside them, not on their own.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1439774332
+    },
+    {
+      "title": "Refused On Arrival",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 73
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (host) (rate(puppet_db_commands_ignored_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Ignored {{host}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (host) (rate(puppet_db_commands_invalidated_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Invalidated {{host}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Ignored.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Invalidated.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Commands PuppetDB would not process. **Ignored** means a newer command for the same certname had already arrived, which is ordinary on a busy estate and is not data loss. **Invalidated** means it was thrown out before processing, which is. Both differ from Discarded and Fatal on the row above: those were attempted and lost, these never started. Flat zero is the resting state; read the shape rather than the value.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1966477531
+    },
+    {
+      "title": "Will it keep working?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 81
+      },
+      "panels": [],
+      "id": 1220225507
+    },
+    {
+      "title": "Cache Hit Ratio",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(puppet_postgres_blocks_total{source=\"cache\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) / sum(rate(puppet_postgres_blocks_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.9
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0.99
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Reads served from cache. The first thing anyone checks on a postgres complaint, and it should sit above 99 percent on a PuppetDB database.",
+      "id": 934490145
+    },
+    {
+      "title": "Connection Saturation",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(sum without (db) (puppet_postgres_backends{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) / puppet_postgres_max_connections{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.9
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.98
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Open connections against max_connections. The alert fires at 90 percent. At the limit new connections are refused rather than queued, so this is a wall rather than a slope.",
+      "id": 821989132
+    },
+    {
+      "title": "Dead Tuple Ratio",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_postgres_table_tuples{state=\"dead\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) / sum(puppet_postgres_table_tuples{state=\"live\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.2
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Dead tuples against live, estate wide. Dead tuples outrunning autovacuum is the classic PuppetDB pathology: bloat, then slow queries, then the queue backing up. The alert fires per table at the same ratio.",
+      "id": 700418684
+    },
+    {
+      "title": "Autovacuum per Hour",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(puppet_postgres_vacuums_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) * 3600 or (vector(0) and on() (count(puppet_postgres_vacuums_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Vacuums completing per hour. Zero while the dead tuple ratio climbs is autovacuum not running at all, which is the first thing that alert asks you to check.",
+      "id": 418456973
+    },
+    {
+      "title": "Deadlocks",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 87
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(puppet_postgres_deadlocks_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) or (vector(0) and on() (count(puppet_postgres_deadlocks_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.0001
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Should be zero. Anything else means two transactions are fighting, and PuppetDB retries are the symptom you would have seen first.",
+      "id": 1621960839
+    },
+    {
+      "title": "Temp File Rate",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 87
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(puppet_postgres_temp_bytes_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) or (vector(0) and on() (count(puppet_postgres_temp_bytes_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "Bps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Bytes spilled to disk because a query would not fit in memory. **How much** spilled; the tile beside it says how many times. Sustained non-zero means work_mem is too small for what PuppetDB is asking postgres to do.",
+      "id": 1645443760
+    },
+    {
+      "title": "Temp File Spills",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 87
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(puppet_postgres_temp_files_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])) or (vector(0) and on() (count(puppet_postgres_temp_files_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How often postgres had to spill a query to disk. **Read against Temp File Rate beside it**: a lot of bytes across few spills is one enormous query, and a steady drip of small ones is work_mem being too small everywhere. They want different answers.",
+      "id": 662821807
+    },
+    {
+      "title": "Largest Tables: $host",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 92
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(8, puppet_postgres_table_bytes{kind=\"total\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{table}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "The why-is-my-disk-full answer. Reports and fact paths dominate, and the slope here is what predicts the next capacity conversation.",
+      "repeat": "host",
+      "repeatDirection": "h",
+      "id": 1589193473
+    },
+    {
+      "title": "Dead Tuples by Table: $host",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 92
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(8, puppet_postgres_table_tuples{state=\"dead\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{table}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Which table the ratio tile is complaining about. One table climbing while the rest stay flat is a vacuum that has stopped keeping up with that table specifically.",
+      "repeat": "host",
+      "repeatDirection": "h",
+      "id": 1552927123
+    },
+    {
+      "title": "Autovacuum by Table: $host",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 92
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(8, sum without (kind, db) (rate(puppet_postgres_vacuums_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])))",
+          "legendFormat": "{{table}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Vacuums per second per table. Read it beside Dead Tuples by Table: a table whose dead count climbs while its vacuum rate is flat at zero is the one autovacuum has stopped keeping up with.",
+      "repeat": "host",
+      "repeatDirection": "h",
+      "id": 160971223
+    },
+    {
+      "title": "Database GC Cost",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 100
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_gc_duration_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{task}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "PuppetDB expiring old reports and catalogues. Overruns interact badly with report-ttl and node-purge settings, and show up on the panels above as periodic latency spikes.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 519749308
+    },
+    {
+      "title": "Largest Indexes",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 100
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(8, puppet_postgres_index_bytes{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "{{index}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "The eight biggest indexes. Read it against Index Scans beside it: an index that is large here and absent there is pure write amplification, paid on every insert and never earning it back. On two primaries the ranking is global, so check the host in the legend before concluding one of them has no large indexes.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 240659843
+    },
+    {
+      "title": "Index Scans",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 100
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(8, rate(puppet_postgres_index_scans_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "{{index}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "How often each index is actually used. The pair to Largest Indexes: something near the top there and nowhere here is costing writes for nothing. Same global ranking caveat on two primaries, same host in the legend. **The legend can run longer than eight**: the ranking is recomputed at every point in the range, so the series drawn are every index that entered the top eight at any moment, not eight indexes.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 265343377
+    },
+    {
+      "title": "Transactions And Rollbacks",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 108
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (outcome, host) (rate(puppet_postgres_xacts_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "{{outcome}} {{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^rollback.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Postgres transactions per second, split by outcome. **The rollback line should sit near zero.** Rollbacks climbing toward commits is work PuppetDB cannot land and is retrying, and it appears here before the queue depth above notices.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1646829484
+    },
+    {
+      "title": "Cache Misses By Table",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 108
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(8, sum by (table) (rate(puppet_postgres_io_blocks_total{source=\"disk\",host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval])))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Table"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Blocks/sec",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Blocks read from disk rather than served from cache, by table. **Cache Hit Ratio above is one number for the whole database; this is which table spent it.** Reports and fact paths dominating is normal; a small table near the top is usually an index that stopped being used.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(table|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "table": "Table",
+              "Value": "Blocks/sec"
+            },
+            "indexByName": {
+              "table": 0,
+              "Value": 1
+            }
+          }
+        }
+      ],
+      "id": 349107029
+    },
+    {
+      "title": "Rows Walked Against Rows Wanted",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 116
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (op, host) (rate(puppet_postgres_tuples_processed_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Table {{op}} {{host}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (op, host) (rate(puppet_postgres_index_tuples_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Index {{op}} {{host}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Tuples postgres processed per second, by operation, with index reads beside them. **Returned running far above fetched means rows are being walked rather than looked up** -- a sequential scan doing an index's job. Read it against Largest Indexes and Index Scans above, which say which indexes exist and which earn their keep.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1990441652
+    },
+    {
+      "title": "Replica Sync",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 116
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_db_ha_sync_duration_seconds{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{entity}} {{host}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (host) (rate(puppet_db_ha_sync_failures_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Sync failures {{host}}",
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (host) (rate(puppet_postgres_conflicts_total{host=~\"${host}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$interval]))",
+          "legendFormat": "Recovery conflicts {{host}}",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "noValue": "Nothing recorded in this window",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Sync failures.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Recovery conflicts.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "HA sync duration per entity, with sync failures and recovery conflicts beside it. **All three are zero by construction on a single primary** and only mean anything where a replica exists. Sync duration climbing while failures stay flat is a replica falling behind; failures above zero is one that cannot keep up at all.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 937070602
+    }
+  ],
+  "description": "Is PuppetDB keeping up, and if not, is it the JVM or the database. Requires enable_service_metrics on the exporter."
+}

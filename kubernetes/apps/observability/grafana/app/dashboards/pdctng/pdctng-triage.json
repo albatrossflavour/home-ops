@@ -1,0 +1,918 @@
+{
+  "uid": "pdctng-triage",
+  "title": "Triage",
+  "tags": [
+    "pdctng",
+    "pdctng-nodes"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_report_timestamp_epoch,environment)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_report_timestamp_epoch,environment)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^(?!rolling_deployment_).*$/",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Environment"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Nodes Needing Work",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(count by (node) (label_replace(puppet_status{state=\"failed\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1, \"reason\", \"Run failed\", \"\", \"\") or label_replace((time() - puppet_report_timestamp_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 3600, \"reason\", \"No report in over an hour\", \"\", \"\") or label_replace(puppet_restart_required{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0, \"reason\", \"Awaiting restart\", \"\", \"\") or label_replace(puppet_patching_blocked{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0, \"reason\", \"Patching blocked\", \"\", \"\") or label_replace(puppet_patch_run{return_code!~\"0|unknown\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}, \"reason\", \"Last patch run failed\", \"\", \"\") or label_replace(puppet_fact_staleness_seconds{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 86400, \"reason\", \"Facts stale\", \"\", \"\") or label_replace((time() - (puppet_cis_scan_timestamp_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0)) > 2592000, \"reason\", \"CIS scan stale\", \"\", \"\") or label_replace((puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90) or (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90 unless on(node, benchmark, profile) puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}), \"reason\", \"CIS score below 90%\", \"\", \"\") or label_replace(((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) < (14 * 86400), \"reason\", \"Cert renewal overdue by 14 days\", \"\", \"\") or label_replace(puppet_noop{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1, \"reason\", \"Running in noop\", \"\", \"\") or label_replace(puppet_pcp_node_disconnected == 1, \"reason\", \"Off the PCP broker\", \"\", \"\"))) or (vector(0) and on() (count(puppet_status{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Distinct nodes with at least one thing wrong. A node with two problems is one node here and two rows below, which is why this and Work Items differ.",
+      "id": 592215089
+    },
+    {
+      "title": "Work Items",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(label_replace(puppet_status{state=\"failed\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1, \"reason\", \"Run failed\", \"\", \"\") or label_replace((time() - puppet_report_timestamp_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 3600, \"reason\", \"No report in over an hour\", \"\", \"\") or label_replace(puppet_restart_required{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0, \"reason\", \"Awaiting restart\", \"\", \"\") or label_replace(puppet_patching_blocked{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0, \"reason\", \"Patching blocked\", \"\", \"\") or label_replace(puppet_patch_run{return_code!~\"0|unknown\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}, \"reason\", \"Last patch run failed\", \"\", \"\") or label_replace(puppet_fact_staleness_seconds{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 86400, \"reason\", \"Facts stale\", \"\", \"\") or label_replace((time() - (puppet_cis_scan_timestamp_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0)) > 2592000, \"reason\", \"CIS scan stale\", \"\", \"\") or label_replace((puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90) or (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90 unless on(node, benchmark, profile) puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}), \"reason\", \"CIS score below 90%\", \"\", \"\") or label_replace(((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) < (14 * 86400), \"reason\", \"Cert renewal overdue by 14 days\", \"\", \"\") or label_replace(puppet_noop{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1, \"reason\", \"Running in noop\", \"\", \"\") or label_replace(puppet_pcp_node_disconnected == 1, \"reason\", \"Off the PCP broker\", \"\", \"\")) or (vector(0) and on() (count(puppet_status{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "One row per node per problem, which is what the list below is bounded to 200 of. If this reads higher than 200, the list is showing the worst slice and this tile is the true total, so the list is not the whole story. **Unless Nodes Withheld reads above zero**, in which case this tile is short too: that cap sits upstream of the union this counts, so the dropped nodes never reach it.",
+      "id": 1758313113
+    },
+    {
+      "title": "Nodes In Scope",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(count by (node) (puppet_status{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"})) or (vector(0) and on() (count(puppet_status{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes PuppetDB knows about in the selected PE and environment. The denominator: Nodes Needing Work against this is the health of the estate.",
+      "id": 546879326
+    },
+    {
+      "title": "Nodes Withheld",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_pcp_node_disconnected_overflow{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_pcp_node_disconnected_overflow{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes off the PCP broker beyond the per-scrape cap of 200, dropped before the work list is built. **Above zero, every tile and the table on this board are short by this many**, including Work Items, which is otherwise the honest total when the list below is bounded. Zero is the answer on any estate with fewer than two hundred disconnected nodes, which is nearly all of them.",
+      "id": 364716872
+    },
+    {
+      "title": "What is wrong",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "panels": [],
+      "id": 223302261
+    },
+    {
+      "title": "What Is Wrong",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sort_desc(count by (reason) (label_replace(label_replace(puppet_status{state=\"failed\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1, \"reason\", \"Run failed\", \"\", \"\") or label_replace((time() - puppet_report_timestamp_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 3600, \"reason\", \"No report in over an hour\", \"\", \"\") or label_replace(puppet_restart_required{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0, \"reason\", \"Awaiting restart\", \"\", \"\") or label_replace(puppet_patching_blocked{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0, \"reason\", \"Patching blocked\", \"\", \"\") or label_replace(puppet_patch_run{return_code!~\"0|unknown\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}, \"reason\", \"Last patch run failed\", \"\", \"\") or label_replace(puppet_fact_staleness_seconds{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 86400, \"reason\", \"Facts stale\", \"\", \"\") or label_replace((time() - (puppet_cis_scan_timestamp_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0)) > 2592000, \"reason\", \"CIS scan stale\", \"\", \"\") or label_replace((puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90) or (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90 unless on(node, benchmark, profile) puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}), \"reason\", \"CIS score below 90%\", \"\", \"\") or label_replace(((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) < (14 * 86400), \"reason\", \"Cert renewal overdue by 14 days\", \"\", \"\") or label_replace(puppet_noop{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1, \"reason\", \"Running in noop\", \"\", \"\") or label_replace(puppet_pcp_node_disconnected == 1, \"reason\", \"Off the PCP broker\", \"\", \"\"), \"instance\", \"\", \"\", \"\") or (label_replace(label_replace(up == 0, \"alias\", \"\", \"\", \"\"), \"reason\", \"Scrape target down\", \"\", \"\") + 1)))",
+          "legendFormat": "{{reason}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "displayName": "${__field.labels.reason}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "Work items by kind, across the whole selection. This counts rows, not nodes, so a node that is both failing and stale is counted under each.",
+      "id": 672678826
+    },
+    {
+      "title": "Which nodes",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "panels": [],
+      "id": 535900148
+    },
+    {
+      "title": "Every Node With Something Wrong",
+      "type": "table",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(200, label_replace(label_replace(puppet_status{state=\"failed\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1, \"reason\", \"Run failed\", \"\", \"\") or label_replace((time() - puppet_report_timestamp_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 3600, \"reason\", \"No report in over an hour\", \"\", \"\") or label_replace(puppet_restart_required{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0, \"reason\", \"Awaiting restart\", \"\", \"\") or label_replace(puppet_patching_blocked{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0, \"reason\", \"Patching blocked\", \"\", \"\") or label_replace(puppet_patch_run{return_code!~\"0|unknown\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}, \"reason\", \"Last patch run failed\", \"\", \"\") or label_replace(puppet_fact_staleness_seconds{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 86400, \"reason\", \"Facts stale\", \"\", \"\") or label_replace((time() - (puppet_cis_scan_timestamp_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0)) > 2592000, \"reason\", \"CIS scan stale\", \"\", \"\") or label_replace((puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90) or (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} < 90 unless on(node, benchmark, profile) puppet_cis_compliance_score{score_type=\"adjusted\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}), \"reason\", \"CIS score below 90%\", \"\", \"\") or label_replace(((puppet_certificate_expires_epoch{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0) - time()) < (14 * 86400), \"reason\", \"Cert renewal overdue by 14 days\", \"\", \"\") or label_replace(puppet_noop{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1, \"reason\", \"Running in noop\", \"\", \"\") or label_replace(puppet_pcp_node_disconnected == 1, \"reason\", \"Off the PCP broker\", \"\", \"\"), \"instance\", \"\", \"\", \"\") or (label_replace(label_replace(up == 0, \"alias\", \"\", \"\", \"\"), \"reason\", \"Scrape target down\", \"\", \"\") + 1))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 230
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Target"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 290
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Node",
+            "desc": false
+          }
+        ]
+      },
+      "description": "Every node with something wrong and what, worst 200 by value. Node, PE, environment and reason; a node with two problems is on it twice. The node name links through to its own board. Work Items above is the true count: when it reads higher than this list is long, the list is the worst slice.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|instance|alias|environment|reason)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "instance": "Target",
+              "alias": "PE",
+              "environment": "Environment",
+              "reason": "Reason"
+            },
+            "indexByName": {
+              "node": 0,
+              "instance": 1,
+              "alias": 2,
+              "environment": 3,
+              "reason": 4
+            }
+          }
+        }
+      ],
+      "id": 630846731
+    },
+    {
+      "title": "Which nodes are deliberately silent",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "panels": [],
+      "id": 1536112816
+    },
+    {
+      "title": "Excluded From Alerting",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 30
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(puppet_nodes_alert_excluded{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 10
+              },
+              {
+                "color": "#d03b3b",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes set to alert level none, and so left out of every fleet ratio and every count on this board and the NOC. Not a fault: silencing a node is a deliberate decision. It is here because the effect is invisible everywhere else, since those tiles read the same whether the silenced machines are healthy or broken.",
+      "id": 553354553
+    },
+    {
+      "title": "Which Nodes, And At What Level",
+      "type": "table",
+      "gridPos": {
+        "h": 6,
+        "w": 16,
+        "x": 8,
+        "y": 30
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_node_alert_level{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "links": [
+            {
+              "title": "This node in detail",
+              "url": "/d/pdctng-node-detail?var-node=${__data.fields.Node}&${__url_time_range}",
+              "targetBlank": false
+            }
+          ],
+          "noValue": "No node carries an alert level"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Node",
+            "desc": false
+          }
+        ]
+      },
+      "description": "Every node carrying an operator-set alert level, and which level. Empty is the common case. A node at level none contributes to the tile beside it and to nothing else anywhere; the other levels are what the per-node severity rules fire on.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|level|environment)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "level": "Level",
+              "environment": "Environment"
+            },
+            "indexByName": {
+              "node": 0,
+              "level": 1,
+              "environment": 2
+            }
+          }
+        }
+      ],
+      "id": 888521111
+    }
+  ],
+  "description": "Every node with something wrong with it, and what. The destination for the work lists on the summary boards."
+}
