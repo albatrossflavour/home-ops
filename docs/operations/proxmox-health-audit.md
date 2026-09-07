@@ -199,20 +199,61 @@ That is the host feeding the `network_ups_tools_ups_status` metric behind the
 *shutdown*, which is a separate mechanism and the one that matters during a
 power cut.
 
-Repointing morpork at `192.168.5.50` on 2026-09-07 got past the routing
-problem and hit the next one:
+Repointing morpork at `192.168.5.50` got past the routing problem and hit the
+real cause:
 
 ```text
 Login on UPS [pr1000elcd@192.168.5.50] failed - got [ERR ACCESS-DENIED]
 ```
 
-The `upsmon_local` credentials in the local config are not accepted by that
-server, so completing this needs a user with `upsmon secondary` rights in
-`upsd.users` on `nut.albatrossflavour.com`. That host does not accept SSH from
-the usual accounts, so the change has to be made by someone with access to it.
+`upsd.users` on the NUT server defined `[upsmon_local]` with a password,
+`actions` and `instcmds`, but **no `upsmon` directive at all**. upsd only
+accepts a `LOGIN` from a user carrying that role, so every upsmon login was
+rejected - including the NUT server's own, which had been failing since at
+least 15 July:
 
-Worth finishing: the drives record 69 unsafe shutdowns on ankh and 39 on
-morpork's Crucial.
+```text
+Jul 15 08:57:06 nut nut-monitor: Login on UPS [pr1000elcd@nut...] failed
+                                 - got [ERR ACCESS-DENIED]
+```
+
+Nothing in the estate had working UPS shutdown. `upsc` needs no auth, which is
+why status reads, the Prometheus metric and the `UPSOnBattery` alert all
+looked healthy while the shutdown path was dead. That is the same trap as the
+pushgateway and the QEMU cache mode: the visible signal was fine and the
+mechanism behind it was not.
+
+### Resolution, 2026-09-07
+
+One line on the NUT server:
+
+```text
+[upsmon_local]
+        upsmon primary      <- added
+        password = ...
+        actions = SET
+        instcmds = ALL
+```
+
+Then on the hypervisors: all three repointed from the unreachable
+`192.168.2.143` to `192.168.5.50`, `upsmon.conf` recreated on ankh from
+morpork's working copy, and `systemctl enable --now nut-monitor` on all three.
+The `enable` matters as much as the start: the unit was `disabled` at boot on
+every host, so even morpork's running instance would not have survived a
+reboot.
+
+```text
+ankh     enabled/active  denied=0  ups=OL
+morpork  enabled/active  denied=0  ups=OL
+stolat   enabled/active  denied=0  ups=OL
+nut      enabled/active  denied=0
+```
+
+Verified over a sustained window rather than at the moment of restart, since
+the old failure recurred every 8 seconds and would have shown up.
+
+This reframes the unsafe shutdown counts, 69 on ankh and 39 on morpork's
+Crucial. Those were not bad luck.
 
 ## Finding 7: patch debt
 
@@ -270,11 +311,7 @@ slowly, at 462s of queue delay against 0.06s through the relay.
    needed.
 5. Reduce overcommit on stolat, and add LXC 701/702 to the backup job or
    record why they differ from 700.
-6. Finish the UPS client fix: add a user with `upsmon secondary` rights to
-   `upsd.users` on `nut.albatrossflavour.com`, then point all three
-   hypervisors at it and `systemctl enable --now nut-monitor`. The service is
-   currently `disabled` at boot on every host, so even a working config would
-   not survive a reboot.
+6. ~~Fix UPS shutdown~~. Done 2026-09-07, see Finding 6.
 7. Complete the second corosync link. Higher risk than the rest of this list,
    since a botched corosync change splits a cluster: bump `config_version`,
    apply to all nodes together, and verify with `corosync-cfgtool -n` that
