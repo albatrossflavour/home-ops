@@ -1,0 +1,1478 @@
+{
+  "uid": "pdctng-node-metrics",
+  "title": "Node Metrics",
+  "tags": [
+    "pdctng",
+    "pdctng-nodes"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Patch windows",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "green",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:patch"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "interval",
+        "type": "interval",
+        "query": "5m,10m,30m,1h,6h,12h,1d",
+        "refresh": 2,
+        "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval_interval"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          }
+        ],
+        "auto": true,
+        "auto_count": 30,
+        "auto_min": "5m",
+        "current": {
+          "text": "auto",
+          "value": "$__auto_interval_interval"
+        },
+        "label": "Interval"
+      },
+      {
+        "name": "instance",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(node_uname_info{job=~\"${node_job}\"},instance)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(node_uname_info{job=~\"${node_job}\"},instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "label": "Instance"
+      },
+      {
+        "name": "sysname",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(node_uname_info{instance=~\"${instance}\",job=~\"${node_job}\"},sysname)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(node_uname_info{instance=~\"${instance}\",job=~\"${node_job}\"},sysname)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Load Per Core",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(node_load1{instance=~\"${instance}\",job=~\"${node_job}\"} / on(instance) group_left count by (instance) (node_cpu_seconds_total{mode=\"idle\",instance=~\"${instance}\",job=~\"${node_job}\"}))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No node_exporter, or a Windows host"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "description": "One-minute load average divided by cores. Raw load average is unreadable without the core count: 4 is idle on a 16-core box and on fire on a 2-core one. Linux only: Windows has no load average, and Processor Queue Per Core beside this one is the nearest Windows equivalent.",
+      "id": 1878397594
+    },
+    {
+      "title": "Processor Queue Per Core",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(windows_system_processor_queue_length{instance=~\"${instance}\",job=~\"${windows_job}\"} / on(instance) group_left windows_cs_logical_processors{instance=~\"${instance}\",job=~\"${windows_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 2
+              },
+              {
+                "color": "#d03b3b",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No windows_exporter, or a Linux host"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Threads waiting for a processor, divided by logical processors. The nearest Windows equivalent to load average and not the same thing: instantaneous rather than averaged, and it counts only threads waiting on CPU, not ones blocked on disk. Sustained above 2 per core is a processor bottleneck; a single sample above it is noise, which is why the trend below matters more than this number.",
+      "id": 1545184513
+    },
+    {
+      "title": "Memory Used",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(1 - (node_memory_MemAvailable_bytes{instance=~\"${instance}\",job=~\"${node_job}\"} / node_memory_MemTotal_bytes{instance=~\"${instance}\",job=~\"${node_job}\"}))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.8
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.9
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "One minus MemAvailable over total. MemAvailable rather than MemFree, which reads near zero on any host with a page cache and means nothing.",
+      "id": 442735385
+    },
+    {
+      "title": "Fullest Filesystem",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",instance=~\"${instance}\",job=~\"${node_job}\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",instance=~\"${instance}\",job=~\"${node_job}\"}))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.85
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.95
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "The fullest real filesystem on this host. tmpfs and overlay mounts excluded: they are memory or somebody else's problem.",
+      "id": 1495826451
+    },
+    {
+      "title": "CPU Busy",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval]))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.8
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.95
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Fraction of CPU time not spent idle, averaged across cores. Read against Load Per Core: high CPU with low load is one busy core, high load with low CPU is a queue waiting on something that is not the processor.",
+      "id": 1007282237
+    },
+    {
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "min(time() - node_boot_time_seconds{instance=~\"${instance}\",job=~\"${node_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 0
+              },
+              {
+                "color": "#0ca30c",
+                "value": 3600
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Time since boot. Amber under an hour, because a host that has just rebooted explains a great deal: cold caches, and every Puppet run that tried to reach it in the meantime.",
+      "id": 1431230345
+    },
+    {
+      "title": "Processes Blocked",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(node_procs_blocked{instance=~\"${instance}\",job=~\"${node_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No node_exporter, or a Windows host"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Processes in uninterruptible sleep, which in practice means waiting on disk. This is the number that explains a high load average on a host whose CPU is idle. Linux only: Windows publishes no equivalent, so this is blank there rather than zero.",
+      "id": 1735170292
+    },
+    {
+      "title": "CPU",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "panels": [],
+      "id": 878708604
+    },
+    {
+      "title": "CPU By Mode",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (mode) (rate(node_cpu_seconds_total{mode!=\"idle\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])) / scalar(count(node_cpu_seconds_total{mode=\"idle\",instance=~\"${instance}\",job=~\"${node_job}\"}))",
+          "legendFormat": "{{mode}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "percentunit",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "CPU time by mode as a fraction of the whole machine. system and user climbing together is work; iowait climbing alone is a disk problem wearing a CPU costume; steal climbing means the hypervisor is the problem and nothing on this host will fix it.",
+      "id": 657926263
+    },
+    {
+      "title": "Load Average",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "node_load1{instance=~\"${instance}\",job=~\"${node_job}\"}",
+          "legendFormat": "1m {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "node_load5{instance=~\"${instance}\",job=~\"${node_job}\"}",
+          "legendFormat": "5m {{instance}}",
+          "refId": "B"
+        },
+        {
+          "expr": "node_load15{instance=~\"${instance}\",job=~\"${node_job}\"}",
+          "legendFormat": "15m {{instance}}",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0,
+          "noValue": "No node_exporter, or a Windows host"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "One, five and fifteen minute load. The shape matters more than the number: 1 rising above 15 is a problem starting, 15 above 1 is one ending. Divide by the core count to read it as saturation, which the headline tile does for you. Linux only; Processor Queue Length beside it is the Windows counterpart.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1392291522
+    },
+    {
+      "title": "Processor Queue Length",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "windows_system_processor_queue_length{instance=~\"${instance}\",job=~\"${windows_job}\"}",
+          "legendFormat": "queue {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0,
+          "noValue": "No windows_exporter, or a Linux host"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Threads waiting for a processor, sampled rather than averaged. Windows only, and the counterpart to Load Average beside it. Read the shape: Windows publishes no averaged form of this, so a single spike is normal and a line that stays up is the finding.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 558687127
+    },
+    {
+      "title": "Memory",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "panels": [],
+      "id": 1472122745
+    },
+    {
+      "title": "Memory",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "node_memory_MemTotal_bytes{instance=~\"${instance}\",job=~\"${node_job}\"}",
+          "legendFormat": "Total {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "node_memory_MemAvailable_bytes{instance=~\"${instance}\",job=~\"${node_job}\"}",
+          "legendFormat": "Available {{instance}}",
+          "refId": "B"
+        },
+        {
+          "expr": "node_memory_Cached_bytes{instance=~\"${instance}\",job=~\"${node_job}\"}",
+          "legendFormat": "Cached {{instance}}",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^Total/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8e949f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^Available/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^Cached/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Total against available, so the gap is what is actually in use. Read the shape rather than the number: available trending steadily down over days with no matching workload is a leak, and it ends as swap.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1472122746
+    },
+    {
+      "title": "Swap",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "node_memory_SwapTotal_bytes{instance=~\"${instance}\",job=~\"${node_job}\"}",
+          "legendFormat": "Total {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "node_memory_SwapFree_bytes{instance=~\"${instance}\",job=~\"${node_job}\"}",
+          "legendFormat": "Free {{instance}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "axisSoftMax": 1073741824
+          },
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Swap free against total. A host with zero total has no swap configured, which is a legitimate and common choice on a Puppet server and reads here as two flat lines at zero rather than as a fault. Free falling away from total is the machine in trouble; the Infrastructure Health board counts the pages coming back, which is the part that costs you.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1148013245
+    },
+    {
+      "title": "Disk",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "panels": [],
+      "id": 175771040
+    },
+    {
+      "title": "Filesystem Used",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",instance=~\"${instance}\",job=~\"${node_job}\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",instance=~\"${instance}\",job=~\"${node_job}\"})",
+          "legendFormat": "{{mountpoint}} {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Every real filesystem as a fraction used. On a PE host the one to watch is whatever holds /opt/puppetlabs: PuppetDB data, the code directory and the report archive all live under it and all three grow without asking.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1114402357
+    },
+    {
+      "title": "Disk Throughput",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "rate(node_disk_read_bytes_total{instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "read {{device}} {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_disk_written_bytes_total{instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "write {{device}} {{instance}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "Bps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Bytes read and written per device. Writes dominating on a PuppetDB host is the normal shape, since every report and every fact set is a write; reads dominating usually means something is not fitting in memory any more.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1643138666
+    },
+    {
+      "title": "Disk Busy",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "rate(node_disk_io_time_seconds_total{instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "{{device}} {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Fraction of wall-clock time each device spent servicing I/O. Sustained near 1 means the device is the ceiling, and it is what the Processes Blocked tile is a consequence of.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1721522148
+    },
+    {
+      "title": "Inodes Used",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "1 - (node_filesystem_files_free{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",instance=~\"${instance}\",job=~\"${node_job}\"} / node_filesystem_files{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",instance=~\"${instance}\",job=~\"${node_job}\"})",
+          "legendFormat": "{{mountpoint}} {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Inodes as a fraction used, which is the disk-full failure that surprises people: a filesystem with free bytes and no free inodes refuses writes exactly as if it were full, and the message says so in a way nobody reads. Report directories and Puppet caches are how it happens.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1338913243
+    },
+    {
+      "title": "Network",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "panels": [],
+      "id": 1675284871
+    },
+    {
+      "title": "Network Throughput",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 46
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_bytes_total{device!=\"lo\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "in {{device}} {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_network_transmit_bytes_total{device!=\"lo\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "out {{device}} {{instance}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "Bps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Bytes in and out per interface, loopback excluded because on a Puppet server it is mostly the services talking to each other and it buries the interface you meant to look at.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 273927325
+    },
+    {
+      "title": "Network Errors And Drops",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 46
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_errs_total{device!=\"lo\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "rx errors {{device}} {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_network_transmit_errs_total{device!=\"lo\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "tx errors {{device}} {{instance}}",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(node_network_receive_drop_total{device!=\"lo\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "rx drops {{device}} {{instance}}",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(node_network_transmit_drop_total{device!=\"lo\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "tx drops {{device}} {{instance}}",
+          "refId": "D"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Errors and dropped packets per interface. Normally flat at zero, and anything else here explains a class of Puppet failure that looks like a slow master and is not: agents timing out mid-run against a network that is losing their packets.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 538148540
+    }
+  ],
+  "description": "What is this machine doing? The standard node_exporter view for any node in the estate, on the datasource that is already here. Requires node_exporter, which pdctng::node_exporter will install and manage for you. Not a replacement for Grafana 1860, which has eighty panels to this one's ten; this has the ones a Puppet operator opens a host board to look at."
+}

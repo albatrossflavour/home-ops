@@ -1,0 +1,1510 @@
+{
+  "uid": "pdctng-console-activity",
+  "title": "Console Activity",
+  "tags": [
+    "pdctng",
+    "pdctng-compliance"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "What this board is, and what it is not",
+      "type": "text",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Two halves, and this board holds both.** *Who can do what* is the row directly below: users, roles, superusers and accounts nobody has ever signed into, read from the RBAC API, which is the half an access review asks for. *Who did what* is everything under it, read from PE's activity log.\n\n**Both halves are off by default and switched on here.** `pdctng::enable_rbac_metrics` and `pdctng::enable_console_activity_metrics` gate them, because these are the collectors that name people and who may read that is a site decision rather than ours to assume.\n\n**The counts start when pdctng starts, not when PE did.** PE keeps its activity log for a long time \u2014 thirteen months on the demo lab, with no sign of pruning \u2014 but the event counters here are tallied forward from the daemon's own start rather than replayed out of that history, so restarting the daemon resets them and Prometheus reads it as a counter reset. It also means these panels are quiet on a fresh install and fill in as the estate is used, which is the honest behaviour rather than an inherited backlog nobody did this week.\n\n**The cost is flat and stays flat.** The activity API has no time filter, but each response carries a running total, and that total is a cursor: the difference between one poll and the last is exactly how many events are new, so only those are read. An idle estate costs one request per service and a busy one costs two. Nothing on this board fans out per node.\n\n**What is still missing is the individual event.** These are counts, which Prometheus is good at; a single change with its subject, timestamp and source address is a log line, and one series per event would mint cardinality per event. That belongs in a log store and is the last row's subject.\n"
+      },
+      "id": 497422005
+    },
+    {
+      "title": "1. Who can do what, right now",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "panels": [],
+      "id": 1429999038
+    },
+    {
+      "title": "People With Access",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_rbac_users{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"rbac_state\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Accounts PE knows about, federated and local together. The split is on the table to the right.",
+      "id": 521564971
+    },
+    {
+      "title": "Superusers",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_rbac_superusers{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"rbac_state\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 3
+              },
+              {
+                "color": "#d03b3b",
+                "value": 6
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Accounts that bypass every permission check. **The number an access review asks for first**, and the one that grows quietly: superuser is what somebody is granted to unblock an afternoon and nobody takes back.",
+      "id": 1806651800
+    },
+    {
+      "title": "Never Signed In",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_rbac_users_never_signed_in{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"rbac_state\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Accounts that exist and have never been used. Each is a live credential nobody would miss, which is what makes it both harmless-looking and worth removing.",
+      "id": 825299966
+    },
+    {
+      "title": "Revoked",
+      "type": "stat",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_rbac_users_revoked{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"rbac_state\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Accounts revoked but still present. Not a fault, and here on purpose: a review wants to see that revocation happened, not that the account quietly vanished.",
+      "id": 950690927
+    },
+    {
+      "title": "Where Identities Live",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 17
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_rbac_users{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "{{identity}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "displayName": "${__field.labels.identity}",
+          "noValue": "Not collected",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "text": {
+          "titleSize": 13,
+          "valueSize": 22
+        }
+      },
+      "description": "`remote` is federated through SAML or LDAP; `local` is an account PE holds itself. **The local count is the one that outlives somebody leaving**, because deprovisioning at the identity provider never reaches it.",
+      "id": 1735254086
+    },
+    {
+      "title": "Roles",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 8,
+        "y": 17
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_rbac_roles{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"rbac_state\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Roles defined in PE: the ones it ships and the ones a site added. Context for the table beside this, where a role with permissions and nobody in it is the tidy case.",
+      "id": 559547652
+    },
+    {
+      "title": "User Groups",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(puppet_rbac_user_groups{alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"rbac_state\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Groups, which is how a federated directory grants access in bulk. **A role reached through a group is granted to everybody the identity provider puts in it, and PE cannot see who that is** \u2014 which is why the table beside this counts users and groups separately.",
+      "id": 544742112
+    },
+    {
+      "title": "Who Holds Each Role",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 33
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_rbac_role_members{alias=~\"${pe}\",job=~\"${pdctng_job}\"} > 0",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "No role has any members, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Role"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Count",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Direct membership per role. **Users and groups are counted separately and summing them answers nothing**: a person reaching a role through a group appears under `group`, and how many people that is lives in the identity provider rather than in PE. A role with permissions and nobody in it is tidy; a role nobody remembers granting with people in it is the finding.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(role|member|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "role": "Role",
+              "member": "Granted to",
+              "Value": "Count"
+            },
+            "indexByName": {
+              "role": 0,
+              "member": 1,
+              "Value": 2
+            }
+          }
+        }
+      ],
+      "id": 1988218271
+    },
+    {
+      "title": "Least Recently Used Accounts",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "1000 * puppet_rbac_user_last_login_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"}",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Nobody has signed in, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Account"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last signed in"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Last signed in",
+            "desc": false
+          }
+        ]
+      },
+      "description": "When each live account last signed in, oldest first. Revoked accounts are left out, since they have already been dealt with. **Accounts that have never signed in are not here either** and are counted in the tile above: a zero would render as 1970 and sort a brand-new account to the top of this list, which is the opposite of the truth.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(login|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "login": "Account",
+              "Value": "Last signed in"
+            },
+            "indexByName": {
+              "login": 0,
+              "Value": 1
+            }
+          }
+        }
+      ],
+      "id": 1738493691
+    },
+    {
+      "title": "2. Who signed in",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "panels": [],
+      "id": 854790563
+    },
+    {
+      "title": "Sign-ins",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 50
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(puppet_console_activity_events_total{type=\"login\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__interval])) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"console_activity\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "sign-ins",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "noValue": "Not collected",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Console sign-ins over the range, counted per bar, from the `login` events the rbac service records. Counted forward from the pdctng daemon's start rather than read from history, so a restart of the daemon shows as a gap and the count begins again. **A quiet line is the normal state of most consoles** and is not a fault. **An individual sign-in, with its timestamp and source address, is deliberately not here**: that is a log line, and one series per sign-in would mint cardinality per event, which is what R417 exists to refuse.",
+      "id": 642120149
+    },
+    {
+      "title": "Who Signed In",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 50
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (subject) (increase(puppet_console_activity_subject_events_total{type=\"login\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__range])))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Nobody signed in, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Account"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Sign-ins",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Sign-ins over the range by account. Bounded by headcount rather than by how often anybody signs in. **It names the account, not the person**: a shared login is one bar however many people use it, which is worth knowing before reading this as a list of individuals \u2014 and a shared login with a lot of sign-ins is itself worth a conversation.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(subject|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "subject": "Account",
+              "Value": "Sign-ins"
+            },
+            "indexByName": {
+              "subject": 0,
+              "Value": 1
+            }
+          }
+        }
+      ],
+      "id": 1394379392
+    },
+    {
+      "title": "3. How much is being changed",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 58
+      },
+      "panels": [],
+      "id": 1716651226
+    },
+    {
+      "title": "Console Changes",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 16,
+        "x": 0,
+        "y": 59
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (service) (increase(puppet_console_activity_commits_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__interval]))",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 60,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "noValue": "No console changes, or not collected",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Changes recorded by each PE service, counted per bar over the range. **Whole events rather than a rate**: console change is rare and bursty, so a per-second figure reads as 0.002 and tells nobody anything. **Read the shape rather than the value**: console change is normally near zero, so a step is somebody working and a flat line is a console nobody has touched. The underlying series counts every change since the install was built, which is why it is drawn as a rate \u2014 the raw total is the age of the installation as much as anything. **What this cannot tell you is what changed**, because the activity API has no time filter and the breakdown would cost a walk of the entire history every poll; the console itself is where a specific change is read.",
+      "id": 685716643
+    },
+    {
+      "title": "Last Console Change",
+      "type": "stat",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 59
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "time() - max(puppet_console_activity_last_epoch{alias=~\"${pe}\",job=~\"${pdctng_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "Nothing ever changed"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "How long since anything was last changed through the console, across the services this board reads. A large number here is a quiet console rather than a broken collector, and the panel beside it is how you tell those apart. **Absent on an installation where nothing has ever been changed**, which is honest rather than a fault: zero would render as 1970 and read as a very old change instead of no change at all.",
+      "id": 1493658416
+    },
+    {
+      "title": "4. What changed in access control",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 66
+      },
+      "panels": [],
+      "id": 438062347
+    },
+    {
+      "title": "What Was Changed",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 67
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (type, what) (increase(puppet_console_activity_events_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__interval]))",
+          "legendFormat": "{{type}} {{what}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 60,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "noValue": "Nothing changed, or not collected",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Console changes over the range, counted per bar and split by what was done and to what. **This is the row an auditor asks about**: a role edit, a user deletion, a change to SAML settings. Reads a counter, so a restart of the pdctng daemon shows as a gap rather than as a spike, and the counters begin again from there. **What is not here is the change itself** \u2014 the prose describing each edit is unbounded text and holding it as a label would mint a series per change, so the console is where a specific edit is read.",
+      "id": 508290742
+    },
+    {
+      "title": "Who Changed Things",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 67
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (subject) (increase(puppet_console_activity_subject_events_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__range])))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Nobody changed anything, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Account"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Changes",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Console changes over the range by the account that made them. **It names the account, not the person**: a shared service account shows as one subject however many people use it, which is worth knowing before reading this as a list of individuals. Bounded by headcount rather than by how much anybody did.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(subject|Value)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "subject": "Account",
+              "Value": "Changes"
+            },
+            "indexByName": {
+              "subject": 0,
+              "Value": 1
+            }
+          }
+        }
+      ],
+      "id": 122353721
+    },
+    {
+      "title": "Changes Not Counted",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 75
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(puppet_console_activity_dropped_total{alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__range])) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"console_activity\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Console changes the daemon could not read, because a single catch-up hit its cap. That happens when a lot was changed while pdctng was down. **Zero is the normal reading and is emitted rather than absent**, so this really does mean nothing was missed. A number means the panels above undercount by that much and the console is the authority for that period.",
+      "id": 1171198529
+    },
+    {
+      "title": "5. Tokens",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 79
+      },
+      "panels": [],
+      "id": 441923736
+    },
+    {
+      "title": "Minted And Revoked",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 80
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(puppet_console_activity_events_total{type=\"token-generation\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__interval])) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"console_activity\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "minted",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(puppet_console_activity_events_total{type=\"token-revocation\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__interval])) or (vector(0) and on() (count(puppet_exporter_collector_success{collector=\"console_activity\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "revoked",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "locale",
+          "noValue": "Not collected",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "minted"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "revoked"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#0ca30c"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Authentication tokens created and revoked, counted per bar over the range. **Read the pair rather than either line**: tokens are meant to be minted, and a mint rate on its own says only that the estate is being used. Generation consistently above revocation is tokens accumulating, which is how a long-lived credential nobody remembers issuing comes to exist. Counted forward from the pdctng daemon's start, so a restart shows as a gap rather than as a lull.",
+      "id": 1052757731
+    },
+    {
+      "title": "Net New Tokens",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 80
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "round((sum(increase(puppet_console_activity_events_total{type=\"token-generation\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__range])) or vector(0)) - (sum(increase(puppet_console_activity_events_total{type=\"token-revocation\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}[$__range])) or vector(0))) and on() (count(puppet_exporter_collector_success{collector=\"console_activity\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No token activity, or not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Tokens minted minus tokens revoked over the selected range. **This is the movement in the window, not the number of tokens that exist** \u2014 pdctng counts events rather than holding a token inventory, so it cannot tell you the standing total and does not pretend to. A persistently positive number over a long range is credentials accumulating; negative is a clean-up, which is a good thing to see occasionally.",
+      "id": 801788598
+    },
+    {
+      "title": "6. The detail",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 88
+      },
+      "panels": [],
+      "id": 275528369
+    },
+    {
+      "title": "Recent activity, in full",
+      "type": "text",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 89
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Not collected yet, and it will not arrive as a metric.** The panels above are counts, which Prometheus is good at. The events themselves carry a subject, an object, a timestamp and an address, which Prometheus is bad at and a log store is built for.\n\npdctng already runs Loki on this node for PE's own logs where `enable_logs` is on, so the home for the detail exists. Expected here: a log panel over the activity events, filtered by service and by event type, sitting under the counts that tell you which day to look at.\n\n**Whether source IP addresses are collected at all is open.** They are the most identifying field in the payload and the least often needed, and dropping them at collection is a decision somebody should take on purpose rather than by default."
+      },
+      "id": 1319770990
+    },
+    {
+      "title": "7. What this board does not reach",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 95
+      },
+      "panels": [],
+      "id": 1573711813
+    },
+    {
+      "title": "CD4PE and SCM",
+      "type": "text",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 96
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**PE's console is the shippable scope and the other two are separate questions.** The request that produced this board named three consoles. Only PE's has been checked.\n\n- **CD4PE** has its own auth store, and pdctng already talks to it for deployments, so an audit surface is plausible. Nobody has confirmed one exists or that it is reachable the same way.\n- **SCM** is a separate product whose audit surface has not been looked at, and which an estate may not run at all.\n\nPromising three consoles and finding that two need different mechanisms is how a documented path turns out to be about a machine nobody ran it against, so this board claims one."
+      },
+      "id": 997769511
+    }
+  ],
+  "description": "Who signed in to PE, who minted a token, and who changed a role, a group or the SAML configuration. The landing place for audit activity (R342); the collection that fills it is not enabled yet."
+}

@@ -44,6 +44,16 @@ spec:
     - action: replace
       targetLabel: job
       replacement: *name
+    # pdctng's installation identity, and the label every PE-scoped query on
+    # its boards joins on. The exporter does not emit it: it is a target label
+    # the scraper is expected to attach, defaulting to the primary's certname.
+    # Without it label_values(puppet_exporter_nodes, alias) returns nothing, so
+    # the boards' PE picker has no options. They still draw, because an empty
+    # or ".*" matcher happens to match series that carry no alias at all, but
+    # that is an accident of a single-PE estate rather than the query working.
+    - action: replace
+      targetLabel: alias
+      replacement: puppet.lab.albatrossflavour.com
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
 # Deprecated: Now using ServiceMonitor from pihole-exporter deployment

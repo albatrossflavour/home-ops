@@ -1,0 +1,1237 @@
+{
+  "uid": "pdctng-infrastructure-health",
+  "title": "Puppet Infrastructure Health",
+  "tags": [
+    "pdctng",
+    "pdctng-health"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "interval",
+        "type": "interval",
+        "query": "5m,10m,30m,1h,6h,12h,1d",
+        "refresh": 2,
+        "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval_interval"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          }
+        ],
+        "auto": true,
+        "auto_count": 30,
+        "auto_min": "5m",
+        "current": {
+          "text": "auto",
+          "value": "$__auto_interval_interval"
+        },
+        "label": "Interval"
+      },
+      {
+        "name": "installation",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(node_uname_info{pe_infrastructure=\"true\",job=~\"${node_job}\"},pe)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(node_uname_info{pe_infrastructure=\"true\",job=~\"${node_job}\"},pe)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "PE"
+      },
+      {
+        "name": "instance",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(node_uname_info{pe_infrastructure=\"true\",job=~\"${node_job}\"},instance)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(node_uname_info{pe_infrastructure=\"true\",job=~\"${node_job}\"},instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Instance"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Load Per Core",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(node_load1{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"} / on(instance) group_left count by (instance) (node_cpu_seconds_total{mode=\"idle\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"}))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "description": "One-minute load average divided by cores, worst host in the selection. Raw load average is unreadable without knowing the core count: 4 is idle on a 16-core box and on fire on a 2-core one. Amber at 1 is a run queue as long as the machine is wide. Catalogue compilation is CPU-bound, so this is the tile that explains agents queueing for a JRuby.",
+      "id": 1878397594
+    },
+    {
+      "title": "Memory Used",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(1 - (node_memory_MemAvailable_bytes{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\"} / node_memory_MemTotal_bytes{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\"}))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.8
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.9
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "One minus MemAvailable over total, worst host, so it reads the same way round as Fullest Filesystem beside it. MemAvailable rather than MemFree, which on any host with a page cache reads near zero and means nothing. Past 90% a JVM is about to start swapping, and a swapping puppetserver is not slow, it is broken.",
+      "id": 442735385
+    },
+    {
+      "title": "Swapping",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(clamp_min(node_vmstat_pswpin{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"} - node_vmstat_pswpin{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"} offset $interval, 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Pages read back in from swap over the selected interval, worst host. This is deliberately not \"how much swap is in use\": a JVM that swapped once at boot and never touched those pages again shows swap used and costs nothing. Pages coming *back* is the fault, and any value here above zero is one. Subtraction against an offset rather than rate(), which is the same measurement in different units: node_vmstat_pswpin is a cumulative kernel counter that node_exporter declares untyped, because it passes /proc/vmstat field names through verbatim, and Grafana puts a permanent warning on any rate() over a name not ending in _total. clamp_min floors the reboot case at zero, where the counter resets and the subtraction would otherwise go negative.",
+      "id": 199094300
+    },
+    {
+      "title": "I/O Wait",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(sum by (instance) (rate(node_cpu_seconds_total{mode=\"iowait\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])) / on(instance) count by (instance) (node_cpu_seconds_total{mode=\"idle\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"}))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.05
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.2
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Fraction of CPU time spent waiting on disk, worst host. PuppetDB writes every report and every fact set, so a host waiting on disk surfaces as queue depth on the PuppetDB board with nothing there to explain it.",
+      "id": 1044100328
+    },
+    {
+      "title": "Fullest Filesystem",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"}))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#fab219",
+                "value": 0.85
+              },
+              {
+                "color": "#d03b3b",
+                "value": 0.95
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "The fullest real filesystem anywhere in the selection. tmpfs and overlay mounts are excluded: they are memory or somebody else's problem, and on a typical host they outnumber the ones that matter. A full disk is the failure that stops things rather than slowing them, and on a Prometheus host it stops Prometheus outright: see docs/retention-sizing.md.",
+      "id": 1495826451
+    },
+    {
+      "title": "Failed Units",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(node_systemd_unit_state{state=\"failed\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#0ca30c",
+                "value": 0
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "locale",
+          "noValue": "Not collected"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "systemd units in a failed state on the selected infrastructure. This is the platform being broken rather than being slow, which is the one thing on this board that is not a speed question. Needs the systemd collector, which is off by default: set pdctng::node_exporter::collectors_enable to ['systemd'] and bound it with a --collector.systemd.unit-include regex in extra_options, or every unit on the host becomes series. No Data here means it is not being collected, not that nothing has failed.",
+      "id": 211734529
+    },
+    {
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "min(time() - node_boot_time_seconds{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"})",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 0
+              },
+              {
+                "color": "#0ca30c",
+                "value": 3600
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "No node_exporter"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Shortest uptime in the selection. Amber under an hour, because a host that has just rebooted explains a great deal: cold JVM, cold page cache, and every agent that tried to reach it in the meantime.",
+      "id": 1431230345
+    },
+    {
+      "title": "Failed units",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "panels": [],
+      "id": 1844064509
+    },
+    {
+      "title": "Which Unit, On Which Host",
+      "type": "table",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "node_systemd_unit_state{state=\"failed\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"} > 0",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "No failed units, or not collected"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "description": "Every systemd unit currently in a failed state on the selected infrastructure. Empty is the healthy answer here. Needs the systemd collector, which is off by default; an empty table on an estate not collecting it means the same as No Data on the tile above, which is why the tile says which of the two it is.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(name|instance|pe)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "name": "Unit",
+              "instance": "Host",
+              "pe": "PE"
+            },
+            "indexByName": {
+              "name": 0,
+              "instance": 1,
+              "pe": 2
+            }
+          }
+        }
+      ],
+      "id": 414927436
+    },
+    {
+      "title": "Console dependencies",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "panels": [],
+      "id": 281614889
+    },
+    {
+      "title": "Console Dependencies Not Reachable",
+      "type": "table",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_infra_console_dependency_up{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\"} == 0",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "Every console dependency reachable"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "description": "pe-console-services components that cannot reach something they need: their database, RBAC, or the activity service. Empty is the healthy answer. This is the panel that explains a console outage the service states cannot, because a component whose database is unreachable still reports itself running. Needs the service collector, which is off by default.",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(component|dependency|host|pe)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "component": "Component",
+              "dependency": "Cannot Reach",
+              "host": "Host",
+              "pe": "PE"
+            },
+            "indexByName": {
+              "component": 0,
+              "dependency": 1,
+              "host": 2,
+              "pe": 3
+            }
+          }
+        }
+      ],
+      "id": 214528888
+    },
+    {
+      "title": "CPU and memory over time",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "panels": [],
+      "id": 1595168430
+    },
+    {
+      "title": "CPU By Mode",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (mode) (rate(node_cpu_seconds_total{mode!=\"idle\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])) / scalar(count(node_cpu_seconds_total{mode=\"idle\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"}))",
+          "legendFormat": "{{mode}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "percentunit",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "CPU time by mode, as a fraction of the whole machine. system and user climbing together is compilation load; iowait climbing on its own is a disk problem wearing a CPU costume; steal climbing means the hypervisor is the problem and nothing on this host will fix it.",
+      "id": 657926263
+    },
+    {
+      "title": "Memory",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "node_memory_MemTotal_bytes{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\"}",
+          "legendFormat": "Total {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "node_memory_MemAvailable_bytes{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\"}",
+          "legendFormat": "Available {{instance}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^Total/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8e949f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^Available/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Total against available, so the gap between the two lines is what is actually in use. Read the shape rather than the number: available trending steadily down over days with no corresponding workload is a leak, and it will end as the Swapping tile.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1472122745
+    },
+    {
+      "title": "Disk",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "panels": [],
+      "id": 175771040
+    },
+    {
+      "title": "Filesystem Used",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 36
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs\",pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"})",
+          "legendFormat": "{{mountpoint}} {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Every real filesystem, as a fraction used. The one to watch on a PE host is whatever holds /opt/puppetlabs: PuppetDB data, the code directory and the report archive all live under it, and all three grow without asking.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1114402357
+    },
+    {
+      "title": "Disk Busy",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "rate(node_disk_io_time_seconds_total{pe_infrastructure=\"true\",pe=~\"${installation}\",instance=~\"${instance}\",job=~\"${node_job}\"}[$interval])",
+          "legendFormat": "{{device}} {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Fraction of wall-clock time each device spent servicing I/O. Sustained near 1 means the device is the ceiling, and it is the thing the I/O Wait tile is a consequence of. Which device matters depends on where PuppetDB's data directory lives.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1721522148
+    },
+    {
+      "title": "When does it run out?",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "panels": [],
+      "id": 1898835792
+    },
+    {
+      "title": "Time To Filesystem Full",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "puppet_infra_filesystem_seconds_to_full",
+          "legendFormat": "{{device}} {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "min": 0,
+          "noValue": "No filesystem losing space"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "How long until each PE infrastructure filesystem reaches zero bytes free, at the rate it is filling over the last forecast window. **Empty is the healthy state**: the series only exists while a filesystem is actually losing space, so nothing to draw means nothing is heading for the wall. tmpfs and overlay mounts are excluded, because a full tmpfs is a symptom rather than a volume anybody sizes. PdctngFilesystemFillingSoon pages when a line falls under the configured threshold.",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*?)([^\\s.]+)\\.[A-Za-z0-9.:-]+$",
+            "renamePattern": "$1$2"
+          }
+        }
+      ],
+      "id": 1841719858
+    }
+  ],
+  "description": "Is the Puppet infrastructure the reason Puppet is unwell? Reads node_exporter, scoped to hosts labelled pe_infrastructure=\"true\", which pdctng::node_exporter sets off the pe_build fact. Deliberately not the whole fleet: for an individual agent, import Grafana 1860. Set pdctng::node_exporter::pe_infrastructure explicitly on an infrastructure host that runs no PE server software, the monitoring node being the one that matters. The PE selector filters hosts that carry a pe label; hosts without one, which is what a node_exporter you manage yourself looks like, stay on the board whatever is selected rather than disappearing from it."
+}

@@ -1,0 +1,827 @@
+{
+  "uid": "pdctng-node-finder",
+  "title": "Node Finder",
+  "tags": [
+    "pdctng",
+    "pdctng-nodes"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "annotations": {
+    "list": [
+      {
+        "name": "Code releases",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:release",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Environment deploys",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "dark-purple",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:deploy",
+            "pe:$pe"
+          ],
+          "limit": 100
+        }
+      },
+      {
+        "name": "Notes",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "blue",
+        "type": "tags",
+        "target": {
+          "type": "tags",
+          "matchAny": false,
+          "tags": [
+            "pdctng:note"
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "PDCTNG boards",
+      "url": "",
+      "type": "dashboards",
+      "icon": "apps",
+      "tags": [
+        "pdctng"
+      ],
+      "asDropdown": true,
+      "targetBlank": false,
+      "includeVars": true,
+      "keepTime": true,
+      "tooltip": ""
+    },
+    {
+      "title": "Puppet Enterprise Console",
+      "url": "https://${puppetserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Security Compliance Manager",
+      "url": "https://${scmserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    },
+    {
+      "title": "Continuous Delivery",
+      "url": "https://${cd4peserver}",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "tooltip": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "refresh": 1,
+        "hide": 0,
+        "includeAll": false
+      },
+      {
+        "name": "pdctng_job",
+        "type": "textbox",
+        "query": "puppet",
+        "options": [
+          {
+            "selected": true,
+            "text": "puppet",
+            "value": "puppet"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "puppet",
+          "value": "puppet"
+        },
+        "hide": 2
+      },
+      {
+        "name": "node_job",
+        "type": "textbox",
+        "query": "node-exporter",
+        "options": [
+          {
+            "selected": true,
+            "text": "node-exporter",
+            "value": "node-exporter"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "node-exporter",
+          "value": "node-exporter"
+        },
+        "hide": 2
+      },
+      {
+        "name": "windows_job",
+        "type": "textbox",
+        "query": "windows",
+        "options": [
+          {
+            "selected": true,
+            "text": "windows",
+            "value": "windows"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "windows",
+          "value": "windows"
+        },
+        "hide": 2
+      },
+      {
+        "name": "pe",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_exporter_nodes,alias)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_exporter_nodes,alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "PE"
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_report_timestamp_epoch,environment)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_report_timestamp_epoch,environment)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^(?!rolling_deployment_).*$/",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Environment"
+      },
+      {
+        "name": "search",
+        "type": "textbox",
+        "query": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "",
+          "value": ""
+        },
+        "label": "Name contains"
+      },
+      {
+        "name": "os",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_node_os{alias=~\"${pe}\"},name)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_node_os{alias=~\"${pe}\"},name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "OS"
+      },
+      {
+        "name": "role",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_node_trusted{alias=~\"${pe}\"},role)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_node_trusted{alias=~\"${pe}\"},role)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "Role"
+      },
+      {
+        "name": "datacenter",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_node_trusted{alias=~\"${pe}\"},datacenter)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_node_trusted{alias=~\"${pe}\"},datacenter)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "allValue": ".*",
+        "label": "Location"
+      },
+      {
+        "name": "agent_version",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_version{alias=~\"${pe}\"},version)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_version{alias=~\"${pe}\"},version)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "label": "Agent version"
+      },
+      {
+        "name": "cis",
+        "type": "custom",
+        "query": "Any : 102,Below 80 : 80",
+        "options": [
+          {
+            "selected": true,
+            "text": "Any",
+            "value": "102"
+          },
+          {
+            "selected": false,
+            "text": "Below 80",
+            "value": "80"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "Any",
+          "value": "102"
+        },
+        "label": "CIS"
+      },
+      {
+        "name": "patch",
+        "type": "custom",
+        "query": "Any : -2,Patchable : 0",
+        "options": [
+          {
+            "selected": true,
+            "text": "Any",
+            "value": "-2"
+          },
+          {
+            "selected": false,
+            "text": "Patchable",
+            "value": "0"
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "Any",
+          "value": "-2"
+        },
+        "label": "Patch state"
+      },
+      {
+        "name": "puppetserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},puppet_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "scmserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},scm_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      },
+      {
+        "name": "cd4peserver",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(puppet_infrastructure_config{alias=~\"${pe}\"},cd4pe_server)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Matched",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_node_os{node=~\".*${search}.*\",name=~\"${os}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1 unless on(node, alias) (puppet_node_trusted{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_node_trusted{role=~\"${role}\",datacenter=~\"${datacenter}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node, alias) (puppet_version{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_version{version=~\"${agent_version}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node) ((max by (node) (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 + 101) >= ${cis}) unless on(node) ((sum by (node) (puppet_patching_data{type=\"all\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 - 1) <= ${patch})) or (vector(0) and on() (count(puppet_status{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes matching the filters, uncapped. The table below shows at most 500: when this reads higher than the table is long, narrow the filter. Neutral because a count of matches is not good or bad.",
+      "id": 1520315131
+    },
+    {
+      "title": "Filtered Out",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "count(puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1) - (count(puppet_node_os{node=~\".*${search}.*\",name=~\"${os}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1 unless on(node, alias) (puppet_node_trusted{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_node_trusted{role=~\"${role}\",datacenter=~\"${datacenter}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node, alias) (puppet_version{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_version{version=~\"${agent_version}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node) ((max by (node) (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 + 101) >= ${cis}) unless on(node) ((sum by (node) (puppet_patching_data{type=\"all\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 - 1) <= ${patch})) or vector(0)) or (vector(0) and on() (count(puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) > 0))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e949f",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Nodes in the selected PE and environment that the other filters removed: In Scope minus Matched. Zero with no filter set, which is the honest landing state -- nothing has narrowed yet.",
+      "id": 886835274
+    },
+    {
+      "title": "Nodes",
+      "type": "table",
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "topk(500, puppet_node_os{node=~\".*${search}.*\",name=~\"${os}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1 unless on(node, alias) (puppet_node_trusted{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_node_trusted{role=~\"${role}\",datacenter=~\"${datacenter}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node, alias) (puppet_version{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_version{version=~\"${agent_version}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node) ((max by (node) (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 + 101) >= ${cis}) unless on(node) ((sum by (node) (puppet_patching_data{type=\"all\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 - 1) <= ${patch}))",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "max by (node) (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) and on(node) (puppet_node_os{node=~\".*${search}.*\",name=~\"${os}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1 unless on(node, alias) (puppet_node_trusted{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_node_trusted{role=~\"${role}\",datacenter=~\"${datacenter}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node, alias) (puppet_version{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_version{version=~\"${agent_version}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node) ((max by (node) (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 + 101) >= ${cis}) unless on(node) ((sum by (node) (puppet_patching_data{type=\"all\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 - 1) <= ${patch}))",
+          "legendFormat": "",
+          "refId": "B",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "sum by (node) (puppet_patching_data{type=\"all\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) and on(node) (puppet_node_os{node=~\".*${search}.*\",name=~\"${os}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1 unless on(node, alias) (puppet_node_trusted{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_node_trusted{role=~\"${role}\",datacenter=~\"${datacenter}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node, alias) (puppet_version{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_version{version=~\"${agent_version}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node) ((max by (node) (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 + 101) >= ${cis}) unless on(node) ((sum by (node) (puppet_patching_data{type=\"all\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 - 1) <= ${patch}))",
+          "legendFormat": "",
+          "refId": "C",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "sum by (node) (puppet_patching_data{type=\"security\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) and on(node) (puppet_node_os{node=~\".*${search}.*\",name=~\"${os}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} == 1 unless on(node, alias) (puppet_node_trusted{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_node_trusted{role=~\"${role}\",datacenter=~\"${datacenter}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node, alias) (puppet_version{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"} unless puppet_version{version=~\"${agent_version}\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) unless on(node) ((max by (node) (puppet_cis_compliance_score{score_type=\"base\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 + 101) >= ${cis}) unless on(node) ((sum by (node) (puppet_patching_data{type=\"all\",environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) or max by (node) (puppet_node_os{environment=~\"${environment}\",alias=~\"${pe}\",job=~\"${pdctng_job}\"}) * 0 - 1) <= ${patch}))",
+          "legendFormat": "",
+          "refId": "D",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "n/a"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "This node in detail",
+                    "url": "/d/pdctng-node-detail?var-node=${__value.text}&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PE"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Operating system"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Version"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 85
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Architecture"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CIS score"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Patches"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 85
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Security patches"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 145
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Node",
+            "desc": false
+          }
+        ]
+      },
+      "description": "The nodes the filters describe, at most 500 of them; Matched above is the true count. The node name links through to that node's board. CIS score and patch debt are joined on per row, restricted to this filtered set: a blank cell is a node with no scan or no patch data, not a zero. Role and agent version stay filters rather than columns, because they are search facets, not the act-on-it numbers CIS and patching are. A node missing the fact behind a filter is kept, not hidden: a filter only excludes a node whose facts say it does not match.",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "node",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(node|alias|environment|name|version|architecture|Value\\ \\#B|Value\\ \\#C|Value\\ \\#D)$"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "node": "Node",
+              "alias": "PE",
+              "environment": "Environment",
+              "name": "Operating system",
+              "version": "Version",
+              "architecture": "Architecture",
+              "Value #B": "CIS score",
+              "Value #C": "Patches",
+              "Value #D": "Security patches"
+            },
+            "indexByName": {
+              "node": 0,
+              "alias": 1,
+              "environment": 2,
+              "name": 3,
+              "version": 4,
+              "architecture": 5,
+              "Value #B": 6,
+              "Value #C": 7,
+              "Value #D": 8
+            }
+          }
+        }
+      ],
+      "id": 1407576733
+    }
+  ],
+  "description": "Turn a description of nodes into a named set: filter by name, OS, role, location, agent version, and now compliance (CIS below 80) and patch state (patchable). What is wrong with them is PDCTNG Triage; this is the whole fleet."
+}
