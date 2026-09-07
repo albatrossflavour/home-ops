@@ -366,9 +366,12 @@ Doing Ceph first has its own snag, since stolat's current corosync link is
 
 Three phases resolve both:
 
-1. **Minimal corosync fix.** Move stolat's `ring5_addr` from `192.168.6.12`
-   to `192.168.5.12`. One node, one address, no new links. This decouples
-   corosync from the Ceph network entirely.
+1. ~~**Minimal corosync fix.**~~ Done 2026-09-07 at `config_version: 14`.
+   stolat's `ring5_addr` moved from `192.168.6.12` to `192.168.5.12`, and both
+   stale `interface` blocks removed. All three links now run on
+   `192.168.5.x`, so corosync no longer touches the Ceph network. It cost an
+   unplanned loss of quorum on the way; see the two subsections above for what
+   went wrong and why the recovery is straightforward.
 2. **Ceph readdress.** Now purely a Ceph and migration operation with nothing
    depending on it.
 3. **Add the second corosync link** on the final Ceph addresses, configured
@@ -399,18 +402,75 @@ or a node that fails to rejoin will hard-reset itself. Verified procedure:
 systemctl stop pve-ha-lrm     # wait for all three
 systemctl stop pve-ha-crm
 
-# confirm nothing can fence before touching corosync
-ls /run/watchdog-mux.active/ | wc -l    # must be 0 on every node
+# confirm nothing can fence: this must be inactive on EVERY node
+systemctl is-active pve-ha-lrm
 
-# ... edit /etc/pve/corosync.conf, bump config_version ...
+# ... edit corosync, bump config_version ...
 
 systemctl start pve-ha-crm    # reverse order
 systemctl start pve-ha-lrm
 ```
 
+Two checks that do **not** work, both learned the hard way:
+
 `ha-manager status` keeps reporting "fencing armed" from a stale status file
-after the services stop, so it is not a reliable check. The watchdog client
-count is.
+after the services stop.
+
+`ls /run/watchdog-mux.active/ | wc -l` reads 0 whether HA is armed or not, so
+it cannot distinguish the two states. It was used as the safety gate on
+2026-09-07 and proved nothing. `watchdog-mux` holds `/dev/watchdog` open
+permanently regardless of HA state; it is the LRM that arms fencing, so
+`systemctl is-active pve-ha-lrm` is the check that means something.
+
+### Corosync will not change a link address on reload
+
+Editing `ring5_addr` and bumping `config_version` distributes the file and
+corosync accepts it, but refuses to apply it:
+
+```text
+[TOTEM] new config has different address for link 5
+        (addr changed from 192.168.6.12 to 192.168.5.12).
+        Internal value was NOT changed.
+[CFG  ] Cannot configure new interface definitions: To reconfigure an
+        interface it must be deleted and recreated. A working interface
+        needs to be available to corosync at all times
+```
+
+So the config and the running state silently diverge until corosync restarts.
+Plan on restarting it, and check `corosync-cfgtool -n` for the addresses
+actually in use rather than trusting the file.
+
+### The `interface` blocks are NOT ignored
+
+An earlier version of this document claimed the `totem` `interface` blocks
+were corosync-2 legacy that knet ignores. That is wrong, and it caused an
+outage on 2026-09-07.
+
+Corosync uses `bindnetaddr` to match a node's ring address to a link at
+**startup validation only**, which is why a running cluster never complains.
+The config carried two blocks, `linknumber: 5` on `192.168.6.0` and
+`linknumber: 0` on `192.168.5.0`. Moving stolat's `ring5_addr` from
+`192.168.6.12` to `192.168.5.12` made it match the `linknumber: 0` block while
+the other two still matched `linknumber: 5`, so corosync refused to start:
+
+```text
+[MAIN] parse error in config: Not all nodes have the same number of links
+```
+
+With knet and explicit `ringX_addr` entries the blocks serve no purpose. Both
+were removed at `config_version: 14`, and the cluster is healthier for it.
+
+### Recovering a cluster that has lost quorum
+
+Once quorum is gone `/etc/pve` is read-only, so corosync cannot be fixed
+there. Corosync reads `/etc/corosync/corosync.conf`, a real local file on each
+node, which stays writable. Fix that copy on every node, restart corosync,
+and once quorum returns copy it back to `/etc/pve/corosync.conf` so the two do
+not diverge.
+
+Guests are unaffected throughout. During the 2026-09-07 outage every VM and
+container kept running, including the whole Kubernetes cluster; it is a
+control-plane outage only.
 
 ### Adjacent observation
 
