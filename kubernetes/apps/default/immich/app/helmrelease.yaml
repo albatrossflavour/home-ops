@@ -122,6 +122,19 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 5
+              # The probe that actually gates the reindex.
+              #
+              # #1756 raised liveness, which was necessary but not sufficient:
+              # the container never got far enough for liveness to apply.
+              # Startup runs first, and at 30 x 5s it killed the container
+              # after 150s with "Container app failed startup probe, will be
+              # restarted" - almost exactly the observed restart cycle.
+              #
+              # A startup probe exists for precisely this: an app that is slow
+              # to become available on first start but healthy thereafter.
+              # 120 x 5s allows ten minutes to rebuild clip_index and
+              # face_index, after which liveness takes over on its normal
+              # cadence. Nothing is loosened for the steady state.
               startup:
                 enabled: true
                 custom: true
@@ -130,7 +143,7 @@ spec:
                     path: /api/server/ping
                     port: *port
                   periodSeconds: 5
-                  failureThreshold: 30
+                  failureThreshold: 120
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
