@@ -104,6 +104,41 @@ spec:
             summary: "Authentik has only {{ $value }} replicas available"
             description: "Authentik server has {{ $value }} replicas available (expected: 3)"
 
+        # NVMe endurance is deliberately NOT alerted on. Two drives in the
+        # Proxmox estate already report Percentage Used above 100% (ankh
+        # nvme1n1 at 143%, morpork nvme0n1 at 150%, both Crucial CT1000P3SSD8
+        # as of 2026-09-07) and that number only ever climbs. It is a warranty
+        # counter, not a failure predictor, so alerting on it would mean a
+        # permanently firing alert that says nothing new.
+        #
+        # Available spare is the metric that actually predicts failure. It is
+        # the proportion of the drive's reserve block pool still unused, and
+        # the NVMe spec has each drive publish its own failure threshold
+        # (5% or 10% across this estate). Both worn drives still read 100%,
+        # so the reserve is completely untouched - which is precisely why a
+        # move off 100% is worth knowing about.
+        #
+        # See docs/operations/proxmox-health-audit.md.
+        - alert: NvmeAvailableSpareLow
+          expr: |
+            nvme_available_spare_ratio * 100 < 90
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NVMe {{ $labels.device }} on {{ $labels.instance }} has consumed reserve blocks"
+            description: "Available spare on {{ $labels.device }} ({{ $labels.instance }}) has fallen to {{ $value | humanize }}%, meaning the drive has started retiring blocks into its reserve pool. Every drive in this estate sat at 100% when this alert was written, so any movement is new. Not urgent on its own, but it is the first genuine sign of wear turning into degradation - check `smartctl -A` for Media and Data Integrity Errors alongside it."
+
+        - alert: NvmeAvailableSpareCritical
+          expr: |
+            nvme_available_spare_ratio <= nvme_available_spare_threshold_ratio
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NVMe {{ $labels.device }} on {{ $labels.instance }} is below its own spare threshold"
+            description: "Available spare on {{ $labels.device }} ({{ $labels.instance }}) has dropped to or below the failure threshold the drive itself publishes. The NVMe spec treats this as a device in a degraded state; replacement is the expected response, not investigation. On ankh and morpork the pve volume group holds the Proxmox host root, swap, every VM system disk and the rook-ceph OSD volumes, so a failure there takes a Kubernetes control plane node and a Ceph OSD with it."
+
         - alert: UPSOnBattery
           expr: |
             network_ups_tools_ups_status{flag="OL"} == 0
