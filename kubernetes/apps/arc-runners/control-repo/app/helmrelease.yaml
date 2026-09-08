@@ -106,6 +106,19 @@ spec:
             # rather than drifting on its own, which is the point.
             image: ghcr.io/actions/actions-runner:2.337.0
             command: ["/home/runner/run.sh"]
+            # The relay workflow reads $CD4PE_WEBHOOK_TOKEN rather than a
+            # GitHub Actions secret, so the CD4PE credential never leaves the
+            # estate. Sourced from the cd4pe-webhook ExternalSecret alongside.
+            env:
+              - name: CD4PE_WEBHOOK_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: cd4pe-webhook
+                    key: apiToken
+              # The endpoint too, so the workflow carries no hostnames and a
+              # renumbered CD4PE is a change here rather than in three repos.
+              - name: CD4PE_WEBHOOK_URL
+                value: http://cd4pe.lab.albatrossflavour.com:8000/github/push
             # Explicit resources so this namespace can take a ResourceQuota
             # later without silently rejecting every job, which is the trap
             # media-quota hit.
