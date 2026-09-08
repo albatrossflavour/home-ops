@@ -1,0 +1,62 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Baseline policy for arc-runners.
+#
+# As with arc-systems, this is NOT derived from a Hubble capture - the workload
+# did not exist when it was written. Capture once a job has run and correct it.
+#
+# This namespace runs code from a Git repository, which makes it the least
+# trusted thing in the cluster. The egress list is therefore the interesting
+# part and should stay as short as the jobs allow.
+#
+# Today the only job is a relay: forward the GitHub webhook payload to CD4PE so
+# Impact Analysis fires. GitHub cannot reach CD4PE directly (the public name is
+# behind Cloudflare, whose edge does not serve port 8000, so every webhook
+# delivery failed with "failed to connect to host"), so the runner makes the
+# call from inside the network instead.
+#
+# CD4PE is scoped to its IP and port rather than toEntities: world, the same
+# reasoning as utilities' NAS minio rule: the destination is fixed and known.
+# If cd4pe is ever renumbered this rule breaks and the relay stops, which is
+# the correct failure mode for a job that reaches into the Puppet network.
+#
+# No ingress rules beyond probes. Nothing should ever connect *to* a runner.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy arc-runners-default -n arc-runners`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: arc-runners-default
+  namespace: arc-runners
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - host
+        - remote-node
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # github.com and api.github.com: collecting the job, reporting status,
+    # downloading any actions the workflow uses.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # CD4PE's webhook listener, for the Impact Analysis relay.
+    - toCIDR:
+        - 192.168.7.11/32
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP

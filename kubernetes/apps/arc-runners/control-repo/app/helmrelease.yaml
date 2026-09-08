@@ -1,0 +1,94 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: arc-runner-control-repo
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: gha-runner-scale-set
+      version: 0.14.2
+      sourceRef:
+        kind: HelmRepository
+        name: actions-runner-controller
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    # Repository scope, not organisation. albatrossflavour is a user account and
+    # GitHub does not offer organisation-level runners on those, so every repo
+    # needs its own scale set. Adding puppet-control-repo or uberwald-control-repo
+    # later means copying this directory and changing this one line; the App
+    # installation and the secret above are shared.
+    githubConfigUrl: https://github.com/albatrossflavour/control-repo
+    githubConfigSecret: arc-github-app
+
+    # The label workflows select on. Deliberately generic rather than naming the
+    # repo, so the same `runs-on` works unchanged across all three control repos
+    # and a workflow can be copied between them without edits.
+    runnerScaleSetName: cd4pe-relay
+
+    # Pinned rather than discovered. The chart's default is to look for a
+    # Deployment labelled app.kubernetes.io/part-of=gha-rs-controller and read
+    # its ServiceAccount, which fails outright when Helm renders without cluster
+    # access - exactly what happens on a Flux reconcile, and what
+    # `helm template` reproduces:
+    #
+    #   No gha-rs-controller deployment found using label
+    #   (app.kubernetes.io/part-of=gha-rs-controller)
+    #
+    # The name comes from the controller release: <release>-gha-rs-controller.
+    # If that HelmRelease is ever renamed, this must change with it.
+    controllerServiceAccount:
+      name: actions-runner-controller-gha-rs-controller
+      namespace: arc-systems
+
+    # Idle to zero. The only job today is a sub-second HTTP POST, so a warm pod
+    # would spend its life doing nothing. Raise minRunners if cold start ever
+    # costs more than it saves.
+    minRunners: 0
+    maxRunners: 3
+
+    containerMode:
+      # kubernetes mode would give each job its own pod and need a PVC per job.
+      # dind is not needed either: the relay runs curl. Leaving this empty means
+      # the job runs in the runner container itself, which is the cheapest
+      # option and the smallest attack surface.
+      type: ""
+
+    template:
+      spec:
+        securityContext:
+          runAsUser: 1001
+          fsGroup: 1001
+        containers:
+          - name: runner
+            # Pinned. The chart's default is actions-runner:latest, which is a
+            # floating tag and out of step with how everything else here is
+            # versioned. The cost is that this needs bumping alongside the chart
+            # rather than drifting on its own, which is the point.
+            image: ghcr.io/actions/actions-runner:2.337.0
+            command: ["/home/runner/run.sh"]
+            # Explicit resources so this namespace can take a ResourceQuota
+            # later without silently rejecting every job, which is the trap
+            # media-quota hit.
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              seccompProfile:
+                type: RuntimeDefault

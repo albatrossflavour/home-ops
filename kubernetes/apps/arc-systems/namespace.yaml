@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arc-systems
+  labels:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+    # The controller is a single Go binary that talks to the Kubernetes API and
+    # api.github.com. It needs no host access, no writable root and no extra
+    # capabilities, so restricted is the correct level and there is nothing to
+    # fix first. Contrast arc-runners, which is baseline for a stated reason.
+    pod-security.kubernetes.io/enforce: restricted
