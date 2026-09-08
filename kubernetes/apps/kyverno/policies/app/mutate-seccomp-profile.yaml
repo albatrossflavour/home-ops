@@ -51,7 +51,31 @@ spec:
     resourceRules:
       - apiGroups: [""]
         apiVersions: [v1]
-        operations: [CREATE, UPDATE]
+        # CREATE only, and this is load-bearing rather than tidiness.
+        #
+        # seccompProfile is immutable on an existing Pod. Matching UPDATE
+        # meant that any pod which missed the mutation at CREATE could never be
+        # updated again: the webhook would inject the field, the API server
+        # would reject the whole request as an immutable-field change, and the
+        # update would fail no matter who issued it or why.
+        #
+        # failurePolicy: Ignore guarantees that some pods miss the mutation.
+        # That is the point of Ignore - when Kyverno is unreachable the pod is
+        # admitted unmutated rather than blocked. The admission controller has
+        # restarted 6 times in 32 hours, losing its leader lease alongside the
+        # snapshot-controller each time.
+        #
+        # On 2026-09-07 at 16:45 that combination cost three volsync backups.
+        # Their mover pods were admitted without a seccompProfile while Kyverno
+        # was down, which made them permanently un-updatable, which stopped the
+        # Job controller removing batch.kubernetes.io/job-tracking, which left
+        # the pods stuck mid-deletion holding pvc-protection on volsync's clone
+        # PVC, which blocked every subsequent run. 50 pods cluster-wide were in
+        # the same un-updatable state; only these three had needed an update.
+        #
+        # Mutating an immutable field on UPDATE can never succeed. It can only
+        # reject somebody else's write.
+        operations: [CREATE]
         resources: [pods]
   # matchConditions reference `object` directly - variables do not exist yet
   # at this point in evaluation.
