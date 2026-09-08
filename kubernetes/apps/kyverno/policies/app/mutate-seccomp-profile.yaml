@@ -47,6 +47,24 @@ metadata:
       pod spec declare it.
 spec:
   failurePolicy: Ignore
+  # Autogen OFF, and like the CREATE-only rule below this is load-bearing.
+  #
+  # Autogen would generate copies of this rule against Deployments, StatefulSets,
+  # DaemonSets, ReplicaSets, Jobs and CronJobs, mutating their POD TEMPLATE. That
+  # puts Kyverno in a fight with any controller that owns and continuously
+  # reconciles its own template. Volsync is one: it recreates the desired Job
+  # spec every reconcile, sees the injected field as drift, tries to update the
+  # Job, and fails because spec.template is immutable. Its error handler then
+  # deletes and recreates the Job, so it loops. Measured on 2026-09-08: 205
+  # delete/recreate cycles in one hour across three ReplicationSources, each
+  # spawning a mover pod that was killed seconds later.
+  #
+  # Nothing is lost by turning it off. A pod created by any of those controllers
+  # still passes through Pod CREATE admission, where the rule below mutates it.
+  # The runtime effect is identical; only the stored template is left alone.
+  autogen:
+    podControllers:
+      controllers: []
   matchConstraints:
     resourceRules:
       - apiGroups: [""]
