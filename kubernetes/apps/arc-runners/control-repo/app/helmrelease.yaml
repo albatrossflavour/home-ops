@@ -64,6 +64,35 @@ spec:
       # option and the smallest attack surface.
       type: ""
 
+    # The controller creates one listener pod per scale set, and it lands in
+    # arc-systems (the controller's namespace), not here. That namespace enforces
+    # PodSecurity restricted, and the chart's default listener spec sets none of
+    # what restricted requires, so the pod was rejected outright:
+    #
+    #   pods "cd4pe-relay-...-listener" is forbidden: violates PodSecurity
+    #   "restricted:latest": allowPrivilegeEscalation != false, unrestricted
+    #   capabilities, runAsNonRoot != true
+    #
+    # Fixing the pod rather than dropping arc-systems to baseline: the listener
+    # is a Go binary that long-polls the Actions service, so it genuinely needs
+    # none of what restricted withholds.
+    listenerTemplate:
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          seccompProfile:
+            type: RuntimeDefault
+        containers:
+          - name: listener
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              readOnlyRootFilesystem: true
+              runAsNonRoot: true
+              runAsUser: 1000
+
     template:
       spec:
         securityContext:
