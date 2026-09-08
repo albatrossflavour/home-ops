@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Pre Flux-Kustomizations
+  - ./namespace.yaml
+  - ./serviceaccount-default.yaml
+  - ./networkpolicy-default.yaml
+  # Flux-Kustomizations
+  - ./control-repo/ks.yaml
+# Deliberately no resourcequota.yaml here yet.
+#
+# A ResourceQuota that sets requests.cpu/requests.memory/limits.memory rejects
+# any pod that omits them, and runner pods are ephemeral Jobs created by the
+# controller. That is exactly how media-quota (7cfa220e) broke every Volsync
+# mover in that namespace for 12 hours on 2026-09-02: invisible until a Job
+# actually ran. Set explicit resources on the runner spec and confirm
+# require-pod-resources is clean for this namespace before adding one.

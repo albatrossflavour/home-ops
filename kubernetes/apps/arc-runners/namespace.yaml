@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arc-runners
+  labels:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+    # baseline, not restricted, and deliberately so. The runner image needs a
+    # writable work directory and runs its entrypoint as the `runner` user
+    # rather than declaring runAsNonRoot, which is a Restricted-only
+    # requirement. Baseline still blocks everything that actually matters here:
+    # hostNetwork, hostPath, privileged and added capabilities.
+    #
+    # Worth revisiting once a job has actually run: if the pods turn out to
+    # satisfy Restricted, tighten it. That is the same order of operations
+    # utilities used, where every live pod was checked before enforcing.
+    pod-security.kubernetes.io/enforce: baseline

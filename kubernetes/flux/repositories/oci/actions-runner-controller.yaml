@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
+# First OCI HelmRepository in this cluster; repositories/oci/ was an empty
+# placeholder until now. GitHub publishes the ARC charts only as OCI artifacts,
+# there is no classic index.yaml to point at.
+#
+# Public registry, no pull secret. The github-oci-auth ExternalSecret in
+# flux-system is for authenticated ghcr pulls and is deliberately not wired in
+# here: these charts are anonymous, and attaching credentials that are not
+# needed just widens what a compromised source-controller could reach.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: actions-runner-controller
+  namespace: flux-system
+spec:
+  type: oci
+  interval: 30m
+  url: oci://ghcr.io/actions/actions-runner-controller-charts

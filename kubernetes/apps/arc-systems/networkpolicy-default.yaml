@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Baseline policy for arc-systems.
+#
+# UNLIKE every other namespace policy in this repo, this one is NOT derived from
+# a live Hubble capture, because the workload did not exist when it was written.
+# It is built from ARC's documented behaviour, which means it is a hypothesis
+# until proven. Run a capture once the controller has registered a scale set and
+# processed a real job, and correct this file the way utilities' minio rules were
+# corrected. Assume something is missing rather than that this is complete.
+#
+# What lives here: the gha-runner-scale-set-controller and the per-scale-set
+# listener pods. The runner pods themselves are in arc-runners and are covered
+# by that namespace's own policy.
+#
+# The controller does three things on the network: watch and update its CRs
+# through the Kubernetes API, create runner pods in arc-runners (also via the
+# API, so no pod-to-pod rule is needed for that), and call api.github.com to
+# exchange the GitHub App credentials for runner registration tokens.
+#
+# GitHub egress is toEntities: world on 443 rather than a CIDR. GitHub publishes
+# its API ranges via meta, but they change without notice and a stale CIDR list
+# fails closed in a way that looks like an auth problem. This matches the
+# reasoning already applied to media's unscoped rule.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy arc-systems-default -n arc-systems`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: arc-systems-default
+  namespace: arc-systems
+spec:
+  endpointSelector: {}
+  ingress:
+    # Kubelet liveness/readiness probes on the controller's metrics port.
+    - fromEntities:
+        - host
+        - remote-node
+        - kube-apiserver
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Watching AutoscalingRunnerSet/EphemeralRunner CRs and creating runner pods.
+    - toEntities:
+        - kube-apiserver
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+    # api.github.com, for the App JWT exchange and runner registration tokens.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
