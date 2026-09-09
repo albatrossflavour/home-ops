@@ -144,9 +144,16 @@ spec:
         size: 10Gi
       resources:
         requests:
-          # p50 sits at 1.0-1.6GiB, so 256Mi under-requested by roughly 4x.
+          # Raised 256Mi -> 1Gi previously on a p50 of 1.0-1.6GiB. Re-measured
+          # 2026-09-09 over 7 days at 5min resolution and 1Gi is still under:
+          #
+          #   min 1006Mi   p50 1627Mi   p95 1955Mi   max 2035Mi
+          #
+          # The request sat below the p50, so this ran above its own request
+          # essentially all of the time, which makes it a first-choice eviction
+          # candidate under node pressure. 2Gi covers p95 and the observed max.
           cpu: 10m
-          memory: 1Gi
+          memory: 2Gi
         limits:
           # 14d peak 1785MiB and p99 1923MiB against the old 2Gi ceiling,
           # which is 94% of the limit. OOMKilled 01 Sep. Store gateway memory
