@@ -388,3 +388,70 @@ spec:
           annotations:
             summary: "Only {{ $value }} temperature sensors reporting (expected ~18)"
             description: "Fewer than 5 temperature sensors are reporting. The mqtt-exporter may be hitting its metric limit or sensors are offline."
+
+    # The NAS mirror on ankh. Metrics come from scripts/nas-sync.sh via
+    # node_exporter's textfile collector (/var/lib/prometheus/node-exporter),
+    # the same route smartmon.prom and nvme.prom already use.
+    #
+    # WHY THIS EXISTS. The previous sync was five rsync lines in cron with
+    # output sent to /dev/null. root's SSH key to the NAS stopped
+    # authenticating, every run failed silently, and it was eight months before
+    # anyone noticed - by which point PlexMediaServer had not moved since 2021.
+    # A backup that fails quietly is worse than no backup, because you believe
+    # you have one. These alerts exist so that cannot happen twice.
+    - name: nas-sync
+      rules:
+        # The one that matters. Everything else here is detail.
+        #
+        # The cron runs daily at midnight, so 36h allows a full miss plus the
+        # run itself (Media alone took 40h on the initial seed; steady-state
+        # incremental runs are far shorter, but the threshold should tolerate a
+        # long one rather than page during it).
+        - alert: NasSyncStale
+          expr: |
+            time() - nas_sync_last_success_timestamp_seconds > 36 * 3600
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS mirror on {{ $labels.instance }} has not completed successfully in {{ $value | humanizeDuration }}"
+            description: "nas-sync.sh last finished without a hard failure {{ $value | humanizeDuration }} ago. The cron is daily, so anything past 36h means runs are failing or not starting. Check /var/log/nas-sync.log on ankh. Note the cron still redirects to /dev/null, so this alert and the log are the only signals."
+
+        # absent() is not redundant with the staleness alert above: if the
+        # script stops running entirely, or the textfile is removed, the metric
+        # disappears and a threshold on it can never fire. Silence is the
+        # failure mode this whole thing exists to catch.
+        - alert: NasSyncMetricsAbsent
+          expr: |
+            absent(nas_sync_last_success_timestamp_seconds)
+          for: 2h
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS mirror metrics have disappeared entirely"
+            description: "nas_sync_last_success_timestamp_seconds is not being reported. Either nas-sync.sh is no longer running, or it is no longer writing /var/lib/prometheus/node-exporter/nas_sync.prom. Both mean the mirror is unmonitored, which is exactly how the 2021-2026 gap happened."
+
+        - alert: NasSyncHardFailure
+          expr: |
+            nas_sync_hard_failures > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS mirror had {{ $value }} source(s) fail outright"
+            description: "One or more sources failed for a reason other than unreadable files. rsync exits 23 and 24 are classed as partial and deliberately do NOT trigger this, so a hard failure here is a real problem - a dead SSH key, a full disk, or an unmounted destination."
+
+        # Media and PlexMediaServer skip a fixed set of files the tgreen
+        # account cannot read - 48 of them as of 2026-09-09. That number being
+        # non-zero is expected and is NOT alertable, or the alert would fire
+        # every night and be ignored. What matters is the number GROWING, which
+        # means new files have become unreadable.
+        - alert: NasSyncUnreadableFilesIncreasing
+          expr: |
+            sum(nas_sync_source_unreadable_files) - sum(nas_sync_source_unreadable_files offset 7d) > 5
+          for: 1h
+          labels:
+            severity: info
+          annotations:
+            summary: "NAS mirror is skipping {{ $value }} more unreadable files than a week ago"
+            description: "The count of files the NAS refuses to hand over has risen. The known baseline is 48 across Media and PlexMediaServer. A rise means new content is being created with permissions the sync account cannot read, so it is silently not being backed up. Check the Permission denied lines in /var/log/nas-sync.log on ankh."
