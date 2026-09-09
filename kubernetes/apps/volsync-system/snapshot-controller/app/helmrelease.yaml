@@ -26,6 +26,41 @@ spec:
       retries: 3
   values:
     controller:
+      # Leader election widened from the chart/upstream defaults of
+      # lease 15s / renew 10s / retry 2s.
+      #
+      # This controller has been losing its lease and restarting repeatedly,
+      # with the same error every time:
+      #
+      #   "Error retrieving lease lock" err="client rate limiter Wait returned
+      #    an error: context deadline exceeded"
+      #   "Failed to renew lease" ... "Stopped leading"
+      #
+      # It is not overloaded - there are three VolumeSnapshots and five
+      # contents in the whole cluster, and it creates snapshots for everything
+      # else without trouble. The API is simply slow to read: measured
+      # 2026-09-09, GET p99 936ms and LIST p99 945ms, with LIST on leases
+      # specifically at 2977ms. Writes are healthy (POST 46ms) and there is no
+      # APF queueing or rejection, so nothing is being throttled by the server.
+      #
+      # A 15s lease with a 10s renew deadline cannot survive three consecutive
+      # reads at that latency. Widening it lets the controller ride out slow
+      # periods instead of exiting.
+      #
+      # Same reasoning as the etcd election-timeout change in #1743, one layer
+      # up: tolerate the latency the cluster actually has rather than treating
+      # every stall as a failure. The cost is identical in shape - failover
+      # after a genuine controller death goes from ~15s to ~60s, which for
+      # snapshot creation is not a availability concern.
+      #
+      # NOTE: controller.args is a map, and Helm merges maps, so these three
+      # keys are added to the chart's defaults rather than replacing them. The
+      # chart renders each key through `kebabcase`, so leaderElectionLeaseDuration
+      # becomes --leader-election-lease-duration.
+      args:
+        leaderElectionLeaseDuration: 60s
+        leaderElectionRenewDeadline: 40s
+        leaderElectionRetryPeriod: 10s
       serviceMonitor:
         create: true
     webhook:

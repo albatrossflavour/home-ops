@@ -217,18 +217,93 @@ spec:
       enabled: false
 
     admissionController:
+      # Leader election widened from the default retry period of 2s.
+      #
+      # Kyverno derives its lease duration from this value: the observed lease
+      # is 12s against a 2s retry period, so the lease is 6x the retry. All
+      # three controllers have been losing their leases and restarting, with
+      # the reports controller managing 3 restarts in 10 minutes on 2026-09-09.
+      #
+      # The cause is read latency, not load. Measured the same day: GET p99
+      # 936ms, LIST p99 945ms, LIST on leases specifically 2977ms, against
+      # healthy writes (POST 46ms) and no APF queueing or rejections. Kyverno's
+      # own client limit is already generous at 300 QPS, so it is not
+      # self-throttling.
+      #
+      # The consequence was not cosmetic. A full background scan takes about
+      # five minutes; the reports controller was dying before finishing one, so
+      # no PolicyReport had been written cluster-wide for over an hour and the
+      # newly added cis-5-1-6 policy produced no results at all. Every report in
+      # the cluster was stale while appearing perfectly normal.
+      #
+      # Same reasoning as the etcd election-timeout change in #1743, one layer
+      # up. The cost is slower failover after a genuine controller death, which
+      # for audit-only policies that block nothing is not an availability
+      # question.
+      extraArgs:
+        leaderElectionRetryPeriod: 6s
       replicas: 1
       serviceMonitor:
         enabled: true
         interval: 30s
 
     backgroundController:
+      # Leader election widened from the default retry period of 2s.
+      #
+      # Kyverno derives its lease duration from this value: the observed lease
+      # is 12s against a 2s retry period, so the lease is 6x the retry. All
+      # three controllers have been losing their leases and restarting, with
+      # the reports controller managing 3 restarts in 10 minutes on 2026-09-09.
+      #
+      # The cause is read latency, not load. Measured the same day: GET p99
+      # 936ms, LIST p99 945ms, LIST on leases specifically 2977ms, against
+      # healthy writes (POST 46ms) and no APF queueing or rejections. Kyverno's
+      # own client limit is already generous at 300 QPS, so it is not
+      # self-throttling.
+      #
+      # The consequence was not cosmetic. A full background scan takes about
+      # five minutes; the reports controller was dying before finishing one, so
+      # no PolicyReport had been written cluster-wide for over an hour and the
+      # newly added cis-5-1-6 policy produced no results at all. Every report in
+      # the cluster was stale while appearing perfectly normal.
+      #
+      # Same reasoning as the etcd election-timeout change in #1743, one layer
+      # up. The cost is slower failover after a genuine controller death, which
+      # for audit-only policies that block nothing is not an availability
+      # question.
+      extraArgs:
+        leaderElectionRetryPeriod: 6s
       replicas: 1
       serviceMonitor:
         enabled: true
         interval: 30s
 
     reportsController:
+      # Leader election widened from the default retry period of 2s.
+      #
+      # Kyverno derives its lease duration from this value: the observed lease
+      # is 12s against a 2s retry period, so the lease is 6x the retry. All
+      # three controllers have been losing their leases and restarting, with
+      # the reports controller managing 3 restarts in 10 minutes on 2026-09-09.
+      #
+      # The cause is read latency, not load. Measured the same day: GET p99
+      # 936ms, LIST p99 945ms, LIST on leases specifically 2977ms, against
+      # healthy writes (POST 46ms) and no APF queueing or rejections. Kyverno's
+      # own client limit is already generous at 300 QPS, so it is not
+      # self-throttling.
+      #
+      # The consequence was not cosmetic. A full background scan takes about
+      # five minutes; the reports controller was dying before finishing one, so
+      # no PolicyReport had been written cluster-wide for over an hour and the
+      # newly added cis-5-1-6 policy produced no results at all. Every report in
+      # the cluster was stale while appearing perfectly normal.
+      #
+      # Same reasoning as the etcd election-timeout change in #1743, one layer
+      # up. The cost is slower failover after a genuine controller death, which
+      # for audit-only policies that block nothing is not an availability
+      # question.
+      extraArgs:
+        leaderElectionRetryPeriod: 6s
       # This is the controller that produces PolicyReport and
       # ClusterPolicyReport objects. For a compliance use case it is the
       # product surface, not overhead - deliberately left on.
