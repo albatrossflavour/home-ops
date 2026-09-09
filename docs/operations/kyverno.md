@@ -79,6 +79,19 @@ ERROR: <input>:1:11: undefined field 'name'
 
 Same rule as native ValidatingAdmissionPolicy. Variables are available in `validations` and `auditAnnotations` only.
 
+**A mutating policy must not match UPDATE on a Pod.** `seccompProfile` and `resources.requests` are immutable on an existing pod. A policy matching `[CREATE, UPDATE]` therefore injects a field the API server then refuses, and it refuses the *whole request*, from anyone, for any reason:
+
+```text
+Pod "volsync-src-paperless-ai-wmjdf" is invalid: spec: Forbidden:
+pod updates may not change fields other than spec.containers[*].image ...
+-  "SeccompProfile": null,
++  "SeccompProfile": {"Type": "RuntimeDefault"}
+```
+
+`failurePolicy: Ignore` guarantees this happens. That setting exists so an unreachable Kyverno never blocks a deploy, and it works, but the pod is admitted *unmutated* - and from then on it can never be written to again. On 2026-09-07 that caught three volsync mover pods while Kyverno was restarting, which stopped the Job controller removing `batch.kubernetes.io/job-tracking`, which left them stuck mid-deletion holding `pvc-protection` on the clone PVC, which blocked those backups for 12+ hours. 50 pods cluster-wide were in the same un-writable state; only three had needed a write. Fixed in #1766 by matching CREATE only.
+
+**Autogen mutates pod templates that other controllers own.** The fix above exposed a second fault. Autogen had been generating copies of the pod mutators against Jobs, injecting `seccompProfile` into the Job's pod template. Volsync recomputes its desired Job spec every reconcile, saw the injected field as drift, tried to update the Job, and failed because `spec.template` is immutable. Its handler is `unable to update object. Deleting object so it can be recreated`, so it looped: 205 Job delete/recreate cycles in one hour, each spawning a mover pod killed seconds later. The UPDATE match had been hiding this by re-injecting the field on the way in. Fixed in #1767 with `autogen.podControllers.controllers: []` on both pod mutators - a pod created by any controller still passes through Pod CREATE admission, so the runtime effect is identical and only the stored template is left alone.
+
 **Cross-resource lookups need explicit RBAC.** Kyverno ships RBAC for core resources only. `require-pvc-backup` reads Volsync CRDs through a `GlobalContextEntry`, and without a grant the entry silently never populates while the policy still reports `Webhook configured` and `Policy is ready for reporting`. The only trace is one line in a controller log:
 
 ```text
@@ -141,7 +154,7 @@ Worth being precise about, because "we run CIS policies" is a claim that needs q
 
 | CIS | Control | Found here | Verdict |
 |---|---|---|---|
-| 5.1.6 | SA tokens mounted only where needed | 218 of 228 pods auto-mount | not written - mostly third-party charts that genuinely call the API, and finding #7 already established the `default` SAs hold no RBAC |
+| 5.1.6 | SA tokens mounted only where needed | 218 of 228 pods auto-mount, 58 of them on the `default` SA | **written, scoped**, as `cis-5-1-6-default-sa-token`. The full control stays out of reach: most of the 218 are third-party charts that genuinely call the API. The 58 are not, because finding #7 established the `default` SA holds no RBAC |
 | 5.4.1 | Prefer secrets as files over env vars | 79 of 228 pods | not written - this repo's entire ExternalSecret pattern injects via `envFrom`; enforcing it means re-plumbing 79 workloads for a threat model (env vars in `/proc` and crash dumps) that does not apply here |
 | 5.3.2 | Every namespace has a NetworkPolicy | 7 namespaces without | **written**, as a rollout tracker |
 | 5.1.3 | No wildcard verbs and resources in RBAC | 2 non-system roles | **written** |
@@ -191,7 +204,7 @@ The one genuinely new policy to come out of an ISM reading was `restrict-image-r
 
 ### The number worth carrying
 
-Of roughly 120 CIS Kubernetes controls, about 25 are admission-addressable, 11 of those are already covered by the PSS bundle, and of the rest exactly **two** were worth enforcing here - one of which is a checkbox that any empty policy satisfies.
+Of roughly 120 CIS Kubernetes controls, about 25 are admission-addressable, 11 of those are already covered by the PSS bundle, and of the rest exactly **three** were worth enforcing here - one of which is a checkbox that any empty policy satisfies, and one of which had to be narrowed to a fraction of the control before it said anything actionable.
 
 That is the honest ceiling for a Kyverno-backed CIS product: something under a quarter of the benchmark, and a meaningful share of that quarter is existence-checking rather than control.
 
@@ -201,4 +214,8 @@ That is the honest ceiling for a Kyverno-backed CIS product: something under a q
 
 **CI gating.** Parked on branch `ci/kyverno-policy-gate-parked`. The script is written and verified against a stubbed renderer; the blocker is `flux-local build hr`, which cannot resolve the cross-namespace `bitnami-nginx` OCIRepository (six HelmReleases share that `chartRef` pattern) and leaves ~40 `cluster-settings` substitutions unresolved. A tool limitation, not a repo fault. Note that audit-mode policies exit 0 from the CLI regardless of flags, so CI gating requires flipping the gating policies to `Deny` first.
 
-**Mutate, generate, image verification, cleanup.** Only one of Kyverno's five policy types is in use. `mutate` is the notable gap: the nine hand-written `automountServiceAccountToken: false` patches are one mutate rule, and injecting default resources would have prevented the `media-quota` backup outage rather than merely reporting it.
+**Generate, image verification, cleanup.** Three of Kyverno's five policy types are in use; `mutate` arrived with `set-default-pod-requests`, `set-revision-history-limit` and `set-seccomp-profile`. Image verification is the interesting remaining gap, though its realistic scope is small: of 79 ghcr.io images only `home-operations` (8) and `fluxcd` (7) are reliably signed, and an ImageValidatingPolicy puts a registry and Rekor call in the pod creation path.
+
+**Do not try to mutate `automountServiceAccountToken` on pods.** An earlier version of this section proposed collapsing the twelve hand-written `serviceaccount-default.yaml` patches into one mutate rule. It does not work, and the reason is ordering: the built-in ServiceAccount admission plugin injects the `kube-api-access` volume before any mutating webhook runs. Tested on 2026-09-07 with a scoped MutatingPolicy and a probe pod, the flag flipped to `false` and the volume and its mount at `/var/run/secrets/kubernetes.io/serviceaccount` both survived. The pod ends up claiming it has no token while carrying one, which is worse than leaving it alone.
+
+That same ordering is why the twelve existing patches achieve less than they appear to. They set `automountServiceAccountToken: false` on each namespace's `default` ServiceAccount, and the bjw-s app-template chart sets it to `true` at pod level, which wins. All 58 pods currently mounting a default-SA token are in namespaces carrying one of those patches. `cis-5-1-6-default-sa-token` reports the condition; the fix is `defaultPodOptions.automountServiceAccountToken: false` in each HelmRelease, which stops the volume being injected in the first place.

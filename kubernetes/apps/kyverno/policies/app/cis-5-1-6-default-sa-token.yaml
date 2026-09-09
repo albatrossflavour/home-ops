@@ -1,0 +1,121 @@
+---
+# CIS Kubernetes Benchmark 5.1.6 - Ensure that Service Account Tokens are only
+# mounted where necessary. Deliberately scoped to the one slice where the
+# answer is not a judgement call.
+#
+# The full control was declined in docs/operations/kyverno.md: 218 of 228 pods
+# auto-mount a token, most of them third-party charts that genuinely call the
+# API, so a blanket policy would be 200-odd findings nobody can action. This
+# narrows it to pods running under the `default` ServiceAccount, which the
+# 2026-09-02 RBAC sweep (finding #7) established holds zero RBAC anywhere in
+# this cluster. A token for an identity with no permissions is not a judgement
+# call, it is a credential handed out for nothing.
+#
+# WHY THIS CHECKS THE VOLUME AND NOT THE FLAG
+#
+# `automountServiceAccountToken: false` reading true on a pod spec does not
+# mean a token is absent, and reading false does not mean it is gone. Both
+# directions were verified on 2026-09-07:
+#
+#   1. The eleven kubernetes/apps/*/serviceaccount-default.yaml files set
+#      automountServiceAccountToken: false on each namespace's default SA.
+#      The bjw-s app-template chart sets it to TRUE at pod level
+#      (charts/common/values.yaml, defaultPodOptions.automountServiceAccountToken),
+#      and the pod-level field wins over the ServiceAccount-level one. All 58
+#      pods currently mounting a default-SA token sit in namespaces carrying
+#      one of those eleven patches. The patches are defeated in every case
+#      where they would have mattered.
+#
+#   2. A MutatingPolicy that sets the flag to false at admission is cosmetic.
+#      The built-in ServiceAccount admission plugin runs BEFORE mutating
+#      webhooks and has already injected the kube-api-access volume and its
+#      mount by the time Kyverno is consulted. Tested with a scoped policy and
+#      a probe pod: the flag flipped to false, and the volume and the mount at
+#      /var/run/secrets/kubernetes.io/serviceaccount both survived. A pod can
+#      therefore read `automountServiceAccountToken: false` while carrying a
+#      mounted token.
+#
+# So the flag is not evidence either way. The volume is. This asks whether a
+# kube-api-access projection is actually present on the pod.
+#
+# THE FIX IS NOT A MUTATION
+#
+# It belongs at source, in the HelmRelease:
+#
+#   values:
+#     defaultPodOptions:
+#       automountServiceAccountToken: false
+#
+# Set there, the pod reaches the API server already declaring false, the
+# ServiceAccount plugin never injects the volume, and nothing downstream has
+# to unpick it. Stripping the volume in a webhook instead means rewriting
+# spec.volumes and every container's volumeMounts by index, which is fragile
+# in exactly the way this repo has been bitten by before.
+#
+# Audit only, and it should stay that way. This describes a posture to work
+# through app by app, not an admission decision - and 58 findings is a
+# backlog, not an outage.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: cis-5-1-6-default-sa-token
+  labels:
+    compliance.home.arpa/cis: "true"
+    compliance.home.arpa/ism: "true"
+    compliance.home.arpa/e8: "true"
+  annotations:
+    policies.kyverno.io/title: CIS 5.1.6 - No API Token On The Default ServiceAccount
+    policies.kyverno.io/category: CIS Benchmark
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    compliance.home.arpa/cis-controls: >-
+      5.1.6 - scoped to the default ServiceAccount only, which holds no RBAC in this cluster. The broader control is not enforced; see docs/operations/kyverno.md.
+    compliance.home.arpa/ism-controls: >-
+      privileged access management (interpreted; no Kubernetes-specific ISM control exists)
+    compliance.home.arpa/e8-strategies: >-
+      5 - restrict administrative privileges
+spec:
+  failurePolicy: Ignore
+  # Autogen off. Kyverno would otherwise generate equivalent rules against
+  # Deployments, StatefulSets, DaemonSets, Jobs and CronJobs, and every one of
+  # them would pass unconditionally: the kube-api-access volume this policy
+  # looks for is injected by the API server at POD admission and never appears
+  # in a controller's pod template. Those passes would be indistinguishable in
+  # the reports from workloads that are genuinely clean.
+  autogen:
+    podControllers:
+      controllers: []
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  # matchConditions are evaluated BEFORE variables exist, so they reference
+  # `object` directly. serviceAccountName is defaulted to "default" by the API
+  # server, but a pod submitted without it is matched here too rather than
+  # relying on that.
+  matchConditions:
+    - name: uses-the-default-service-account
+      expression: >-
+        !has(object.spec.serviceAccountName) ||
+        object.spec.serviceAccountName == '' ||
+        object.spec.serviceAccountName == 'default'
+  validations:
+    # `volumes` can be present and null, and .exists() over null aborts the
+    # evaluation with "got 'types.Null', expected iterable type" - which
+    # reports as `error`, neither pass nor fail. The same trap that produced
+    # 26 phantom errors in cis-5-1-3.
+    - expression: >-
+        !has(object.spec.volumes) ||
+        object.spec.volumes == null ||
+        !object.spec.volumes.exists(v, v.name.startsWith('kube-api-access'))
+      message: >-
+        This pod runs under the default ServiceAccount and has an API token
+        mounted at /var/run/secrets/kubernetes.io/serviceaccount. The default
+        SA holds no RBAC in this cluster, so the token grants nothing and
+        exists only to be stolen. Set defaultPodOptions.automountServiceAccountToken
+        to false in the HelmRelease. Note that the namespace's
+        serviceaccount-default.yaml does NOT achieve this on its own: the
+        pod-level field set by the chart overrides the ServiceAccount.
+  validationActions: [Audit]
