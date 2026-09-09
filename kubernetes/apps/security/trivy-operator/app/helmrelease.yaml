@@ -68,3 +68,43 @@ spec:
       # Does not affect image vulnerability scanning (the actual point of
       # this deployment) - that's a separate scanner, unaffected.
       infraAssessmentScannerEnabled: false
+
+      # 2026-09-09: everything except image vulnerability scanning turned off.
+      #
+      # Trivy was holding 1,832 report objects, 10.6% of every object in etcd
+      # (17,325 total, deduplicated across the three apiservers):
+      #
+      #   710  configauditreports      (602 + 108 cluster)
+      #   383  sbomreports             (381 + 2 cluster)
+      #   273  rbacassessmentreports   (103 + 170 cluster)
+      #   269  exposedsecretreports
+      #   190  vulnerabilityreports    (188 + 2 cluster)   <- KEPT
+      #     4  clustercompliancereports
+      #
+      # Disabling the five below removes 1,639 of those and keeps the 190 that
+      # anything actually reads.
+      #
+      # WHAT STILL CONSUMES TRIVY DATA, checked rather than assumed:
+      #   dashboard  security/trivy-vulnerabilities-dashboard
+      #   alert      observability/critical-ha-alerts -> TrivyFixableCriticalBacklog
+      # Both are driven by vulnerabilityreports, so both keep working.
+      #
+      # THE DUPLICATION ARGUMENT, which matters more than "nobody reads them".
+      # configauditreports check privileged containers, runAsNonRoot,
+      # capabilities and seccomp - all already covered by
+      # disallow-privileged-containers, require-run-as-nonroot,
+      # disallow-capabilities and restrict-seccomp in kyverno/policies.
+      # rbacassessmentreports overlap cis-5-1-3-no-wildcard-rbac. So 983 of
+      # these objects were a second opinion on checks this cluster already
+      # runs, in a format nothing consumes.
+      #
+      # Consistent with the note above: image vulnerability scanning is "the
+      # actual point of this deployment".
+      #
+      # Existing report objects may not be garbage collected on disable. Check
+      # and delete the orphaned kinds if they linger.
+      configAuditScannerEnabled: false
+      rbacAssessmentScannerEnabled: false
+      exposedSecretScannerEnabled: false
+      sbomGenerationEnabled: false
+      clusterComplianceEnabled: false
