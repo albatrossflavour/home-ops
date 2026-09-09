@@ -4,3 +4,27 @@ kind: Kustomization
 resources:
   - ./prometheusrule.yaml
   - ./puppet.yaml
+
+# The NAS mirror board, paired with the nas-sync alert group in
+# prometheusrule.yaml. Metrics come from scripts/nas-sync.sh on ankh via
+# node_exporter's textfile collector.
+#
+# NOTE ON THE ENVSUBST TRAP that bit the kyverno and trivy boards: Flux runs
+# envsubst over Kustomize output, so any ${...} or bare $NAME in dashboard JSON
+# is substituted away and fails the Kustomization in strict mode. Those boards
+# escape every occurrence as $${...}. This one needs no escaping at all - it
+# pins the datasource to uid "prometheus" rather than a ${DS_*} variable, uses
+# no template variables, and avoids $__rate_interval by querying gauges
+# directly. Verified with `grep -o '\$[A-Za-z_{]'` returning nothing. Keep it
+# that way and this file needs no special handling.
+configMapGenerator:
+  - name: nas-sync-dashboard
+    namespace: observability
+    files:
+      - nas-sync.json=./dashboards/nas-sync.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: Infrastructure
