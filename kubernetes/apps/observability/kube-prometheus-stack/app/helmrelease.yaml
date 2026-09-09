@@ -152,9 +152,35 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 4096Mi
+            # Request and limit kept equal for Guaranteed QoS.
+            #
+            # Raised 4096Mi -> 5Gi on 2026-09-09 for headroom, not growth. The
+            # prometheus container measured over 7 days at 5min resolution:
+            #
+            #   p50 3829Mi   p95 3904Mi   max 4049Mi
+            #
+            # 4049 against a 4096Mi limit is 98.9%. Zero restarts so far, but
+            # there was no margin left at all, and this is Guaranteed QoS so
+            # crossing the limit is an OOMKill rather than a squeeze.
+            #
+            # Do not read a pod-level figure here. Summing the pod gives ~5991Mi
+            # peak, which is an artefact of old and new containers reporting
+            # under the same StatefulSet pod name during a restart. The
+            # per-container numbers above are the real ones.
+            #
+            # THE ACTUAL LEVER IS CARDINALITY, NOT MEMORY. Head series sit at
+            # 524,035, and at roughly 8KB/series that accounts for the ~4GiB on
+            # its own, so this is legitimate rather than a leak. The single
+            # largest contributor is hubble_port_distribution_total at 70,885
+            # series, 13.5% of the whole TSDB, and port distribution is rarely
+            # something anyone acts on. Dropping it via metricRelabelings on the
+            # Hubble ServiceMonitor would buy back more than raising this ever
+            # will. Deliberately not done here: losing observability data is a
+            # judgement call, and this change is only about not being one spike
+            # away from an OOMKill.
+            memory: 5Gi
           limits:
-            memory: 4096Mi
+            memory: 5Gi
         storageSpec:
           volumeClaimTemplate:
             spec:
