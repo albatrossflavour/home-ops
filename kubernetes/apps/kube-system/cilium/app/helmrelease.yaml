@@ -41,7 +41,22 @@ spec:
           - drop
           - tcp
           - flow
-          - port-distribution
+          # port-distribution deliberately NOT enabled.
+          #
+          # It emits one series per destination port, and on this cluster that
+          # was hubble_port_distribution_total at 70,885 series - 13.5% of the
+          # entire Prometheus TSDB of 524,035 head series, and 6.5x larger than
+          # the next biggest metric family. At roughly 8KB/series in the head
+          # block that is around 550MiB of Prometheus memory for one metric.
+          #
+          # Removed at source rather than dropped with metricRelabelings, so
+          # Cilium stops computing it as well as Prometheus storing it.
+          #
+          # THE COST: two panels on the chart's own hubble-dashboard read the
+          # metric and will show no data. Nothing else uses it - no
+          # PrometheusRule references it, and no alert depends on it (checked
+          # 2026-09-09). If those panels are wanted back, re-enabling this line
+          # is the whole change, but expect the TSDB to grow by the same 13.5%.
           - icmp
           - http
         serviceMonitor:
