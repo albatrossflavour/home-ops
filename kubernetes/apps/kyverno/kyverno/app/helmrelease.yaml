@@ -117,6 +117,8 @@ spec:
         namespaceSelector:
           matchExpressions: []
 
+
+    features:
       # Stop emitting an Event for every audit failure.
       #
       # 6,810 of the cluster's 9,698 Event objects were Kyverno PolicyViolation
@@ -145,12 +147,19 @@ spec:
       #
       # Revisit if any policy ever moves to Enforce. A blocked admission is
       # exactly the case where an event IS the signal.
+      #
+      # PATH TRAP: this is features.omitEvents.eventTypes. An earlier version of
+      # this change put `omitEvents` under `config:`, which Flux applied cleanly,
+      # Helm accepted without complaint, and the chart ignored entirely - the
+      # rendered deployments kept --omitEvents=PolicyApplied,PolicySkipped. Same
+      # shape as the policyExceptions trap in docs/operations/kyverno.md: the
+      # value exists, nothing reads it. Verify with:
+      #   kubectl get deploy -n kyverno -o json | grep omitEvents
       omitEvents:
-        - PolicyApplied
-        - PolicySkipped
-        - PolicyViolation
-
-    features:
+        eventTypes:
+          - PolicyApplied
+          - PolicySkipped
+          - PolicyViolation
       backgroundScan:
         # Chart default is true, meaning the background scan deliberately
         # IGNORES the resourceFilters that admission honours - including the
@@ -240,8 +249,15 @@ spec:
       # up. The cost is slower failover after a genuine controller death, which
       # for audit-only policies that block nothing is not an availability
       # question.
-      extraArgs:
-        leaderElectionRetryPeriod: 6s
+      # NOTE: admissionController nests this under `container` because it also
+      # has an initContainer with its own extraArgs, so the chart reads
+      # .Values.admissionController.container.extraArgs. reportsController and
+      # backgroundController take extraArgs directly. Set flat here it is
+      # accepted by Helm and silently dropped - verified: the rendered
+      # deployment had no leaderElectionRetryPeriod flag while the other two did.
+      container:
+        extraArgs:
+          leaderElectionRetryPeriod: 6s
       replicas: 1
       serviceMonitor:
         enabled: true
