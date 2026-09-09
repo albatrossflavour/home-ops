@@ -1,0 +1,49 @@
+cluster:
+  apiServer:
+    # Talos ships kube-apiserver with requests of 200m CPU / 512Mi memory and
+    # no limits. The CPU figure is fine (measured 51-110m). The memory figure
+    # is wrong by roughly 8x, and being wrong at that scale distorts every
+    # scheduling decision on the cluster.
+    #
+    # MEASURED 2026-09-09, working set over 36 hours at hourly resolution:
+    #
+    #   magrat      2.8 - 4.4 GiB
+    #   ogg         3.1 - 4.3 GiB
+    #   weatherwax  3.6 - 5.4 GiB
+    #
+    # Sawtooth from Go GC, no upward trend, so this is steady state rather
+    # than a leak. weatherwax runs consistently ~1 GiB above the other two.
+    #
+    # WHY IT MATTERS. Requests are the only thing the scheduler can see. With
+    # 512Mi declared against ~4.4 GiB used, roughly 13 GB of real memory was
+    # invisible to it across the three control planes. The effect showed up as
+    # nodes whose reported and actual load disagreed in opposite directions:
+    # weatherwax reported 79% requested while running at 60% used, magrat
+    # reported 26% while running at 36%. The scheduler was steering work away
+    # from a node that had room and toward nodes that were fuller than it
+    # thought.
+    #
+    # WHY 4Gi. Inside the observed band for all three nodes, below
+    # weatherwax's current 5.2 GiB, and above magrat's typical. 3Gi was the
+    # conservative alternative but leaves ~1.4 GiB per node still invisible,
+    # which means doing this twice.
+    #
+    # NO LIMIT, deliberately. A memory limit on kube-apiserver turns a cache
+    # growth spike into an OOMKilled control plane. Talos ships no limit and
+    # that is correct.
+    #
+    # EXPECTED EFFECT. weatherwax goes from 79% to ~92% of allocatable
+    # requested. Nothing is evicted - requests only gate scheduling of new
+    # pods, and static pods bypass the scheduler entirely. What changes is
+    # that heavy pods which restart can no longer land back on weatherwax and
+    # will place elsewhere, so the cluster rebalances itself gradually instead
+    # of being pushed. Cluster-wide this takes total requests from 65 GB to
+    # ~76 GB against 129 GB allocatable, so nothing should go Pending.
+    #
+    # Next step is the over-request side, chiefly the three CNPG postgres
+    # instances at 3Gi requested against 411-692Mi actual. Deliberately not
+    # done in the same change, so the effect of each is measurable.
+    resources:
+      requests:
+        cpu: 200m
+        memory: 4Gi
