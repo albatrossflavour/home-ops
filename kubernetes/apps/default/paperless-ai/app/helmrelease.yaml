@@ -84,8 +84,11 @@ spec:
 
             resources:
               requests:
+                # Measured peak 1641Mi over 7 days (2026-09-09) against a
+                # 512Mi request, so this ran at over 3x what it declared. The
+                # limit stays 2Gi, which it has not reached.
                 cpu: 100m
-                memory: 512Mi
+                memory: 1536Mi
               limits:
                 memory: 2Gi
 

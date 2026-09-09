@@ -150,8 +150,13 @@ spec:
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
+                # 512Mi was a guess; measured peak is 1487Mi over 7 days
+                # (2026-09-09), so the scheduler was told this needs a third of
+                # what it reliably uses. A Burstable pod running above its
+                # request is also first in line for eviction under node
+                # pressure, which is the wrong pod to pick.
                 cpu: 100m
-                memory: 512Mi
+                memory: 1536Mi
               limits:
                 memory: 8Gi
           machine-learning:
@@ -201,6 +206,9 @@ spec:
                   failureThreshold: 60
             resources:
               requests:
+                # Measured peak 380Mi over 7 days, so 512Mi is about right.
+                # Left alone deliberately, recorded so the next reader knows it
+                # was checked rather than skipped.
                 cpu: 100m
                 memory: 512Mi
               limits:
