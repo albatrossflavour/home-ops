@@ -295,6 +295,33 @@ spec:
         interval: 30s
 
     reportsController:
+      # Chart default is requests 64Mi / limits 128Mi - the same allowance the
+      # cleanup controller gets, and a third of the admission controller's
+      # 384Mi. This is the controller that background-scans every resource in
+      # the cluster against every policy and aggregates the results, so it is
+      # the heaviest of the four, not the lightest.
+      #
+      # MEASURED 2026-09-09 over 3 days at 5min resolution, container "controller":
+      #
+      #   p50 ~115Mi   p95 ~120Mi   max 125Mi   against a 128Mi limit
+      #
+      # 98% of its ceiling, sustained. Not a spike - it lives there. Go's GC
+      # runs flat out to stay under, and the symptom was this controller alone
+      # continuing to lose its leader lease after #1774/#1775 widened the lease
+      # durations, while the admission, background and snapshot controllers all
+      # went to zero restarts. It was dying mid-scan often enough that no
+      # PolicyReport was written cluster-wide for 90 minutes, and the newly
+      # added cis-5-1-6 policy never completed a pass.
+      #
+      # 512Mi limit is 4x the observed ceiling. The true working set is unknown
+      # because 128Mi has been suppressing it - re-measure once it has room and
+      # tighten if it settles well below.
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
       # Leader election widened from the default retry period of 2s.
       #
       # Kyverno derives its lease duration from this value: the observed lease
