@@ -224,8 +224,29 @@ spec:
             resources:
               requests:
                 cpu: 100m
-                memory: 1Gi
+                # 7-day peak working set is 134Mi (measured 2026-09-09 at 5min
+                # resolution across every mds pod that ran in the window). The
+                # filesystem is small: 6.3G of data, 3 clients, and the active
+                # mds holds 7643 dentries against a cache that could hold
+                # orders of magnitude more. 256Mi is ~1.9x the observed peak.
+                #
+                # The LIMIT is deliberately left at 2Gi rather than lowered to
+                # match. See the warning below - it is already too low, not too
+                # high, and cutting it would make an existing problem worse.
+                memory: 256Mi
               limits:
+                # WARNING, not addressed here: Ceph's own mds_cache_memory_limit
+                # is 4Gi (`ceph config get mds mds_cache_memory_limit`) while
+                # this container limit is 2Gi. Ceph will grow the mds cache
+                # toward 4Gi and Kubernetes will OOMKill it at 2Gi first. Usual
+                # guidance is a container limit around 1.5x the cache limit, so
+                # this wants either a lower mds_cache_memory_limit or a higher
+                # limit here.
+                #
+                # Not urgent: reaching 4Gi of cache needs roughly a hundred
+                # times the current metadata. Deliberately not fixed in the same
+                # change as a request tweak, because it is a Ceph tunable
+                # decision rather than a scheduling one.
                 memory: 2Gi
         storageClass:
           enabled: true
@@ -267,7 +288,11 @@ spec:
             resources:
               requests:
                 cpu: 100m
-                memory: 1Gi
+                # 7-day peak working set is 210Mi (measured 2026-09-09). The
+                # object store is nearly empty: every rgw pool holds kilobytes
+                # except the log pool at 1MB, and the buckets.index and
+                # buckets.non-ec pools have zero objects. 384Mi is ~1.8x peak.
+                memory: 384Mi
               limits:
                 memory: 1536Mi
             instances: 2
