@@ -117,6 +117,39 @@ spec:
         namespaceSelector:
           matchExpressions: []
 
+      # Stop emitting an Event for every audit failure.
+      #
+      # 6,810 of the cluster's 9,698 Event objects were Kyverno PolicyViolation
+      # events (measured 2026-09-09), 70% of every event in etcd. They are not
+      # success noise - generateSuccessEvents is already false and the chart
+      # already omits PolicyApplied and PolicySkipped - they are real audit
+      # failures, chiefly require-pod-resources (146), disallow-privilege-
+      # escalation (95), require-run-as-nonroot (72) and the seccomp pair.
+      #
+      # WHY THEY ARE SAFE TO DROP HERE. Every policy in this cluster is
+      # validationActions [Audit] with failurePolicy Ignore. Nothing blocks.
+      # So a PolicyViolation event announces something that was admitted
+      # anyway, and it announces it again on every background scan. The durable
+      # record is the PolicyReport, which is what the Grafana boards and Policy
+      # Reporter UI actually read, and that is untouched.
+      #
+      # Events carry a TTL, so this is continuous create-and-expire churn
+      # against etcd rather than a fixed cost. That matters right now: reads on
+      # this cluster run at ~940ms p99 and controllers are losing leader leases
+      # mid-scan.
+      #
+      # THE COST, stated plainly. `kubectl describe pod` will no longer show
+      # policy violations inline. That is a genuine convenience loss - it is how
+      # the paperless-ai scheduling problem was read on 2026-09-09. The reports
+      # still have everything; they are just less convenient to query.
+      #
+      # Revisit if any policy ever moves to Enforce. A blocked admission is
+      # exactly the case where an event IS the signal.
+      omitEvents:
+        - PolicyApplied
+        - PolicySkipped
+        - PolicyViolation
+
     features:
       backgroundScan:
         # Chart default is true, meaning the background scan deliberately
