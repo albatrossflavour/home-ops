@@ -1,0 +1,271 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app lab-dns-sync
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      *app:
+        type: cronjob
+        cronjob:
+          # Ten minutes before nebula-sync runs on the hour, so new records are
+          # in place on the primary in time to be replicated.
+          schedule: "50 * * * *"
+          timeZone: "Australia/Sydney"
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+        containers:
+          app:
+            image:
+              repository: python
+              tag: 3.12-alpine
+            command: ["python3", "/app/lab-dns-sync.py"]
+            env:
+              TZ: "Australia/Sydney"
+              PIHOLE_URL: "http://192.168.9.2"
+              PUPPETDB_URL: "https://puppet.lab.albatrossflavour.com:8081"
+              PUPPETDB_CACERT: "/app/puppet-ca.pem"
+            envFrom:
+              - secretRef:
+                  name: lab-dns-sync-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+    # The script below is a copy of app/lab-dns-sync.py, kept inline so no image
+    # has to be built. Edit the .py, then paste it back here.
+    configMaps:
+      script:
+        data:
+          lab-dns-sync.py: |
+            #!/usr/bin/env python3
+            """Publish managed Puppet node DNS records to Pi-hole, from PuppetDB.
+
+            NOTE: this file is the editable source. The pod runs a copy embedded in the
+            configMap in helmrelease.yaml. Change one and you must change the other, or the
+            cluster keeps running the old version.
+
+            The lab's managed nodes have no DNS records of their own. PuppetDB knows every
+            node's certname and current address, which beats a hand-kept list on
+            DHCP-assigned addresses.
+
+            Only records matching MANAGED_RE are ever touched, so the hand-curated entries
+            in dns.hosts are never at risk. Writes go to the primary Pi-hole; nebula-sync
+            replicates to the others.
+
+            Env:
+              PIHOLE_URL        default http://192.168.9.2
+              PIHOLE_PASSWORD   required
+              PUPPETDB_URL      default https://puppet.lab.albatrossflavour.com:8081
+              PUPPETDB_TOKEN    required, PE RBAC token (PuppetDB takes X-Authentication)
+              PUPPETDB_CACERT   optional path to the Puppet CA cert; unset means no verify
+              MANAGED_RE        default -puppet-(development|production)-\\d+\\.lab\\.
+              DRY_RUN           set to any value to report without changing anything
+            """
+            import ipaddress, json, os, re, ssl, sys, urllib.parse, urllib.request
+
+            PIHOLE = os.environ.get("PIHOLE_URL", "http://192.168.9.2").rstrip("/")
+            PDB = os.environ.get("PUPPETDB_URL", "https://puppet.lab.albatrossflavour.com:8081").rstrip("/")
+            MANAGED = re.compile(os.environ.get("MANAGED_RE", r"-puppet-(development|production)-\d+\.lab\."))
+            DRY = bool(os.environ.get("DRY_RUN"))
+
+
+            def log(msg):
+                print(msg, flush=True)
+
+
+            def http(url, *, method="GET", headers=None, data=None, ctx=None):
+                req = urllib.request.Request(url, method=method, data=data, headers=headers or {})
+                with urllib.request.urlopen(req, timeout=30, context=ctx) as r:
+                    return r.status, r.read()
+
+
+            def puppetdb_inventory():
+                token = os.environ["PUPPETDB_TOKEN"]
+                ca = os.environ.get("PUPPETDB_CACERT")
+                if ca:
+                    ctx = ssl.create_default_context(cafile=ca)
+                else:
+                    ctx = ssl._create_unverified_context()  # lab-internal, no CA mounted
+                    log("  note: PUPPETDB_CACERT unset, not verifying the PuppetDB certificate")
+                q = urllib.parse.urlencode({"query": "inventory[certname, facts.networking.ip]{}"})
+                status, body = http(f"{PDB}/pdb/query/v4?{q}",
+                                    headers={"X-Authentication": token}, ctx=ctx)
+                if status != 200:
+                    raise SystemExit(f"PuppetDB returned {status}")
+                return json.loads(body)
+
+
+            def pihole_session():
+                body = json.dumps({"password": os.environ["PIHOLE_PASSWORD"]}).encode()
+                status, resp = http(f"{PIHOLE}/api/auth", method="POST", data=body,
+                                    headers={"Content-Type": "application/json"})
+                sid = json.loads(resp).get("session", {}).get("sid")
+                if not sid:
+                    raise SystemExit(f"Pi-hole auth failed ({status})")
+                return sid
+
+
+            def main():
+                want = set()
+                for row in puppetdb_inventory():
+                    fqdn, ip = row["certname"], row.get("facts.networking.ip")
+                    if not ip or not MANAGED.search(fqdn):
+                        continue
+                    try:
+                        ipaddress.ip_address(ip)
+                    except ValueError:
+                        continue
+                    want.add(f"{ip} {fqdn}")
+
+                sid = pihole_session()
+                hdr = {"X-FTL-SID": sid}
+                try:
+                    _, body = http(f"{PIHOLE}/api/config/dns/hosts", headers=hdr)
+                    have = set(json.loads(body)["config"]["dns"]["hosts"])
+                    mine = {h for h in have if MANAGED.search(h)}
+                    add, remove = sorted(want - mine), sorted(mine - want)
+
+                    log(f"managed: {len(want & mine)} correct, {len(add)} to add, "
+                        f"{len(remove)} to remove ({len(have - mine)} curated entries untouched)")
+                    for e in remove:
+                        log(f"  - {e}")
+                    for e in add:
+                        log(f"  + {e}")
+
+                    if DRY:
+                        log("dry run, nothing changed")
+                        return 0
+
+                    failed = False
+                    for entry, method, ok in ([(e, "DELETE", 204) for e in remove] +
+                                              [(e, "PUT", 201) for e in add]):
+                        url = f"{PIHOLE}/api/config/dns/hosts/{urllib.parse.quote(entry, safe='')}"
+                        try:
+                            status, _ = http(url, method=method, headers=hdr)
+                        except Exception as exc:  # noqa: BLE001
+                            log(f"  {method} errored for {entry}: {exc}")
+                            failed = True
+                            continue
+                        if status != ok:
+                            log(f"  {method} returned {status} for {entry}")
+                            failed = True
+                    if failed:
+                        log("finished with errors")
+                        return 1
+                    if add or remove:
+                        log("applied. nebula-sync carries it to the replicas on the hour")
+                    else:
+                        log("nothing to do")
+                    return 0
+                finally:
+                    try:
+                        http(f"{PIHOLE}/api/auth", method="DELETE", headers=hdr)
+                    except Exception:  # noqa: BLE001
+                        pass
+
+
+            if __name__ == "__main__":
+                sys.exit(main())
+          puppet-ca.pem: |
+            -----BEGIN CERTIFICATE-----
+            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
+            rOIMcXNhdYMGSC1X3+wcqegjsWQbQlo=
+            -----END CERTIFICATE-----
+            -----BEGIN CERTIFICATE-----
+            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
+            -----END CERTIFICATE-----
+    persistence:
+      script:
+        type: configMap
+        name: lab-dns-sync-script
+        globalMounts:
+          - path: /app

@@ -11,4 +11,5 @@ resources:
   - ./external-dns/pihole-internal/ks.yaml
   - ./external-dns/pihole-external/ks.yaml
   - ./ingress-nginx/ks.yaml
+  - ./lab-dns-sync/ks.yaml
   - ./nebula-sync/ks.yaml
