@@ -90,14 +90,67 @@ spec:
         - ankh.lab.albatrossflavour.com:9100
         - morpork.lab.albatrossflavour.com:9100
         - stolat.lab.albatrossflavour.com:9100
-        - pihole.albatrossflavour.com:9100
-        - pihole2.albatrossflavour.com:9100
-        - pihole3.albatrossflavour.com:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
       targetLabel: job
       replacement: *name
+---
+## yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: node-exporter-lxc
+spec:
+  # The three piholes are LXC containers, one per Proxmox host, and they are
+  # split out from the node-exporter job above so the metrics their kernel
+  # cannot honestly answer can be dropped.
+  #
+  # lxcfs virtualises /proc/meminfo, /proc/cpuinfo and the `cpu` lines of
+  # /proc/stat, so memory, core count, CPU time and filesystem figures are
+  # genuinely container-scoped and are kept. It does NOT virtualise
+  # /proc/loadavg, nor /proc/stat's btime, ctxt, intr and procs_* lines, so
+  # node-exporter reads those straight off the Proxmox host.
+  #
+  # Measured 2026-09-15, pihole3 against its host ankh:
+  #
+  #   node_load1          11.68  vs  11.68   identical
+  #   node_load5           9.99  vs   9.99   identical
+  #   node_boot_time  1788735572  vs  1788735572   identical to the second
+  #   node_intr_total  42267255498 vs 42267350376  same counter, scrape skew
+  #   busy CPU s/s         1.38  vs   8.72   correctly container-scoped
+  #   MemTotal             2GiB  vs  125GiB  correctly container-scoped
+  #
+  # Why it matters rather than just being untidy: NodeSystemSaturation divides
+  # node_load1 by the visible core count. The container sees 5 cores, morpork
+  # has 28, so the host only needs load 10 (36% per real core, completely
+  # healthy) to push its pihole past the alert threshold of 2. Every one of
+  # these has been a Proxmox load reading wearing a pihole's name.
+  #
+  # No signal is lost. ankh, morpork and stolat are scraped directly in the job
+  # above, so host load is already monitored where it means something.
+  #
+  # The alternative fix is starting lxcfs with -l on all three hosts, which
+  # virtualises loadavg but still leaves btime, ctxt, intr and procs_*. Since
+  # the host figures are already collected properly, correct container load
+  # would add nothing worth a Proxmox config change and three container
+  # restarts.
+  staticConfigs:
+    - targets:
+        - pihole.albatrossflavour.com:9100
+        - pihole2.albatrossflavour.com:9100
+        - pihole3.albatrossflavour.com:9100
+  metricsPath: /metrics
+  relabelings:
+    # Deliberately the same job name as the real hosts, so existing dashboards
+    # and queries filtering on job="node-exporter" keep working.
+    - action: replace
+      targetLabel: job
+      replacement: node-exporter
+  metricRelabelings:
+    - action: drop
+      sourceLabels: ["__name__"]
+      regex: "node_load(1|5|15)|node_boot_time_seconds|node_context_switches_total|node_intr_total|node_forks_total|node_procs_(running|blocked)"
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
 #apiVersion: monitoring.coreos.com/v1alpha1
