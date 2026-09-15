@@ -81,7 +81,10 @@ spec:
         - node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs",pe_infrastructure="true"})
         / node_filesystem_size_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs",pe_infrastructure="true"},
         "host", "$1", "alias", "(.*)")), "ceiling", "Infrastructure filesystem", "",
-        "") or label_replace(max by (host) (puppet_server_jvm_heap_bytes{area="used"}
+        "") or label_replace(max by (host) (label_replace((node_memory_MemTotal_bytes{pe_infrastructure="true"}
+        - node_memory_MemAvailable_bytes{pe_infrastructure="true"}) / node_memory_MemTotal_bytes{pe_infrastructure="true"},
+        "host", "$1", "alias", "(.*)")), "ceiling", "Infrastructure memory", "", "")
+        or label_replace(max by (host) (puppet_server_jvm_heap_bytes{area="used"}
         / ignoring(area) puppet_server_jvm_heap_bytes{area="max"}), "ceiling", "Puppetserver
         JVM heap", "", "") or label_replace(max by (host) (puppet_db_jvm_heap_bytes{area="used"}
         / ignoring(area) puppet_db_jvm_heap_bytes{area="max"}), "ceiling", "PuppetDB
