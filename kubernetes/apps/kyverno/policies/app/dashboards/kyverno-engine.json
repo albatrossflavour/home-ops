@@ -44,7 +44,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "# Kyverno\nA Kubernetes-native policy management engine\n\n#### About this dashboard\n\nThis dashboard represents generic insights that can be extracted from a cluster with Kyverno running.\n\n#### For more details around the metrics\n\nCheckout the [official docs of Kyverno metrics](https://kyverno.io/docs/monitoring/)",
+        "content": "# Unified Compliance\nA Kubernetes-native policy management engine\n\n#### About this dashboard\n\nThis dashboard represents generic insights that can be extracted from a cluster with Unified Compliance running.\n\n#### For more details around the metrics\n\nCheckout the [engine metric reference](https://kyverno.io/docs/monitoring/)",
         "mode": "markdown"
       },
       "pluginVersion": "11.2.0",
@@ -4475,7 +4475,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Kyverno Engine",
+  "title": "Unified Compliance Engine",
   "uid": "kyverno-engine",
   "version": 2,
   "weekStart": ""

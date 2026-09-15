@@ -50,7 +50,7 @@ configMapGenerator:
       labels:
         grafana_dashboard: "1"
       annotations:
-        grafana_folder: Kyverno
+        grafana_folder: Unified Compliance
   # Upstream's own dashboard, forked for one reason. Its `cluster` variable is
   # defined as label_values(kyverno_policy_results_total, cluster) - the LEGACY
   # ClusterPolicy metric, which emits nothing on a cluster running only CEL
@@ -82,4 +82,4 @@ configMapGenerator:
       labels:
         grafana_dashboard: "1"
       annotations:
-        grafana_folder: Kyverno
+        grafana_folder: Unified Compliance
