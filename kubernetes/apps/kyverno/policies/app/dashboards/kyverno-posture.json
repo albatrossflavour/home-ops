@@ -1,8 +1,8 @@
 {
-  "title": "Kyverno Policy Posture",
+  "title": "Unified Compliance Policy Posture",
   "uid": "kyverno-posture",
   "tags": [
-    "kyverno",
+    "unified-compliance",
     "policy",
     "security"
   ],
@@ -15,7 +15,7 @@
     "to": "now"
   },
   "editable": true,
-  "description": "Policy posture from Kyverno's background scan. All policies are audit-only: nothing here is being blocked, these are violations recorded and admitted. See docs/operations/kyverno.md.",
+  "description": "Policy posture from the Unified Compliance background scan. All policies are audit-only: nothing here is being blocked, these are violations recorded and admitted. See docs/operations/kyverno.md.",
   "templating": {
     "list": [
       {
@@ -414,7 +414,7 @@
         "type": "prometheus",
         "uid": "$${datasource}"
       },
-      "description": "Kyverno's autogen expands a policy written for Pods to Deployments, ReplicaSets, DaemonSets, StatefulSets, Jobs and CronJobs. Expect ReplicaSets to dominate - most are historical revisions nobody will act on. Judge real posture on the Pod slice.",
+      "description": "Unified Compliance autogen expands a policy written for Pods to Deployments, ReplicaSets, DaemonSets, StatefulSets, Jobs and CronJobs. Expect ReplicaSets to dominate - most are historical revisions nobody will act on. Judge real posture on the Pod slice.",
       "gridPos": {
         "h": 11,
         "w": 10,
@@ -510,7 +510,7 @@
         "type": "prometheus",
         "uid": "$${datasource}"
       },
-      "description": "Kyverno sits in the pod creation path. If this climbs, everything creating pods gets slower. All policies here run failurePolicy: Ignore, so a timeout fails open rather than blocking.",
+      "description": "Unified Compliance sits in the pod creation path. If this climbs, everything creating pods gets slower. All policies here run failurePolicy: Ignore, so a timeout fails open rather than blocking.",
       "gridPos": {
         "h": 8,
         "w": 12,
