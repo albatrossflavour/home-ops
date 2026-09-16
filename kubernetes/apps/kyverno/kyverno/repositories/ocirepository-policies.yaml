@@ -10,6 +10,7 @@ spec:
   url: oci://ghcr.io/kyverno/charts/kyverno-policies
   ref:
     # Kept in lockstep with the engine chart (3.9.0 -> Kyverno v1.19.0).
-    tag: 3.9.0
+    tag: 3.9.1
+    digest: sha256:db7a4d5fb20eb2122328fc60c309435704a6355f4e3ee0744ce1aed32b31e965
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
