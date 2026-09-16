@@ -624,6 +624,27 @@ spec:
         < 1)
   - name: pdctng-exporter
     rules:
+    - alert: PdctngAlertRulesStale
+      expr: count(puppet_exporter_build_info unless on(version) pdctng_alert_rules_info)
+        > 0
+      for: 6h
+      labels:
+        severity: warning
+      annotations:
+        summary: The Prometheus rules loaded here are not the ones this pdctng ships
+        description: 'This Prometheus is evaluating a pdctng rule set rendered at
+          a different module version from the exporter it is scraping, so some rules
+          it pages on may have been changed or removed and some that exist may never
+          have arrived. That is not hypothetical: a rule set from July was still live
+          seven weeks later in a second Prometheus, paging critical twice a day on
+          a threshold that had already been deleted, and the two rules missing on
+          the day this was written were the memory alerts -- one of which was firing
+          at the time, in the Prometheus nobody is paged from. Compare `count by (version)
+          (pdctng_alert_rules_info)` with `count by (version) (puppet_exporter_build_info)`
+          to see both numbers. The fix is usually an open pull request on the `pdctng/alert-rules`
+          branch that nobody has merged; `.github/workflows/alert-rules-sync.yml`
+          opens one whenever the rendered rules change. Two versions in `pdctng_alert_rules_info`
+          at once means two Prometheuses disagreeing rather than one being behind.'
     - alert: PdctngExporterDown
       expr: up{job="puppet"} == 0
       for: 10m
