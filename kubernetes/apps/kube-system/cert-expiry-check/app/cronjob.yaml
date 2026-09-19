@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
             - name: cert-expiry-check
-              image: alpine/openssl:latest@sha256:80b347d7b4d58e28aae515cf808ba3ce1c4a2a69a323b2cb2cb2d6d278729684
+              image: alpine/openssl:latest@sha256:6aa2be0ed55a61fff35583e5763c2ea8288bcd3549d316b954b01eec32fb7006
               command:
                 - /bin/sh
                 - -c
