@@ -10,7 +10,7 @@ It exists for two reasons. Finding #2 of the cluster audit left `ResourceQuota` 
 |---|---|
 | Kyverno v1.19.0 (chart 3.9.0) | `kyverno` namespace, `enforce: restricted` |
 | 17 Pod Security Standards policies | 11 Baseline + 6 Restricted, from `kyverno-policies` 3.9.0 |
-| 7 custom policies | `kubernetes/apps/kyverno/policies/app/` |
+| 7 custom policies | `kubernetes/apps/unified-compliance/policies/app/` |
 | 1 PolicyException | Volsync restic movers |
 | Policy Reporter + UI | `policy-reporter.${SECRET_DOMAIN}`, internal |
 
@@ -33,8 +33,8 @@ Proven by breaking the `kyverno-svc` selector so the webhook stayed registered w
 ## Layout
 
 ```text
-kubernetes/apps/kyverno/
-├── kyverno/          the engine (HelmRelease) + OCIRepositories for all three charts
+kubernetes/apps/unified-compliance/
+├── engine/           the engine (HelmRelease) + OCIRepositories for all three charts
 ├── pss/              the Pod Security Standards bundle (HelmRelease)
 ├── policies/app/     hand-written policies, the PolicyException, the GlobalContextEntry
 └── policy-reporter/  the UI
@@ -47,7 +47,7 @@ Author against `policies.kyverno.io` (CEL), not the legacy `kyverno.io` `Cluster
 Copy `require-ingress-class.yaml` as the simplest complete example. Then, before committing:
 
 ```bash
-kubectl apply --dry-run=server -f kubernetes/apps/kyverno/policies/app/your-policy.yaml
+kubectl apply --dry-run=server -f kubernetes/apps/unified-compliance/policies/app/your-policy.yaml
 ```
 
 That sends the policy through Kyverno's own webhook, which compiles the CEL and rejects a syntax error with a caret pointing at the exact character. Costs nothing and catches the whole class of typo.

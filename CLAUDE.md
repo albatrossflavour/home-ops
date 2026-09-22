@@ -459,10 +459,12 @@ Audit-only. No policy blocks anything, and the configuration is deliberately arr
 
 **Do not change `failurePolicy` to `Fail` on anything matching real workloads.** The `kyverno-policies` chart ships `Fail` as its default and it is overridden here on purpose.
 
-Policies live in `kubernetes/apps/kyverno/policies/app/`. Author against `policies.kyverno.io` (CEL), not the deprecated `kyverno.io` `ClusterPolicy`. Dry-run every new policy before committing, and then check its output against an independent count:
+**The namespace is `unified-compliance`, not `kyverno`.** So are the Flux Kustomizations, the OCIRepositories and the HelmReleases. This is deliberate: the install doubles as a proto-demo for a product that is based on Kyverno but has not shipped, so the branding is turned down wherever it is ours to turn down. The engine HelmRelease carries `fullnameOverride: kyverno` to keep the rendered object names (pods, services, RBAC) identical to what they were before the rename, so `kubectl get pods -n unified-compliance` still lists `kyverno-*`. What is not hideable at all: the `kyverno.io` and `policies.kyverno.io` API groups, the `reg.kyverno.io` images, the `kyverno_*` metric names, the runtime-generated `kyverno-*-webhook-cfg` webhook configurations, and the leases, which are named from constants in the binary.
+
+Policies live in `kubernetes/apps/unified-compliance/policies/app/`. Author against `policies.kyverno.io` (CEL), not the deprecated `kyverno.io` `ClusterPolicy`. Dry-run every new policy before committing, and then check its output against an independent count:
 
 ```bash
-kubectl apply --dry-run=server -f kubernetes/apps/kyverno/policies/app/your-policy.yaml
+kubectl apply --dry-run=server -f kubernetes/apps/unified-compliance/policies/app/your-policy.yaml
 ```
 
 A policy that compiles can still be completely wrong. `require-pvc-backup` once reported all 36 replicated PVCs as unbacked, including three with working backups, because of a single wrong JMESPath that raised no error anywhere. "It compiled" is not evidence of anything.
