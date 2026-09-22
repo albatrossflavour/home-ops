@@ -12,7 +12,7 @@ resources:
 # rendered ConfigMap, finds no "datasource" variable and fails the whole
 # Kustomization in strict mode. Every occurrence is therefore escaped as
 # $${...}, which envsubst emits as a literal ${...} for Grafana to consume.
-# Same reasoning as kubernetes/apps/kyverno/policies/app/kustomization.yaml.
+# Same reasoning as kubernetes/apps/unified-compliance/policies/app/kustomization.yaml.
 configMapGenerator:
   - name: trivy-vulnerabilities-dashboard
     namespace: security

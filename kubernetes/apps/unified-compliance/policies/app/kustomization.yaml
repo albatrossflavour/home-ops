@@ -1,0 +1,85 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./require-pod-resources.yaml
+  - ./exception-volsync-movers.yaml
+  - ./exception-pvc-backup-cnpg.yaml
+  - ./exception-pvc-backup-monitoring.yaml
+  - ./exception-pvc-backup-pushgateway.yaml
+  - ./exception-pvc-backup-shitbox.yaml
+  - ./exception-rook-ceph.yaml
+  - ./exception-kube-system-node-infrastructure.yaml
+  - ./exception-openebs-local-storage.yaml
+  - ./require-ingress-dns-target.yaml
+  - ./require-ingress-class.yaml
+  - ./require-image-digest.yaml
+  - ./require-homepage-decision.yaml
+  - ./require-storageclass-allowlist.yaml
+  - ./rbac-volsync-read.yaml
+  - ./rbac-cis-read.yaml
+  - ./globalcontext-replicationsources.yaml
+  - ./globalcontext-networkpolicies.yaml
+  - ./require-pvc-backup.yaml
+  - ./cis-5-1-3-no-wildcard-rbac.yaml
+  - ./cis-5-3-2-namespace-networkpolicy.yaml
+  - ./cis-5-1-6-default-sa-token.yaml
+  - ./restrict-image-registries.yaml
+  - ./mutate-pod-requests.yaml
+  - ./mutate-revision-history-limit.yaml
+  - ./mutate-seccomp-profile.yaml
+
+# The dashboard JSON uses Grafana's own ${var} template syntax, which
+# collides head-on with Flux's postBuild variable substitution: cluster-apps
+# patches substituteFrom onto every child Kustomization, envsubst runs over
+# the rendered ConfigMap, finds no "datasource" variable and fails the whole
+# Kustomization in strict mode. Every occurrence is therefore escaped as
+# $${...}, which envsubst emits as a literal ${...} for Grafana to consume.
+#
+# The other dashboards in this cluster (cilium, cnpg) carry ${DS_PROMETHEUS}
+# unescaped and are fine, because they are rendered by Helm and never pass
+# through Flux's postBuild at all. Only Kustomize-generated manifests do.
+configMapGenerator:
+  - name: compliance-posture-dashboard
+    namespace: unified-compliance
+    files:
+      - compliance-posture.json=./dashboards/compliance-posture.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: Unified Compliance
+  # Upstream's own dashboard, forked for one reason. Its `cluster` variable is
+  # defined as label_values(kyverno_policy_results_total, cluster) - the LEGACY
+  # ClusterPolicy metric, which emits nothing on a cluster running only CEL
+  # policies. The variable gets zero options, $cluster never resolves, and all
+  # 73 expressions filtering cluster=~"$cluster" return nothing. The whole
+  # dashboard reads "No data" with no indication why.
+  #
+  # The label itself was never missing: both Prometheus instances set
+  # externalLabels {cluster: home-ops}, and Grafana's default datasource points
+  # at Thanos, which applies them. Only the variable's query was wrong.
+  #
+  # The single change is that query, pointed at the metric we actually emit.
+  # Everything else is upstream's, untouched. uid and title are changed so this
+  # can never collide with the chart's own copy.
+  #
+  # To re-fork after a chart bump: pull the chart, take
+  # charts/grafana/dashboard/kyverno-dashboard.json, repoint the cluster
+  # variable, set uid/title, and escape every ${...} as $${...} (Flux runs
+  # envsubst over Kustomize output and fails strict-mode on unknown vars).
+  #
+  # Upstream bug worth reporting: the dashboard has CEL panels but a legacy
+  # variable query, so every CEL-only install gets a blank dashboard.
+  - name: compliance-engine-dashboard
+    namespace: unified-compliance
+    files:
+      - compliance-engine.json=./dashboards/compliance-engine.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: Unified Compliance
