@@ -51,21 +51,42 @@ jobs:
             --sources "home-kubernetes"
             --output-file diff.patch
 
+      # The diff goes to the comment step as a FILE, never as a `with:` input.
+      #
+      # It used to be interpolated into `message:`, which makes the whole diff
+      # a single process argument. Linux caps one argument at 128KiB
+      # (MAX_ARG_STRLEN), and a PR that moves a namespace blows straight
+      # through that: renaming kyverno -> unified-compliance produced 950KiB on
+      # the helmrelease leg and 580KiB on the kustomization one, because every
+      # resource in the stack is removed and re-added. Both legs failed with
+      # "Argument list too long" while starting node, AFTER generating a
+      # perfectly good diff. Since both legs are required status checks, that
+      # is a green change wearing a red X.
+      #
+      # `--limit-bytes` above does not save us; it is per-resource, so the
+      # total still scales with how many resources moved.
+      #
+      # The old form also wrote the diff to $GITHUB_OUTPUT, which caps at 1MiB.
+      # The helmrelease leg was at 950KiB, so that was the next wall anyway.
+      #
+      # Oversized comments are handled by the action's own `truncate: artifact`
+      # default: too long for a comment body and it uploads the full diff as a
+      # downloadable artifact and links it.
       - name: Generate Diff
         id: diff
         run: |
           cat diff.patch
-          echo "diff<<EOF" >> $GITHUB_OUTPUT
-          cat diff.patch >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          if [[ -s diff.patch ]]; then
+            { echo '```diff'; cat diff.patch; echo '```'; } > comment.md
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - if: ${{ steps.diff.outputs.diff != '' }}
+      - if: ${{ steps.diff.outputs.present == 'true' }}
         name: Add comment
         uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3
         with:
           message-id: "${{ github.event.pull_request.number }}/${{ matrix.paths }}/${{ matrix.resources }}"
           message-failure: Diff was not successful
-          message: |
-            ```diff
-            ${{ steps.diff.outputs.diff }}
-            ```
+          message-path: comment.md
