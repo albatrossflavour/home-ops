@@ -32,10 +32,11 @@ spec:
           that moves its artefact does not fire this. Run `sudo puppet-backup create`
           by hand and watch it. If it says the staging directory is not writable by
           pe-postgres, the directory is fine and the `su` is not, which is an SCE
-          control on `/etc/pam.d/su`. docs/troubleshooting.md has the test and the
-          fix, and that fault is what this alert was built after. The other cause
-          is configuration: a site backing up straight to another path should point
-          `pdctng::backup_dir` there, or set `pdctng::enable_backup_metrics` to false.'
+          control on `/etc/pam.d/su`. docs/operate/troubleshooting.md has the test
+          and the fix, and that fault is what this alert was built after. The other
+          cause is configuration: a site backing up straight to another path should
+          point `pdctng::backup_dir` there, or set `pdctng::enable_backup_metrics`
+          to false.'
     - alert: PuppetBackupShrank
       expr: max by (alias) (puppet_backup_last_bytes) < 0.5 * max by (alias) (max_over_time(puppet_backup_last_bytes[30d]))
       for: 1h
@@ -66,7 +67,7 @@ spec:
           PE's own `pe_backup-<timestamp>.tgz` but not an artefact renamed by `puppet-backup
           create --name`, and a mismatch reads exactly like a missing backup. If the
           pattern is right, run `sudo puppet-backup create` and watch it; a staging-directory-not-writable
-          error is the `su - pe-postgres` PAM fault documented in docs/troubleshooting.md
+          error is the `su - pe-postgres` PAM fault documented in docs/operate/troubleshooting.md
           rather than a permissions problem on the directory. A backup completing
           is not proof it is whole, so check `Newest Backup Size` on TAM Check afterwards.
           The default assumes a weekly cadence with a day of margin; set `pdctng::alerts::thresholds.backup_stale_days`
@@ -105,6 +106,8 @@ spec:
         pool", "", "") or label_replace(max by (host) (label_replace(puppet_node_count{environment="all"}
         / ignoring(environment) puppet_license_entitled_nodes, "host", "$1", "instance",
         "([^:]+).*")), "ceiling", "Licence nodes", "", "")
+    - record: puppet_orchestrator_job_nodes_max
+      expr: max by (alias) (puppet_orchestrator_job_node_count)
   - name: pdctng-capacity_forecast
     rules:
     - alert: PdctngFilesystemFillingSoon
@@ -129,8 +132,8 @@ spec:
           from a volume the estate has outgrown. A full disk on a PE primary can stop
           catalogue compilation, and it truncates the next backup without failing
           it, which only PuppetBackupShrank catches afterwards; on the monitoring
-          node it stops Prometheus, which retention-sizing.md prices. Deleting the
-          wrong thing under pressure is the risk in the fix, so identify the growth
+          node it stops Prometheus, which docs/operate/sizing.md prices. Deleting
+          the wrong thing under pressure is the risk in the fix, so identify the growth
           first."
     - record: puppet_infra_filesystem_seconds_to_full
       expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs",pe_infrastructure="true"}
@@ -432,7 +435,7 @@ spec:
     rules:
     - alert: PdctngCollectorFailing
       expr: puppet_exporter_collector_consecutive_failures > 3
-      for: 30m
+      for: 5m
       labels:
         severity: warning
       annotations:
@@ -441,7 +444,7 @@ spec:
           tolerates. Everything {{ $labels.collector }} feeds is stale and nothing
           else says so: the exporter is up, the scrape succeeds, and its families
           keep serving their last good values. Start on the exporter host with `curl
-          -sf http://localhost:10050/healthz | jq ''.collectors''`, which gives this
+          -s http://localhost:10050/healthz | jq ''.collectors''`, which gives this
           collector''s `last_error` and `last_success_age_seconds`; the untruncated
           message is in `journalctl -u pdctng | grep "collector ''{{ $labels.collector
           }}''"`. Usually the thing it reads is down or its credentials have expired,
@@ -472,7 +475,7 @@ spec:
           age."
     - alert: PdctngCollectorSlow
       expr: puppet_exporter_collector_duration_seconds > puppet_exporter_collector_interval_seconds
-      for: 30m
+      for: 10m
       labels:
         severity: warning
       annotations:
@@ -556,6 +559,27 @@ spec:
           it presents has not expired. A `puppet_exporter_source_last_success_timestamp`
           of 0 means it has never been read at all, which is configuration rather
           than an outage.'
+    - alert: PdctngTextfileParseFailing
+      expr: node_textfile_scrape_error{pe_infrastructure="true"} > 0
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: node_exporter on {{ $labels.instance }} cannot parse {{ $value |
+          printf "%.0f" }} file(s) in the textfile drop zone
+        description: 'node_exporter on {{ $labels.instance }} could not parse at least
+          one file in its textfile drop zone, so the metrics from that file stopped
+          arriving while every other family it serves kept working. Nothing else reports
+          this: the scrape still succeeds, no collector fails, and the boards fed
+          by the missing families simply go quiet. "Textfile Feeds" on PDCTNG Internal
+          Operations names the drop zone and its files, and the "Parse Failures" tile
+          beside it is this same number. The usual cause is a writer that was interrupted
+          part way, leaving a half-written file, which clears itself on the next successful
+          write; one that does not clear is a malformed file that needs looking at.
+          `promtool check metrics < the-file.prom` says what is wrong with it. A file
+          must be written to a temporary name and renamed into place, because node_exporter
+          reads whatever is there when it scrapes. Nothing else is degraded by this
+          and it can wait for the morning.'
   - name: pdctng-custom_metrics
     rules:
     - alert: PdctngCustomMetricPollStopped
@@ -645,6 +669,19 @@ spec:
           branch that nobody has merged; `.github/workflows/alert-rules-sync.yml`
           opens one whenever the rendered rules change. Two versions in `pdctng_alert_rules_info`
           at once means two Prometheuses disagreeing rather than one being behind.'
+    - alert: PdctngDuplicateDaemon
+      expr: puppet_exporter_peers > 1
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: '{{ $value | printf "%.0f" }} pdctng daemons are polling the PuppetDB
+          {{ $labels.instance }} reads'
+        description: PuppetDB says {{ $value | printf "%.0f" }} nodes are classified
+          with pdctng, and it belongs on one per PE installation. Every fleet metric
+          is being exported once per daemon under a different alias, so counts read
+          multiplied with PE set to All and threshold alerts fire early. The daemon's
+          log names the nodes. Remove pdctng from the HA replica or DR primary.
     - alert: PdctngExporterDown
       expr: up{job="puppet"} == 0
       for: 10m
@@ -707,6 +744,30 @@ spec:
           at boot, so any fix needs `systemctl restart pdctng` before it counts. Nothing
           else is degraded by this and it will not clear on its own, so it can wait
           for the morning.'
+    - alert: PdctngPrometheusConfigNotLoaded
+      expr: prometheus_config_last_reload_successful == 0
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: Prometheus on {{ $labels.instance }} rejected its configuration and
+          is running the previous one
+        description: 'Prometheus would not accept its configuration on the last reload,
+          so it is still evaluating whatever it had before. Anything written since
+          -- a pdctng rule, a scrape job, a third party''s rules file -- is on disk
+          and not in effect, and every board carries on looking normal because the
+          old configuration is still working. The Puppet run that wrote the file reported
+          success either way. **Prometheus loads all rule files or none**, so the
+          usual cause is one malformed file rather than anything pdctng wrote: pdctng
+          validates its own with `promtool check rules` before placing it, and nothing
+          validates a component''s. Find the offender with `promtool check rules /etc/prometheus/rules/*.yaml`,
+          which names the file and the line, then fix or remove it and reload. `journalctl
+          -u prometheus --since -1h | grep -i ''error loading config''` says the same
+          thing from the other end. Until it is fixed, treat every alert as suspect
+          rather than absent: the rules still running are the ones from before the
+          change, so a threshold somebody just raised is still paging at the old one.
+          This is also how a rule set goes stale for weeks without anybody noticing,
+          which is what R693''s own freshness series exists for.'
     - alert: PdctngRenderSectionFailing
       expr: puppet_exporter_render_sections_failed > 0
       for: 15m
@@ -812,6 +873,32 @@ spec:
           still page. The denominator is PuppetDB active nodes minus the level-none
           set, so an estate that never deactivates dead nodes under-reports. Tune
           fleet_catastrophe_nodes and fleet_catastrophe_ratio under pdctng::alerts::thresholds.'
+    - alert: PdctngFleetSilent
+      expr: count by (alias) ((time() - puppet_report_timestamp_epoch) > 3600 unless
+        on (node) puppet_node_alert_level{level="none"}) >= 5 and count by (alias)
+        ((time() - puppet_report_timestamp_epoch) > 3600 unless on (node) puppet_node_alert_level{level="none"})
+        / on(alias) (puppet_node_lifecycle{state="active"} - ignoring(state) puppet_nodes_alert_excluded)
+        >= 0.2
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: 'Fleet-wide Puppet silence: {{ $value }} nodes have stopped reporting'
+        description: 'At least 5 nodes and 0.2 of the active fleet have gone silent
+          by the same threshold the per-node silence rules use, which is one event
+          and not {{ $value }} unrelated ones. Nothing on those nodes is converging,
+          and every board still shows them as they were on their last report, because
+          puppet_status serves it for ever. Silence at this scale is an agent that
+          cannot reach the primary: the CA or the certificates behind it, puppetserver
+          refusing or queueing agents, a network or DNS change, or a scheduled run
+          that stopped estate-wide. Certificate Authority first, then Puppetserver
+          for agents turned away, then Convergence''s Silent tile for which nodes
+          and since when; nodes that went quiet on the same minute share a cause.
+          While this fires PdctngNodeSilentHigh is inhibited, so per-node silence
+          pages going quiet is not evidence those nodes came back; critical-tier hosts
+          still page. Decommissioned hosts belong at pdctng::node_alert_level::level:
+          none, which takes them out of both counts. Tune fleet_silent_nodes and fleet_silent_ratio
+          under pdctng::alerts::thresholds.'
     - alert: PdctngNoNodesReporting
       expr: puppet_node_count{environment="all"} == 0
       for: 15m
@@ -830,8 +917,8 @@ spec:
           nodes and lost their reports, usually a report-ttl purge or a restore. Both
           at zero means PuppetDB is empty or puppetdb_urls points at the wrong one,
           and puppet_exporter_server_up at zero means it is not answering at all.
-          Then curl -sf http://localhost:10050/healthz | jq and journalctl -u pdctng
-          -n 100. docs/troubleshooting.md has the mTLS curl for querying PuppetDB
+          Then curl -s http://localhost:10050/healthz | jq and journalctl -u pdctng
+          -n 100. docs/operate/troubleshooting.md has the mTLS curl for querying PuppetDB
           by hand, which is what settles it. Restarting the daemon changes nothing:
           it rebuilds the store from the same query.'
     - alert: PdctngNodeCountDropped
@@ -1044,7 +1131,7 @@ spec:
           into a directory that is no longer empty, dpkg leaves grafana in `iF`, and
           the old version carries on serving while every dashboard, the datasource
           and the provisioning config quietly stop being managed. Read "The whole
-          dashboard node stops being managed after a patch run" in docs/troubleshooting.md
+          dashboard node stops being managed after a patch run" in docs/operate/troubleshooting.md
           before you upgrade, not after.'
     - alert: PcpNodesDisconnected
       expr: puppet_pcp_disconnected_nodes > 0
@@ -1070,6 +1157,24 @@ spec:
           outage and forty out of four thousand is a Tuesday. Doing nothing costs
           you the ability to drive the estate during an incident, which is when you
           find out.'
+    - alert: PdctngInfraTimerInactive
+      expr: node_systemd_unit_state{state="active",pe_infrastructure="true",name=~"pdctng-.*\\.timer"}
+        == 0
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "{{ $labels.name }} is not active on {{ $labels.instance }}"
+        description: A pdctng timer that systemd still knows about has not been active
+          for fifteen minutes, so it has been stopped, disabled or masked rather than
+          having failed -- a failed unit shows on PdctngInfraUnitFailed instead and
+          this one deliberately does not overlap it. Nothing will run on its schedule
+          until somebody starts it, and on a quarterly timer like `pdctng-tam-report.timer`
+          that silence lasts until the next quarter. Check `systemctl status {{ $labels.name
+          }}` and `systemctl list-timers {{ $labels.name }}` on the host in {{ $labels.instance
+          }}; `systemctl enable --now {{ $labels.name }}` is the fix when it was stopped
+          by hand or by a package action. Needs the systemd collector, which `pdctng::node_exporter::collectors_enable`
+          leaves off by default.
     - alert: PdctngInfraUnitFailed
       expr: node_systemd_unit_state{state="failed",pe_infrastructure="true"} == 1
       for: 15m
@@ -1092,6 +1197,35 @@ spec:
           Needs the systemd collector, which `pdctng::node_exporter::collectors_enable`
           leaves off by default, so an estate that has not added `systemd` to it gets
           silence rather than health.'
+    - alert: PdctngScheduledJobStuck
+      expr: |-
+        label_replace(
+          changes(node_systemd_timer_last_trigger_seconds[14400s]) == 0
+          and node_systemd_timer_last_trigger_seconds > 0
+          and node_systemd_timer_last_trigger_seconds offset 14400s,
+          "name", "$1.service", "name", "(.+)\\.timer")
+        and on (instance, name) (node_systemd_unit_state{state=~"activating|failed"} == 1) and on (instance, name) (max_over_time(node_systemd_unit_state{state="inactive"}[14400s]) == 0) unless on (instance, name) (node_systemd_unit_state{state="failed",pe_infrastructure="true"} == 1)
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "{{ $labels.name }} on {{ $labels.instance }} has not completed since
+          its timer started it"
+        description: 'A timer started {{ $labels.name }} more than four hours ago,
+          has not fired it again since, and the job has not once got back to `inactive`:
+          either it is still running, which for a scheduled job is usually a hang,
+          or it failed. Whatever it produces was not produced this cycle, and anything
+          downstream carries on reading the last good run''s output with nothing saying
+          it is old. `systemctl status {{ $labels.name }}` on the host in {{ $labels.instance
+          }} says which of the two it is, and `journalctl -u {{ $labels.name }} --since
+          -1d` shows whether the run logged a finish. A hang wants killing (`systemctl
+          stop`) before the next scheduled start, because systemd will not start a
+          unit that is still running and that run is skipped too. A unit with `TimeoutStartSec`
+          set moves itself from hanging to failed when it expires, and this keeps
+          firing either way until the timer next fires. Needs the systemd collector
+          on the host (`pdctng::node_exporter::collectors_enable`), and the unit inside
+          any `--collector.systemd.unit-include` pattern the host sets. A timer whose
+          `Unit=` names a service of a different name is not matched.'
     - alert: PeInfraNodeInNoop
       expr: puppet_noop == 1 and on(node) label_replace(puppet_infra_platform, "node",
         "$1", "host", "(.+)")
@@ -1116,6 +1250,26 @@ spec:
           next enforcing run applies everything the noop runs have been reporting,
           on an infrastructure server, so read the pending changes before you flip
           it rather than after. pe_status_check S0003.'
+    - alert: PeStatusCheckFailing
+      expr: puppet_pe_status_check_failing == 1
+      for: 1h
+      labels:
+        severity: warning
+      annotations:
+        summary: pe_status_check {{ $labels.check }} is failing on {{ $labels.node
+          }}
+        description: 'PE''s own health check {{ $labels.check }} has returned false
+          on {{ $labels.node }} for two agent runs. The code names one of about forty
+          conditions PE checks on its infrastructure nodes, from a service that is
+          not running to a certificate close to expiry, and each has its own entry
+          on the runbook saying what PE checks, why it matters and what to do: follow
+          the link below. PE''s own table of every indicator is https://github.com/puppetlabs/puppetlabs-pe_status_check#fact-pe_status_check,
+          and it is the reference for a code newer than pdctng''s. To see everything
+          failing at once, `Failing Health Checks by Node` on TAM Check lists them
+          per node, and `facter -p pe_status_check` on the node lists every indicator
+          with its result. The alert clears after the next agent run that passes it.'
+        where: "[{{ $labels.check }} on the Runbook](/d/pdctng-runbook/?var-alert={{
+          $labels.check }}), PE's entry for this indicator and what to do about it."
     - alert: PeUpgradeOverdue
       expr: time() - puppet_pe_last_upgrade_epoch > 365 * 86400
       for: 1h
@@ -1447,10 +1601,13 @@ spec:
           free is a pool that is simply too small for the arrival rate; requested
           no higher than usual with free on the floor means something is holding interpreters
           and not giving them back. Wait Against Hold Time shows queueing and hold
-          time together, and Costliest Functions or Costliest Resources says what
-          is eating the hold time. Restarting pe-puppetserver clears a stuck pool
-          and costs every in-flight compile, so try it once and stop if it comes straight
-          back. Real capacity is another compiler and not a wider pool: see PuppetserverJRubyPoolOversized.'
+          time together, and Where Compile Time Actually Goes says what is eating
+          it. Read that one rather than the two panels beside it: those rank by mean
+          cost per call, and on a real estate the two rankings invert, so the slowest
+          function per call is routinely not the one burning the time. Restarting
+          pe-puppetserver clears a stuck pool and costs every in-flight compile, so
+          try it once and stop if it comes straight back. Real capacity is another
+          compiler and not a wider pool: see PuppetserverJRubyPoolOversized.'
     - alert: PuppetserverJRubyFreeAvgLow
       expr: puppet_server_jruby_free_avg < 0.9
       for: 10m
@@ -1577,7 +1734,7 @@ spec:
     rules:
     - alert: PdctngScmExportFailing
       expr: puppet_scm_export_success == 0
-      for: 1h
+      for: 15m
       labels:
         severity: warning
       annotations:
@@ -1710,3 +1867,497 @@ spec:
     - record: node_uname_info
       expr: label_replace(label_replace(windows_os_info, "sysname", "Windows", "",
         ""), "release", "$1", "version", "(.*)")
+  - name: pdctng-alert-inventory
+    rules:
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetBackupNeverRun
+        severity: warning
+        rule_group: backup
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetBackupShrank
+        severity: warning
+        rule_group: backup
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetBackupStale
+        severity: warning
+        rule_group: backup
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngFilesystemFillingSoon
+        severity: warning
+        rule_group: capacity_forecast
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraFilesystemCritical
+        severity: critical
+        rule_group: capacity_level
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraFilesystemLow
+        severity: warning
+        rule_group: capacity_level
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraMemoryCritical
+        severity: critical
+        rule_group: capacity_level
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraMemoryLow
+        severity: warning
+        rule_group: capacity_level
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCaExpiringCritical
+        severity: critical
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCaExpiringSoon
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCertRenewalAssumptionStale
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCertWarningAboveRenewal
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCrlUpdateOverdue
+        severity: critical
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCrlUpdateSoon
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetCertificateExpiringCritical
+        severity: critical
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetCertificateNotRenewing
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCisScanStale
+        severity: warning
+        rule_group: cis
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCisScanStopped
+        severity: critical
+        rule_group: cis
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCisScoreWithoutScanTime
+        severity: warning
+        rule_group: cis
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCollectorFailing
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCollectorServingStaleData
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCollectorSlow
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCollectorStale
+        severity: critical
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngSourceFailing
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngSourceStale
+        severity: critical
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngTextfileParseFailing
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCustomMetricPollStopped
+        severity: critical
+        rule_group: custom_metrics
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngDeploymentStuck
+        severity: warning
+        rule_group: delivery_health
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngAlertRulesStale
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngDuplicateDaemon
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngExporterDown
+        severity: critical
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngMetricsStale
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngPluginLoadFailed
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngPrometheusConfigNotLoaded
+        severity: critical
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngRenderSectionFailing
+        severity: critical
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngScrapeConfigMissing
+        severity: critical
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngStoreAtCeiling
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngAlertExclusionsHigh
+        severity: warning
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngFleetCatastrophe
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngFleetSilent
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNoNodesReporting
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeCountDropped
+        severity: warning
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeRunFailingCritical
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeRunFailingHigh
+        severity: warning
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeSilentCritical
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeSilentHigh
+        severity: warning
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngLicenseExpiringCritical
+        severity: critical
+        rule_group: license
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngLicenseExpiringSoon
+        severity: warning
+        rule_group: license
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngLicenseNearLimit
+        severity: warning
+        rule_group: license
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngLicenseOverLimit
+        severity: critical
+        rule_group: license
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: GrafanaBelowSupportedFloor
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PcpNodesDisconnected
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraTimerInactive
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraUnitFailed
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngScheduledJobStuck
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PeInfraNodeInNoop
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PeStatusCheckFailing
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PeUpgradeOverdue
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: TooManyEnvironments
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PostgresConnectionsNearLimit
+        severity: warning
+        rule_group: postgres
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PostgresDeadTuplesAccumulating
+        severity: warning
+        rule_group: postgres
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngPuppetDBErrorRate
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngPuppetDBServerDown
+        severity: critical
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBCommandsDiscarded
+        severity: critical
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBCommandsFatal
+        severity: critical
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBHeapDeadZone
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBHeapPressure
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBQueueGrowing
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBReplicaSyncStale
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverHeapDeadZone
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverHeapPressure
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyBurstExhaustion
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyExhausted
+        severity: critical
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyFreeAvgLow
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyPoolOversized
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyQueueLimit
+        severity: critical
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyWaitTime
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverQueueLimitTooHigh
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngScmExportFailing
+        severity: warning
+        rule_group: scm
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngScmExportStale
+        severity: warning
+        rule_group: scm
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetInfraServiceError
+        severity: critical
+        rule_group: service_status
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetInfraServiceNotRunning
+        severity: warning
+        rule_group: service_status
