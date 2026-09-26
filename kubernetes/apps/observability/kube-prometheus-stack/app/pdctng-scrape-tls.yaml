@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1.json
+# pdctng R845. The PE client certificate home-ops Prometheus presents to
+# pdctng's metrics port once that port is on mTLS. Issued by the lab PE CA to
+# homeops-prometheus.lab.albatrossflavour.com; the 1Password item holds the
+# certificate, its key and the CA that signed pdctng's own certificate.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: pdctng-scrape-tls
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword-connect
+  target:
+    name: pdctng-scrape-tls
+    template:
+      engineVersion: v2
+      data:
+        ca.crt: "{{ .ca }}"
+        tls.crt: "{{ .cert }}"
+        tls.key: "{{ .key }}"
+  dataFrom:
+    - extract:
+        key: pdctng-scrape-tls
