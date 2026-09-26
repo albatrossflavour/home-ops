@@ -16,11 +16,17 @@ name, is published at the first non-loopback IPv4 its guest agent reports.
 
 Only records matching MANAGED_RE or PROXMOX_MANAGED_RE are ever touched, so the
 hand-curated entries in dns.hosts are never at risk. If a source can't be read,
-its records are left alone rather than removed. Writes go to the primary
-Pi-hole; nebula-sync replicates to the others.
+its records are left alone rather than removed.
+
+Managed records are written to the primary Pi-hole and to every replica in
+PIHOLE_REPLICAS. nebula-sync only copies the primary to the replicas on the
+hour, and clients that ask a replica first would otherwise get NXDOMAIN for up
+to an hour after a record is added. nebula-sync's copy then matches what is
+already there.
 
 Env:
   PIHOLE_URL        default http://192.168.9.2
+  PIHOLE_REPLICAS   optional, comma-separated replica URLs sharing the password
   PIHOLE_PASSWORD   required
   PUPPETDB_URL      default https://puppet.lab.albatrossflavour.com:8081
   PUPPETDB_TOKEN    required, PE RBAC token (PuppetDB takes X-Authentication)
@@ -35,6 +41,7 @@ Env:
 import ipaddress, json, os, re, ssl, sys, urllib.parse, urllib.request
 
 PIHOLE = os.environ.get("PIHOLE_URL", "http://192.168.9.2").rstrip("/")
+REPLICAS = [u.strip().rstrip("/") for u in os.environ.get("PIHOLE_REPLICAS", "").split(",") if u.strip()]
 PDB = os.environ.get("PUPPETDB_URL", "https://puppet.lab.albatrossflavour.com:8081").rstrip("/")
 MANAGED = re.compile(os.environ.get("MANAGED_RE", r"-puppet-(development|production)-\d+\.lab\."))
 PVE = os.environ.get("PROXMOX_URL", "https://192.168.5.10:8006").rstrip("/")
@@ -110,14 +117,56 @@ def proxmox_inventory():
     return entries
 
 
-def pihole_session():
+def pihole_session(base):
     body = json.dumps({"password": os.environ["PIHOLE_PASSWORD"]}).encode()
-    status, resp = http(f"{PIHOLE}/api/auth", method="POST", data=body,
+    status, resp = http(f"{base}/api/auth", method="POST", data=body,
                         headers={"Content-Type": "application/json"})
     sid = json.loads(resp).get("session", {}).get("sid")
     if not sid:
-        raise SystemExit(f"Pi-hole auth failed ({status})")
+        raise RuntimeError(f"Pi-hole auth failed at {base} ({status})")
     return sid
+
+
+def sync_pihole(base, want, managed):
+    """Bring one Pi-hole's managed records in line with want. True on success."""
+    sid = pihole_session(base)
+    hdr = {"X-FTL-SID": sid}
+    try:
+        _, body = http(f"{base}/api/config/dns/hosts", headers=hdr)
+        have = set(json.loads(body)["config"]["dns"]["hosts"])
+        mine = {h for h in have if any(m.search(h) for m in managed)}
+        add, remove = sorted(want - mine), sorted(mine - want)
+
+        log(f"{base}: {len(want & mine)} correct, {len(add)} to add, "
+            f"{len(remove)} to remove ({len(have - mine)} curated entries untouched)")
+        for e in remove:
+            log(f"  - {e}")
+        for e in add:
+            log(f"  + {e}")
+
+        if DRY:
+            log("  dry run, nothing changed")
+            return True
+
+        ok_all = True
+        for entry, method, ok in ([(e, "DELETE", 204) for e in remove] +
+                                  [(e, "PUT", 201) for e in add]):
+            url = f"{base}/api/config/dns/hosts/{urllib.parse.quote(entry, safe='')}"
+            try:
+                status, _ = http(url, method=method, headers=hdr)
+            except Exception as exc:  # noqa: BLE001
+                log(f"  {method} errored for {entry}: {exc}")
+                ok_all = False
+                continue
+            if status != ok:
+                log(f"  {method} returned {status} for {entry}")
+                ok_all = False
+        return ok_all
+    finally:
+        try:
+            http(f"{base}/api/auth", method="DELETE", headers=hdr)
+        except Exception:  # noqa: BLE001
+            pass
 
 
 def main():
@@ -139,51 +188,20 @@ def main():
         want |= pve
         managed.append(PVE_MANAGED)
 
-    sid = pihole_session()
-    hdr = {"X-FTL-SID": sid}
-    try:
-        _, body = http(f"{PIHOLE}/api/config/dns/hosts", headers=hdr)
-        have = set(json.loads(body)["config"]["dns"]["hosts"])
-        mine = {h for h in have if any(m.search(h) for m in managed)}
-        add, remove = sorted(want - mine), sorted(mine - want)
-
-        log(f"managed: {len(want & mine)} correct, {len(add)} to add, "
-            f"{len(remove)} to remove ({len(have - mine)} curated entries untouched)")
-        for e in remove:
-            log(f"  - {e}")
-        for e in add:
-            log(f"  + {e}")
-
-        if DRY:
-            log("dry run, nothing changed")
-            return 0
-
-        failed = False
-        for entry, method, ok in ([(e, "DELETE", 204) for e in remove] +
-                                  [(e, "PUT", 201) for e in add]):
-            url = f"{PIHOLE}/api/config/dns/hosts/{urllib.parse.quote(entry, safe='')}"
-            try:
-                status, _ = http(url, method=method, headers=hdr)
-            except Exception as exc:  # noqa: BLE001
-                log(f"  {method} errored for {entry}: {exc}")
-                failed = True
-                continue
-            if status != ok:
-                log(f"  {method} returned {status} for {entry}")
-                failed = True
-        if failed:
-            log("finished with errors")
-            return 1
-        if add or remove:
-            log("applied. nebula-sync carries it to the replicas on the hour")
-        else:
-            log("nothing to do")
-        return 0
-    finally:
+    # Primary first. A replica that fails doesn't stop the others; the run
+    # just reports failure so it is visible.
+    failed = False
+    for base in [PIHOLE] + REPLICAS:
         try:
-            http(f"{PIHOLE}/api/auth", method="DELETE", headers=hdr)
-        except Exception:  # noqa: BLE001
-            pass
+            if not sync_pihole(base, want, managed):
+                failed = True
+        except Exception as exc:  # noqa: BLE001
+            log(f"{base}: sync failed: {exc}")
+            failed = True
+    if failed:
+        log("finished with errors")
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
