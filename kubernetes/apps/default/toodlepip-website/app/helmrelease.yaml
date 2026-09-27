@@ -33,7 +33,7 @@ spec:
               repository: ghcr.io/albatrossflavour/toodlepip-site
               # 2026-08-31: digest pinned so Renovate can track it - "latest"
               # alone gives it nothing to diff against.
-              tag: "latest@sha256:5c775c65c960b28a587b2988c37df0ab2bcec94aef404fb3412819d0420c3d38"
+              tag: "latest@sha256:7ec7b0cad3350ecd50e9a29a4d7f4f8d81496ce09cfbd25c1cbbfdf50f9d5e2d"
               pullPolicy: Always
             resources:
               requests:
