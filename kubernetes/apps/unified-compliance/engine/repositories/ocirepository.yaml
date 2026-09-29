@@ -9,7 +9,7 @@ spec:
   interval: 12h
   url: oci://ghcr.io/kyverno/charts/kyverno
   ref:
-    # Chart 3.9.0 -> Kyverno v1.19.0 (confirmed by reading the chart's own
+    # Chart 3.9.1 -> Kyverno v1.19.1 (confirmed by reading the chart's own
     # config blob from ghcr, not from the docs).
     #
     # COMPATIBILITY NOTE: Kyverno v1.19 is tested against Kubernetes
@@ -20,6 +20,6 @@ spec:
     # tested". Admission review is a stable API so the webhook path should
     # be fine; the background and reports controllers touch far more of the
     # API surface and are the more likely place for a 1.36 surprise.
-    tag: 3.9.0
+    tag: 3.9.1
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
