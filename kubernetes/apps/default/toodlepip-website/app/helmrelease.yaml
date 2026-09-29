@@ -73,7 +73,7 @@ spec:
           scanner:
             image:
               repository: ghcr.io/albatrossflavour/toodlepip-scanner
-              tag: "latest@sha256:62dea32f535c1f6d6ce2c5817b0aae38de22f5fb2f24ba37865fe88c7a7b263c"
+              tag: "latest@sha256:7d95d3c2e47fbacb802ad8028d3a86d3f5e5d8833af357bd4ecd691c639cd36a"
               pullPolicy: Always
             env:
               GALLERY_SOURCE: /gallery-source
