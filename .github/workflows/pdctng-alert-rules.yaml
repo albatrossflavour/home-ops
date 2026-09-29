@@ -1,0 +1,191 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "pdctng alert rules"
+
+# The PrometheusRule that pages Tony about the Puppet lab is rendered from
+# pdctng's own rule set. pdctng used to push it here from its CI; since pdctng
+# R853 (2026-09-26) that repo names no personal repo, so this side pulls.
+#
+# Same behaviour as the job it replaces: render with pdctng's own rake task,
+# validate with promtool, compare, and propose a PR only when the file moved.
+# The PR is the gate. Nothing here touches the cluster; Flux reconciles on merge.
+#
+# PDCTNG_SYNC_TOKEN is a fine-grained PAT with contents:read on
+# albatrossflavour/pdctng (private) and contents plus pull-requests write here.
+# It opens the PR as a person rather than as GITHUB_TOKEN, because a PR opened
+# by GITHUB_TOKEN triggers no workflows, and Kubeconform is a required check.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: pdctng-alert-rules
+  cancel-in-progress: false
+
+env:
+  SOURCE_REPO: albatrossflavour/pdctng
+  TARGET_PATH: kubernetes/apps/observability/custom-alerts/app/puppet.yaml
+  BRANCH: pdctng/alert-rules
+
+jobs:
+  propose:
+    name: Regenerate and propose
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check for a token
+        id: token
+        env:
+          PDCTNG_SYNC_TOKEN: ${{ secrets.PDCTNG_SYNC_TOKEN }}
+        run: |
+          if [ -z "${PDCTNG_SYNC_TOKEN}" ]; then
+            echo "::notice::PDCTNG_SYNC_TOKEN is not set, so pdctng cannot be read. Skipping."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout home-ops
+        if: steps.token.outputs.present == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          token: ${{ secrets.PDCTNG_SYNC_TOKEN }}
+          path: home-ops
+          fetch-depth: 0
+
+      - name: Checkout pdctng
+        if: steps.token.outputs.present == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          token: ${{ secrets.PDCTNG_SYNC_TOKEN }}
+          path: pdctng
+
+      - name: Setup Ruby
+        if: steps.token.outputs.present == 'true'
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: pdctng
+
+      # pdctng's rake tasks shell out to promtool. The newest release, as
+      # pdctng's CI uses: the stricter parser is the safe side.
+      - name: Fetch promtool
+        if: steps.token.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=$(gh release view --repo prometheus/prometheus --json tagName -q .tagName)
+          ver=${tag#v}
+          curl -fsSL -o /tmp/prometheus.tar.gz \
+            "https://github.com/prometheus/prometheus/releases/download/${tag}/prometheus-${ver}.linux-amd64.tar.gz"
+          tar -xzf /tmp/prometheus.tar.gz -C /tmp
+          echo "PROMTOOL=/tmp/prometheus-${ver}.linux-amd64/promtool" >> "$GITHUB_ENV"
+
+      - name: Validate and render
+        if: steps.token.outputs.present == 'true'
+        working-directory: pdctng
+        run: |
+          bundle exec rake alerts:check
+          bundle exec rake alerts:test
+          bundle exec rake alerts:prometheusrule
+
+      - name: Compare
+        if: steps.token.outputs.present == 'true'
+        id: compare
+        run: |
+          set -euo pipefail
+          rendered=pdctng/pkg/pdctng-alerts.yaml
+          current="home-ops/${TARGET_PATH}"
+
+          if [ -f "$current" ] && cmp -s "$rendered" "$current"; then
+            echo "::notice::Rule set is identical to what Flux is deploying. Nothing to propose."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          count() { grep -c "^ *- $2:" "$1" 2>/dev/null || echo 0; }
+          version() { sed -n 's/.*pdctng\.puppet\.com\/module-version: *//p' "$1" 2>/dev/null | head -1; }
+          {
+            echo "was_alerts=$(count "$current" alert)"
+            echo "now_alerts=$(count "$rendered" alert)"
+            echo "was_records=$(count "$current" record)"
+            echo "now_records=$(count "$rendered" record)"
+            echo "was_version=$(version "$current")"
+            echo "now_version=$(version "$rendered")"
+            echo "source_sha=$(git -C pdctng rev-parse HEAD)"
+            echo "changed=true"
+          } >> "$GITHUB_OUTPUT"
+
+          names() { grep "^ *- alert:" "$1" 2>/dev/null | sed 's/.*- alert: *//' | sort; }
+          {
+            echo "### Rules"
+            echo '```diff'
+            diff <(names "$current") <(names "$rendered") | sed -n 's/^> /+ /p; s/^< /- /p' || true
+            echo '```'
+          } > rule-delta.md
+          if ! grep -qE '^[+-] ' rule-delta.md; then
+            printf '%s\n' "No alerts added or removed: expressions, thresholds or the version annotation moved." > rule-delta.md
+          fi
+
+      - name: Open or update the pull request
+        if: steps.compare.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PDCTNG_SYNC_TOKEN }}
+          WAS_ALERTS: ${{ steps.compare.outputs.was_alerts }}
+          NOW_ALERTS: ${{ steps.compare.outputs.now_alerts }}
+          WAS_RECORDS: ${{ steps.compare.outputs.was_records }}
+          NOW_RECORDS: ${{ steps.compare.outputs.now_records }}
+          WAS_VERSION: ${{ steps.compare.outputs.was_version }}
+          NOW_VERSION: ${{ steps.compare.outputs.now_version }}
+          SOURCE_SHA: ${{ steps.compare.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          cd home-ops
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          # The rendered file is a whole artefact, so each run starts the
+          # branch again from main.
+          git checkout -B "${BRANCH}" origin/main
+          cp ../pdctng/pkg/pdctng-alerts.yaml "${TARGET_PATH}"
+          git add "${TARGET_PATH}"
+          git commit -m "chore(observability): regenerate pdctng alert rules (${WAS_VERSION:-unknown} -> ${NOW_VERSION:-unknown})"
+          git push --force-with-lease origin "${BRANCH}"
+
+          {
+            echo "Generated by \`rake alerts:prometheusrule\` in pdctng@${SOURCE_SHA:0:8}."
+            echo
+            echo "| | in cluster | proposed |"
+            echo "| --- | --- | --- |"
+            echo "| module version | ${WAS_VERSION:-none} | ${NOW_VERSION:-none} |"
+            echo "| alerting rules | ${WAS_ALERTS} | ${NOW_ALERTS} |"
+            echo "| recording rules | ${WAS_RECORDS} | ${NOW_RECORDS} |"
+            echo
+            cat ../rule-delta.md
+            echo
+            echo "\`promtool check rules\` and \`promtool test rules\` both passed before this was proposed. Merging it lets Flux reconcile."
+          } > ../pr-body.md
+
+          # --state open: a merged PR on the same branch must not be edited.
+          open_pr=$(gh pr list --head "${BRANCH}" --state open --json number --jq '.[0].number // empty')
+          if [ -n "${open_pr}" ]; then
+            gh pr edit "${open_pr}" --body-file ../pr-body.md
+          else
+            gh pr create --base main --head "${BRANCH}" \
+              --title "chore(observability): regenerate pdctng alert rules (${NOW_VERSION:-unknown})" \
+              --body-file ../pr-body.md
+          fi
+
+          # Assert the outcome: this job exists to stop the rules drifting
+          # quietly, so it must not propose nothing and report success.
+          final=$(gh pr list --head "${BRANCH}" --state open --json number --jq '.[0].number // empty')
+          if [ -z "${final}" ]; then
+            echo "::error::Rules differ but no open pull request exists on ${BRANCH}. Nothing was proposed."
+            exit 1
+          fi
+          echo "::notice::Proposed on #${final}."

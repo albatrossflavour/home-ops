@@ -44,7 +44,7 @@ spec:
           app:
             image:
               repository: amruthpillai/reactive-resume
-              tag: "v5.2.9@sha256:9569a5a90c2d9b251d232b853b8e31ba6e273aa86a27c114aeae87205a5f401c"
+              tag: "v5.3.2@sha256:b433dbe2fa2c23bfb7734d16380e4d703a05349db096113a18cb13b16f4c1fa0"
             env:
               TZ: ${TZ}
               PORT: "3000"
@@ -85,7 +85,7 @@ spec:
           browserless:
             image:
               repository: ghcr.io/browserless/chromium
-              tag: v2.56.3@sha256:4a12700b8140396806958bc5622dbf1abb3c4a1025aadaabe8f03c570aa43c79
+              tag: v2.56.7@sha256:b1ba7b054af2891a8199f884d4bd249cf8c3bd2fa8a97b339077e40f92803ba8
             env:
               TOKEN: "$(CHROME_TOKEN)"
               PORT: "3001"

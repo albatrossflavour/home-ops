@@ -47,7 +47,7 @@ spec:
           app:
             image:
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: "3.1.3@sha256:aa810a36942c63d4ee70d00eda7236cd3d6acfb7eb3f7987fb568ed14df8817a"
+              tag: "3.2.1@sha256:5fa76604a81df6945086e0837b14b56543d137e8ce4f311cc5d9ebe907e74e79"
             env:
               # Application configuration
               PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
@@ -111,7 +111,7 @@ spec:
           redis:
             image:
               repository: docker.io/valkey/valkey
-              tag: "9.1.2@sha256:475ee65cc75c327407458f5096cdd36954b3de3fc83f4c8ac31a4a8edecbf49e"
+              tag: "9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd"
             resources:
               requests:
                 cpu: 5m

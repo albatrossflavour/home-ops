@@ -23,17 +23,17 @@ spec:
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: No PE backup artefact has ever landed on {{ $labels.alias }}
         description: 'No PE backup artefact has ever landed here, so there is nothing
           on this primary to restore from. `puppet_backup_dir_mtime_epoch` says nothing
-          has been written to or removed from `pdctng::backup_dir` for 14 days, which
-          is what separates never backed up from backed up and moved away; an estate
-          that moves its artefact does not fire this. Run `sudo puppet-backup create`
-          by hand and watch it. If it says the staging directory is not writable by
-          pe-postgres, the directory is fine and the `su` is not, which is an SCE
-          control on `/etc/pam.d/su`. docs/troubleshooting.md has the test and the
-          fix, and that fault is what this alert was built after. The other cause
+          has been written to or removed from `pdctng::backup_dir` for 14 days, so
+          this is a primary that was never backed up; an estate that moves its artefacts
+          away does not fire this. Run `sudo puppet-backup create` by hand and watch
+          it. If it says the staging directory is not writable by pe-postgres, the
+          directory is fine and the `su` is not, which is an SCE control on `/etc/pam.d/su`.
+          docs/operate/troubleshooting.md has the test and the fix. The other cause
           is configuration: a site backing up straight to another path should point
           `pdctng::backup_dir` there, or set `pdctng::enable_backup_metrics` to false.'
     - alert: PuppetBackupShrank
@@ -41,23 +41,24 @@ spec:
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: The newest PE backup on {{ $labels.alias }} is under 0.5 of the largest
           in the last thirty days
         description: 'A backup artefact is present and current, and it is a fraction
           of the size the last thirty days say it should be. The usual cause is a
-          tarball truncated by a full disk: nothing can tell a truncated tarball from
-          a complete one by stat alone, which is why this watches the size instead
-          of asking whether a backup ran. Restore from the previous artefact if you
-          need one today, then find what filled the disk. Expect one false positive,
-          an estate that has just decommissioned a large part of its fleet: the backup
-          really is smaller, and the alert clears itself once the old size ages out
-          of the thirty-day window.'
+          tarball truncated by a full disk: a truncated tarball and a complete one
+          look the same to stat, so this rule watches the size. Restore from the previous
+          artefact if you need one today, then find what filled the disk. Expect one
+          false positive, an estate that has just decommissioned a large part of its
+          fleet: the backup is smaller, and the alert clears itself once the old size
+          ages out of the thirty-day window.'
     - alert: PuppetBackupStale
       expr: time() - puppet_backup_last_epoch > 8 * 86400
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: The newest PE backup on {{ $labels.alias }} is over 8 days old
         description: The newest restorable artefact on this primary is 8 days old,
@@ -66,10 +67,10 @@ spec:
           PE's own `pe_backup-<timestamp>.tgz` but not an artefact renamed by `puppet-backup
           create --name`, and a mismatch reads exactly like a missing backup. If the
           pattern is right, run `sudo puppet-backup create` and watch it; a staging-directory-not-writable
-          error is the `su - pe-postgres` PAM fault documented in docs/troubleshooting.md
-          rather than a permissions problem on the directory. A backup completing
-          is not proof it is whole, so check `Newest Backup Size` on TAM Check afterwards.
-          The default assumes a weekly cadence with a day of margin; set `pdctng::alerts::thresholds.backup_stale_days`
+          error is the `su - pe-postgres` PAM fault documented in docs/operate/troubleshooting.md,
+          not a permissions problem on the directory. A backup completing is not proof
+          it is whole, so check `Newest Backup Size` on TAM Check afterwards. The
+          default assumes a weekly cadence with a day of margin; set `pdctng::alerts::thresholds.backup_stale_days`
           to your own.
   - name: pdctng-capacity_ceiling
     rules:
@@ -105,6 +106,8 @@ spec:
         pool", "", "") or label_replace(max by (host) (label_replace(puppet_node_count{environment="all"}
         / ignoring(environment) puppet_license_entitled_nodes, "host", "$1", "instance",
         "([^:]+).*")), "ceiling", "Licence nodes", "", "")
+    - record: puppet_orchestrator_job_nodes_max
+      expr: max by (alias) (puppet_orchestrator_job_node_count)
   - name: pdctng-capacity_forecast
     rules:
     - alert: PdctngFilesystemFillingSoon
@@ -112,6 +115,7 @@ spec:
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.device }} on {{ $labels.instance }} is forecast full
           within 4 days"
@@ -129,9 +133,8 @@ spec:
           from a volume the estate has outgrown. A full disk on a PE primary can stop
           catalogue compilation, and it truncates the next backup without failing
           it, which only PuppetBackupShrank catches afterwards; on the monitoring
-          node it stops Prometheus, which retention-sizing.md prices. Deleting the
-          wrong thing under pressure is the risk in the fix, so identify the growth
-          first."
+          node it stops Prometheus, which docs/operate/sizing.md prices. Identify
+          what is growing before deleting anything."
     - record: puppet_infra_filesystem_seconds_to_full
       expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs",pe_infrastructure="true"}
         / -deriv(node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs",pe_infrastructure="true"}[2592000s:1d]))
@@ -151,21 +154,21 @@ spec:
       for: 15m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.device }} on {{ $labels.instance }} has under 5% free"
         description: '{{ $labels.device }} on {{ $labels.instance }} is down to {{
-          $value | printf "%.1f" }}% free and is not necessarily filling, which is
-          why the forecast alert beside this one may be silent: it exists only while
-          a volume is heading somewhere on a slope fitted over thirty days, so a volume
-          that arrived and stopped is invisible to it and so is one that filled in
-          an afternoon. This is the measurement rather than the projection. A full
-          disk on a PE primary stops catalogue compilation, and it truncates the next
-          backup without failing it, which only PuppetBackupShrank catches afterwards;
-          on the monitoring node it stops Prometheus. `df -h` then `du -x` down the
-          mount, and read `Fullest Filesystem` on Puppet Infrastructure Health for
-          which host and `Time To Filesystem Full` for whether it is still moving.
-          Deleting the wrong thing under pressure is the risk in the fix, so identify
-          what is using the space first.'
+          $value | printf "%.1f" }}% free and is not necessarily filling, so the forecast
+          alert beside this one may be silent: it exists only while a volume is heading
+          somewhere on a slope fitted over thirty days, so a volume that arrived and
+          stopped is invisible to it and so is one that filled in an afternoon. This
+          is the measurement; the forecast rule is the projection. A full disk on
+          a PE primary stops catalogue compilation, and it truncates the next backup
+          without failing it, which only PuppetBackupShrank catches afterwards; on
+          the monitoring node it stops Prometheus. `df -h` then `du -x` down the mount,
+          and read `Fullest Filesystem` on Puppet Infrastructure Health for which
+          host and `Time To Filesystem Full` for whether it is still moving. Identify
+          what is using the space before deleting anything.'
     - alert: PdctngInfraFilesystemLow
       expr: ((node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs",pe_infrastructure="true"}
         / node_filesystem_size_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs|autofs|nsfs|devtmpfs",pe_infrastructure="true"})
@@ -175,41 +178,39 @@ spec:
       for: 30m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.device }} on {{ $labels.instance }} has under 15% free"
         description: '{{ $labels.device }} on {{ $labels.instance }} has {{ $value
           | printf "%.1f" }}% free. **This is a level and not a trend**, so it fires
           on a volume that has been full for a year as readily as on one that filled
-          last night; the forecast alert beside it is the one that says which. This
-          is the reading a TAM engagement check writes down by hand, and it is here
-          because two of the four real ones scored against this module found exactly
-          this shape and nothing in pdctng could see it. Nothing is broken yet. Find
-          what is using the space now, while the choice of what to delete is still
-          yours: `df -h`, then `du -x` down the mount, then `Fullest Filesystem` on
-          Puppet Infrastructure Health for the shape over the window. Escalates to
-          PdctngInfraFilesystemCritical at 5%.'
+          last night; the forecast alert beside it is the one that says which. Nothing
+          is broken yet. Find what is using the space now, while the choice of what
+          to delete is still yours: `df -h`, then `du -x` down the mount, then `Fullest
+          Filesystem` on Puppet Infrastructure Health for the shape over the window.
+          Escalates to PdctngInfraFilesystemCritical at 5%.'
     - alert: PdctngInfraMemoryCritical
       expr: (node_memory_MemAvailable_bytes{pe_infrastructure="true"} / node_memory_MemTotal_bytes{pe_infrastructure="true"})
         * 100 < 5
       for: 15m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.instance }} has under 5% of its memory available"
         description: '{{ $labels.instance }} is down to {{ $value | printf "%.1f"
           }}% memory available and has been for fifteen minutes. **Available, not
           free**: this already counts page cache the kernel will hand back, so it
-          is the number that says whether the next allocation succeeds rather than
-          the alarming-looking one. On a PE primary the thing that breaks is whichever
-          JVM the OOM killer reaches first, and the answer is rarely the one at fault
-          -- cd4pe has been killed on this estate while puppetserver held 6.9 GiB.
-          `free -h` for the shape, then `ps -eo rss,comm --sort=-rss | head` for who
-          has it. **Check swap before you plan around it**: most hosts here have none,
-          so there is no slow degradation before the killer runs. Growing the VM does
-          not help by itself on a PE host, because `puppet infrastructure tune` sizes
-          the JVM heaps from host RAM and hands the extra straight back to them; retune
-          deliberately or the available floor does not move. "Memory" on Puppet Infrastructure
-          Health has the trend, and "Memory Used" above it the current reading.'
+          is the number that says whether the next allocation succeeds. On a PE primary
+          the thing that breaks is whichever JVM the OOM killer reaches first, and
+          that is often not the one at fault. `free -h` for the shape, then `ps -eo
+          rss,comm --sort=-rss | head` for who has it. **Check swap before you plan
+          around it**: most hosts here have none, so there is no slow degradation
+          before the killer runs. Growing the VM does not help by itself on a PE host,
+          because `puppet infrastructure tune` sizes the JVM heaps from host RAM and
+          hands the extra straight back to them; retune the heaps as well, or available
+          memory does not rise. "Memory" on Puppet Infrastructure Health has the trend,
+          and "Memory Used" above it the current reading.'
     - alert: PdctngInfraMemoryLow
       expr: ((node_memory_MemAvailable_bytes{pe_infrastructure="true"} / node_memory_MemTotal_bytes{pe_infrastructure="true"})
         * 100 < 15) and ((node_memory_MemAvailable_bytes{pe_infrastructure="true"}
@@ -217,18 +218,18 @@ spec:
       for: 30m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.instance }} has under 15% of its memory available"
         description: '{{ $labels.instance }} has {{ $value | printf "%.1f" }}% memory
           available and has held there for thirty minutes. **This is a level and not
           a trend**, so it fires on a host that has been tight for a year as readily
           as on one that started leaking last night; "Memory" on Puppet Infrastructure
-          Health says which. Nothing is broken yet, and that is the point -- the choice
-          of what to move or resize is still yours. `ps -eo rss,comm --sort=-rss |
-          head` names the largest consumers, and on a PE host most of the answer is
-          JVM heaps sized by `puppet infrastructure tune` from host RAM rather than
-          processes that can simply be stopped. Escalates to PdctngInfraMemoryCritical
-          at 5%.'
+          Health says which. Nothing is broken yet, so there is time to choose what
+          to move or resize. `ps -eo rss,comm --sort=-rss | head` names the largest
+          consumers, and on a PE host most of the answer is JVM heaps sized by `puppet
+          infrastructure tune` from host RAM and not processes that can be stopped.
+          Escalates to PdctngInfraMemoryCritical at 5%.'
   - name: pdctng-certificates
     rules:
     - alert: PdctngCaExpiringCritical
@@ -236,6 +237,7 @@ spec:
       for: 1h
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: CA certificate {{ $labels.subject }} expires in under 30 days
         description: '{{ $value | printf "%.0f" }} days left on {{ $labels.subject
@@ -243,132 +245,137 @@ spec:
           it signed stops authenticating in the same minute: agents, PuppetDB, the
           orchestrator and PE''s own console and SAML certificates. Replacing a PE
           CA means reissuing every certificate in the estate, so it is scheduled work
-          with a change window rather than an afternoon, and at under 30 days you
-          are already inside the lead time the warning horizon exists to give you.
-          Open PDCTNG Certificate Authority and read the CA Certificates table first:
-          PE ships a root and an intermediate, and which of them is the clock decides
-          how big the work is. Then get the window booked. Every week of waiting comes
-          off the one you have left to do it in.'
+          with a change window, and at under 30 days you are already inside the lead
+          time the warning horizon exists to give you. Open PDCTNG Certificate Authority
+          and read the CA Certificates table first: PE ships a root and an intermediate,
+          and which of them is the clock decides how big the work is. Then book the
+          change window.'
     - alert: PdctngCaExpiringSoon
       expr: "(puppet_ca_expires_epoch - time()) / 86400 < 90"
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: CA certificate {{ $labels.subject }} expires in under 90 days
         description: '{{ $value | printf "%.0f" }} days left on {{ $labels.subject
-          }}, which is a planning horizon rather than a deadline: this fires at 90
-          days because replacing a CA is a project with lead time, and pe_status_check
-          flags the CA on the same horizon. When it expires, every certificate it
-          signed stops authenticating at once, and replacing a PE CA means reissuing
-          every certificate in the estate. Nothing is broken today, which is the point
-          of firing this early. Open PDCTNG Certificate Authority and read the CA
-          Certificates table: PE ships a root and an intermediate, and which of them
-          is the clock decides how big the work is. Book the change while the date
-          is still yours to choose. Left alone the same fact returns as PdctngCaExpiringCritical
-          at 30 days, by which point the choice of window has gone.'
+          }}, which is a planning horizon: this fires at 90 days because replacing
+          a CA is a project with lead time, and pe_status_check flags the CA on the
+          same horizon. When it expires, every certificate it signed stops authenticating
+          at once, and replacing a PE CA means reissuing every certificate in the
+          estate. Open PDCTNG Certificate Authority and read the CA Certificates table:
+          PE ships a root and an intermediate, and which of them is the clock decides
+          how big the work is. Book the change while the date is still yours to choose.
+          Left alone the same fact returns as PdctngCaExpiringCritical at 30 days.'
     - alert: PdctngCertRenewalAssumptionStale
       expr: puppet_agent_cert_renewal_interval_seconds != (30 * 86400)
       for: 6h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Boards assume a different certificate renewal interval than the estate
           uses
-        description: Nothing is broken. The picture is mis-scaled. The estate renews
+        description: The certificate boards are scaled for the wrong renewal interval.
+          No certificate is affected, so this keeps until morning. The estate renews
           at {{ $value | humanizeDuration }} before expiry and the boards are cut
           for 30 days, so the Expiry Spread on PDCTNG Certificate Authority draws
           its healthy band in the wrong place. Where the estate's real interval is
           the shorter of the two, certificates in normal rotation fall into buckets
           the board colours as a problem. Where it is the longer, a certificate whose
           renewal was due and did not happen still lands in an uncoloured bucket and
-          reads as healthy, which is the direction that costs you something. Set pdctng::dashboards::thresholds.cert_renewal_interval_days
-          to what puppet_agent_cert_renewal_interval_seconds reports, and its alerts
-          twin with it. No certificate changes either way, so it keeps until morning.
+          reads as healthy, which is the direction that costs you something. Set `pdctng::dashboards::thresholds.cert_renewal_interval_days`
+          to what `puppet_agent_cert_renewal_interval_seconds` reports, and its alerts
+          twin with it.
     - alert: PdctngCertWarningAboveRenewal
       expr: puppet_agent_cert_renewal_interval_seconds <= (14 * 86400)
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Certificate warning threshold is at or above the renewal interval
         description: Agents renew their own certificates at {{ $value | humanizeDuration
           }} before expiry, and the certificate warning is configured at or above
           that. Every healthy node will trip the warning once per certificate cycle,
           so the alert stops meaning renewal has failed and starts meaning renewal
-          is working. Set pdctng::alerts::thresholds.cert_expiry_warning_days below
+          is working. Set `pdctng::alerts::thresholds.cert_expiry_warning_days` below
           the renewal interval, and its dashboards twin with it.
     - alert: PdctngCrlUpdateOverdue
       expr: puppet_crl_next_update_epoch - time() < 0
       for: 5m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: CRL from {{ $labels.issuer }} has expired
         description: 'The CRL from {{ $labels.issuer }} is past its nextUpdate, and
           anything enforcing CRLs rejects every certificate checked against a stale
-          one. That presents as the whole estate failing to authenticate at once rather
-          than as one broken node. Confirm the reading is current before anything
-          else: `sudo pdctng-ctl status` on the primary lists a failing `ca` collector
-          by name, and CRL Freshness on PDCTNG Certificate Authority says how long
-          since each CRL was regenerated. The file is `/etc/puppetlabs/puppetserver/ca/ca_crl.pem`
-          unless `crl_file` has been moved. If the reading is real this is CA-side
-          work on the primary, not something an agent can fix, and it is the classic
-          PE support ticket: raise it at the hour it fires, because the failure is
-          fleet-wide and does not degrade gently.'
+          one. That presents as the whole estate failing to authenticate at once.
+          Confirm the reading is current before anything else: `sudo pdctng-ctl status`
+          on the primary lists a failing `ca` collector by name, and CRL Freshness
+          on PDCTNG Certificate Authority says how long since each CRL was regenerated.
+          The file is `/etc/puppetlabs/puppetserver/ca/ca_crl.pem` unless `crl_file`
+          has been moved. If the reading is real this is CA-side work on the primary,
+          not something an agent can fix, and it is the classic PE support ticket:
+          raise it at the hour it fires, because the failure is fleet-wide and does
+          not degrade gently.'
     - alert: PdctngCrlUpdateSoon
       expr: "(puppet_crl_next_update_epoch - time()) / 86400 < 30"
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: CRL from {{ $labels.issuer }} stops being valid in under 30 days
         description: 'The CRL from {{ $labels.issuer }} stops being valid in {{ $value
           | printf "%.0f" }} days. The CA normally regenerates it long before this,
-          so the alert firing at all says the refresh has stopped rather than that
-          the deadline is close. Nothing is broken yet. Once it lapses, anything enforcing
-          CRLs rejects every certificate checked against it, which presents as the
-          whole estate failing to authenticate at once. Rule out a stuck reading first,
-          because it is the cheap answer: `sudo pdctng-ctl status` on the primary
-          lists a failing `ca` collector by name. Then read CRL Freshness on PDCTNG
-          Certificate Authority, where an old last refresh beside recent revocations
-          is the machinery having stopped. It fires at 30 days out, so it keeps until
-          morning. Left alone it becomes PdctngCrlUpdateOverdue.'
+          so the alert firing at all says the refresh has stopped. Nothing is broken
+          yet. Once it lapses, anything enforcing CRLs rejects every certificate checked
+          against it, which presents as the whole estate failing to authenticate at
+          once. Rule out a stuck reading first, because it is the cheap answer: `sudo
+          pdctng-ctl status` on the primary lists a failing `ca` collector by name.
+          Then read CRL Freshness on PDCTNG Certificate Authority, where an old last
+          refresh beside recent revocations is the machinery having stopped. It fires
+          at 30 days out, so it keeps until morning. Left alone it becomes PdctngCrlUpdateOverdue.'
     - alert: PuppetCertificateExpiringCritical
       expr: "(puppet_certificate_expires_epoch - time()) / 86400 < 7"
       for: 1h
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: Puppet certificate for {{ $labels.node }} is about to expire
         description: '{{ $labels.node }} has {{ $value | printf "%.0f" }} days of
           certificate left and nothing has renewed it. On expiry the node stops authenticating
           to the primary altogether: it stops reporting, so it surfaces as a silent
-          node rather than as a failure, and it does not come back on its own. Check
-          whether it should still exist first. PDCTNG Triage lists it under Cert renewal
-          overdue and puppet_report_timestamp_epoch says when it last reported. A
-          node quiet for weeks is usually a destroyed VM whose certificate was never
-          cleaned, and `puppetserver ca clean` closes it. A live one wants fixing
-          before the date, because afterwards the work starts on the node itself rather
-          than on the primary, one host at a time.'
+          node, not as a failure, and it does not come back on its own. Check whether
+          it should still exist first. PDCTNG Triage lists it as a certificate that
+          has not renewed, and `puppet_report_timestamp_epoch` says when it last reported.
+          A node quiet for weeks is usually a destroyed VM whose certificate was never
+          cleaned, and `sudo /opt/puppetlabs/bin/puppetserver ca clean --certname
+          {{ $labels.node }}` on the primary closes it. A live one wants fixing before
+          the date, because afterwards the fix is on each node, one host at a time.'
     - alert: PuppetCertificateNotRenewing
       expr: "(puppet_certificate_expires_epoch - time()) / 86400 < 14"
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Puppet certificate for {{ $labels.node }} is not being renewed
         description: 'The node has stopped renewing; the certificate itself is fine.
           {{ $value | printf "%.0f" }} days left on {{ $labels.node }}, and an auto-renewing
           estate should have replaced it once it came inside its renewal interval,
           which is already past. Check the node before you touch the certificate:
-          puppet_report_timestamp_epoch says when it last reported and PDCTNG Node
+          `puppet_report_timestamp_epoch` says when it last reported and PDCTNG Node
           Detail carries its run history. A node that went quiet weeks ago is usually
-          a machine destroyed without being purged, and `puppetserver ca clean` closes
-          it rather than a reissue. One still reporting and not renewing wants the
-          Auto-Renewal tile on PDCTNG Certificate Authority, which reads Off where
-          the CA will not issue renewals at all. Where nothing auto-renews, renew
-          it by hand. Ignored, PuppetCertificateExpiringCritical follows at 7 days.'
+          a machine destroyed without being purged, and `sudo /opt/puppetlabs/bin/puppetserver
+          ca clean --certname {{ $labels.node }}` on the primary closes it, with no
+          reissue needed. One still reporting and not renewing wants the Auto-Renewal
+          tile on PDCTNG Certificate Authority, which reads Off where the CA will
+          not issue renewals at all. Where nothing auto-renews, renew it by hand.
+          Ignored, PuppetCertificateExpiringCritical follows at 7 days.'
   - name: pdctng-cis
     rules:
     - alert: PdctngCisScanStale
@@ -376,6 +383,7 @@ spec:
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: CIS scan for {{ $labels.node }} is {{ $value | printf "%.0f" }} days
           old
@@ -388,93 +396,88 @@ spec:
           and confirm it is still in scope for scanning in SCM. `Scan Freshness` on
           the same board is the twenty stalest scans, so anything else in this state
           shows up beside it. Left alone it escalates to PdctngCisScanStopped at 30
-          days, by which point the score is fiction.
+          days.
     - alert: PdctngCisScanStopped
       expr: "(time() - puppet_cis_scan_timestamp_epoch) / 86400 > 30"
       for: 1h
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: CIS scan for {{ $labels.node }} stopped {{ $value | printf "%.0f"
           }} days ago
         description: '30 days without a scan means the scanner has stopped for this
-          node rather than that a run was missed. Its score is fiction, and it still
-          counts: the CIS board''s score panels draw it like a current one and Essential
-          Eight folds it into its averages and counts with no freshness test at all,
-          so any compliance claim covering this node is unevidenced. Check `Last Successful
-          Export` on the CIS board first, because recent means the export is healthy
-          and the fault is scanning rather than collection. Since R278 there is no
-          per-node fact to inspect, so the next look is SCM itself: whether the node
-          is still in scope, and whether its last scan errored. `<scm_dir>/score_data/Summary_Report_API.csv`
-          holds the row the score came from. Rescanning is cheap and reversible. Leaving
-          it means the node keeps a score 30 days old, and only `Oldest Scan` and
-          `Scan Freshness` on the CIS board will say so.'
+          node. Its score is out of date and still counts: the CIS board''s score
+          panels draw it like a current one and Essential Eight folds it into its
+          averages and counts with no freshness test at all, so any compliance claim
+          covering this node is unevidenced. Check `Last Successful Export` on the
+          CIS board first, because recent means the export is healthy and the fault
+          is in scanning. There is no per-node fact to inspect, so the next look is
+          SCM itself: whether the node is still in scope, and whether its last scan
+          errored. `<scm_dir>/score_data/Summary_Report_API.csv` holds the row the
+          score came from. Rescanning is cheap and reversible. Until it rescans, `Oldest
+          Scan` and `Scan Freshness` on the CIS board show its age.'
     - alert: PdctngCisScoreWithoutScanTime
-      expr: puppet_cis_compliance_score unless on(node) puppet_cis_scan_timestamp_epoch
+      expr: puppet_cis_compliance_score unless on(node, benchmark, profile) puppet_cis_scan_timestamp_epoch
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: CIS score for {{ $labels.node }} has no scan timestamp
-        description: 'This node has a CIS score with no scan timestamp behind it,
-          so it is invisible to PdctngCisScanStale and PdctngCisScanStopped, absent
-          from `Oldest Scan` and `Scan Freshness`, and can sit on a wrong score indefinitely
-          with nothing to catch it. `Unscanned Nodes` does not count it either, because
-          it does have a score. The raw timestamp the export delivered rides on the
-          score series itself as a `scan_timestamp` label, so read that first: the
-          freshness series is dropped when that string is present but cannot be parsed
-          into an epoch. A row carrying no node name or no scan timestamp at all is
-          skipped by the reader outright and produces no score, so that is not this.
+        description: This node has a CIS score with no scan timestamp behind it, so
+          it is invisible to PdctngCisScanStale and PdctngCisScanStopped, absent from
+          `Oldest Scan` and `Scan Freshness`, and can sit on a wrong score indefinitely.
+          `Unscanned Nodes` does not count it either, because it does have a score.
+          The `benchmark` and `profile` labels say which of the node's scans it is.
+          The freshness series is dropped when the export's timestamp for that scan
+          is present but cannot be parsed into an epoch; a row with no timestamp at
+          all is skipped by the reader and produces no score, so that is not this.
           `<scm_dir>/score_data/Summary_Report_API.csv` has the row, under `Scan Timestamp`.
           The fix is SCM side, the scan has to produce a timestamp the export carries.
-          Until then treat this node''s score as unaged and leave it out of any claim.'
+          Until then treat this score as unaged and leave it out of any claim.
   - name: pdctng-collectors
     rules:
     - alert: PdctngCollectorFailing
       expr: puppet_exporter_collector_consecutive_failures > 3
-      for: 30m
+      for: 5m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: pdctng collector {{ $labels.collector }} is failing
-        description: '{{ $value }} consecutive failed runs, more than the 3 this rule
-          tolerates. Everything {{ $labels.collector }} feeds is stale and nothing
-          else says so: the exporter is up, the scrape succeeds, and its families
-          keep serving their last good values. Start on the exporter host with `curl
-          -sf http://localhost:10050/healthz | jq ''.collectors''`, which gives this
-          collector''s `last_error` and `last_success_age_seconds`; the untruncated
-          message is in `journalctl -u pdctng | grep "collector ''{{ $labels.collector
-          }}''"`. Usually the thing it reads is down or its credentials have expired,
-          so fix that and not the exporter. Restarting pdctng resets the counter and
-          fixes nothing. "Collector Freshness, and What Goes Stale With It" on PDCTNG
-          Internal Operations names the boards that go stale with it. Left alone,
-          PdctngCollectorStale escalates this to critical.'
+        description: |-
+          The {{ $labels.collector }} collector has failed {{ $value }} runs in a row, more than the 3 this rule allows, so everything it feeds is stale; it can wait for working hours unless you need those boards tonight.
+          The exporter is up and the scrape succeeds, so the boards keep drawing its last good values.
+          On the primary, `sudo pdctng-ctl status` lists the failing collectors with a shortened error, and `sudo journalctl -u pdctng --since -1h | grep "collector '{{ $labels.collector }}' failed"` has the full one.
+          Usually what the collector reads is down, or the certificate or token it reads with has expired, so fix that; restarting pdctng resets the failure count without fixing the cause. "A collector is failing" in docs/operate/troubleshooting.md maps each error to its fix, the On by default table in docs/reference/defaults.md says what each collector reads, and "Collector Freshness, and What Goes Stale With It" on PDCTNG Internal Operations names the boards that go stale with it. Left failing, it escalates to PdctngCollectorStale, which is critical.
+          It is fixed when `sudo pdctng-ctl status` no longer lists the collector after its next scheduled run, and the alert resolves at the next evaluation after that.
     - alert: PdctngCollectorServingStaleData
       expr: puppet_exporter_collector_partial_failures > 0
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: pdctng collector {{ $labels.collector }} has served stale data for
           an hour
         description: "{{ $value }} subject(s) {{ $labels.collector }} could not refresh,
           so it is publishing last-known-good for them. It records a clean run either
           way, so `puppet_exporter_collector_success` reads 1 and the Collectors Failing
-          tiles read zero: nothing else in the estate shows this. Deliberate for a
-          blip, wrong after an hour. Six collectors do it and the subject differs:
-          deploy_impact counts environments, code_deploys unresolved code_ids, cd4pe_events
-          impact analyses, deploy_observed deployments it could not observe, orchestrator
-          its two queries, and classifier node groups whose membership fetch failed.
-          `journalctl -u pdctng | grep last-known-good` names the collector and the
-          count each cycle, and the warning above it usually names the query that
-          failed. Fix the upstream it reads. Nothing breaks while you wait, but a
-          stale deploy time is the kind of number people act on without checking its
-          age."
+          tiles read zero. Deliberate for a blip, wrong after an hour. Six collectors
+          do it and the subject differs: deploy_impact counts environments, code_deploys
+          unresolved code_ids, cd4pe_events impact analyses, deploy_observed deployments
+          it could not observe, orchestrator its two queries, and classifier node
+          groups whose membership fetch failed. `journalctl -u pdctng | grep last-known-good`
+          names the collector and the count each cycle, and the warning above it usually
+          names the query that failed. Fix the upstream it reads. Nothing breaks while
+          you wait."
     - alert: PdctngCollectorSlow
       expr: puppet_exporter_collector_duration_seconds > puppet_exporter_collector_interval_seconds
-      for: 30m
+      for: 10m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: pdctng collector {{ $labels.collector }} took longer than its own
           run interval
@@ -494,27 +497,29 @@ spec:
       for: 15m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: pdctng collector {{ $labels.collector }} has missed three of its
           own run intervals
         description: '{{ $labels.collector }} has not completed a run in 3 of its
           own scheduled intervals, so every board reading it shows a plausible figure
-          that is at least that old rather than No data. A collector that has never
-          succeeded since the daemon started reads identically, because `puppet_exporter_collector_last_success_timestamp`
+          that is at least that old, not No data. A collector that has never succeeded
+          since the daemon started reads identically, because `puppet_exporter_collector_last_success_timestamp`
           is 0 until the first success: the "Never Succeeded" panel on PDCTNG Internal
           Operations separates the two, and that is the difference between a broken
-          dependency and a misconfiguration. `curl -s http://localhost:10050/healthz
-          | jq ''.collectors''` carries `last_error` and the failure streak; `journalctl
-          -u pdctng` has the full exception. The threshold is a multiple of this collector''s
-          own cadence rather than a clock time, so read it against that collector''s
-          `puppet_exporter_collector_interval_seconds` and not against the clock:
-          the same rule trips in minutes on a five-minute collector and takes days
-          on a daily one.'
+          dependency and a misconfiguration. `sudo pdctng-ctl status` on the primary
+          lists a failing collector with its failure streak and `last_error`, and
+          a late one with its last success; `sudo journalctl -u pdctng` has the full
+          exception. The threshold is a multiple of this collector''s own cadence,
+          so read it against that collector''s `puppet_exporter_collector_interval_seconds`
+          and not against the clock: the same rule trips in minutes on a five-minute
+          collector and takes days on a daily one.'
     - alert: PdctngSourceFailing
       expr: puppet_exporter_source_consecutive_failures > 3
       for: 30m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: pdctng cannot read {{ $labels.host }} for the {{ $labels.collector
           }} collector
@@ -529,14 +534,15 @@ spec:
           Only the service collectors read several hosts, so this is status_service,
           puppetdb_internals or postgres, and the usual causes are the host being
           down, a firewall, or an expired certificate. What that host contributes
-          is missing from the numbers, so they under-report rather than being wrong.
-          PdctngSourceStale escalates it.'
+          is missing from the numbers, so they under-report. PdctngSourceStale escalates
+          it.'
     - alert: PdctngSourceStale
       expr: "(time() - puppet_exporter_source_last_success_timestamp) > ignoring(host)
         group_left() clamp_min(3 * puppet_exporter_collector_interval_seconds, 3600)"
       for: 15m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: pdctng has not read {{ $labels.host }} for {{ $labels.collector }}
           in over an hour
@@ -554,8 +560,30 @@ spec:
           and `journalctl -u pdctng | grep {{ $labels.host }}` has the error. Check
           the host is up, that the primary can reach its port, and that the certificate
           it presents has not expired. A `puppet_exporter_source_last_success_timestamp`
-          of 0 means it has never been read at all, which is configuration rather
-          than an outage.'
+          of 0 means it has never been read at all, which is configuration, not an
+          outage.'
+    - alert: PdctngTextfileParseFailing
+      expr: node_textfile_scrape_error{pe_infrastructure="true"} > 0
+      for: 15m
+      labels:
+        severity: warning
+        pdctng: 'true'
+      annotations:
+        summary: node_exporter on {{ $labels.instance }} cannot parse {{ $value |
+          printf "%.0f" }} file(s) in the textfile drop zone
+        description: node_exporter on {{ $labels.instance }} could not parse at least
+          one file in its textfile drop zone, so the metrics from that file stopped
+          arriving while every other family it serves kept working. The scrape still
+          succeeds and no collector fails, so the boards fed by the missing families
+          go quiet with no other alert. "Textfile Feeds" on PDCTNG Internal Operations
+          names the drop zone and its files, and the "Parse Failures" tile beside
+          it is this same number. The usual cause is a writer that was interrupted
+          part way, leaving a half-written file, which clears itself on the next successful
+          write; one that does not clear is a malformed file that needs looking at.
+          `promtool check metrics < the-file.prom` says what is wrong with it. A file
+          must be written to a temporary name and renamed into place, because node_exporter
+          reads whatever is there when it scrapes. Nothing else is degraded by this,
+          so it can wait for working hours.
   - name: pdctng-custom_metrics
     rules:
     - alert: PdctngCustomMetricPollStopped
@@ -563,6 +591,7 @@ spec:
       for: 5m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: pdctng custom metric poll loop on {{ $labels.instance }} has stopped
         description: 'Every custom metric on {{ $labels.instance }} is frozen at its
@@ -570,13 +599,13 @@ spec:
           stopped moving {{ $value | printf "%.0f" }} seconds ago. The loop ticks
           about once a second when healthy; past 600 the poll thread has died. It
           is a secondary thread, so the process is not torn down and the fleet metrics
-          are unaffected. This rule is the only thing that says otherwise. Read the
-          cause while you are there, because that one line is the only record of it:
-          `journalctl -u pdctng | grep ''custom metric poll thread died''` has the
-          exception class and backtrace. Then `systemctl restart pdctng`; the thread
-          does not come back on its own. The restart costs an empty fleet store until
-          the next poll completes, seconds on a small estate and longer at scale.
-          `sudo pdctng-ctl status` confirms the metrics are polling again.'
+          are unaffected. Read the cause while you are there, because that one line
+          is the only record of it: `journalctl -u pdctng | grep ''custom metric poll
+          thread died''` has the exception class and backtrace. Then `systemctl restart
+          pdctng`; the thread does not come back on its own. The restart costs an
+          empty fleet store until the next poll completes, seconds on a small estate
+          and longer at scale. `sudo pdctng-ctl status` confirms the metrics are polling
+          again.'
   - name: pdctng-delivery_health
     rules:
     - alert: PdctngDeploymentStuck
@@ -584,19 +613,19 @@ spec:
       for: 10m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.deployment }} has been deploying for {{ $value | humanizeDuration
           }}"
         description: 'A CD4PE deployment has been in flight far longer than this estate''s
-          deployments take, and nothing else reports it: the Code Releases board shows
-          it as `running` rather than failed, so the Failed tile reads zero. Check
-          whether it is retrying rather than hung -- "Start moved" on that board counts
-          how many times CD4PE has revised its start time, and a deployment well above
-          the one move a healthy one makes is looping. A deployment stuck this long
-          is usually holding an ephemeral `rolling_deployment_<id>` environment open,
-          which is its own problem: catalogue compilation pins module load paths into
-          those environments and breaks fleet-wide when one is removed underneath
-          it (R196).'
+          deployments take. The Code Releases board shows it as `running`, not failed,
+          so the Failed tile reads zero. Check whether it is retrying or hung. "Start
+          moved" on that board counts how many times CD4PE has revised its start time,
+          and a deployment well above the one move a healthy one makes is looping.
+          A deployment stuck this long is usually holding an ephemeral `rolling_deployment_<id>`
+          environment open, which is its own problem: catalogue compilation pins module
+          load paths into those environments and fails fleet-wide when one is removed
+          while in use.'
     - record: puppet_delivery_change_failure_ratio
       expr: (count by (alias) (puppet_deploy_end_epoch and on(deployment) puppet_deploy_info{state!="done",state!="cancelled"})
         or on(alias) (count by (alias) (puppet_deploy_end_epoch) * 0)) / count by
@@ -630,40 +659,52 @@ spec:
       for: 6h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: The Prometheus rules loaded here are not the ones this pdctng ships
-        description: 'This Prometheus is evaluating a pdctng rule set rendered at
-          a different module version from the exporter it is scraping, so some rules
+        description: This Prometheus is evaluating a pdctng rule set rendered at a
+          different module version from the exporter it is scraping, so some rules
           it pages on may have been changed or removed and some that exist may never
-          have arrived. That is not hypothetical: a rule set from July was still live
-          seven weeks later in a second Prometheus, paging critical twice a day on
-          a threshold that had already been deleted, and the two rules missing on
-          the day this was written were the memory alerts -- one of which was firing
-          at the time, in the Prometheus nobody is paged from. Compare `count by (version)
-          (pdctng_alert_rules_info)` with `count by (version) (puppet_exporter_build_info)`
-          to see both numbers. The fix is usually an open pull request on the `pdctng/alert-rules`
-          branch that nobody has merged; `.github/workflows/alert-rules-sync.yml`
-          opens one whenever the rendered rules change. Two versions in `pdctng_alert_rules_info`
-          at once means two Prometheuses disagreeing rather than one being behind.'
+          have arrived. Compare `count by (version) (pdctng_alert_rules_info)` with
+          `count by (version) (puppet_exporter_build_info)` to see both numbers. The
+          fix is usually an open pull request on the `pdctng/alert-rules` branch that
+          nobody has merged; `.github/workflows/alert-rules-sync.yml` opens one whenever
+          the rendered rules change. Two versions in `pdctng_alert_rules_info` at
+          once means two Prometheuses disagree.
+    - alert: PdctngDuplicateDaemon
+      expr: puppet_exporter_peers > 1
+      for: 30m
+      labels:
+        severity: warning
+        pdctng: 'true'
+      annotations:
+        summary: '{{ $value | printf "%.0f" }} pdctng daemons are polling the PuppetDB
+          {{ $labels.instance }} reads'
+        description: PuppetDB says {{ $value | printf "%.0f" }} nodes are classified
+          with pdctng, and it belongs on one per PE installation. Every fleet metric
+          is being exported once per daemon under a different alias, so counts read
+          multiplied with PE set to All and threshold alerts fire early. The daemon's
+          log names the nodes. Remove pdctng from the HA replica or DR primary.
     - alert: PdctngExporterDown
       expr: up{job="puppet"} == 0
       for: 10m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: pdctng exporter on {{ $labels.instance }} is not responding
         description: 'Prometheus cannot scrape the pdctng exporter on {{ $labels.instance
           }}, so every Puppet metric is stale and every rule reading pdctng''s own
-          series has gone quiet rather than firing: they all key on series that are
-          no longer arriving. Certificate expiry, licence headroom and fleet failure
-          are unwatched until this comes back. On the exporter host run `systemctl
-          status pdctng`, then `curl -s http://localhost:10050/healthz | jq`. Use
-          `-s` and not `-sf` here: the daemon answers 200 when serving and 503 while
-          starting or wedged, and `-f` throws away the body in exactly the case you
-          are trying to read. If the daemon answers locally it is the network or the
-          scrape config, and Prometheus''s own Targets page separates them: `connection
-          refused` is a firewall or a moved `listen_port`, `context deadline exceeded`
-          is a DROP rule, `lookup ... no such host` is DNS. If it is restarting instead,
+          series has gone quiet: they all key on series that are no longer arriving.
+          Certificate expiry, licence headroom and fleet failure are unwatched until
+          this comes back. On the primary run `sudo systemctl status pdctng`, then
+          `sudo pdctng-ctl status`, which reads the daemon''s `/healthz` over plain
+          HTTP or mTLS as configured. It prints NOT RUNNING when nothing answers,
+          and the daemon''s state (`starting` or `stale`) when it answers but is not
+          serving. If the daemon answers locally it is the network or the scrape config,
+          and Prometheus''s own Targets page separates them: `connection refused`
+          is a firewall or a moved `listen_port`, `context deadline exceeded` is a
+          DROP rule, `lookup ... no such host` is DNS. If it is restarting instead,
           `journalctl -u pdctng | grep -E ''thread died|watchdog withholding''` says
           why.'
     - alert: PdctngMetricsStale
@@ -671,6 +712,7 @@ spec:
       for: 5m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: pdctng data on {{ $labels.instance }} is over thirty minutes old
         description: 'The poll loop last completed a cycle {{ $value | humanizeDuration
@@ -680,18 +722,18 @@ spec:
           current. Compare this rule''s thirty minutes against `pdctng::polling_interval`
           first: an estate that widened the interval wants this widened with it. If
           the daemon is still running at this age the watchdog is still seeing collectors
-          complete, which means the cycle is running long rather than wedged. "Poll
-          Cycle Load" and "Slowest Collectors" on PDCTNG Internal Operations name
-          the offender, and PdctngCollectorSlow usually fires alongside. `curl -s
-          http://localhost:10050/healthz | jq .poll` gives the same age plus the last
-          cycle''s duration; do not add `-f`, because the daemon is answering 503
-          at this age and you would get nothing back. Nothing recovers on its own
-          while a collector is holding the cycle open.'
+          complete, which means the cycle is running long, not wedged. "Poll Cycle
+          Load" and "Slowest Collectors" on PDCTNG Internal Operations name the offender,
+          and PdctngCollectorSlow usually fires alongside. `sudo pdctng-ctl status`
+          on the primary gives the same age on its Last poll line, plus the last cycle''s
+          duration. Nothing recovers on its own while a collector is holding the cycle
+          open.'
     - alert: PdctngPluginLoadFailed
       expr: puppet_exporter_plugin_load_failures > 0
       for: 10m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: pdctng on {{ $labels.instance }} refused {{ $value | printf "%.0f"
           }} plugin collector(s)
@@ -705,21 +747,46 @@ spec:
           and pdctng runs as `pe-puppet`, so 0644 root-owned is the shape that works.
           `SyntaxError` is Ruby nobody ran `ruby -c` over. Loading is decided once
           at boot, so any fix needs `systemctl restart pdctng` before it counts. Nothing
-          else is degraded by this and it will not clear on its own, so it can wait
-          for the morning.'
+          else is degraded by this and it will not clear on its own; it can wait for
+          working hours.'
+    - alert: PdctngPrometheusConfigNotLoaded
+      expr: prometheus_config_last_reload_successful == 0
+      for: 10m
+      labels:
+        severity: critical
+        pdctng: 'true'
+      annotations:
+        summary: Prometheus on {{ $labels.instance }} rejected its configuration and
+          is running the previous one
+        description: 'Prometheus would not accept its configuration on the last reload,
+          so it is still evaluating whatever it had before. Anything written since,
+          such as a pdctng rule, a scrape job or a third party''s rules file, is on
+          disk and not in effect, and every board carries on looking normal because
+          the old configuration is still working. The Puppet run that wrote the file
+          reported success either way. **Prometheus loads all rule files or none**,
+          so the usual cause is one malformed file rather than anything pdctng wrote:
+          pdctng validates its own with `promtool check rules` before placing it,
+          and no check runs on a component''s. Find the offender with `promtool check
+          rules /etc/prometheus/rules/*.yaml`, which names the file and the line,
+          then fix or remove it and reload. `journalctl -u prometheus --since -1h
+          | grep -i ''error loading config''` says the same thing from the other end.
+          Until it is fixed, treat every alert as suspect rather than absent: the
+          rules still running are the ones from before the change, so a threshold
+          somebody just raised is still paging at the old one. A rule set left in
+          this state goes stale, and PdctngAlertRulesStale reports that.'
     - alert: PdctngRenderSectionFailing
       expr: puppet_exporter_render_sections_failed > 0
       for: 15m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: pdctng on {{ $labels.instance }} cannot render {{ $value | printf
           "%.0f" }} metric section(s)
         description: '{{ $value | printf "%.0f" }} metric section(s) on {{ $labels.instance
           }} raised during the render, so their families are absent from every scrape
-          and the panels reading them show No data. The rest of the response is intact,
-          which is why nothing else is complaining, and absent families cannot alert,
-          so nothing else will tell you either. `puppet_exporter_render_section_failed`
+          and the panels reading them show No data. The rest of the response is intact
+          and absent families cannot alert, so no other rule reports this. `puppet_exporter_render_section_failed`
           names the sections; `journalctl -u pdctng | grep ''render section''` has
           the exception class and message for each. Usually one node reporting a fact
           value the renderer did not expect, so the fix is upstream of pdctng and
@@ -731,40 +798,41 @@ spec:
       for: 10m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: Prometheus has no pdctng scrape target at all
         description: 'There is no `up` series for the pdctng job at all, so Prometheus
-          has no target for it and every rule keyed on pdctng''s own series is inert
-          rather than quiet, PdctngExporterDown included. The estate is unmonitored
-          by pdctng and nothing else will say so. This is almost never the exporter.
-          Compare `pdctng::alerts::prometheus_job` on the Prometheus node against
-          `pdctng::scrape_job_name` on the primary and against the job name in the
-          scrape config itself. All three default to `puppet`, so one of them has
-          been changed and the other two not. If they agree, the scrape config was
-          never applied on the Prometheus side: its own Targets page will have no
-          pdctng job listed. There is nothing to restart and nothing degrades further
-          while you work on it, but you stay blind until it is fixed.'
+          has no target for it and every rule keyed on pdctng''s own series is inert,
+          PdctngExporterDown included. The estate is unmonitored by pdctng. This is
+          almost never the exporter. Compare `pdctng::alerts::prometheus_job` on the
+          Prometheus node against `pdctng::scrape_job_name` on the primary and against
+          the job name in the scrape config itself. All three default to `puppet`,
+          so one of them has been changed and the other two not. If they agree, the
+          scrape config was never applied on the Prometheus side: its own Targets
+          page will have no pdctng job listed. There is nothing to restart and nothing
+          degrades further while you work on it, but you stay blind until it is fixed.'
     - alert: PdctngStoreAtCeiling
       expr: puppet_exporter_store_at_ceiling == 1
       for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: pdctng node store on {{ $labels.alias }} is at its store ceiling
         description: 'The node store on {{ $labels.alias }} has shed every report
           metric it can and is now refusing new nodes, so the fleet view is missing
           a stable set of machines and the oldest nodes have lost their per-node report
-          detail. Nodes already held keep updating, which is why the counts look plausible
-          rather than broken. "Store Memory" on PDCTNG Internal Operations shows the
-          estimate against the ceiling and "Nodes Refused Since Restart" counts what
-          has been turned away, which is `puppet_exporter_store_refused_total`. The
-          tile called "Ceiling Used" beside them is a different number, nodes against
-          the recommended node ceiling, so do not read it for this. Check the node
-          count first: pruning only runs after a cycle that succeeded against every
-          configured PuppetDB, so one dead server (PdctngPuppetDBServerDown) means
-          departed nodes never leave the store. If the count is genuinely right, raise
-          `pdctng::store_ceiling_mb`. That bounds the store and not the process, so
-          size the host from `puppet_exporter_process_rss_bytes` before going far.'
+          detail. Nodes already held keep updating, so the counts look plausible.
+          "Store Memory" on PDCTNG Internal Operations shows the estimate against
+          the ceiling and "Nodes Refused Since Restart" counts what has been turned
+          away, which is `puppet_exporter_store_refused_total`. The tile called "Ceiling
+          Used" beside them is a different number, nodes against the recommended node
+          ceiling, so do not read it for this. Check the node count first: pruning
+          only runs after a cycle that succeeded against every configured PuppetDB,
+          so one dead server (PdctngPuppetDBServerDown) means departed nodes never
+          leave the store. If the count is right, raise `pdctng::store_ceiling_mb`.
+          That bounds the store and not the process, so size the host from `puppet_exporter_process_rss_bytes`
+          before going far.'
     - record: pdctng_alert_rules_info
       expr: vector(1)
       labels:
@@ -776,6 +844,7 @@ spec:
       for: 6h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Over a fifth of the estate is set to alert level none
         description: '{{ $value }} nodes are at alert level none, more than 0.2 of
@@ -784,11 +853,11 @@ spec:
           denominator this much smaller, so an outage confined to the silenced set
           cannot reach its threshold and nobody is told. Triage names them under "Which
           nodes are deliberately silent": the count is Excluded From Alerting, the
-          list is Which Nodes, And At What Level. The level comes from pdctng::node_alert_level
-          and lands in facts.d/pdctng_alert_level.yaml on the node, so a stale one
-          is usually a rebuild nobody tidied up. Clear it with pdctng::node_alert_level::level:
-          ~ at a more specific Hiera layer. Expect the hosts you unsilence to start
-          paging, which is the point, so work through them in batches.'
+          list is Which Nodes, And At What Level. The level comes from `pdctng::node_alert_level`
+          and lands in `facts.d/pdctng_alert_level.yaml` on the node, so a stale one
+          is usually a rebuild nobody tidied up. Clear it with `pdctng::node_alert_level::level:
+          ~` at a more specific Hiera layer. Expect the hosts you unsilence to start
+          paging, so work through them in batches.'
     - alert: PdctngFleetCatastrophe
       expr: count by (alias) (puppet_status{state="failed"} == 1 unless on (node)
         puppet_node_alert_level{level="none"}) >= 50 and count by (alias) (puppet_status{state="failed"}
@@ -797,6 +866,7 @@ spec:
       for: 10m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: 'Fleet-wide Puppet incident: {{ $value }} nodes are failing their
           run'
@@ -811,12 +881,40 @@ spec:
           pages going quiet is not evidence those nodes recovered; critical-tier hosts
           still page. The denominator is PuppetDB active nodes minus the level-none
           set, so an estate that never deactivates dead nodes under-reports. Tune
-          fleet_catastrophe_nodes and fleet_catastrophe_ratio under pdctng::alerts::thresholds.'
+          `fleet_catastrophe_nodes` and `fleet_catastrophe_ratio` under `pdctng::alerts::thresholds`.'
+    - alert: PdctngFleetSilent
+      expr: count by (alias) ((time() - puppet_report_timestamp_epoch) > 3600 unless
+        on (node) puppet_node_alert_level{level="none"}) >= 5 and count by (alias)
+        ((time() - puppet_report_timestamp_epoch) > 3600 unless on (node) puppet_node_alert_level{level="none"})
+        / on(alias) (puppet_node_lifecycle{state="active"} - ignoring(state) puppet_nodes_alert_excluded)
+        >= 0.2
+      for: 15m
+      labels:
+        severity: critical
+        pdctng: 'true'
+      annotations:
+        summary: 'Fleet-wide Puppet silence: {{ $value }} nodes have stopped reporting'
+        description: 'At least 5 nodes and 0.2 of the active fleet have gone silent
+          by the same threshold the per-node silence rules use, which is one event
+          and not {{ $value }} unrelated ones. Nothing on those nodes is converging,
+          and every board still shows them as they were on their last report, because
+          `puppet_status` serves it for ever. Silence at this scale is an agent that
+          cannot reach the primary: the CA or the certificates behind it, puppetserver
+          refusing or queueing agents, a network or DNS change, or a scheduled run
+          that stopped estate-wide. Certificate Authority first, then Puppetserver
+          for agents turned away, then Convergence''s Silent tile for which nodes
+          and since when; nodes that went quiet on the same minute share a cause.
+          While this fires PdctngNodeSilentHigh is inhibited, so per-node silence
+          pages going quiet is not evidence those nodes came back; critical-tier hosts
+          still page. Decommissioned hosts belong at `pdctng::node_alert_level::level:
+          none`, which takes them out of both counts. Tune `fleet_silent_nodes` and
+          `fleet_silent_ratio` under `pdctng::alerts::thresholds`.'
     - alert: PdctngNoNodesReporting
       expr: puppet_node_count{environment="all"} == 0
       for: 15m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: pdctng knows about zero nodes
         description: 'Every board that counts nodes is empty and every rule that divides
@@ -825,34 +923,35 @@ spec:
           rules do not touch the node store and are still live, which is usually where
           the cause is. The nodes may be running Puppet perfectly well: this says
           the exporter cannot see them. The store is built from PuppetDB reports where
-          latest_report? = true, so read puppet_node_lifecycle{state="active"} first.
-          Nodes there while puppet_node_count sits at zero means PuppetDB kept its
-          nodes and lost their reports, usually a report-ttl purge or a restore. Both
-          at zero means PuppetDB is empty or puppetdb_urls points at the wrong one,
-          and puppet_exporter_server_up at zero means it is not answering at all.
-          Then curl -sf http://localhost:10050/healthz | jq and journalctl -u pdctng
-          -n 100. docs/troubleshooting.md has the mTLS curl for querying PuppetDB
-          by hand, which is what settles it. Restarting the daemon changes nothing:
-          it rebuilds the store from the same query.'
+          `latest_report? = true`, so read `puppet_node_lifecycle{state="active"}`
+          first. Nodes there while `puppet_node_count` sits at zero means PuppetDB
+          kept its nodes and lost their reports, usually a report-ttl purge or a restore.
+          Both at zero means PuppetDB is empty or `pdctng::puppetdb_urls` points at
+          the wrong one, and `puppet_exporter_server_up` at zero means it is not answering
+          at all. Then, on the primary, `sudo pdctng-ctl status` and `sudo journalctl
+          -u pdctng -n 100`. docs/operate/troubleshooting.md has the mTLS curl for
+          querying PuppetDB by hand. Restarting the daemon changes nothing: it rebuilds
+          the store from the same query.'
     - alert: PdctngNodeCountDropped
       expr: puppet_node_count{environment="all"} < 0.9 * (puppet_node_count{environment="all"}
         offset 1h)
       for: 30m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Puppet node count dropped below 0.9 of an hour ago
         description: 'Confirm the nodes have gone before believing any fleet number.
-          puppet_node_count counts nodes with a latest report in PuppetDB, so it falls
-          the same way for a decommission, a report-ttl purge and a prune that should
-          not have happened. The journal separates them: journalctl -u pdctng | grep
-          -E "pruned|pruning with". A "pruned N departed node(s)" line is written
-          on every prune, ordinary ones included, so it dates the drop rather than
-          explaining it. The line that explains it is "pruning with N server(s) excluded",
-          which is the exporter dropping nodes it should have kept because a PuppetDB
-          server has been failing longer than the grace; puppet_exporter_server_up
-          names which. puppet_node_lifecycle{state="active"} says what PuppetDB still
-          holds, and it comes off the nodes endpoint rather than reports, so it survives
+          `puppet_node_count` counts nodes with a latest report in PuppetDB, so it
+          falls the same way for a decommission, a report-ttl purge and a prune that
+          should not have happened. The journal separates them: `sudo journalctl -u
+          pdctng | grep -E "pruned|pruning with"` on the primary. A "pruned N departed
+          node(s)" line is written on every prune, ordinary ones included, so it dates
+          the drop without explaining it. The line that explains it is "pruning with
+          N server(s) excluded", which is the exporter dropping nodes it should have
+          kept because a PuppetDB server has been failing longer than the grace; `puppet_exporter_server_up`
+          names which. `puppet_node_lifecycle{state="active"}` says what PuppetDB
+          still holds, and it comes off the nodes endpoint, not reports, so it survives
           a reports-only loss. Left alone, licence headroom and the alert-exclusion
           ratio measure against a fleet this much smaller, so the estate reads healthier
           than it is. Fixing the server repopulates the store on the next poll.'
@@ -862,6 +961,7 @@ spec:
       for: 45m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.node }} has been failing its Puppet run for 45 minutes"
         description: '{{ $labels.node }} has been failing its Puppet run for 45 minutes,
@@ -871,22 +971,22 @@ spec:
           in that window has not fully landed. This tier keeps paging through a fleet-wide
           incident, where the high tier is inhibited. Start on Node Detail for this
           node: Run Failed leads, and Why The Last Run Failed carries the message
-          Puppet logged and the class chain, where pdctng::dashboard_server::enable_changes_datasource
-          is on. Then sudo puppet agent -t and read the middle of the output, not
-          the last line: a run that fails on one resource still ends with "Applied
-          catalog", and everything depending on it is skipped rather than reported
-          again, so the first failure is the only one worth chasing. If the agent
-          is not running at all, this is really silence: puppet_status serves the
+          Puppet logged and the class chain, where `pdctng::dashboard_server::enable_changes_datasource`
+          is on. Then run `sudo puppet agent -t` on the node and read the middle of
+          the output, not the last line: a run that fails on one resource still ends
+          with "Applied catalog", and everything depending on it is skipped and not
+          reported again, so the first failure is the only one worth chasing. If the
+          agent is not running at all, this is silence: `puppet_status` serves the
           last report for ever, so one failure followed by a dead agent holds this
           rule open too, and PdctngNodeSilentCritical is what separates them. A knowingly
-          broken host wants pdctng::node_alert_level::level: none rather than a silenced
-          rule.'
+          broken host wants `pdctng::node_alert_level::level: none`, not a silence.'
     - alert: PdctngNodeRunFailingHigh
       expr: puppet_status{state="failed"} == 1 and on (node) puppet_node_alert_level{level="high"}
         == 1
       for: 45m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.node }} has been failing its Puppet run for 45 minutes"
         description: '{{ $labels.node }} has been failing its Puppet run for 45 minutes,
@@ -896,55 +996,51 @@ spec:
           deployed in that window has not fully landed, which is a morning job unless
           the host is one you would have tiered critical. Node Detail for this node
           has the last run, and Why The Last Run Failed carries the logged message
-          where the changes datasource is on. Then sudo puppet agent -t and read the
-          middle of the output, not the last line, since a run that fails on one resource
-          still ends with "Applied catalog" and the skipped resources are not reported
-          again. The inhibition pdctng ships holds this down only while PdctngFleetCatastrophe
-          is actually firing, and that needs both its node count and its ratio, so
-          one arriving on its own means no catastrophe is firing, not that nothing
-          wider is wrong.'
+          where the changes datasource is on. Then run `sudo puppet agent -t` on the
+          node and read the middle of the output, not the last line, since a run that
+          fails on one resource still ends with "Applied catalog" and the skipped
+          resources are not reported again. The inhibition pdctng ships holds this
+          down only while PdctngFleetCatastrophe is firing, and that needs both its
+          node count and its ratio, so one arriving on its own means no catastrophe
+          is firing, not that nothing wider is wrong.'
     - alert: PdctngNodeSilentCritical
       expr: (time() - puppet_report_timestamp_epoch) > 3600 and on (node) puppet_node_alert_level{level="critical"}
         == 1
       for: 15m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.node }} has not reported to Puppet in over an hour"
         description: '{{ $labels.node }} is tiered critical and has stopped reporting
-          altogether, which is a different fault from failing. puppet_status keeps
+          altogether, which is a different fault from failing. `puppet_status` keeps
           serving whatever it last reported, so every board and every run-failure
           rule goes on showing this node as it was on its last report, indefinitely,
-          and this rule is the only thing that pages on it. Rule the certificate out
-          from Prometheus before touching the host, where puppet_server is configured
-          and those series exist: puppet_certificate_expires_epoch{node="{{ $labels.node
-          }}"} in the past means renewal failed and Puppet dropped it. puppet_nodes_without_certificate
-          carries no node label, so above zero it tells you a certificate was cleaned
-          for some host PuppetDB still holds, not that it was this one. Otherwise
-          it is a stopped or disabled agent, or the machine is off. A genuinely decommissioned
-          host wants pdctng::node_alert_level::level: none, which takes it out of
-          this rule and the fleet ratios; left as it is, this pages until the node
-          drops out of the exporter''s store.'
+          and only the silence rules page on it. Rule the certificate out from Prometheus
+          before touching the host, where those series exist: `puppet_certificate_expires_epoch{node="{{
+          $labels.node }}"}` in the past means renewal failed and Puppet dropped it.
+          `puppet_nodes_without_certificate` carries no node label, so above zero
+          it tells you a certificate was cleaned for some host PuppetDB still holds,
+          not that it was this one. Otherwise it is a stopped or disabled agent, or
+          the machine is off. A decommissioned host wants `pdctng::node_alert_level::level:
+          none`, which takes it out of this rule and the fleet ratios; left as it
+          is, this pages until the node drops out of the exporter''s store.'
     - alert: PdctngNodeSilentHigh
       expr: (time() - puppet_report_timestamp_epoch) > 3600 and on (node) puppet_node_alert_level{level="high"}
         == 1
       for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.node }} has not reported to Puppet in over an hour"
-        description: '{{ $labels.node }} has gone silent rather than failed, and silence
-          is a stopped or disabled agent, an expired certificate, or a machine that
-          is off. It is not a failing run: puppet_status serves this node''s last
-          report for ever, so no run-failure rule will ever flag it and Convergence''s
-          Silent tile is the only other place it shows up. Check puppet_certificate_expires_epoch{node="{{
-          $labels.node }}"} first, where puppet_server is configured and that series
-          exists, because an expired certificate drops a node out of Puppet without
-          a failure anywhere, then the agent service on the host. Nothing on it has
-          converged since it went quiet, so it is drifting from what the repository
-          says while reading as fine everywhere else, which is why this is worth clearing
-          rather than muting. A decommissioned host wants pdctng::node_alert_level::level:
-          none, which takes it out of this rule and the fleet ratios at once.'
+        description: |-
+          {{ $labels.node }} is tiered high and has sent no Puppet report for over an hour, so nothing on it has been enforced since; look at it in working hours, or now if the host matters tonight.
+          The cause is a stopped or disabled agent, an expired certificate, or a machine that is off. No run-failure rule sees it, because pdctng keeps serving the node's last report. While PdctngFleetSilent fires this alert is inhibited, so work that one first.
+          On {{ $labels.node }}, `sudo systemctl status puppet` says whether the agent service is running, and `sudo puppet agent -t` runs the agent in the foreground and prints the error. An agent that says it is administratively disabled wants `sudo puppet agent --enable`. To check the certificate, `sudo openssl x509 -noout -enddate -in "$(sudo puppet config print hostcert)"` on the node prints its expiry date, and `puppet_certificate_expires_epoch{node="{{ $labels.node }}"}` in Prometheus gives the same date as an epoch.
+          An expired certificate has to be reissued: on the primary run `sudo /opt/puppetlabs/bin/puppetserver ca clean --certname {{ $labels.node }}`, then on the node `sudo puppet ssl clean` and `sudo puppet agent -t`, then on the primary `sudo /opt/puppetlabs/bin/puppetserver ca sign --certname {{ $labels.node }}` unless autosigning signs it, and finally `sudo puppet agent -t` on the node again.
+          A decommissioned host wants `pdctng::node_alert_level::level: none`, which takes it out of this rule and the fleet ratios.
+          It is fixed when `sudo puppet agent -t` on the node completes and sends a report; the alert resolves once pdctng's next poll reads that report, within one `pdctng::polling_interval`.
   - name: pdctng-license
     rules:
     - alert: PdctngLicenseExpiringCritical
@@ -952,61 +1048,63 @@ spec:
       for: 1h
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: PE licence expires in under 14 days
         description: '{{ $value | printf "%.0f" }} days left on the suite licence,
-          and renewal is procurement rather than an operator task, so this does not
-          close tonight. The warning fired at 60 days and this is what is left of
-          that runway. Confirm what pdctng is reading before escalating: Licence Expires
-          In on PDCTNG TAM Check carries the time left, and the Licence table beside
-          it names the customer, product and licence type, all decoded from `/etc/puppetlabs/suite-license.lic`
-          on the primary. If a replacement licence has already been installed, this
-          number will not move until the pdctng service is restarted, so rule that
-          out before waking anybody. Otherwise it is a purchase order and whoever
-          owns the Puppet contract, today rather than next week.'
+          and renewal is procurement work, so this does not close tonight. The warning
+          fired at 60 days and this is what is left of that runway. Confirm what pdctng
+          is reading before escalating: Licence Expires In on PDCTNG TAM Check carries
+          the time left, and the Licence table beside it names the customer, product
+          and licence type, all decoded from `/etc/puppetlabs/suite-license.lic` on
+          the primary. If a replacement licence has already been installed, this number
+          will not move until the pdctng service is restarted, so rule that out before
+          waking anybody. Otherwise it is a purchase order and whoever owns the Puppet
+          contract, today.'
     - alert: PdctngLicenseExpiringSoon
       expr: "(puppet_license_expires_epoch - time()) / 86400 < 60"
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PE licence expires in under 60 days
         description: '{{ $value | printf "%.0f" }} days left on the suite licence.
-          Nothing is broken and none of the fix is an operator''s job, which is why
-          this fires at 60 days rather than at the certificate horizons: a purchase
-          order moves at procurement''s pace. Start on PDCTNG TAM Check. Licence Expires
-          In carries the time left, the Licence table names the customer and product
-          on the licence as PE reads it, and Ceiling Reached puts a date on when the
-          fleet crosses its entitled node count, which is the same procurement conversation
-          and cheaper had once. Then hand it to whoever owns the Puppet contract.
-          Left to PdctngLicenseExpiringCritical at 14 days, the renewal is being chased
-          rather than scheduled.'
+          Nothing is broken and none of the fix is an operator''s job, so this fires
+          at 60 days, because a purchase order moves at procurement''s pace. Start
+          on PDCTNG TAM Check. Licence Expires In carries the time left, the Licence
+          table names the customer and product on the licence as PE reads it, and
+          Ceiling Reached puts a date on when the fleet crosses its entitled node
+          count, which is the same procurement conversation and cheaper had once.
+          Then hand it to whoever owns the Puppet contract. PdctngLicenseExpiringCritical
+          follows at 14 days.'
     - alert: PdctngLicenseNearLimit
       expr: sum by (alias) (puppet_node_count{environment="all"}) / on(alias) puppet_license_entitled_nodes
         > 0.9
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PE estate is at {{ $value | humanizePercentage }} of its licensed
           node count
         description: 'The estate on {{ $labels.alias }} is over 0.9 of the node ceiling
           its licence entitles, now at {{ $value | humanizePercentage }}. Nothing
           stops working and nothing needs doing tonight. The useful number is the
-          date rather than the percentage: Ceiling Reached on PDCTNG TAM Check projects
-          when the fleet crosses the ceiling from its recent growth, and Fleet Against
-          The Licensed Ceiling draws the crossing instead of computing it. Ceiling
-          Reached showing nothing means the fleet is not growing, which is a real
-          answer. The count is every node PuppetDB holds, so check PDCTNG Fleet Churn''s
+          date: Ceiling Reached on PDCTNG TAM Check projects when the fleet crosses
+          the ceiling from its recent growth, and Fleet Against The Licensed Ceiling
+          draws the crossing. Ceiling Reached showing nothing means the fleet is not
+          growing. The count is every node PuppetDB holds, so check PDCTNG Fleet Churn''s
           Deactivated tile before treating it as growth: decommissioned nodes nobody
           purged still sit in the numerator. Growth from here is a licensing conversation
-          and it is cheaper before the ceiling than after.'
+          with whoever owns the Puppet contract.'
     - alert: PdctngLicenseOverLimit
       expr: sum by (alias) (puppet_node_count{environment="all"}) / on(alias) puppet_license_entitled_nodes
         > 1
       for: 1h
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: PE estate on {{ $labels.alias }} exceeds its licensed node count
         description: "{{ $labels.alias }} is running more nodes than its suite licence
@@ -1016,9 +1114,8 @@ spec:
           The numerator is every node PuppetDB holds, so PDCTNG Fleet Churn's Deactivated
           tile says how much of the overage is decommissioned hardware nobody purged,
           and purging those out of PuppetDB is the cheap correction and the only one
-          available tonight. If the nodes are genuinely there, this is a true-up with
-          whoever owns the Puppet contract, and it is a smaller conversation the sooner
-          it is had."
+          available tonight. If the nodes are there, this is a true-up with whoever
+          owns the Puppet contract."
   - name: pdctng-pe
     rules:
     - alert: GrafanaBelowSupportedFloor
@@ -1026,128 +1123,197 @@ spec:
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Grafana {{ $labels.grafana_version }} on {{ $labels.grafana_server
           }} is below the supported floor
-        description: 'Panels on this Grafana can be wrong without looking wrong. The
-          boards are generated at schemaVersion 39, which is Grafana 11, and their
-          panel options are validated against 11, so on an older major a panel renders
-          as an empty box or drops options silently. Nothing else is at risk: Prometheus
-          keeps scraping and every other alert keeps firing, so this can wait for
-          the morning. The running version is in this alert''s own summary, read off
-          Grafana''s `/api/health` by the health probe that `pdctng::grafana_url`
-          points at; curl the same endpoint afterwards to confirm the upgrade landed.
-          There is no upper bound, so 11 or newer is fine. `pdctng::dashboard_server::grafana_version`
-          is `installed` by default and leaves the upgrade to your patching run, which
-          is the risky half. On an apt host that has had a Grafana 13 install succeed
-          before, the package''s post-install script cannot move its bundled plugins
-          into a directory that is no longer empty, dpkg leaves grafana in `iF`, and
-          the old version carries on serving while every dashboard, the datasource
-          and the provisioning config quietly stop being managed. Read "The whole
-          dashboard node stops being managed after a patch run" in docs/troubleshooting.md
-          before you upgrade, not after.'
+        description: 'This Grafana is older than 11, so panels can render empty or
+          drop options without an error. The boards are generated at schemaVersion
+          39, which is Grafana 11, and their panel options are validated against 11,
+          so on an older major a panel renders as an empty box or drops options silently.
+          Nothing else is at risk: Prometheus keeps scraping and every other alert
+          keeps firing, so this can wait for the morning. The running version is in
+          this alert''s own summary, read off Grafana''s `/api/health` by the health
+          probe that `pdctng::grafana_url` points at; curl the same endpoint afterwards
+          to confirm the upgrade landed. There is no upper bound, so 11 or newer is
+          fine. `pdctng::dashboard_server::grafana_version` is `installed` by default
+          and leaves the upgrade to your patching run, which is the risky half. On
+          an apt host that has had a Grafana 13 install succeed before, the package''s
+          post-install script cannot move its bundled plugins into a directory that
+          is no longer empty, dpkg leaves grafana in `iF`, and the old version carries
+          on serving while every dashboard, the datasource and the provisioning config
+          stop being managed. Read "The whole dashboard node stops being managed after
+          a patch run" in docs/operate/troubleshooting.md before you upgrade.'
     - alert: PcpNodesDisconnected
       expr: puppet_pcp_disconnected_nodes > 0
       for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $value }} node(s) have been off the PCP broker for 15 minutes"
         description: 'These nodes cannot be given a task, a plan or an orchestrated
-          deployment, and nothing else says so: they may still be running Puppet and
-          reporting healthily. `puppet_pcp_node_disconnected` names each one and PDCTNG
-          Triage lists them as work. The naming is capped at 200 per scrape with the
-          remainder counted in `puppet_pcp_node_disconnected_overflow`, so on a big
-          outage the list can be shorter than the number, but the number itself stays
-          right. Disconnected is a set difference, what PuppetDB knows minus what
-          the orchestrator can reach, so a decommissioned host drops out on its own
-          and a node that has never run pxp-agent counts as disconnected. On a named
-          node, `systemctl status pxp-agent` and `journalctl -u pxp-agent --since
-          -1h`; no such unit is as likely an answer as a stopped one. Restarting pxp-agent
-          is cheap and reversible, which makes it the first move on a single node.
-          A large count points at the broker instead, so read Fleet Disconnected against
-          Fleet Connected on the Orchestrator board: forty out of forty-five is an
-          outage and forty out of four thousand is a Tuesday. Doing nothing costs
-          you the ability to drive the estate during an incident, which is when you
-          find out.'
+          deployment, and they may still be running Puppet and reporting healthily.
+          `puppet_pcp_node_disconnected` names each one and PDCTNG Triage lists them
+          as work. The naming is capped at 200 per scrape with the remainder counted
+          in `puppet_pcp_node_disconnected_overflow`, so on a big outage the list
+          can be shorter than the number, but the number itself stays right. Disconnected
+          is a set difference, what PuppetDB knows minus what the orchestrator can
+          reach, so a decommissioned host drops out on its own and a node that has
+          never run pxp-agent counts as disconnected. On a named node, `systemctl
+          status pxp-agent` and `journalctl -u pxp-agent --since -1h`; no such unit
+          is as likely an answer as a stopped one. Restarting pxp-agent is cheap and
+          reversible, so try it first on a single node. A large count points at the
+          broker instead, so read Fleet Disconnected against Fleet Connected on the
+          Orchestrator board: forty of forty-five is an outage, and forty of four
+          thousand is ordinary churn.'
+    - alert: PdctngInfraTimerInactive
+      expr: node_systemd_unit_state{state="active",pe_infrastructure="true",name=~"pdctng-.*\\.timer"}
+        == 0
+      for: 15m
+      labels:
+        severity: warning
+        pdctng: 'true'
+      annotations:
+        summary: "{{ $labels.name }} is not active on {{ $labels.instance }}"
+        description: A pdctng timer that systemd still knows about has not been active
+          for fifteen minutes, so it has been stopped, disabled or masked. A failed
+          unit shows on PdctngInfraUnitFailed instead, and this rule does not overlap
+          it. Nothing will run on its schedule until somebody starts it, and on a
+          quarterly timer like `pdctng-tam-report.timer` that silence lasts until
+          the next quarter. Check `systemctl status {{ $labels.name }}` and `systemctl
+          list-timers {{ $labels.name }}` on the host in {{ $labels.instance }}; `systemctl
+          enable --now {{ $labels.name }}` is the fix when it was stopped by hand
+          or by a package action. Needs the systemd collector, which `pdctng::node_exporter::collectors_enable`
+          leaves off by default.
     - alert: PdctngInfraUnitFailed
       expr: node_systemd_unit_state{state="failed",pe_infrastructure="true"} == 1
       for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.name }} has failed on {{ $labels.instance }}"
         description: 'A systemd unit on a Puppet infrastructure host has been failed
-          for fifteen minutes, so this is the platform being broken rather than being
-          slow. Start with `systemctl status {{ $labels.name }}` and `journalctl -u
-          {{ $labels.name }} --since -1h` on the host named in {{ $labels.instance
-          }}; a restart is the cheap first move and the journal says whether it will
-          hold. PDCTNG Puppet Infrastructure Health lists every failed unit under
-          Which Unit, On Which Host. What it costs depends entirely on the unit: a
-          failed `pe-puppetserver` is an outage and every board goes stale with it,
-          while a unit like `puppet_postgres-metrics.service` can sit failed for days
-          doing nothing visible. The fifteen minutes has already ruled out a unit
-          its own `Restart=` picked back up; what it does not rule out is a oneshot
-          on a timer, which reports failed between runs until the next one succeeds.
-          Needs the systemd collector, which `pdctng::node_exporter::collectors_enable`
+          for fifteen minutes, so the platform is broken, not slow. Start with `systemctl
+          status {{ $labels.name }}` and `journalctl -u {{ $labels.name }} --since
+          -1h` on the host named in {{ $labels.instance }}; a restart is the cheap
+          first move and the journal says whether it will hold. PDCTNG Puppet Infrastructure
+          Health lists every failed unit under Which Unit, On Which Host. What it
+          costs depends entirely on the unit: a failed `pe-puppetserver` is an outage
+          and every board goes stale with it, while a unit like `puppet_postgres-metrics.service`
+          can sit failed for days doing nothing visible. The fifteen minutes has already
+          ruled out a unit its own `Restart=` picked back up; what it does not rule
+          out is a oneshot on a timer, which reports failed between runs until the
+          next one succeeds. Needs the systemd collector, which `pdctng::node_exporter::collectors_enable`
           leaves off by default, so an estate that has not added `systemd` to it gets
-          silence rather than health.'
+          no alert from this rule.'
+    - alert: PdctngScheduledJobStuck
+      expr: |-
+        label_replace(
+          changes(node_systemd_timer_last_trigger_seconds[14400s]) == 0
+          and node_systemd_timer_last_trigger_seconds > 0
+          and node_systemd_timer_last_trigger_seconds offset 14400s,
+          "name", "$1.service", "name", "(.+)\\.timer")
+        and on (instance, name) (node_systemd_unit_state{state=~"activating|failed"} == 1) and on (instance, name) (max_over_time(node_systemd_unit_state{state="inactive"}[14400s]) == 0) unless on (instance, name) (node_systemd_unit_state{state="failed",pe_infrastructure="true"} == 1)
+      for: 5m
+      labels:
+        severity: warning
+        pdctng: 'true'
+      annotations:
+        summary: "{{ $labels.name }} on {{ $labels.instance }} has not completed since
+          its timer started it"
+        description: 'A timer started {{ $labels.name }} more than four hours ago,
+          has not fired it again since, and the job has not once got back to `inactive`:
+          either it is still running, which for a scheduled job is usually a hang,
+          or it failed. Whatever it produces was not produced this cycle, and anything
+          downstream carries on reading the last good run''s output with nothing saying
+          it is old. `systemctl status {{ $labels.name }}` on the host in {{ $labels.instance
+          }} says which of the two it is, and `journalctl -u {{ $labels.name }} --since
+          -1d` shows whether the run logged a finish. A hang wants killing (`systemctl
+          stop`) before the next scheduled start, because systemd will not start a
+          unit that is still running and that run is skipped too. A unit with `TimeoutStartSec`
+          set moves itself from hanging to failed when it expires, and this keeps
+          firing either way until the timer next fires. Needs the systemd collector
+          on the host (`pdctng::node_exporter::collectors_enable`), and the unit inside
+          any `--collector.systemd.unit-include` pattern the host sets. A timer whose
+          `Unit=` names a service of a different name is not matched.'
     - alert: PeInfraNodeInNoop
       expr: puppet_noop == 1 and on(node) label_replace(puppet_infra_platform, "node",
         "$1", "host", "(.+)")
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PE infrastructure server {{ $labels.node }} is running in noop
         description: 'Puppet is changing nothing on a PE infrastructure server, and
           every other board will keep showing the estate as converged while it drifts.
-          An hour of it is a configuration state rather than a run that happened to
-          be noop, so somebody set it. Check `puppet_noop_pending` for this node first:
-          it says whether the last noop run found something to change and did not
-          change it, which is the difference between a quiet safety measure and an
-          hour of accumulated drift. Noop With Changes on the Convergence board draws
-          the same family, though that tile is a fleet count and here you want the
-          series for this node. Then on the node, `sudo puppet config print noop --section
-          agent` and the `noop` setting in `/etc/puppetlabs/puppet/puppet.conf`; a
-          config that reads false means the noop is coming from the run rather than
-          from the file, and you want to know which before you go looking for someone
-          to blame. Clearing it is a one-line change with a large blast radius: the
-          next enforcing run applies everything the noop runs have been reporting,
-          on an infrastructure server, so read the pending changes before you flip
-          it rather than after. pe_status_check S0003.'
+          An hour of it means noop is configured, so somebody set it. Check `puppet_noop_pending`
+          for this node first: it says whether the last noop run found something to
+          change and did not change it, which is the difference between a quiet safety
+          measure and an hour of accumulated drift. Noop With Changes on the Convergence
+          board draws the same family, though that tile is a fleet count and here
+          you want the series for this node. Then on the node, `sudo puppet config
+          print noop --section agent` and the `noop` setting in `/etc/puppetlabs/puppet/puppet.conf`;
+          a config that reads false means the noop is coming from the run and not
+          the file, and the two are fixed in different places. Clearing it is a one-line
+          change with a large blast radius: the next enforcing run applies everything
+          the noop runs have been reporting, on an infrastructure server, so read
+          the pending changes before you flip it. pe_status_check S0003.'
+    - alert: PeStatusCheckFailing
+      expr: puppet_pe_status_check_failing == 1
+      for: 1h
+      labels:
+        severity: warning
+        pdctng: 'true'
+      annotations:
+        summary: pe_status_check {{ $labels.check }} is failing on {{ $labels.node
+          }}
+        description: 'PE''s own health check {{ $labels.check }} has returned false
+          on {{ $labels.node }} for two agent runs. The code names one of about forty
+          conditions PE checks on its infrastructure nodes, from a service that is
+          not running to a certificate close to expiry, and each has its own entry
+          on the runbook saying what PE checks, why it matters and what to do: follow
+          the link below. PE''s own table of every indicator is https://github.com/puppetlabs/puppetlabs-pe_status_check#fact-pe_status_check,
+          and it is the reference for a code newer than pdctng''s. To see everything
+          failing at once, `Failing Health Checks by Node` on TAM Check lists them
+          per node, and `facter -p pe_status_check` on the node lists every indicator
+          with its result. The alert clears after the next agent run that passes it.'
+        where: "[{{ $labels.check }} on the Runbook](/d/pdctng-runbook/?var-alert={{
+          $labels.check }}), PE's entry for this indicator and what to do about it."
     - alert: PeUpgradeOverdue
       expr: time() - puppet_pe_last_upgrade_epoch > 365 * 86400
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PE on {{ $labels.alias }} has not been upgraded in over a year
-        description: 'Nothing is broken and nothing breaks today. This install is
-          more than 365 days past its last upgrade, dated from the mtime of the pe_build
-          file, so it is outside the support window for the newest agent versions
-          and carries every defect fixed since, security ones included. pe_status_check
+        description: 'This install is more than 365 days past its last upgrade, dated
+          from the mtime of the `pe_build` file, so it is outside the support window
+          for the newest agent versions and carries every defect fixed since, security
+          ones included. Nothing breaks today; this is planning work. pe_status_check
           S0034 draws the line in the same place. The metric only exists on a PE primary,
           so this is naming the install itself and not a compiler. `puppet_infrastructure_config`
           carries the running version in its `pe_version` label; check that against
-          what Puppet currently supports. Plan the upgrade properly rather than fitting
-          it into an afternoon: it wants a maintenance window and a rollback path,
-          and it starts with a backup you have confirmed exists (`puppet_backup_last_epoch`,
-          and `PuppetBackupNeverRun` if none ever has). The cost of deferring again
-          is that every release you fall further behind makes the eventual upgrade
-          longer and less well trodden.'
+          what Puppet currently supports. Plan the upgrade: it wants a maintenance
+          window and a rollback path, and it starts with a backup you have confirmed
+          exists (`puppet_backup_last_epoch`, and `PuppetBackupNeverRun` if none ever
+          has).'
     - alert: TooManyEnvironments
       expr: count by (alias) (count by (alias, environment) (puppet_code_id)) > 100
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PE {{ $labels.alias }} is serving {{ $value }} environments
-        description: Nothing is broken; the cost is disk, file sync time and compile
-          latency. Every environment is a full checkout of the control repo plus its
-          share of puppetserver's caches, and 100 is where pe_status_check S0038 draws
-          the line. What this counts is every environment nodes have reported under,
-          from `puppet_code_id`, and that includes CD4PE's ephemeral `rolling_deployment_*`
+        description: Too many environments cost disk, file sync time and compile latency,
+          and nothing is broken. Every environment is a full checkout of the control
+          repo plus its share of puppetserver's caches, and 100 is where pe_status_check
+          S0038 draws the line. What this counts is every environment nodes have reported
+          under, from `puppet_code_id`, and that includes CD4PE's ephemeral `rolling_deployment_*`
           and `*_cdpe_ia_*` branches. The Environments board filters those out of
           its Environments Deployed tile and this rule does not, so the two numbers
           will disagree and a rolling deployment in flight can be what tipped you
@@ -1168,28 +1334,29 @@ spec:
       for: 10m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PostgreSQL on {{ $labels.host }} is near its connection limit
         description: 'Open connections on {{ $labels.host }} are past 0.9 of max_connections.
           Nothing is broken yet, and at the ceiling it will be: postgres refuses new
-          connections rather than queueing them, so PuppetDB''s pools and anything
+          connections instead of queueing them, so PuppetDB''s pools and anything
           else on this database fail outright instead of slowing down. The "Connection
           Saturation" tile on the PuppetDB board draws the same expression this rule
           fires on. For which database is holding them, read the backends for this
-          host rather than summing across the estate: `sum by (db) (puppet_postgres_backends{host="<this
-          host>"})`. Then connect to pe-puppetdb and query `pg_stat_activity`, which
-          is cluster-wide, filtering on datname; look for sessions idle in transaction
-          before raising anything. Raising max_connections is not free either. It
-          needs a postgres restart, so PuppetDB and everything else on that database
-          lose their connections for the duration, which belongs in a window and not
-          at 3am. pe_status_check S0029 watches the same ratio, and the default here
-          is its threshold.'
+          host: `sum by (db) (puppet_postgres_backends{host="<this host>"})`. Then
+          connect to pe-puppetdb and query `pg_stat_activity`, which is cluster-wide,
+          filtering on datname; look for sessions idle in transaction before raising
+          anything. Raising max_connections is not free either. It needs a postgres
+          restart, so PuppetDB and everything else on that database lose their connections
+          for the duration, which belongs in a window and not at 3am. pe_status_check
+          S0029 watches the same ratio, and the default here is its threshold.'
     - alert: PostgresDeadTuplesAccumulating
       expr: puppet_postgres_table_tuples{state="dead"} / ignoring(state) puppet_postgres_table_tuples{state="live"}
         > 0.2 and ignoring(state) puppet_postgres_table_tuples{state="live"} > 100000
       for: 2h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Dead tuples are accumulating in {{ $labels.table }} on {{ $labels.host
           }}
@@ -1197,14 +1364,13 @@ spec:
           been past 0.2 of live rows for two hours, on a table with more than 100000
           live rows, so autovacuum is not keeping up with it. Nothing has failed.
           What follows is every query on that table getting slower as the bloat grows,
-          and on PuppetDB that arrives as command processing falling behind (PuppetDBQueueGrowing)
-          rather than as a database complaint. Read "Dead Tuples by Table" and "Autovacuum
-          by Table" together on the PuppetDB board; they sit next to each other for
-          exactly this. A dead count climbing while that table''s vacuum rate is flat
-          at zero is autovacuum having given up on this table, which is a per-table
-          or cost-limit setting rather than a global one. A plain VACUUM is safe and
-          online. VACUUM FULL is not: it takes an exclusive lock and rewrites the
-          table, so PuppetDB stops for as long as it runs.'
+          and on PuppetDB that arrives as command processing falling behind (PuppetDBQueueGrowing).
+          Read "Dead Tuples by Table" and "Autovacuum by Table" together on the PuppetDB
+          board; they sit next to each other for exactly this. A dead count climbing
+          while that table''s vacuum rate is flat at zero is autovacuum having given
+          up on this table, which is a per-table or cost-limit setting. A plain VACUUM
+          is safe and online. VACUUM FULL is not: it takes an exclusive lock and rewrites
+          the table, so PuppetDB stops for as long as it runs.'
   - name: pdctng-puppetdb
     rules:
     - alert: PdctngPuppetDBErrorRate
@@ -1212,6 +1378,7 @@ spec:
       for: 30m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: pdctng is seeing query errors against {{ $labels.server }}
         description: Queries against {{ $labels.server }} have been failing at over
@@ -1232,45 +1399,46 @@ spec:
       for: 15m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: pdctng cannot query PuppetDB server {{ $labels.server }}
         description: 'pdctng has not been able to query {{ $labels.server }} for fifteen
           minutes. With several entries in `puppetdb_urls` the exporter fails over
-          to the others and no board goes blank, which is the whole reason this rule
-          exists: nothing else in the estate reports it. On a single-server config
-          everything pdctng reads from PuppetDB is now stale, which is most of the
-          fleet view. Start with `sudo pdctng-ctl preflight`, which only reads and
-          says whether this host can reach each configured endpoint and whether the
-          daemon''s certificate is still good. An unreachable endpoint is a warning
-          there and does not fail the run, so read the output rather than the exit
-          code. Then `systemctl status pe-puppetdb` on the server itself. The "PuppetDB
-          Servers" panel on Internal Operations has the per-server view. Leaving it
-          costs more than staleness: node pruning stalls on a dead server, so departed
-          nodes accumulate in the store and it can reach its ceiling (PdctngStoreAtCeiling).'
+          to the others and no board goes blank, and no other rule reports it. On
+          a single-server config everything pdctng reads from PuppetDB is now stale,
+          which is most of the fleet view. Start with `sudo pdctng-ctl preflight`,
+          which only reads and says whether this host can reach each configured endpoint
+          and whether the daemon''s certificate is still good. An unreachable endpoint
+          is a warning there and does not fail the run, so read the output rather
+          than the exit code. Then `systemctl status pe-puppetdb` on the server itself.
+          The "PuppetDB Servers" panel on Internal Operations has the per-server view.
+          Leaving it costs more than staleness: node pruning stalls on a dead server,
+          so departed nodes accumulate in the store and it can reach its ceiling (PdctngStoreAtCeiling).'
     - alert: PuppetDBCommandsDiscarded
       expr: increase(puppet_db_commands_discarded_total[30m]) > 0
       for: 5m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: PuppetDB on {{ $labels.host }} is discarding commands
         description: 'Commands on {{ $labels.host }} were given up on after exhausting
-          their retries, so the reports or catalogues they carried were never stored
-          and nothing else will say so. The nodes that sent them go on reporting success,
-          so convergence and freshness read better on every board than the estate
-          actually is. `/var/log/puppetlabs/puppetdb/puppetdb.log` carries the command
-          and the exception that killed it, and that is the first read. Then fork
-          on the PuppetDB board: "Waiting on Postgres" above zero is the database,
-          "Heap Used" near max is the JVM. "Awaiting Retry" is the leading indicator
-          and will have been climbing before this. The lost commands do not come back,
-          but once the cause is fixed a `sudo puppet agent -t` on an affected node
-          puts that node''s current facts and catalogue back; the reports that were
-          dropped stay gone.'
+          their retries, so the reports or catalogues they carried were never stored.
+          The nodes that sent them go on reporting success, so convergence and freshness
+          read better on every board than the estate is. `/var/log/puppetlabs/puppetdb/puppetdb.log`
+          carries the command and the exception that killed it, and that is the first
+          read. Then fork on the PuppetDB board: "Waiting on Postgres" above zero
+          is the database, "Heap Used" near max is the JVM. "Awaiting Retry" is the
+          leading indicator and will have been climbing before this. The lost commands
+          do not come back, but once the cause is fixed a `sudo puppet agent -t` on
+          an affected node puts that node''s current facts and catalogue back; the
+          reports that were dropped stay gone.'
     - alert: PuppetDBCommandsFatal
       expr: increase(puppet_db_commands_fatal_total[30m]) > 0
       for: 5m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: PuppetDB on {{ $labels.host }} has fatally failed commands
         description: 'Commands on {{ $labels.host }} were rejected outright rather
@@ -1282,86 +1450,83 @@ spec:
           fault the log line is usually enough on its own. Check whether it is one
           certname repeating, which points at that node''s report or catalogue, or
           many, which points at the database. A malformed submission fails the same
-          way every run, so a single bad node can stay unrepresented on every board
-          indefinitely while looking perfectly healthy.'
+          way every run, so a single bad node stays missing from every board until
+          its submission is fixed.'
     - alert: PuppetDBHeapDeadZone
       expr: puppet_db_jvm_heap_bytes{area="init"} > 31 * 1024 * 1024 * 1024 and puppet_db_jvm_heap_bytes{area="init"}
         < 48 * 1024 * 1024 * 1024
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PuppetDB heap on {{ $labels.host }} is in the compressed-oops dead
           zone
-        description: Nothing is failing, and this is a daylight job rather than a
-          3am one. The heap on {{ $labels.host }} is set between 31GB and 48GB, where
-          the JVM has switched compressed object pointers off but the extra address
-          space has not paid for itself. It holds less usable memory than a 31GB heap
-          would, so you are buying RAM PuppetDB cannot use and PuppetDBHeapPressure
-          is closer than the number suggests. The setting is `puppet_enterprise::profile::puppetdb::java_args`.
+        description: 'This can wait for working hours: nothing is failing. The heap
+          on {{ $labels.host }} is set between 31GB and 48GB, where the JVM has switched
+          compressed object pointers off but the extra address space has not paid
+          for itself. It holds less usable memory than a 31GB heap would, so you are
+          buying RAM PuppetDB cannot use and PuppetDBHeapPressure is closer than the
+          number suggests. The setting is `puppet_enterprise::profile::puppetdb::java_args`.
           **`What The Tuner Would Change` on TAM Check draws the recommended value
           beside the current one** where `pdctng::enable_tune_metrics` is on, which
           is the reading without a shell; otherwise `puppet infrastructure tune --compare`
           on the primary prints the same comparison. Drop it to 31GB, or past 48GB
-          only if PuppetDB genuinely needs more. Changing it and running Puppet restarts
-          pe-puppetdb either way, so ingestion pauses and the queue drains afterwards.
-          pe_status_check S0026/S0027.
+          only if PuppetDB needs more. Changing it and running Puppet restarts pe-puppetdb
+          either way, so ingestion pauses and the queue drains afterwards. pe_status_check
+          S0026/S0027.'
     - alert: PuppetDBHeapPressure
       expr: puppet_db_jvm_heap_bytes{area="used"} / ignoring(area) puppet_db_jvm_heap_bytes{area="max"}
         > 0.9
       for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PuppetDB heap on {{ $labels.host }} is over 0.9 of max
         description: Used heap on {{ $labels.host }} has been over 0.9 of max for
-          fifteen minutes. Still that high after a collection is the OOM precursor
-          rather than a busy moment. PuppetDB under memory pressure slows command
-          processing first, so expect PuppetDBQueueGrowing next and stale data on
-          everything reading PuppetDB after that. On the PuppetDB board, "GC Time
-          Fraction" moves before the "Heap Used" tile does, and the shape to look
-          for on "Heap" is the sawtooth floor rising, each collection recovering less
-          than the last, which is a leak rather than a busy hour. "Where The CPU Goes"
-          separates a JVM doing work from one collecting garbage. Restarting pe-puppetdb
-          clears the heap, but on an undersized heap that only buys time. The durable
-          fix is `puppet_enterprise::profile::puppetdb::java_args`, sized from `puppet
-          infrastructure tune --compare` rather than guessed.
+          fifteen minutes. Still that high after a collection is the precursor to
+          an OutOfMemoryError. PuppetDB under memory pressure slows command processing
+          first, so expect PuppetDBQueueGrowing next and stale data on everything
+          reading PuppetDB after that. On the PuppetDB board, "GC Time Fraction" moves
+          before the "Heap Used" tile does, and the shape to look for on "Heap" is
+          the sawtooth floor rising, each collection recovering less than the last,
+          which is a leak. "Where The CPU Goes" separates a JVM doing work from one
+          collecting garbage. Restarting pe-puppetdb clears the heap, but on an undersized
+          heap that only buys time. The durable fix is `puppet_enterprise::profile::puppetdb::java_args`,
+          sized from `puppet infrastructure tune --compare`.
     - alert: PuppetDBQueueGrowing
       expr: puppet_db_queue_depth > 10 and delta(puppet_db_queue_depth[15m]) > 0
       for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PuppetDB command queue on {{ $labels.host }} is growing
-        description: 'The stockpile queue on {{ $labels.host }} is past 10 and still
-          climbing after fifteen minutes, so command processing is losing to arrivals.
-          It normally drains to zero between agent runs, and a burst that drains needs
-          nothing. Everything PuppetDB serves gets staler the longer this lasts, and
-          whatever is stopping the queue draining is usually what starts commands
-          retrying and then being discarded, which is data loss nothing else reports
-          (PuppetDBCommandsDiscarded). "Waiting on Postgres" on the PuppetDB board
-          is the discriminator: above zero PuppetDB is waiting on the database, so
-          read "Dead Tuple Ratio" and "Connection Saturation" next; at zero the database
-          is keeping up, so read "Heap Used" and "GC Time Fraction" instead. "Commands
-          In and Out" draws the Seen against Processed gap, which is the backlog forming.'
+        description: |-
+          The PuppetDB command queue on {{ $labels.host }} is past 10 and has kept growing for fifteen minutes, so PuppetDB is storing reports, facts and catalogues more slowly than they arrive; look at it within the hour, because a queue that keeps growing ends in commands retried and then discarded (PuppetDBCommandsDiscarded). A burst after a code deploy or a mass run that drains on its own needs nothing.
+          On {{ $labels.host }}, `curl -s http://localhost:8080/status/v1/services/puppetdb-status | jq .status.queue_depth` gives the current depth, and `sudo grep -E 'WARN|ERROR' /var/log/puppetlabs/puppetdb/puppetdb.log | tail -50` shows the commands retrying and why.
+          "Waiting on Postgres" on the PuppetDB board says which side is slow. Above zero, PuppetDB is waiting on the database: read "Dead Tuple Ratio" and "Connection Saturation", check `sudo systemctl status pe-postgresql`, and follow PostgresDeadTuplesAccumulating or PostgresConnectionsNearLimit if either is firing. At zero, the database is keeping up and the PuppetDB JVM is the bottleneck: read "Heap Used" and "GC Time Fraction", and follow PuppetDBHeapPressure if heap is near max. `sudo systemctl restart pe-puppetdb` buys time there, and queued commands survive it because the queue is kept on disk under /opt/puppetlabs/server/data/puppetdb/stockpile. The alert clears as soon as the queue stops growing, which can be while it is still deep.
+          It is fixed when "Commands In and Out" shows Processed back level with Seen and the curl above returns 0.
     - alert: PuppetDBReplicaSyncStale
       expr: puppet_db_ha_last_sync_age_seconds > 900
       for: 10m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: PuppetDB replica sync on {{ $labels.host }} is stale
-        description: 'Nothing is broken while the primary is up, which is what makes
-          this one easy to leave. The last successful HA sync on {{ $labels.host }}
-          was {{ $value | humanizeDuration }} ago against a normal cadence of about
-          two minutes, so promoting this replica today would promote that much missing
-          report and catalogue history, and the promotion will not put it back. On
-          the PuppetDB board, "Replica Sync" draws sync duration per entity with sync
-          failures beside it: duration climbing while failures stay flat is a replica
-          falling behind, failures above zero is one that cannot keep up at all. `/var/log/puppetlabs/puppetdb/puppetdb.log`
-          on the replica has the reason. Only fires on PE HA estates. The metric is
-          absent elsewhere, so a blank "Replica Sync Age" tile means no replica rather
-          than a healthy one.'
+        description: 'This costs nothing while the primary is up, and loses data if
+          you fail over to this replica, so fix it in working hours. The last successful
+          HA sync on {{ $labels.host }} was {{ $value | humanizeDuration }} ago against
+          a normal cadence of about two minutes, so promoting this replica today would
+          promote that much missing report and catalogue history, and the promotion
+          will not put it back. On the PuppetDB board, "Replica Sync" draws sync duration
+          per entity with sync failures beside it: duration climbing while failures
+          stay flat is a replica falling behind, failures above zero is one that cannot
+          keep up at all. `/var/log/puppetlabs/puppetdb/puppetdb.log` on the replica
+          has the reason. Only fires on PE HA estates. The metric is absent elsewhere,
+          so a blank "Replica Sync Age" tile means no replica, not a healthy one.'
   - name: pdctng-puppetserver
     rules:
     - alert: PuppetserverHeapDeadZone
@@ -1370,29 +1535,31 @@ spec:
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Puppetserver heap on {{ $labels.host }} is in the compressed-oops
           dead zone
-        description: 'Nothing is failing; this host is quietly wasting memory. The
-          heap is set between 31GB and 48GB. Somewhere around 32GB the JVM turns off
-          compressed object pointers, so every reference starts costing eight bytes
-          instead of four, and until the extra address space has paid for that a heap
-          in this band holds less usable memory than a 31GB one would. `puppet_server_jvm_heap_bytes{area="init"}`
+        description: 'This heap is sized where it wastes memory, and nothing is failing.
+          The heap is set between 31GB and 48GB. Somewhere around 32GB the JVM turns
+          off compressed object pointers, so every reference starts costing eight
+          bytes instead of four, and until the extra address space has paid for that
+          a heap in this band holds less usable memory than a 31GB one would. `puppet_server_jvm_heap_bytes{area="init"}`
           is the configured size, because PE sets Xms equal to Xmx, and the Heap panel
           on the Puppetserver board draws it against used and max. The setting is
           `Xmx` and `Xms` in the `java_args` hash on `puppet_enterprise::master::puppetserver`:
-          bring it down to 31GB, or past 48GB only where the node genuinely needs
-          the address space. **`What The Tuner Would Change` on TAM Check says what
-          PE would size it at on this hardware** where `pdctng::enable_tune_metrics`
-          is on; otherwise `puppet infrastructure tune --compare` on the primary says
-          the same. Applying it restarts puppetserver and drops the in-flight compiles,
-          so it is a maintenance window and not a 3am fix.'
+          bring it down to 31GB, or past 48GB only where the node needs the address
+          space. **`What The Tuner Would Change` on TAM Check says what PE would size
+          it at on this hardware** where `pdctng::enable_tune_metrics` is on; otherwise
+          `puppet infrastructure tune --compare` on the primary says the same. Applying
+          it restarts puppetserver and drops the in-flight compiles, so it is a maintenance
+          window and not a 3am fix.'
     - alert: PuppetserverHeapPressure
       expr: puppet_server_jvm_heap_bytes{area="used"} / ignoring(area) puppet_server_jvm_heap_bytes{area="max"}
         > 0.9
       for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Puppetserver heap on {{ $labels.host }} is over 0.9 of max
         description: 'Used heap has been over 0.9 of max for fifteen minutes, long
@@ -1414,18 +1581,19 @@ spec:
       for: 10m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Puppetserver on {{ $labels.host }} is running out of JRubies repeatedly
           without staying out
         description: 'The pool reached zero free interpreters in at least 2 separate
           minutes of the last hour, and the worst wait for one in that hour was over
           5 seconds. Agents are queueing for a compiler and getting one, so nothing
-          has failed and no run has been refused, which is why this is a warning and
-          why none of the other JRuby rules will have fired: each of them waits for
-          the condition to hold, and this one never holds. It is the shape that arrives
-          before sustained exhaustion does. Two different faults look the same here,
-          a fleet that has outgrown its compilers and a slow leak, so check `puppet_node_count`
-          against the same window before touching the pool. Raising `max-active-instances`
+          has failed and no run has been refused. That makes this a warning, and none
+          of the other JRuby rules will have fired: each of them waits for the condition
+          to hold, and this one never holds. It is the shape that arrives before sustained
+          exhaustion does. Two different faults look the same here, a fleet that has
+          outgrown its compilers and a slow leak, so check `puppet_node_count` against
+          the same window before touching the pool. Raising `max-active-instances`
           is not free: each JRuby wants heap, an oversized pool trades this for PuppetserverHeapPressure,
           and past 12 PuppetserverJRubyPoolOversized fires because more interpreters
           stop buying throughput. Above that the answer is another compiler. `Free
@@ -1436,55 +1604,52 @@ spec:
       for: 5m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: Puppetserver on {{ $labels.host }} has no free JRuby instances
-        description: 'Every catalogue request on this host is waiting for an interpreter
-          and has been for five minutes. Agents will start timing out, and a run that
-          times out does not happen: those nodes drift until their next successful
-          one. Short spikes to zero are normal under load, five minutes solid is not.
-          Free and Requested JRubies on the Puppetserver board is where the causes
-          separate, read against the Pool Size tile above it. Requested pinned above
-          free is a pool that is simply too small for the arrival rate; requested
-          no higher than usual with free on the floor means something is holding interpreters
-          and not giving them back. Wait Against Hold Time shows queueing and hold
-          time together, and Costliest Functions or Costliest Resources says what
-          is eating the hold time. Restarting pe-puppetserver clears a stuck pool
-          and costs every in-flight compile, so try it once and stop if it comes straight
-          back. Real capacity is another compiler and not a wider pool: see PuppetserverJRubyPoolOversized.'
+        description: |-
+          Puppetserver on {{ $labels.host }} has had no free JRuby interpreters for five minutes, so agents compiling there are queueing and starting to time out: act on it now.
+          A run that times out does not happen, and while this lasts agents on this host cannot get a catalogue or submit a report, so if node silence or run-failure alerts are firing for nodes behind this host, start here.
+          On {{ $labels.host }}, or anywhere that reaches its port 8140, `curl -s --cacert /etc/puppetlabs/puppet/ssl/certs/ca.pem "https://{{ $labels.host }}:8140/status/v1/services/jruby-metrics?level=debug" | jq '.status.experimental.metrics | {free: ."num-free-jrubies", size: ."num-jrubies", borrowed: ."borrowed-instances"}'` gives the free count, the pool size and what each borrowed interpreter is serving. The endpoint needs no client certificate. `sudo grep -iE 'jruby|borrow|OutOfMemory' /var/log/puppetlabs/puppetserver/puppetserver.log | tail -50` on the host has the server's side.
+          On the Puppetserver board, Free and Requested JRubies read against the Pool Size tile separates the causes. Requested pinned above free is a pool too small for the arrival rate. Requested no higher than usual with free at zero is something holding interpreters, such as compiles waiting on a slow PuppetDB query, and Where Compile Time Actually Goes says what the time goes on.
+          `sudo systemctl restart pe-puppetserver` on the host clears a stuck pool. It does not drain: every compile in flight there fails, and those agents try again at their next run. Try it once. If the pool empties again straight away it is capacity, and the answer is another compiler, not a wider pool (PuppetserverJRubyPoolOversized).
+          It is fixed when the curl above shows `free` staying above zero and Free and Requested JRubies shows free off the floor; the alert resolves at the next evaluation after that.
     - alert: PuppetserverJRubyFreeAvgLow
       expr: puppet_server_jruby_free_avg < 0.9
       for: 10m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Puppetserver on {{ $labels.host }} averages less than one free JRuby
         description: 'Free interpreters average below 0.9, so most of the time every
           JRuby is busy and agents queue for one. Nothing is failing yet. This is
           the chronic reading behind the instantaneous PuppetserverJRubyExhausted:
-          demand has outgrown the pool rather than spiked, and left alone it arrives
-          as PuppetserverJRubyQueueLimit, where agents get 503s and their runs do
-          not happen. Free and Requested JRubies on the Puppetserver board shows how
-          far requested sits above free, and Where Compile Time Actually Goes says
-          whether the answer is more capacity or cheaper catalogues. PuppetserverJRubyBurstExhaustion
-          fires first where the pool is already emptying in bursts. Add a compiler
-          or make catalogues cheaper. Raising `max-active-instances` past 12 buys
-          heap pressure and GC time instead of throughput, which is what PuppetserverJRubyPoolOversized
-          is for.'
+          demand has outgrown the pool, and left alone it arrives as PuppetserverJRubyQueueLimit,
+          where agents get 503s and their runs do not happen. Free and Requested JRubies
+          on the Puppetserver board shows how far requested sits above free, and Where
+          Compile Time Actually Goes says whether the answer is more capacity or cheaper
+          catalogues. PuppetserverJRubyBurstExhaustion fires first where the pool
+          is already emptying in bursts. Add a compiler or make catalogues cheaper.
+          Raising `max-active-instances` past 12 buys heap pressure and GC time instead
+          of throughput, and PuppetserverJRubyPoolOversized fires past that point.'
     - alert: PuppetserverJRubyPoolOversized
       expr: puppet_server_jruby_pool_size > 12
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Puppetserver on {{ $labels.host }} has more than 12 JRubies configured
-        description: 'Nothing is failing; this pool costs more than it returns. `puppet_server_jruby_pool_size`,
-          the live pool the status service reports, is above 12, the practical ceiling
-          PE support encodes: each extra interpreter holds its own heap and adds GC
-          time, so past that point throughput stops improving and heap pressure starts.
-          Pool Size on the Puppetserver board is the same number. The setting behind
-          it is `jruby-puppet.max-active-instances` in `/etc/puppetlabs/puppetserver/conf.d/pe-puppet-server.conf`,
-          normally written by `puppet_enterprise::master::puppetserver`. **`What The
-          Tuner Would Change` on TAM Check says what PE would size it at on this hardware**
+        description: 'This pool is wider than it can use, and nothing is failing.
+          `puppet_server_jruby_pool_size`, the live pool the status service reports,
+          is above 12, the practical ceiling PE support encodes: each extra interpreter
+          holds its own heap and adds GC time, so past that point throughput stops
+          improving and heap pressure starts. Pool Size on the Puppetserver board
+          is the same number. The setting behind it is `jruby-puppet.max-active-instances`
+          in `/etc/puppetlabs/puppetserver/conf.d/pe-puppet-server.conf`, normally
+          written by `puppet_enterprise::master::puppetserver`. **`What The Tuner
+          Would Change` on TAM Check says what PE would size it at on this hardware**
           where `pdctng::enable_tune_metrics` is on; otherwise `puppet infrastructure
           tune --compare` on the primary says the same. Read Heap and GC Time Fraction
           on the same board before changing it, because a pool this wide on a heap
@@ -1497,6 +1662,7 @@ spec:
       for: 5m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: Puppetserver on {{ $labels.host }} is turning agents away
         description: 'Agents were turned away with 503s and those Puppet runs did
@@ -1509,16 +1675,17 @@ spec:
           it carries no `host` label because it is read from the config on the box
           the exporter runs on, so on a multi-compiler estate it is the primary''s
           number and not this compiler''s. Free and Requested JRubies against the
-          Pool Size tile tells a pool that is simply too small for the arrival rate
-          from one whose interpreters are not coming back. Restarting pe-puppetserver
-          clears a stuck pool at the price of the in-flight compiles; if the refusals
-          resume immediately it is capacity, and the answer is another compiler and
-          not a deeper queue, which PuppetserverQueueLimitTooHigh explains.'
+          Pool Size tile tells a pool too small for the arrival rate from one whose
+          interpreters are not coming back. Restarting pe-puppetserver clears a stuck
+          pool at the price of the in-flight compiles; if the refusals resume immediately
+          it is capacity, and the answer is another compiler and not a deeper queue,
+          which PuppetserverQueueLimitTooHigh explains.'
     - alert: PuppetserverJRubyWaitTime
       expr: puppet_server_jruby_wait_seconds > 1
       for: 10m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: Agent requests on {{ $labels.host }} are queuing for JRubies
         description: 'Requests are queuing for an interpreter: mean wait is {{ $value
@@ -1531,13 +1698,13 @@ spec:
           and hold time rising means catalogues have become more expensive, which
           Where Compile Time Actually Goes then attributes. PuppetserverJRubyBurstExhaustion
           fires where the pool has been reaching zero repeatedly alongside these waits.
-          Nothing needs doing tonight, and getting to it in business hours is far
-          cheaper than getting to the 503s.'
+          This can wait for working hours.'
     - alert: PuppetserverQueueLimitTooHigh
       expr: puppet_puppetserver_max_queued_requests > 150
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: puppetserver max-queued-requests is {{ $value }} on {{ $labels.alias
           }}
@@ -1549,11 +1716,11 @@ spec:
           is masking may well be. Free and Requested JRubies and Wait Against Hold
           Time on the Puppetserver board carry the two numbers to read first, `puppet_server_jruby_free_avg`
           and `puppet_server_jruby_wait_seconds`, because lowering the limit makes
-          refusals appear at once, which looks worse and is more honest. The value
-          is `jruby-puppet.max-queued-requests` in `/etc/puppetlabs/puppetserver/conf.d/pe-puppet-server.conf`,
-          read from the config on the box the exporter runs on and carrying no `host`
-          label, so on a multi-compiler estate this is the primary's ceiling and not
-          each compiler's. pe_status_check S0036."
+          refusals appear at once. The value is `jruby-puppet.max-queued-requests`
+          in `/etc/puppetlabs/puppetserver/conf.d/pe-puppet-server.conf`, read from
+          the config on the box the exporter runs on and carrying no `host` label,
+          so on a multi-compiler estate this is the primary's ceiling and not each
+          compiler's. pe_status_check S0036."
   - name: pdctng-review
     rules:
     - record: puppet_review_subject
@@ -1563,10 +1730,11 @@ spec:
         by (alias) (puppet_restart_required > 0) or (0 * count by (alias) (puppet_restart_required)),
         "subject", "Nodes awaiting restart", "", "") or label_replace(sum by (alias)
         (puppet_patching_stats{type="nodes_to_patch"}), "subject", "Nodes waiting
-        for patches", "", "") or label_replace(count by (alias) (puppet_cis_compliance_score{score_type="base"}
-        < 90) or (0 * count by (alias) (puppet_cis_compliance_score{score_type="base"})),
-        "subject", "Nodes below the CIS score target", "", "") or label_replace(count
-        by (alias) (count by (module, alias) (count by (module, version, alias) (puppet_module_version))
+        for patches", "", "") or label_replace(count by (alias) (count by (alias,
+        node) (puppet_cis_compliance_score{score_type="base"} < 90)) or (0 * count
+        by (alias) (puppet_cis_compliance_score{score_type="base"})), "subject", "Nodes
+        below the CIS score target", "", "") or label_replace(count by (alias) (count
+        by (module, alias) (count by (module, version, alias) (puppet_module_version))
         > 1) or (0 * count by (alias) (puppet_module_version)), "subject", "Modules
         at more than one version", "", "") or label_replace(count by (alias) (puppet_certificate_expires_epoch
         - time() < 14 * 86400) or (0 * count by (alias) (puppet_certificate_expires_epoch)),
@@ -1577,9 +1745,10 @@ spec:
     rules:
     - alert: PdctngScmExportFailing
       expr: puppet_scm_export_success == 0
-      for: 1h
+      for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: SCM export on {{ $labels.instance }} is failing
         description: 'The CIS export ran and failed, so every `puppet_cis_*` metric
@@ -1587,18 +1756,18 @@ spec:
           drawing those numbers as current. On the CIS board only `Export Failing`
           and `Last Successful Export` say so, and the per-node staleness rules will
           not fire for up to another 7 days, because they age the scan timestamps
-          the last good export left behind. The exporter runs inside the daemon (R113/R110),
-          so the reason is in the daemon''s own journal and in `scm_export_status.json`
+          the last good export left behind. The exporter runs inside the daemon, so
+          the reason is in the daemon''s own journal and in `scm_export_status.json`
           under `scm_dir`: `journalctl -u pdctng -n 100 | grep -i scm`, and the file''s
           `error_message` field. An HTTP 401 there is the token, an IP restriction,
           or something SCM side rather than anything local. Nothing local is broken
-          and this does not need doing at 3am, but every compliance number ages silently
-          until it is done.'
+          and this can wait for working hours.'
     - alert: PdctngScmExportStale
       expr: time() - puppet_scm_export_last_success_timestamp > 172800
       for: 1h
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: SCM export on {{ $labels.instance }} has not succeeded in two days
         description: 'No SCM export has succeeded in two days. Every CIS score on
@@ -1612,8 +1781,8 @@ spec:
           pdctng-ctl status` ruling the daemon in or out is the first check, and `journalctl
           -u pdctng` carries whatever it last said. Restarting the daemon is the cheap
           reversible step, and an export follows within `scm_export_interval`. The
-          threshold is deliberately longer than any sane export schedule so one missed
-          run pages nobody.'
+          threshold is longer than any normal export schedule, so one missed run does
+          not fire it.'
   - name: pdctng-service_status
     rules:
     - alert: PuppetInfraServiceError
@@ -1621,14 +1790,15 @@ spec:
       for: 5m
       labels:
         severity: critical
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.component }} on {{ $labels.host }} is in the error state"
         description: 'Trapperkeeper reports the {{ $labels.service }} component {{
-          $labels.component }} on {{ $labels.host }} as error rather than running,
-          so whatever it backs (catalogue compilation, filesync, the CA, the PCP broker)
-          is degraded or down on that host. This is a live fault, not a service still
-          coming up. Start with the component''s own status block, `/status/v1/services?level=debug`
-          on the port for the service that fired: 8140 puppetserver, 8143 orchestrator,
+          $labels.component }} on {{ $labels.host }} as error, so whatever it backs
+          (catalogue compilation, filesync, the CA, the PCP broker) is degraded or
+          down on that host. The component is faulted, not still starting. Start with
+          the component''s own status block, `/status/v1/services?level=debug` on
+          the port for the service that fired: 8140 puppetserver, 8143 orchestrator,
           4433 console, 8146 patching, 8148 workflow. It is mTLS, so pass the host''s
           own `puppet config print hostcert`, `hostprivkey` and `localcacert`. Then
           `systemctl status` and `journalctl` for the PE unit that owns it. `Which
@@ -1642,6 +1812,7 @@ spec:
       for: 15m
       labels:
         severity: warning
+        pdctng: 'true'
       annotations:
         summary: "{{ $labels.component }} on {{ $labels.host }} is stuck in state
           {{ $labels.state }}"
@@ -1650,9 +1821,9 @@ spec:
           A brief `starting` during a restart is normal and would have cleared before
           this fired; this long means it never came up. `unknown` means the status
           endpoint could not read the component''s state, which is often the endpoint
-          rather than the component. Nothing has declared a fault, which is why this
-          is a warning and not PuppetInfraServiceError, but the component is not serving.
-          Check what it backs before deciding it can wait: on a compiler a stuck `jruby-metrics`
+          and not the component. No fault has been declared, so this is a warning
+          and not PuppetInfraServiceError, but the component is not serving. Check
+          what it backs before deciding it can wait: on a compiler a stuck `jruby-metrics`
           costs you the JRuby numbers this module reads, where a stuck `server` costs
           catalogues. `/status/v1/services?level=debug` gives the component''s own
           status block, on 8140 for puppetserver, 8143 orchestrator, 4433 console,
@@ -1710,3 +1881,497 @@ spec:
     - record: node_uname_info
       expr: label_replace(label_replace(windows_os_info, "sysname", "Windows", "",
         ""), "release", "$1", "version", "(.*)")
+  - name: pdctng-alert-inventory
+    rules:
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetBackupNeverRun
+        severity: warning
+        rule_group: backup
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetBackupShrank
+        severity: warning
+        rule_group: backup
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetBackupStale
+        severity: warning
+        rule_group: backup
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngFilesystemFillingSoon
+        severity: warning
+        rule_group: capacity_forecast
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraFilesystemCritical
+        severity: critical
+        rule_group: capacity_level
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraFilesystemLow
+        severity: warning
+        rule_group: capacity_level
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraMemoryCritical
+        severity: critical
+        rule_group: capacity_level
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraMemoryLow
+        severity: warning
+        rule_group: capacity_level
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCaExpiringCritical
+        severity: critical
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCaExpiringSoon
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCertRenewalAssumptionStale
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCertWarningAboveRenewal
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCrlUpdateOverdue
+        severity: critical
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCrlUpdateSoon
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetCertificateExpiringCritical
+        severity: critical
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetCertificateNotRenewing
+        severity: warning
+        rule_group: certificates
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCisScanStale
+        severity: warning
+        rule_group: cis
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCisScanStopped
+        severity: critical
+        rule_group: cis
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCisScoreWithoutScanTime
+        severity: warning
+        rule_group: cis
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCollectorFailing
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCollectorServingStaleData
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCollectorSlow
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCollectorStale
+        severity: critical
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngSourceFailing
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngSourceStale
+        severity: critical
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngTextfileParseFailing
+        severity: warning
+        rule_group: collectors
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngCustomMetricPollStopped
+        severity: critical
+        rule_group: custom_metrics
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngDeploymentStuck
+        severity: warning
+        rule_group: delivery_health
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngAlertRulesStale
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngDuplicateDaemon
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngExporterDown
+        severity: critical
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngMetricsStale
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngPluginLoadFailed
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngPrometheusConfigNotLoaded
+        severity: critical
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngRenderSectionFailing
+        severity: critical
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngScrapeConfigMissing
+        severity: critical
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngStoreAtCeiling
+        severity: warning
+        rule_group: exporter
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngAlertExclusionsHigh
+        severity: warning
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngFleetCatastrophe
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngFleetSilent
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNoNodesReporting
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeCountDropped
+        severity: warning
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeRunFailingCritical
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeRunFailingHigh
+        severity: warning
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeSilentCritical
+        severity: critical
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngNodeSilentHigh
+        severity: warning
+        rule_group: fleet
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngLicenseExpiringCritical
+        severity: critical
+        rule_group: license
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngLicenseExpiringSoon
+        severity: warning
+        rule_group: license
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngLicenseNearLimit
+        severity: warning
+        rule_group: license
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngLicenseOverLimit
+        severity: critical
+        rule_group: license
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: GrafanaBelowSupportedFloor
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PcpNodesDisconnected
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraTimerInactive
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngInfraUnitFailed
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngScheduledJobStuck
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PeInfraNodeInNoop
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PeStatusCheckFailing
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PeUpgradeOverdue
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: TooManyEnvironments
+        severity: warning
+        rule_group: pe
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PostgresConnectionsNearLimit
+        severity: warning
+        rule_group: postgres
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PostgresDeadTuplesAccumulating
+        severity: warning
+        rule_group: postgres
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngPuppetDBErrorRate
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngPuppetDBServerDown
+        severity: critical
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBCommandsDiscarded
+        severity: critical
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBCommandsFatal
+        severity: critical
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBHeapDeadZone
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBHeapPressure
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBQueueGrowing
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetDBReplicaSyncStale
+        severity: warning
+        rule_group: puppetdb
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverHeapDeadZone
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverHeapPressure
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyBurstExhaustion
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyExhausted
+        severity: critical
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyFreeAvgLow
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyPoolOversized
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyQueueLimit
+        severity: critical
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverJRubyWaitTime
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetserverQueueLimitTooHigh
+        severity: warning
+        rule_group: puppetserver
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngScmExportFailing
+        severity: warning
+        rule_group: scm
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PdctngScmExportStale
+        severity: warning
+        rule_group: scm
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetInfraServiceError
+        severity: critical
+        rule_group: service_status
+    - record: pdctng_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetInfraServiceNotRunning
+        severity: warning
+        rule_group: service_status

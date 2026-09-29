@@ -40,6 +40,23 @@ spec:
     - targets:
         - puppet.lab.albatrossflavour.com:10050
   metricsPath: /metrics
+  # pdctng R845. The metrics port is on mTLS, so this presents the PE client
+  # certificate from ExternalSecret/pdctng-scrape-tls and verifies pdctng's
+  # own certificate against the PE CA, by its certname.
+  scheme: HTTPS
+  tlsConfig:
+    serverName: puppet.lab.albatrossflavour.com
+    ca:
+      secret:
+        name: pdctng-scrape-tls
+        key: ca.crt
+    cert:
+      secret:
+        name: pdctng-scrape-tls
+        key: tls.crt
+    keySecret:
+      name: pdctng-scrape-tls
+      key: tls.key
   relabelings:
     - action: replace
       targetLabel: job

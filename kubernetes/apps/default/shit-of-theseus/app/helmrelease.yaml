@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: nginx
-              tag: "1.31-alpine@sha256:72ba65eb42c10344912a84ff42408db7d34f2feb642204570ab8fc5ffd29f1d3"
+              tag: "1.31-alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2"
             resources:
               requests:
                 cpu: 10m
@@ -41,7 +41,7 @@ spec:
           donation-exporter:
             image:
               repository: python
-              tag: "3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc"
+              tag: "3.14-alpine@sha256:9e9fde4d32eedce0b661d9ab91e826b62dddf28e928c230ec55f1866cac66b01"
             command:
               - sh
               - -c

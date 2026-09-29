@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./pdctng-scrape-tls.yaml
   - ./prometheusrule.yaml
 #  - ./puppet-prometheusrule.yaml
   - ./scrapeconfig.yaml
