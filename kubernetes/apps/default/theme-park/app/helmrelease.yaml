@@ -29,7 +29,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/theme-park
-              tag: "1.22.1@sha256:8087a8c3a81e342014ce2528870bc97a50c86ccd8e316287cac2d200d44e19c1"
+              tag: "1.23.0@sha256:28f4144dee712d914e533a3040cff63221d0d2fc5e8a775d8b8b58303b545df7"
             probes:
               liveness:
                 enabled: true
