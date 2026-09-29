@@ -33,6 +33,7 @@ spec:
             key: EXTERNAL_DNS_PIHOLE_PASSWORD
     extraArgs:
       - --pihole-server=http://192.168.9.2
+      - --pihole-api-version=6
       - --ingress-class=external
     policy: sync
     sources: ["ingress"]
