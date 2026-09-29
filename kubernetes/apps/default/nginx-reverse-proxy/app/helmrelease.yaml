@@ -7,9 +7,12 @@ metadata:
 spec:
   interval: 5m
   chartRef:
+    # No namespace: the Kustomization's targetNamespace puts the OCIRepository
+    # in default alongside this release. This used to name flux-system, which
+    # resolved to a hand-applied source left over from the OCI migration and
+    # froze the chart at 18.3.6 while Renovate bumped the real one.
     kind: OCIRepository
     name: bitnami-nginx
-    namespace: flux-system
   install:
     createNamespace: true
     remediation:
