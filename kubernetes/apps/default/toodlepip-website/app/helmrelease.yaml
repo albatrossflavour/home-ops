@@ -44,7 +44,7 @@ spec:
           contact-api:
             image:
               repository: ghcr.io/albatrossflavour/toodlepip-contact-api
-              tag: "latest@sha256:00847ddd409c57c4ac0402dbe910848df7661299266d947f66a05176df873f97"
+              tag: "latest@sha256:84e77b161fc55ff476512c538abe61cc7c7d7f4333300404360474ab094669d9"
               pullPolicy: Always
             env:
               PORT: "3000"
