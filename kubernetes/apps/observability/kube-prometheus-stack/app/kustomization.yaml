@@ -4,6 +4,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./externalsecret.yaml
+  - ./kiln-externalsecret.yaml
   - ./helmrelease.yaml
   - ./pdctng-scrape-tls.yaml
   - ./prometheusrule.yaml

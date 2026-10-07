@@ -20,6 +20,15 @@ kind: ScrapeConfig
 metadata:
   name: &name kilns
 spec:
+  # 2026-10-07: the controller now requires a shared token on every route,
+  # /metrics included. Read-only, but "the kiln is at 1180C with four hours
+  # left" says a good deal about whether anyone is home, so it is not exempt.
+  # The same token is in the iOS app's Keychain and in config.py on the Pi.
+  authorization:
+    type: Bearer
+    credentials:
+      name: kiln-secret
+      key: api_token
   staticConfigs:
     - targets:
 #        - betty.albatrossflavour.com
