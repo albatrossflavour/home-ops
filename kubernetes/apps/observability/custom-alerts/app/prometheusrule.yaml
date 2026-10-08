@@ -276,8 +276,8 @@ spec:
             summary: "Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} in ImagePullBackOff"
             description: "Container has been unable to pull its image for more than 10 minutes."
 
-    - name: trivy
-      rules:
+#   - name: trivy
+#     rules:
         # 2026-09-01: deliberately scoped to fixable-only. Cluster-wide
         # CRITICAL count sits around 260+ at any given time, ~150 of which
         # are unfixed Debian/base-image CVEs (a handful of Perl CVEs alone
@@ -304,35 +304,35 @@ spec:
         # instead of looking like good news. An alert that stops firing
         # because its input vanished is indistinguishable from a fixed
         # problem, which is the whole trap.
-        - alert: CertExpiryMetricAbsent
-          expr: |
-            absent(cert_expiry_timestamp_seconds)
-          for: 2h
-          labels:
-            severity: warning
-          annotations:
-            summary: "cert_expiry_timestamp_seconds has vanished, HubbleCiliumCertExpiresSoon is blind"
-            description: "No cert expiry metric has been present for 2h, so HubbleCiliumCertExpiresSoon cannot fire regardless of the real cert state. These Cilium/Hubble mTLS certs are Helm-templated with no cert-manager renewal behind them, so this alert is the only thing watching them. Check the cert-expiry-pushgateway pod in kube-system and the cert-expiry-check CronJob."
+#       - alert: CertExpiryMetricAbsent
+#         expr: |
+#           absent(cert_expiry_timestamp_seconds)
+#         for: 2h
+#         labels:
+#           severity: warning
+#         annotations:
+#           summary: "cert_expiry_timestamp_seconds has vanished, HubbleCiliumCertExpiresSoon is blind"
+#           description: "No cert expiry metric has been present for 2h, so HubbleCiliumCertExpiresSoon cannot fire regardless of the real cert state. These Cilium/Hubble mTLS certs are Helm-templated with no cert-manager renewal behind them, so this alert is the only thing watching them. Check the cert-expiry-pushgateway pod in kube-system and the cert-expiry-check CronJob."
 
-        - alert: TrivyFixableMetricAbsent
-          expr: |
-            absent(trivy_critical_fixable_total)
-          for: 2h
-          labels:
-            severity: warning
-          annotations:
-            summary: "trivy_critical_fixable_total has vanished, TrivyFixableCriticalBacklog is blind"
-            description: "No fixable-CRITICAL metric has been present for 2h, so TrivyFixableCriticalBacklog cannot fire. Check the cert-expiry-pushgateway pod in kube-system and the trivy-fixable-check CronJob in security; the job logs the count it computed even when the push does not survive."
+#       - alert: TrivyFixableMetricAbsent
+#         expr: |
+#           absent(trivy_critical_fixable_total)
+#         for: 2h
+#         labels:
+#           severity: warning
+#         annotations:
+#           summary: "trivy_critical_fixable_total has vanished, TrivyFixableCriticalBacklog is blind"
+#           description: "No fixable-CRITICAL metric has been present for 2h, so TrivyFixableCriticalBacklog cannot fire. Check the cert-expiry-pushgateway pod in kube-system and the trivy-fixable-check CronJob in security; the job logs the count it computed even when the push does not survive."
 
-        - alert: TrivyFixableCriticalBacklog
-          expr: |
-            trivy_critical_fixable_total > 10
-          for: 24h
-          labels:
-            severity: warning
-          annotations:
-            summary: "{{ $value }} fixable CRITICAL vulnerabilities sitting unaddressed"
-            description: "{{ $value }} CRITICAL vulnerabilities across the cluster have a fix already published upstream but haven't been picked up yet - a stale image pin somewhere is the usual cause (see the postgres16/nginx-reverse-proxy fixes in the audit doc for the pattern). Check `kubectl get vulnerabilityreports -A` and cross-reference fixedVersion fields to find which image(s)."
+#       - alert: TrivyFixableCriticalBacklog
+#         expr: |
+#           trivy_critical_fixable_total > 10
+#         for: 24h
+#         labels:
+#           severity: warning
+#         annotations:
+#           summary: "{{ $value }} fixable CRITICAL vulnerabilities sitting unaddressed"
+#           description: "{{ $value }} CRITICAL vulnerabilities across the cluster have a fix already published upstream but haven't been picked up yet - a stale image pin somewhere is the usual cause (see the postgres16/nginx-reverse-proxy fixes in the audit doc for the pattern). Check `kubectl get vulnerabilityreports -A` and cross-reference fixedVersion fields to find which image(s)."
 
     - name: thanos
       rules:
