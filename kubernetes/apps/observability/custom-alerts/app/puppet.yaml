@@ -1167,6 +1167,48 @@ spec:
           and purging those out of PuppetDB is the cheap correction and the only one
           available tonight. If the nodes are there, this is a true-up with whoever
           owns the Puppet contract."
+  - name: pobs-patching
+    rules:
+    - alert: PobsMaintenanceWindowStalled
+      expr: puppet_patching_maintenance_window_next_epoch < time()
+      for: 1h
+      labels:
+        severity: warning
+        pobs: 'true'
+      annotations:
+        summary: Maintenance window {{ $labels.name }} schedule has stopped
+        description: The next opening of maintenance window `{{ $labels.name }}` is
+          in the past, so its schedule has stopped advancing and no patch run will
+          fire for it. pe-patching-service moves the next instance forward as each
+          opening passes, so a timestamp behind the clock means the trigger itself
+          is gone rather than a run that failed, which is why no `PobsPatchJobRunFailed`
+          fires alongside it. The common causes are a deleted or disabled schedule
+          and a window with no patch job wired to it (PE-44733). Check the window
+          on the console Patch management page and confirm a job is attached and its
+          schedule is enabled. It clears once the window has a future opening again.
+          This catches a stopped schedule, not a window that opened but ran nothing
+          inside it.
+    - alert: PobsPatchJobRunFailed
+      expr: puppet_patching_patch_job_last_run_failed == 1
+      for: 15m
+      labels:
+        severity: warning
+        pobs: 'true'
+      annotations:
+        summary: Patch job {{ $labels.patch_job }} last run failed
+        description: 'The last run of patch job `{{ $labels.patch_job }}` failed on
+          pe-patching-service, so the nodes in its patch group were not patched and
+          will not be until a run succeeds. The node `pe_patch` facts do not show
+          this: the task is never dispatched, so each node still reports its last
+          successful run. The common cause is the run firing outside its maintenance
+          window after a daylight-saving change, where the job trigger is evaluated
+          in local time and the window in UTC (PE-47191), so the run is rejected at
+          the `task-creation` stage with "not currently in a maintenance window".
+          Open the run on the console Patch runs page for the stage that failed, and
+          read `puppet_patching_patch_job_last_run_epoch` for this job against the
+          window''s `puppet_patching_maintenance_window_next_epoch` for the timezone
+          gap. It clears when a run lands inside its window, which needs the schedule
+          or the window realigned rather than a retry.'
   - name: pobs-pe
     rules:
     - alert: GrafanaBelowSupportedFloor
@@ -2281,6 +2323,18 @@ spec:
         alertname: PobsLicenseOverLimit
         severity: critical
         rule_group: license
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PobsMaintenanceWindowStalled
+        severity: warning
+        rule_group: patching
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PobsPatchJobRunFailed
+        severity: warning
+        rule_group: patching
     - record: pobs_alert_rule_info
       expr: vector(1)
       labels:
