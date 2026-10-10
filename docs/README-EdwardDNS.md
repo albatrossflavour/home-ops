@@ -108,6 +108,23 @@ The script will show you the first 5 services when it completes.
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
+### "A positional parameter cannot be found that accepts argument"
+
+The folder the script lives in has a space in its name. PowerShell treats each word as a separate argument unless the path is in quotes:
+
+```powershell
+cd "C:\Users\edwar\Downloads\Host file entries"
+.\Sync-ClusterDNS.ps1
+```
+
+Or run it by its full path without changing directory:
+
+```powershell
+& "C:\Users\edwar\Downloads\Host file entries\Sync-ClusterDNS.ps1"
+```
+
+Note that `cd` needs the folder, not the script file. Renaming the folder to something without spaces (for example `HostFileEntries`) avoids the problem entirely.
+
 ### "Can't reach the cluster"
 
 Make sure you're on the home network (192.168.x.x). The script needs to reach `192.168.8.10:30888`.
