@@ -60,15 +60,16 @@ spec:
               # cache, required when going through a transaction-mode pooler.
               DATABASE_URL: "postgresql://resume:$(RESUME_DB_PASSWORD)@postgres16-pooler-rw.database.svc.cluster.local:5432/resume?pgbouncer=true"
               MAIL_FROM: "noreply@${SECRET_DOMAIN}"
-              STORAGE_PROVIDER: "s3"
-              STORAGE_URL: "http://minio.default.svc.cluster.local:9000"
-              STORAGE_ENDPOINT: "minio.default.svc.cluster.local"
-              STORAGE_PORT: "9000"
-              STORAGE_REGION: "us-east-1"
-              STORAGE_BUCKET: "resume"
-              STORAGE_USE_SSL: "false"
-              STORAGE_ACCESS_KEY: "$(MINIO_ROOT_USER)"
-              STORAGE_SECRET_KEY: "$(MINIO_ROOT_PASSWORD)"
+              # v6 renamed every storage variable. The v5 STORAGE_* names are
+              # not read at all, and with none of the S3_* names set v6 falls
+              # back to local filesystem storage without complaining.
+              STORAGE_BACKEND: "s3"
+              S3_ENDPOINT: "http://minio.default.svc.cluster.local:9000"
+              S3_BUCKET: "resume"
+              S3_REGION: "us-east-1"
+              S3_ACCESS_KEY_ID: "$(MINIO_ROOT_USER)"
+              S3_SECRET_ACCESS_KEY: "$(MINIO_ROOT_PASSWORD)"
+              S3_FORCE_PATH_STYLE: "true"
               CHROME_URL: "ws://localhost:3001"
             envFrom:
               - secretRef:
