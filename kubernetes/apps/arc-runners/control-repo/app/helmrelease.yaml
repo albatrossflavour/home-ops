@@ -104,7 +104,7 @@ spec:
             # floating tag and out of step with how everything else here is
             # versioned. The cost is that this needs bumping alongside the chart
             # rather than drifting on its own, which is the point.
-            image: ghcr.io/actions/actions-runner:2.337.0
+            image: ghcr.io/actions/actions-runner:2.338.0@sha256:4ffadc0002b2581327e06101fc8c06cd189232baf79fe561fac9caeb76f5e807
             command: ["/home/runner/run.sh"]
             # The relay workflow reads $CD4PE_WEBHOOK_TOKEN rather than a
             # GitHub Actions secret, so the CD4PE credential never leaves the
