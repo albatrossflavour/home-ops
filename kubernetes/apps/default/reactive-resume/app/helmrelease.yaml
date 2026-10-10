@@ -20,8 +20,11 @@ spec:
   upgrade:
     cleanupOnFail: true
     remediation:
-      strategy: rollback
-      retries: 3
+      # v6 runs Prisma migrations on startup and they do not unwind. A Helm
+      # rollback would put v5 in front of a v6 schema, so leave a failed
+      # upgrade failed and recover from the pre-upgrade dump instead.
+      retries: 0
+      remediateLastFailure: false
   values:
     defaultPodOptions:
       securityContext:
@@ -30,6 +33,7 @@ spec:
     controllers:
       resume:
         replicas: 1
+        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -44,10 +48,13 @@ spec:
           app:
             image:
               repository: amruthpillai/reactive-resume
-              tag: "v5.3.2@sha256:b433dbe2fa2c23bfb7734d16380e4d703a05349db096113a18cb13b16f4c1fa0"
+              tag: "v6.0.2@sha256:2b08d01446f8b775e0bf5888cc15b0a3fd6805521efefb0a0e21a4f5bfb253b3"
             env:
               TZ: ${TZ}
               PORT: "3000"
+              # v6 requires this behind a reverse proxy or it falls back to the
+              # proxy IP for per-visitor auth limits. Cluster pod CIDR.
+              TRUSTED_PROXIES: "10.69.0.0/16"
               APP_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
               # pgbouncer=true disables Prisma's server-side prepared statement
               # cache, required when going through a transaction-mode pooler.
