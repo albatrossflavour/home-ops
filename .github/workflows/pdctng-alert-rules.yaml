@@ -67,7 +67,7 @@ jobs:
         if: steps.token.outputs.present == 'true'
         uses: ruby/setup-ruby@e81a8fa391b11a595c1b7ed84177cc0fe02faf83 # v1.328.0
         with:
-          ruby-version: "3.4"
+          ruby-version: "4.0"
           bundler-cache: true
           working-directory: pdctng
 
