@@ -83,6 +83,17 @@ spec:
         - ports:
             - port: "9000"
               protocol: TCP
+    # asciinema login links (one-time email sign-in) via the in-cluster
+    # SMTP relay. Missed by the 2026-09-01 Hubble capture because no login
+    # email was sent during the window.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/name: smtp-relay
+      toPorts:
+        - ports:
+            - port: "25"
+              protocol: TCP
     # Same mover pods' daily offsite ("-r2") backup to the NAS.
     - toCIDR:
         - 192.168.1.22/32
