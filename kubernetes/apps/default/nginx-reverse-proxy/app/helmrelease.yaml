@@ -34,7 +34,7 @@ spec:
       # digest-pinning tracks a floating tag's digest the same way it did
       # the old versioned one, so this stays auto-updatable going forward,
       # it just won't show a version-number bump in the PR title anymore.
-      tag: latest@sha256:b8d42f076789079bd84f114df5ad880be5d99cb9266b010841a7da0e64c1ffee
+      tag: latest@sha256:fb69e7a082a5e90c42650ee5bfedec42628f0dd1fd89a354906eac2fb86e409b
     pullPolicy: IfNotPresent
     debug: false
     # Finding #18 (2026-09-02): the chart's own default NetworkPolicy allowed
