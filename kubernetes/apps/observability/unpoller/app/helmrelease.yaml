@@ -50,6 +50,9 @@ spec:
               # listener opens only after the first controller login, which can outlast liveness
               startup:
                 enabled: true
+                spec:
+                  periodSeconds: 10
+                  failureThreshold: 30
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
