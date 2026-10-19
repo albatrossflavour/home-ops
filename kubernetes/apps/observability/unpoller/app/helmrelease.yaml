@@ -47,6 +47,9 @@ spec:
                 enabled: true
               readiness:
                 enabled: true
+              # listener opens only after the first controller login, which can outlast liveness
+              startup:
+                enabled: true
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
