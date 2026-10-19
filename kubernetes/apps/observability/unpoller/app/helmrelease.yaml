@@ -14,10 +14,14 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
+  # disableWait, same reason as immich (#1757): a pod that cannot become ready
+  # makes Helm roll back the probe change that would let it become ready.
   install:
+    disableWait: true
     remediation:
       retries: 3
   upgrade:
+    disableWait: true
     cleanupOnFail: true
     remediation:
       strategy: rollback
