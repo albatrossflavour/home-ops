@@ -27,6 +27,9 @@ spec:
   values:
     controllers:
       paperless-ai:
+        # Replaced by paperless-gpt. Scaled to zero while paperless-gpt is
+        # trialled, then removed along with its PVC.
+        replicas: 0
         annotations:
           reloader.stakater.com/auto: "true"
 

@@ -1,0 +1,130 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app paperless-gpt
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: paperless-gpt
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+
+  values:
+    controllers:
+      paperless-gpt:
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        initContainers:
+          # paperless-gpt writes to /app/prompts (copies defaults, saves UI
+          # edits), so the SOPS-managed templates are copied into a scratch
+          # directory on every start. Git is the source of truth: edits made
+          # in the web UI are lost on restart.
+          prompts:
+            image:
+              repository: alpine
+              tag: "3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6"
+            command: ["sh", "-c", "cp /prompts-src/*.tmpl /app/prompts/"]
+            resources:
+              requests:
+                cpu: 5m
+                memory: 8Mi
+              limits:
+                memory: 32Mi
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/icereed/paperless-gpt
+              tag: "v0.31.0@sha256:d668941a829552cc0eddbc7c22506b3480dfbf61bd0d6eae881ad9fcfe2de70c"
+            env:
+              PAPERLESS_BASE_URL: http://paperless.default.svc.cluster.local:8000
+              PAPERLESS_PUBLIC_URL: https://paperless.${SECRET_DOMAIN}
+
+              LLM_PROVIDER: anthropic
+              LLM_MODEL: claude-sonnet-5-5
+              LLM_LANGUAGE: English
+
+              # Documents tagged paperless-gpt-auto are processed and written
+              # straight back; paperless-gpt is the manual review queue.
+              AUTO_TAG: paperless-gpt-auto
+              MANUAL_TAG: paperless-gpt
+              AUTO_GENERATE_TITLE: "true"
+              AUTO_GENERATE_TAGS: "true"
+              AUTO_GENERATE_CORRESPONDENTS: "true"
+              AUTO_GENERATE_DOCUMENT_TYPE: "true"
+              # Keep the date paperless extracted at consume time; the
+              # financial-year saved views depend on it.
+              AUTO_GENERATE_CREATED_DATE: "false"
+              # Tags come only from the curated list.
+              CREATE_NEW_TAGS: "false"
+              # Overwrite correspondent and type so reprocessing can fix them.
+              PRESERVE_EXISTING_METADATA: "false"
+
+              LOG_LEVEL: info
+            envFrom:
+              - secretRef:
+                  name: paperless-gpt-secret
+
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+
+            # Upstream reserves 10m CPU and 20M. Calls to Claude are network
+            # bound; measure with kubectl top after the back-catalogue run.
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+
+    service:
+      app:
+        controller: paperless-gpt
+        ports:
+          http:
+            port: 8080
+
+    # No ingress. The web UI has no authentication and can rewrite any
+    # document, so it is reached with:
+    #   kubectl -n default port-forward svc/paperless-gpt 8080:8080
+
+    persistence:
+      # settings.json (custom field selection) and the undo history
+      data:
+        existingClaim: *app
+        advancedMounts:
+          paperless-gpt:
+            app:
+              - path: /app/config
+                subPath: config
+              - path: /app/db
+                subPath: db
+      prompts:
+        type: emptyDir
+        advancedMounts:
+          paperless-gpt:
+            prompts:
+              - path: /app/prompts
+            app:
+              - path: /app/prompts
+      prompts-src:
+        type: secret
+        name: paperless-gpt-prompts
+        advancedMounts:
+          paperless-gpt:
+            prompts:
+              - path: /prompts-src
+                readOnly: true
