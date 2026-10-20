@@ -38,7 +38,7 @@ diff <(git show main:kubernetes/apps/default/paperless-gpt/app/prompts.sops.yaml
 
 Things learned the hard way:
 
-- Every prompt must end, after the document content, with an instruction to reply with the answer alone. Without it the model sometimes writes its reasoning first, and paperless-gpt saves the whole reply as the title or correspondent. A long correspondent then fails paperless's 128-character limit.
+- Every prompt must end, after the document content, by telling the model to do any reasoning inside `<think></think>` tags and then give the answer alone. paperless-gpt strips `<think>` blocks before saving (`internal/textsanitize/reasoning.go`). Telling the model not to reason at all wasn't enough: 57 of about 6,200 titles still came back with reasoning in them, and a long correspondent fails paperless's 128-character limit.
 - `sops -d` re-indents block scalars. Scripted edits against decrypted output need to match the decrypted indentation, not the source file's.
 - A case-insensitive grep for a short word can match base64 ciphertext. Check a hit before assuming plaintext leaked.
 
