@@ -51,7 +51,7 @@ spec:
               PAPERLESS_PUBLIC_URL: https://paperless.${SECRET_DOMAIN}
 
               LLM_PROVIDER: anthropic
-              LLM_MODEL: claude-sonnet-5-5
+              LLM_MODEL: claude-haiku-5-5
               LLM_LANGUAGE: English
 
               # Documents tagged paperless-gpt-auto are processed and written
