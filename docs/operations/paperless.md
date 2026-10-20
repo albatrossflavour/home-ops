@@ -39,6 +39,8 @@ diff <(git show main:kubernetes/apps/default/paperless-gpt/app/prompts.sops.yaml
 Things learned the hard way:
 
 - Never ask the model to reason inside `<think>` tags or say the reasoning is thrown away. The API refuses the request outright (`stop_reason: refusal`, no content), paperless-gpt treats that as an empty answer, and documents get their correspondent, type and tags wiped while being marked complete. This happened to 663 documents on 2026-10-20. Prompts end with "Do not show any working or reasoning" instead. That still leaks reasoning occasionally (57 of about 6,200 titles), so check titles after a big reprocess.
+- Leaked reasoning comes from rules that seem to conflict with the document in front of the model: a business named after a person, an unreadable issuer, "registration" meaning an event. Spell out each edge case in the prompt and tell it a best guess beats an explanation. That took a set of 8 leaking documents to 0.
+- Sonnet 5.5 reasons in a separate thinking block on hard documents (about 500 tokens). That's invisible to paperless-gpt and is part of why a document costs about 2.6 cents.
 - Before shipping a prompt change, send it to the API by hand against a couple of real documents and check `stop_reason` is `end_turn`.
 - `sops -d` re-indents block scalars. Scripted edits against decrypted output need to match the decrypted indentation, not the source file's.
 - A case-insensitive grep for a short word can match base64 ciphertext. Check a hit before assuming plaintext leaked.
