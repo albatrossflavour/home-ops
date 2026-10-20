@@ -69,6 +69,10 @@ spec:
               CREATE_NEW_TAGS: "false"
               # Overwrite correspondent and type so reprocessing can fix them.
               PRESERVE_EXISTING_METADATA: "false"
+              # Send only the 150 correspondents most relevant to the document
+              # (names appearing in it first) instead of the whole list, which
+              # keeps the prompt from growing with every new correspondent.
+              CORRESPONDENT_PROMPT_LIMIT: "150"
 
               LOG_LEVEL: info
             envFrom:
