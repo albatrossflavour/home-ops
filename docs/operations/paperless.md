@@ -38,7 +38,8 @@ diff <(git show main:kubernetes/apps/default/paperless-gpt/app/prompts.sops.yaml
 
 Things learned the hard way:
 
-- Every prompt must end, after the document content, by telling the model to do any reasoning inside `<think></think>` tags and then give the answer alone. paperless-gpt strips `<think>` blocks before saving (`internal/textsanitize/reasoning.go`). Telling the model not to reason at all wasn't enough: 57 of about 6,200 titles still came back with reasoning in them, and a long correspondent fails paperless's 128-character limit.
+- Never ask the model to reason inside `<think>` tags or say the reasoning is thrown away. The API refuses the request outright (`stop_reason: refusal`, no content), paperless-gpt treats that as an empty answer, and documents get their correspondent, type and tags wiped while being marked complete. This happened to 663 documents on 2026-10-20. Prompts end with "Do not show any working or reasoning" instead. That still leaks reasoning occasionally (57 of about 6,200 titles), so check titles after a big reprocess.
+- Before shipping a prompt change, send it to the API by hand against a couple of real documents and check `stop_reason` is `end_turn`.
 - `sops -d` re-indents block scalars. Scripted edits against decrypted output need to match the decrypted indentation, not the source file's.
 - A case-insensitive grep for a short word can match base64 ciphertext. Check a hit before assuming plaintext leaked.
 
