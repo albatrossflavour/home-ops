@@ -55,7 +55,7 @@ spec:
               PAPERLESS_PORT: "8000"
               PAPERLESS_TIME_ZONE: "Australia/Sydney"
               PAPERLESS_WEBSERVER_WORKERS: "2"
-              PAPERLESS_TASK_WORKERS: "4"
+              PAPERLESS_TASK_WORKERS: "2"
               # Web workers grow with API traffic (paperless-gpt polls constantly) and reached
               # 2.7G each. Granian respawns a worker once it passes this many MiB.
               GRANIAN_WORKERS_MAX_RSS: "1024"
