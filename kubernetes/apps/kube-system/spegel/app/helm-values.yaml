@@ -5,6 +5,3 @@ spegel:
   mirrorResolveRetries: 1
   registryFilters:
     - ".*:latest$"
-service:
-  registry:
-    hostPort: 29999
