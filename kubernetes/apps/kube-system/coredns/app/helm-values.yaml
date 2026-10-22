@@ -43,6 +43,10 @@ servers:
       - name: loop
       - name: reload
       - name: loadbalance
+# Two replicas so a CoreDNS roll never takes cluster DNS away entirely
+replicaCount: 2
+podDisruptionBudget:
+  minAvailable: 1
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -50,6 +54,14 @@ affinity:
         - matchExpressions:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: coredns
 tolerations:
   - key: CriticalAddonsOnly
     operator: Exists
