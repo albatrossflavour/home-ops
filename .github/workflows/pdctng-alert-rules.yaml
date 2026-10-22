@@ -35,17 +35,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # A missing token fails the run. It used to skip with a notice, and the
+      # job then reported success every day while doing nothing. Since the
+      # source moved to puppetlabs/observability no albatrossflavour-owned
+      # token can read it; the replacement is a POBS alert_definitions tool.
       - name: Check for a token
         id: token
         env:
           PDCTNG_SYNC_TOKEN: ${{ secrets.PDCTNG_SYNC_TOKEN }}
         run: |
           if [ -z "${PDCTNG_SYNC_TOKEN}" ]; then
-            echo "::notice::PDCTNG_SYNC_TOKEN is not set, so pdctng cannot be read. Skipping."
-            echo "present=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "::error::PDCTNG_SYNC_TOKEN is not set, so the alert rules cannot be synced."
+            exit 1
           fi
+          echo "present=true" >> "$GITHUB_OUTPUT"
 
       - name: Checkout home-ops
         if: steps.token.outputs.present == 'true'
