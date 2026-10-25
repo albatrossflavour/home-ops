@@ -1,0 +1,99 @@
+---
+# Keeps custom-alerts/app/puppet.yaml in step with the rules the POBS primary
+# actually runs, by proposing a PR whenever they differ. See sync.py.
+#
+# The rules come from GET /api/v1/alerts/prometheusrule on the primary's 10051
+# (POBS R1168), which renders the deployed module at this estate's thresholds.
+# mTLS: it presents the same PE-signed client certificate Prometheus uses to
+# scrape 10050, so that certificate's CN has to stay on
+# observability::dashboard_export_api_allowlist in control-repo.
+#
+# A failed run surfaces through KubeJobFailed rather than a red Actions run.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pobs-alert-sync
+spec:
+  schedule: "17 6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          initContainers:
+            # promtool from the same Prometheus version the cluster runs, copied
+            # into a shared volume so the python image needs nothing installed.
+            - name: promtool
+              image: quay.io/prometheus/prometheus:v3.15.0@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e
+              command: ["/bin/cp", "/bin/promtool", "/tools/promtool"]
+              volumeMounts:
+                - name: tools
+                  mountPath: /tools
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  memory: 64Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+          containers:
+            - name: sync
+              image: python:3.15-slim@sha256:2da676046630d7bf14c6764ae1143dc7fa0377a53f94bf5a642f0b214aca5bce
+              command: ["python3", "-I", "/app/sync.py"]
+              env:
+                - name: GITHUB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: pobs-alert-sync
+                      key: github_token
+              volumeMounts:
+                - name: script
+                  mountPath: /app
+                  readOnly: true
+                - name: tls
+                  mountPath: /tls
+                  readOnly: true
+                - name: tools
+                  mountPath: /tools
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            - name: script
+              configMap:
+                name: pobs-alert-sync-script
+            # Created by kube-prometheus-stack's ExternalSecret (pdctng R845).
+            - name: tls
+              secret:
+                secretName: pdctng-scrape-tls
+                defaultMode: 0440
+            - name: tools
+              emptyDir: {}
+            - name: tmp
+              emptyDir: {}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            fsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
