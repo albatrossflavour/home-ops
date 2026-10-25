@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./externalsecret.yaml
+  - ./cronjob.yaml
+configMapGenerator:
+  - name: pobs-alert-sync-script
+    files:
+      - sync.py

@@ -6,6 +6,7 @@ resources:
   - ./serviceaccount-default.yaml
   - ./prometheus-operator-crds/ks.yaml
   - ./custom-alerts/ks.yaml
+  - ./pobs-alert-sync/ks.yaml
   - ./grafana/ks.yaml
   - ./tempo/ks.yaml
   - ./blackbox-exporter/ks.yaml
