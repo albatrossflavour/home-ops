@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: external-dns
-      version: 1.21.1
+      version: 1.23.0
       sourceRef:
         kind: HelmRepository
         name: external-dns
@@ -33,9 +33,12 @@ spec:
             key: EXTERNAL_DNS_PIHOLE_PASSWORD
     extraArgs:
       - --pihole-server=http://192.168.9.2
-      - --pihole-api-version=6
       - --ingress-class=internal
     annotationFilter: "external-dns.alpha.kubernetes.io/target==internal.${SECRET_DOMAIN}"
+    # external-dns 0.22 changed the default prefix to external-dns.kubernetes.io/ with no
+    # fallback, and every ingress here uses the alpha prefix. Without this it ignores our
+    # targets and deletes the proxied CNAMEs (2026-09-29, #1857).
+    annotationPrefix: external-dns.alpha.kubernetes.io/
     policy: sync
     sources: ["ingress"]
     triggerLoopOnEvent: true

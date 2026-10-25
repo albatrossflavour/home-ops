@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: external-dns
-      version: 1.21.1
+      version: 1.23.0
       sourceRef:
         kind: HelmRepository
         name: external-dns
@@ -37,6 +37,10 @@ spec:
       - --cloudflare-proxied
       - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
       - --crd-source-kind=DNSEndpoint
+    # external-dns 0.22 changed the default prefix to external-dns.kubernetes.io/ with no
+    # fallback, and every ingress here uses the alpha prefix. Without this it ignores our
+    # targets and deletes the proxied CNAMEs (2026-09-29, #1857).
+    annotationPrefix: external-dns.alpha.kubernetes.io/
     policy: sync
     sources: ["crd", "ingress"]
     txtPrefix: k8s.
