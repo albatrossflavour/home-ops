@@ -9,7 +9,7 @@ spec:
   interval: 12h
   url: oci://ghcr.io/kyverno/charts/policy-reporter
   ref:
-    tag: 3.11.1
-    digest: sha256:058c8ec46566b90ade2cea99811bedc79e433898aeb80052ee0f5fb5f0a38699
+    tag: 3.11.2
+    digest: sha256:8ae9316555bc2f4b111bbec67c428549c1bf254ed806575784738e5a3022f2b7
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
