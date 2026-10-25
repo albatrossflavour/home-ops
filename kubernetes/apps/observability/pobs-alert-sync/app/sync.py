@@ -71,8 +71,14 @@ def gh(method, path, body=None):
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.load(r)
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        # GitHub's reason ("Resource not accessible by personal access token")
+        # is in the body, and a bare 403 says nothing about which permission.
+        print(f"{method} {path}: {e.code} {e.read().decode(errors='replace')}", file=sys.stderr)
+        raise
 
 
 def summary(text):
@@ -126,21 +132,22 @@ def main():
     if DRY_RUN:
         return
 
-    # Each run starts the branch again from main: the file is a whole artefact.
+    # Each run builds one commit on top of main (the file is a whole artefact)
+    # and moves the branch straight to it. Resetting the branch to main first
+    # makes the open PR empty for a moment, and GitHub closes an empty PR.
     main_sha = gh("GET", "/git/ref/heads/main")["object"]["sha"]
+    base_tree = gh("GET", f"/git/commits/{main_sha}")["tree"]["sha"]
+    tree = gh("POST", "/git/trees", {
+        "base_tree": base_tree,
+        "tree": [{"path": TARGET, "mode": "100644", "type": "blob", "content": rendered.decode()}],
+    })["sha"]
+    commit = gh("POST", "/git/commits", {"message": title, "tree": tree, "parents": [main_sha]})["sha"]
     try:
-        gh("PATCH", f"/git/refs/heads/{BRANCH}", {"sha": main_sha, "force": True})
+        gh("PATCH", f"/git/refs/heads/{BRANCH}", {"sha": commit, "force": True})
     except urllib.error.HTTPError as e:
         if e.code not in (404, 422):
             raise
-        gh("POST", "/git/refs", {"ref": f"refs/heads/{BRANCH}", "sha": main_sha})
-    blob = gh("GET", f"/contents/{TARGET}?ref={BRANCH}")["sha"]
-    gh("PUT", f"/contents/{TARGET}", {
-        "message": title,
-        "content": base64.b64encode(rendered).decode(),
-        "sha": blob,
-        "branch": BRANCH,
-    })
+        gh("POST", "/git/refs", {"ref": f"refs/heads/{BRANCH}", "sha": commit})
 
     owner = REPO.split("/")[0]
     open_prs = gh("GET", f"/pulls?state=open&head={owner}:{BRANCH}")
