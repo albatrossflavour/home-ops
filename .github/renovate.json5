@@ -149,6 +149,18 @@
       allowedVersions: '<2.3.0',
     },
     {
+      description: [
+        'Hold sonarr on v4 until upstream ships v5 as stable: every v5 release is a prerelease, and v5 migrates the database so a revert means a restore. Remove once v5 is stable.',
+      ],
+      matchDatasources: [
+        'docker',
+      ],
+      matchPackageNames: [
+        'ghcr.io/home-operations/sonarr',
+      ],
+      allowedVersions: '<5',
+    },
+    {
       matchDatasources: [
         'helm',
       ],
