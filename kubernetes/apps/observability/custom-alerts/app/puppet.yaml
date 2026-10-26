@@ -1855,6 +1855,37 @@ spec:
           the node is not reporting, is reporting but not compiling, or has had its
           certificate revoked.
         thresholds: node_silent_human, node_silent_seconds
+  - name: pobs-health
+    rules:
+    - record: pobs_health_area_score
+      expr: min by (alias, area) (pobs_health_signal_score)
+    - record: pobs_health_score
+      expr: min by (alias) (pobs_health_area_score)
+    - record: pobs_health_signal_score
+      expr: label_replace(label_replace(100 * clamp_min(1 - (sum by (alias) (puppet_state_overview{state="failed"})
+        / clamp_min(sum by (alias) (puppet_state_overview), 1)) / 0.2, 0), "area",
+        "convergence", "", ""), "signal", "Failed runs", "", "") or label_replace(label_replace(100
+        * clamp_min(1 - (sum by (alias) (puppet_state_overview{state="unknown"}) /
+        clamp_min(sum by (alias) (puppet_state_overview), 1)) / 0.2, 0), "area", "convergence",
+        "", ""), "signal", "Nodes with no report", "", "") or label_replace(label_replace(100
+        * clamp_min(1 - (sum by (alias) (puppet_node_exception_count{reason="not_reporting"})
+        / clamp_min(sum by (alias) (puppet_state_overview), 1)) / 0.2, 0), "area",
+        "convergence", "", ""), "signal", "Nodes not reporting", "", "") or label_replace(label_replace(100
+        / (1 + count by (alias) (count by (alias, check) (puppet_pe_status_check_failing)))
+        or 100 * group by (alias) (up{job="puppet"}), "area", "platform", "", ""),
+        "signal", "Failing pe_status_check indicators", "", "") or label_replace(label_replace(group
+        by (alias) (up{job="puppet"}) * on() group_left() (100 * clamp(1 - (max(avg_over_time(puppet_ceiling_utilisation[15m]))
+        - 0.7) / (1 - 0.7), 0, 1)), "area", "capacity", "", ""), "signal", "Worst
+        capacity ceiling", "", "") or label_replace(label_replace(100 * clamp_max(avg
+        by (alias) (puppet_compliance_score{standard="cis",score_type="adjusted"})
+        / 90, 1), "area", "compliance", "", ""), "signal", "CIS score against target",
+        "", "") or label_replace(label_replace(100 * clamp_min(1 - (sum by (alias)
+        (puppet_remediation_items{state="breached"}) / clamp_min(sum by (alias) (puppet_remediation_items),
+        1)) / 0.2, 0), "area", "compliance", "", ""), "signal", "Remediation past
+        SLA", "", "") or label_replace(label_replace(100 * avg by (alias) (puppet_exporter_collector_success),
+        "area", "data", "", ""), "signal", "Collectors succeeding", "", "") or label_replace(label_replace(100
+        * avg by (alias) (avg_over_time(up{job="puppet"}[1h])), "area", "data", "",
+        ""), "signal", "Scrapes succeeding, last hour", "", "")
   - name: pobs-license
     rules:
     - alert: PobsLicenseExpiringCritical
