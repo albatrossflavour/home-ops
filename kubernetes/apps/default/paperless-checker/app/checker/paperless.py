@@ -55,6 +55,12 @@ class PaperlessClient:
     def history(self, doc_id):
         return self._call("GET", f"documents/{doc_id}/history/")
 
+    def notes(self, doc_id):
+        return self._call("GET", f"documents/{doc_id}/notes/")
+
+    def tagged(self, tag_id):
+        return self._all("documents/", {"tags__id__all": tag_id, "ordering": "-modified", "page_size": 100})
+
     def add_note(self, doc_id, text):
         self._call("POST", f"documents/{doc_id}/notes/", body={"note": text})
 

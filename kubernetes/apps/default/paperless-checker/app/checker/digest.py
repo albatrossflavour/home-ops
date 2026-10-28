@@ -5,7 +5,7 @@ from email.message import EmailMessage
 from html import escape
 
 FIELD_LABELS = {"created": "Created date", "title": "Title", "tags_add": "Tag added", "tags_remove": "Tag removed",
-                "document_type": "Type", "correspondent": "Correspondent", "owner": "Owner", "amount": "Amount"}
+                "document_type": "Type", "correspondent": "Correspondent", "owner": "Owner", "amount": "Amount", "check-failed": "Couldn't check"}
 CSS = ("body{font-family:-apple-system,Segoe UI,sans-serif;max-width:640px;margin:0 auto;padding:16px;color:#1d1d1f}"
        "h2{font-size:18px;margin:24px 0 8px}a{color:#0a58ca}"
        ".doc{border:1px solid #ddd;border-radius:8px;padding:10px 12px;margin:8px 0}"
