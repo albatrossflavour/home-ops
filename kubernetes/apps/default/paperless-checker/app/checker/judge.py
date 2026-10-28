@@ -52,7 +52,11 @@ Raise a decision (short lowercase-hyphenated key, plain sentence of text) when:
 Return no changes and no decisions if everything is right."""
 
 
-class UsageLimit(Exception):
+class StopRun(Exception):
+    """Nothing more can be checked this run; leave the remaining documents for the next one."""
+
+
+class UsageLimit(StopRun):
     pass
 
 
@@ -92,6 +96,8 @@ def judge(prompt, run=subprocess.run, claude_bin="claude"):
         raise JudgeError(f"unreadable output (exit {proc.returncode}): {proc.stderr[-300:]}") from e
     if out.get("is_error"):
         text = json.dumps(out).lower()
+        if out.get("api_error_status") in (401, 403) or "authenticate" in text:
+            raise StopRun("Claude login failed; the CLAUDE_CODE_OAUTH_TOKEN needs renewing with `claude setup-token`")
         if out.get("api_error_status") == 429 or "limit" in str(out.get("subtype", "")).lower() or "usage limit" in text:
             raise UsageLimit(out.get("result") or "usage limit")
         raise JudgeError(out.get("result") or f"error {out.get('api_error_status')}")

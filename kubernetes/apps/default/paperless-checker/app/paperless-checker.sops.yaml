@@ -1,0 +1,26 @@
+# Who is who in paperless. Encrypted because it names the family.
+apiVersion: v1
+kind: Secret
+metadata:
+    name: paperless-checker-config
+type: Opaque
+stringData:
+    HAND_EDITORS: ENC[AES256_GCM,data:S/1SU9yAISiUkz4=,iv:qdOe6gH0LRxecKNHKKNMX0CEe/ARuOiGXITWssvfInU=,tag:f5xEHRyRAeXAaXYTkh2rAQ==,type:str]
+    PERSON_USERS: ENC[AES256_GCM,data:S/LqByQfAfSZ6sMXBhxRq6LYzK8PlmqVBvMrSPs+Q8T8puKseK8=,iv:HX7vJhxGSZZcj2KUz6lf4MJ8ikxQUSqlm0S46GI+D10=,tag:wfhAKwbxVwfV6MFmKGWFkw==,type:str]
+    OWNER_DEFAULT: ENC[AES256_GCM,data:9UcWiwuC,iv:UyllsUXIze5lltpUOLnyx5Rmmf8yBmNNUPfFxgGoq+0=,tag:625xJFRZcfEoAqHPfFfuFg==,type:str]
+    DIGEST_TO: ENC[AES256_GCM,data:06pGBrEl0tE7muxM/MbPTPb4e2+pnkRDOCX/,iv:PatUt1uHzQPM5ncFIIHex/Ob/scGNd1NP9dQJTPdj3Q=,tag:Knj9xAe0zp45yjXDMJqhkw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBqK2FheEZranlsbXQzUS9H
+            YzgwWFVqbCtTY0ZDQjBOOVlTNmZwbUc1cmdRCnNaSkhlMFNIWHJBUTZxTi9UTHBD
+            RVBmTnZ3OThmNEw5MGdpdE43QnJmZFEKLS0tIDhSblVRQ3l3aHc0MlJMZHNFQW1x
+            Zjc5c0diTmthYVlISWVVZ2dqWFhtQ28KvgNOuvq2iojSiXr6WM+3Ww5M6UD2pQPI
+            p2Frbwjqau3wZ4dL5LAWpFlQd832Y5v0uGedJMGnOyMQAx9/8655wQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1n7n73hztvwkq43gskmeddawn5w638dh30g0jycfxvn4h7ek9yvfq8tesqz
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-28T03:14:36Z"
+    mac: ENC[AES256_GCM,data:IfkMvsroq4H6XOZaiIHM59/xDwuAO35q4vbIuD78R6ri9ue4C1IT/PulTDD8H/h/Qp9zDIurmxvRWZ3JNiOV2l42iHGPFvvpHmnk467vAEYDkGfD4AOC/BdQ+qU5wWLSIVslwKIC1aINBifKy5/JXI5QaN2gQqD6BVJd0npufac=,iv:G0p5XD/0Q8OJ7J3qVIovHHjN6iY3AFd0WsWO9/KlSc8=,tag:9rJOKrs3/Zo8fIc/Zm4ogA==,type:str]
+    version: 3.13.3

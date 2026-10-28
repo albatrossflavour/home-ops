@@ -8,7 +8,7 @@ import sys
 from zoneinfo import ZoneInfo
 
 from checker import digest
-from checker.judge import JudgeError, UsageLimit, build_prompt, judge
+from checker.judge import JudgeError, StopRun, UsageLimit, build_prompt, judge
 from checker.paperless import PaperlessClient
 from checker.plan import locked_fields, plan_changes
 from checker.state import State
@@ -133,9 +133,9 @@ def run(client, judge_fn, state, env, now, send_fn):
                 log(f"{listed['id']}: gone, skipped")
             else:
                 check_document(client, judge_fn, state, d, ctx, dry)
-        except UsageLimit as e:
+        except StopRun as e:
             log(f"stopping: {e}")
-            state.stopped = f"usage limit reached ({e})"
+            state.stopped = f"usage limit reached ({e})" if isinstance(e, UsageLimit) else str(e)
             code = 2
             break
         except JudgeError as e:
