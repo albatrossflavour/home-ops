@@ -11,6 +11,12 @@ PROPOSAL_FIELD = {"tags_add": "tags", "tags_remove": "tags"}
 EARLIEST = datetime.date(1991, 1, 1)
 AMOUNT = re.compile(r"^\d+(\.\d{2})?$")
 KEY = re.compile(r"^[a-z0-9-]{3,40}$")
+# todo makes an OmniFocus task on Hex (~/bin/paperless-todo), so only a person may add it
+PEOPLE_ONLY_TAGS = {"needs-decision", "todo"}
+
+
+def is_system_tag(name):
+    return name.startswith("paperless-gpt") or name in PEOPLE_ONLY_TAGS
 
 
 @dataclass
@@ -29,7 +35,7 @@ def current_values(doc, ignore_tag_ids, amount_field_id):
             "created": doc.get("created"), "owner": doc.get("owner"), "amount": amount}
 
 
-def locked_fields(history, hand_editors, doc_state, current, system_tag_names):
+def locked_fields(history, hand_editors, doc_state, current, system_tag_names, system_tag_ids=frozenset()):
     """Fields the checker must leave alone.
 
     'hand' if a person made the latest change to it. 'checker' while the value the checker set
@@ -45,6 +51,9 @@ def locked_fields(history, hand_editors, doc_state, current, system_tag_names):
                 continue
             if key == "tags" and isinstance(value, dict) and set(value.get("objects") or []) <= set(system_tag_names):
                 continue  # closing a decision or the AI's queue tags isn't a hand edit of the tags
+            if key == "tags" and isinstance(value, list) and len(value) == 2 and \
+                    set(value[0] or []) ^ set(value[1] or []) <= set(system_tag_ids):
+                continue  # the same, logged by a bulk edit as before and after id lists
             last[HISTORY_FIELDS[key]] = actor
     locked = {f: "hand" for f, actor in last.items() if actor in hand_editors}
     for f, value in (doc_state.get("set_values") or {}).items():
@@ -68,7 +77,7 @@ def plan_changes(doc, proposal, *, names, locked, raised, person_users, owner_de
                  amount_field_id, needs_decision_id, today, allow_new_decisions=True):
     tag_ids = names["tags"]
     tag_names = {v: k for k, v in tag_ids.items()}
-    applicable = {n for n in tag_ids if not n.startswith("paperless-gpt") and n != "needs-decision"}
+    applicable = {n for n in tag_ids if not is_system_tag(n)}
     type_names = {v: k for k, v in names["document_types"].items()}
     corr_names = {v: k for k, v in names["correspondents"].items()}
 

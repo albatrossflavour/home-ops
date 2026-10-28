@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 from checker import digest
 from checker.judge import JudgeError, StopRun, UsageLimit, build_prompt, judge
 from checker.paperless import PaperlessClient
-from checker.plan import Change, current_values, locked_fields, plan_changes
+from checker.plan import Change, current_values, is_system_tag, locked_fields, plan_changes
 from checker.state import State
 
 DIGEST_HOUR = 6
@@ -61,7 +61,8 @@ def check_document(client, judge_fn, state, d, ctx, dry):
         return
 
     current = current_values(d, ctx["system_tags"], ctx["amount_field"])
-    locked = locked_fields(client.history(d["id"]), ctx["hand"], st, current, ctx["system_tag_names"])
+    locked = locked_fields(client.history(d["id"]), ctx["hand"], st, current, ctx["system_tag_names"],
+                           ctx["system_tags"])
     prompt = build_prompt(d, client.neighbours(d), ctx["rules"], ctx["names"], locked,
                           raised=st["decisions"], amount_field_id=ctx["amount_field"])
     proposal = judge_fn(prompt)
@@ -148,7 +149,7 @@ def run(client, judge_fn, state, env, now, send_fn):
         "amount_field": client.lookup("custom_fields").get("Amount"),
         "needs_decision": tags["needs-decision"], "failed": tags.get("paperless-gpt-failed"),
     }
-    ctx["system_tag_names"] = {n for n in tags if n.startswith("paperless-gpt") or n == "needs-decision"}
+    ctx["system_tag_names"] = {n for n in tags if is_system_tag(n)}
     ctx["system_tags"] = {tags[n] for n in ctx["system_tag_names"]}
     if state.fresh and not state.last_run_set():
         # First run: start from CHECK_SINCE (or now), never the back catalogue
