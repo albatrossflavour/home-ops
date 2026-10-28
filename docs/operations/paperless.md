@@ -75,3 +75,25 @@ Correspondents are restricted to existing names in practice, because the prompt 
 
 - **Deleting a parent tag deletes its children.** Deleting a tag that a workflow filters on leaves the workflow's filter empty, so it matches every document. Check `children` and every workflow's `filter_has_tags` before deleting tags, and disable affected workflows first.
 - **The Anthropic key must be scoped to a workspace.** An unscoped key fails every request with `This API key is not scoped to a workspace ... must include the anthropic-workspace-id header`, and paperless-gpt can't send that header.
+
+## Second-pass checker
+
+`kubernetes/apps/default/paperless-checker` runs hourly at five past. It re-checks every document paperless-gpt has finished with since its last run, compares it with the house rules (the same `paperless-gpt-prompts` Secret, mounted at `/rules`) and the closest existing documents, and fixes what paperless-gpt got wrong. It runs `claude -p` with no tools on the subscription token, and the script does the writing with PATCH and note calls only. It has no way to delete a document.
+
+What it leaves behind:
+
+- A note on each document it changes, `checker: <field> <old> → <new>, because <reason>`.
+- The `needs-decision` tag and a `checker decision [<key>]:` note when a person has to decide or act. Removing the tag closes it, and that decision isn't raised again on that document unless its text changes.
+- One HTML email a day, at the first run after 06:00, only when something changed or a decision is open.
+
+It acts as the paperless superuser `checker`, so its edits are told apart from people's in the audit log (`admin` is paperless-gpt). A field a person changed last is never overwritten.
+
+State lives on the `paperless-checker` PVC: `/data/state.json` (what it has checked, the values it set, decisions raised) and `/data/changes.jsonl` (one line per change, with the old value, so anything can be put back). `CHECK_SINCE` in the HelmRelease is only read while there is no state file.
+
+Day to day:
+
+- Run it now: `kubectl -n default create job --from=cronjob/paperless-checker checker-manual-$(date +%s)`
+- Pause it: set `suspend: true` under the cronjob in the HelmRelease.
+- See what it would do without changing anything: add `DRY_RUN: "1"` to its env.
+- A run that stops early (usage limit, Claude or paperless down, Claude token rejected) exits 2, keeps what it finished, and says why in the next email. A rejected token is renewed with `claude setup-token`, stored in the `discworld` vault as `CLAUDE_CODE_OAUTH_TOKEN`.
+- A document listed as "Couldn't check" is skipped until it changes. Requeue it through paperless-gpt with `paperless-gpt-auto`, and the checker picks it up afterwards.
