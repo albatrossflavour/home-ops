@@ -5,7 +5,7 @@ from checker.plan import current_values, locked_fields, plan_changes
 
 NAMES = {
     "tags": {"Edward": 1, "Car": 2, "hit-by-a-bus-plan": 3, "needs-decision": 4,
-             "paperless-gpt-auto": 5, "Home": 6},
+             "paperless-gpt-auto": 5, "Home": 6, "todo": 8},
     "document_types": {"Form": 10, "Manual": 11},
     "correspondents": {"1Password": 20},
     "users": {"tgreen": 4, "edward": 38},
@@ -48,6 +48,11 @@ class PlanTest(unittest.TestCase):
 
     def test_system_tags_not_accepted(self):
         patch, _, _ = plan(doc(), [ch("tags_add", ["paperless-gpt-auto", "needs-decision"])])
+        self.assertEqual(patch, {})
+
+    def test_todo_tag_never_added_by_checker(self):
+        # todo makes an OmniFocus task, so only a person may add it
+        patch, _, _ = plan(doc(), [ch("tags_add", ["todo"])])
         self.assertEqual(patch, {})
 
     def test_needs_decision_tag_only_removed_by_people(self):
@@ -119,7 +124,7 @@ def h(ts, actor, changes, action="update"):
     return {"timestamp": ts, "action": action, "actor": {"username": actor} if actor else None, "changes": changes}
 
 
-SYSTEM = {"needs-decision", "paperless-gpt-auto", "paperless-gpt-failed"}
+SYSTEM = {"needs-decision", "paperless-gpt-auto", "paperless-gpt-failed", "todo"}
 NO_STATE = {"set_values": {}}
 
 
@@ -144,6 +149,16 @@ class LockedFieldsTest(unittest.TestCase):
     def test_system_tag_edit_does_not_lock(self):
         history = [h("2026-10-02", "tgreen", {"tags": {"type": "m2m", "objects": ["needs-decision"], "operation": "delete"}})]
         self.assertEqual(locked_fields(history, {"tgreen"}, NO_STATE, {}, SYSTEM), {})
+
+    def test_todo_tag_edits_do_not_lock(self):
+        # 6651: Tony added todo, then paperless-todo cleared it with a bulk edit, logged as id lists
+        history = [h("2026-10-29", "tgreen", {"tags": [[8], []]}),
+                   h("2026-10-28", "tgreen", {"tags": {"type": "m2m", "objects": ["todo"], "operation": "add"}})]
+        self.assertEqual(locked_fields(history, {"tgreen"}, NO_STATE, {}, SYSTEM, {8}), {})
+
+    def test_bulk_tag_edit_by_hand_still_locks(self):
+        history = [h("2026-10-29", "tgreen", {"tags": [[8], [8, 2]]})]
+        self.assertEqual(locked_fields(history, {"tgreen"}, NO_STATE, {}, SYSTEM, {8}), {"tags": "hand"})
 
     def test_checker_lock_only_while_value_stands(self):
         state = {"set_values": {"document_type": 10}}
