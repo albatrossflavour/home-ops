@@ -5,12 +5,13 @@ import hashlib
 import json
 import os
 import sys
+import urllib.error
 from zoneinfo import ZoneInfo
 
 from checker import digest
 from checker.judge import JudgeError, StopRun, UsageLimit, build_prompt, judge
 from checker.paperless import PaperlessClient
-from checker.plan import locked_fields, plan_changes
+from checker.plan import Change, current_values, locked_fields, plan_changes
 from checker.state import State
 
 DIGEST_HOUR = 6
@@ -25,8 +26,9 @@ def _hash(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, default=str).encode()).hexdigest()
 
 
-def fields_hash(doc):
-    return _hash({k: sorted(doc.get(k) or []) if k == "tags" else doc.get(k) for k in HASHED})
+def fields_hash(doc, ctx):
+    # System tags are left out, so closing a decision (removing needs-decision) doesn't trigger a recheck
+    return _hash(current_values(doc, ctx["system_tags"], ctx["amount_field"]))
 
 
 def _read_log(path, since):
@@ -37,29 +39,44 @@ def _read_log(path, since):
     return [r for r in rows if not since or r["ts"] > since]
 
 
+def _write_log(ctx, doc, rows):
+    ts = ctx["now"].isoformat()
+    with open(ctx["log_path"], "a") as f:
+        for field, old, new, reason in rows:
+            f.write(json.dumps({"ts": ts, "doc": doc["id"], "title": doc.get("title"), "field": field,
+                                "old": old, "new": new, "reason": reason}, default=str) + "\n")
+        f.flush()
+
+
 def check_document(client, judge_fn, state, d, ctx, dry):
     content = d.get("content") or ""
     chash = _hash(content)
     st = state.doc(d["id"])
-    if st["content_hash"] == chash and st["fields_hash"] == fields_hash(d):
+    if st["content_hash"] == chash and st["fields_hash"] == fields_hash(d, ctx):
         return
     if not content.strip():
         log(f"{d['id']}: no OCR text, skipped")
         if not dry:
-            state.mark_checked(d["id"], chash, fields_hash(d), st["changed_fields"], st["decisions"])
+            state.mark_checked(d["id"], chash, fields_hash(d, ctx), st["set_values"], st["decisions"])
         return
 
-    locked = locked_fields(client.history(d["id"]), ctx["hand"], st, chash)
-    prompt = build_prompt(d, client.neighbours(d), ctx["rules"], ctx["names"], locked)
+    current = current_values(d, ctx["system_tags"], ctx["amount_field"])
+    locked = locked_fields(client.history(d["id"]), ctx["hand"], st, current, ctx["system_tag_names"])
+    prompt = build_prompt(d, client.neighbours(d), ctx["rules"], ctx["names"], locked,
+                          raised=st["decisions"], amount_field_id=ctx["amount_field"])
     proposal = judge_fn(prompt)
+    # Same text as when decisions were last raised: anything "new" is the same point reworded
+    allow_new = not (st["decisions"] and st["content_hash"] == chash)
     patch, changes, decisions = plan_changes(
         d, proposal, names=ctx["names"], locked=locked, raised=set(st["decisions"]),
         person_users=ctx["person_users"], owner_default_id=ctx["owner_default"],
-        amount_field_id=ctx["amount_field"], needs_decision_id=ctx["needs_decision"], today=ctx["today"])
+        amount_field_id=ctx["amount_field"], needs_decision_id=ctx["needs_decision"], today=ctx["today"],
+        allow_new_decisions=allow_new)
     failed = ctx["failed"]
     if failed in (patch.get("tags") or d.get("tags") or []):
         # The checker has now classified it, so the "requeue failed" runbook mustn't undo that
         patch["tags"] = sorted(set(patch.get("tags") or d["tags"]) - {failed})
+        changes.append(Change("tags_remove", "paperless-gpt-failed", None, "the checker classified it instead"))
 
     for c in changes:
         log(f"{d['id']}: {c.field} {c.old!r} -> {c.new!r} ({c.reason})")
@@ -75,20 +92,27 @@ def check_document(client, judge_fn, state, d, ctx, dry):
         ctx["names"]["correspondents"][name] = patch["correspondent"]
     if patch:
         client.patch(d["id"], patch)
-    ts = ctx["now"].isoformat()
-    with open(ctx["log_path"], "a") as f:
-        for c in changes:
-            f.write(json.dumps({"ts": ts, "doc": d["id"], "title": d.get("title"), "field": c.field,
-                                "old": c.old, "new": c.new, "reason": c.reason}, default=str) + "\n")
-        f.flush()
+    # From here the change is made, so record it whatever happens to the notes
+    _write_log(ctx, d, [(c.field, c.old, c.new, c.reason) for c in changes])
+    notes = []
     if changes:
-        client.add_note(d["id"], "\n".join(f"checker: {c.field} {c.old} → {c.new}, because {c.reason}" for c in changes))
-    for x in decisions:
-        client.add_note(d["id"], f"checker decision [{x['key']}]: {x['text']}")
-
-    after = client.document(d["id"]) or d
-    changed = sorted(set(st["changed_fields"]) | {"tags" if c.field.startswith("tags_") else c.field for c in changes})
-    state.mark_checked(d["id"], chash, fields_hash(after), changed, st["decisions"] + [x["key"] for x in decisions])
+        notes.append("\n".join(f"checker: {c.field} {c.old} → {c.new}, because {c.reason}" for c in changes))
+    notes += [f"checker decision [{x['key']}]: {x['text']}" for x in decisions]
+    for note in notes:
+        try:
+            client.add_note(d["id"], note)
+        except (urllib.error.URLError, OSError) as e:
+            log(f"{d['id']}: note failed: {e}")
+    try:
+        after = client.document(d["id"]) or dict(d, **patch)
+    except (urllib.error.URLError, OSError):
+        after = dict(d, **patch)
+    after_values = current_values(after, ctx["system_tags"], ctx["amount_field"])
+    set_values = dict(st["set_values"])
+    for c in changes:
+        field = "tags" if c.field.startswith("tags_") else c.field
+        set_values[field] = after_values.get(field)
+    state.mark_checked(d["id"], chash, fields_hash(after, ctx), set_values, st["decisions"] + [x["key"] for x in decisions])
 
 
 def maybe_digest(client, state, env, now, send_fn, needs_decision):
@@ -124,6 +148,11 @@ def run(client, judge_fn, state, env, now, send_fn):
         "amount_field": client.lookup("custom_fields").get("Amount"),
         "needs_decision": tags["needs-decision"], "failed": tags.get("paperless-gpt-failed"),
     }
+    ctx["system_tag_names"] = {n for n in tags if n.startswith("paperless-gpt") or n == "needs-decision"}
+    ctx["system_tags"] = {tags[n] for n in ctx["system_tag_names"]}
+    if state.fresh and not state.last_run_set():
+        # First run: start from CHECK_SINCE (or now), never the back catalogue
+        state.last_run = env.get("CHECK_SINCE") or now.isoformat()
     cap = int(env.get("MAX_DOCS_PER_RUN", "20"))
     code = 0
     for listed in client.ready_documents(state.last_run, [tags["paperless-gpt-auto"]], cap):
@@ -138,15 +167,28 @@ def run(client, judge_fn, state, env, now, send_fn):
             state.stopped = f"usage limit reached ({e})" if isinstance(e, UsageLimit) else str(e)
             code = 2
             break
+        except urllib.error.HTTPError as e:
+            if e.code == 401 or e.code >= 500:
+                log(f"stopping: paperless returned {e.code}")
+                state.stopped = f"paperless returned {e.code}"
+                code = 2
+                break
+            # A 4xx about this one document: skip it rather than block every later run
+            log(f"{listed['id']}: paperless refused ({e.code}): {e}")
+            code = 1
+            if not dry:
+                _write_log(ctx, listed, [("check-failed", None, f"paperless {e.code}", "not checked; fix by hand or requeue it")])
+        except (urllib.error.URLError, OSError) as e:
+            log(f"stopping: can't reach paperless: {e}")
+            state.stopped = f"couldn't reach paperless ({e})"
+            code = 2
+            break
         except JudgeError as e:
             # Skip it rather than stop, or one bad document blocks every run; the digest lists it
             log(f"{listed['id']}: judge failed: {e}")
             code = 1
             if not dry:
-                with open(ctx["log_path"], "a") as f:
-                    f.write(json.dumps({"ts": now.isoformat(), "doc": listed["id"], "title": listed.get("title"),
-                                        "field": "check-failed", "old": None, "new": str(e)[:200],
-                                        "reason": "not checked; fix by hand or requeue it"}) + "\n")
+                _write_log(ctx, listed, [("check-failed", None, str(e)[:200], "not checked; fix by hand or requeue it")])
         if dry:
             continue
         state.last_run = listed["modified"]

@@ -19,14 +19,17 @@ class StateTest(unittest.TestCase):
         s = State(self.path)
         s.load()
         self.assertEqual(s.doc(5)["decisions"], [])
+        self.assertEqual(s.doc(5)["set_values"], {})
         s.last_run = "2026-10-28T00:00:00Z"
-        s.mark_checked(5, "c", "f", ["title"], ["secret-in-ocr"])
+        self.assertTrue(s.fresh)
+        s.mark_checked(5, "c", "f", {"title": "T"}, ["secret-in-ocr"])
         s.save()
         t = State(self.path)
         t.load()
         self.assertEqual(t.last_run, "2026-10-28T00:00:00Z")
+        self.assertFalse(t.fresh)
         self.assertEqual(t.doc(5), {"content_hash": "c", "fields_hash": "f",
-                                    "changed_fields": ["title"], "decisions": ["secret-in-ocr"]})
+                                    "set_values": {"title": "T"}, "decisions": ["secret-in-ocr"]})
 
     def test_save_is_atomic(self):
         s = State(self.path)

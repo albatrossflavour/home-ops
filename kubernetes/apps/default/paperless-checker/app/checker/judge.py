@@ -64,19 +64,27 @@ class JudgeError(Exception):
     pass
 
 
-def _summary(d):
-    return {k: d.get(k) for k in ("id", "title", "tags", "document_type", "correspondent", "owner", "created")}
+def _summary(d, names, amount_field_id):
+    """The document as names, so Claude can compare it with its neighbours and the rules."""
+    rev = {k: {v: n for n, v in m.items()} for k, m in names.items()}
+    amount = next((f.get("value") for f in d.get("custom_fields") or [] if f.get("field") == amount_field_id), None)
+    return {"id": d.get("id"), "title": d.get("title"), "created": d.get("created"),
+            "tags": sorted(rev["tags"].get(t, str(t)) for t in d.get("tags") or []),
+            "document_type": rev["document_types"].get(d.get("document_type")),
+            "correspondent": rev["correspondents"].get(d.get("correspondent")),
+            "owner": rev.get("users", {}).get(d.get("owner")), "amount": amount}
 
 
-def build_prompt(doc, neighbours, rules, names, locked=()):
+def build_prompt(doc, neighbours, rules, names, locked=(), raised=(), amount_field_id=None):
     lists = {k: sorted(v) for k, v in names.items() if k != "users"}
     parts = [
         INSTRUCTIONS,
         "Do not propose changes to: " + (", ".join(sorted(locked)) or "(nothing locked)"),
+        "Decisions already raised on this document, do not raise again: " + (", ".join(sorted(raised)) or "(none)"),
         f"<house_rules>\n{rules}\n</house_rules>",
         f"<names>\n{json.dumps(lists)}\n</names>",
-        f"<neighbours>\n{json.dumps([_summary(n) for n in neighbours])}\n</neighbours>",
-        f"<current>\n{json.dumps(_summary(doc))}\n</current>",
+        f"<neighbours>\n{json.dumps([_summary(n, names, amount_field_id) for n in neighbours])}\n</neighbours>",
+        f"<current>\n{json.dumps(_summary(doc, names, amount_field_id))}\n</current>",
         f"<document_text>\n{doc.get('content', '')}\n</document_text>",
     ]
     return "\n\n".join(parts)
@@ -89,7 +97,7 @@ def judge(prompt, run=subprocess.run, claude_bin="claude"):
     try:
         proc = run(cmd, input=prompt, capture_output=True, text=True, timeout=300)
     except subprocess.TimeoutExpired as e:
-        raise JudgeError("claude timed out") from e
+        raise StopRun("Claude timed out; trying again next run") from e
     try:
         out = json.loads(proc.stdout)
     except json.JSONDecodeError as e:
@@ -98,6 +106,8 @@ def judge(prompt, run=subprocess.run, claude_bin="claude"):
         text = json.dumps(out).lower()
         if out.get("api_error_status") in (401, 403) or "authenticate" in text:
             raise StopRun("Claude login failed; the CLAUDE_CODE_OAUTH_TOKEN needs renewing with `claude setup-token`")
+        if (out.get("api_error_status") or 0) >= 500:
+            raise StopRun(f"Claude unavailable ({out.get('api_error_status')}); trying again next run")
         if out.get("api_error_status") == 429 or "limit" in str(out.get("subtype", "")).lower() or "usage limit" in text:
             raise UsageLimit(out.get("result") or "usage limit")
         raise JudgeError(out.get("result") or f"error {out.get('api_error_status')}")

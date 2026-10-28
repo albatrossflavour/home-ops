@@ -11,9 +11,11 @@ class State:
         self.last_digest = ""
         self.stopped = None
         self.docs = {}
+        self.fresh = True  # no state file yet: the first run starts from CHECK_SINCE, not the epoch
 
     def load(self):
         if os.path.exists(self.path):
+            self.fresh = False
             with open(self.path) as f:
                 data = json.load(f)
             self.last_run = data.get("last_run", self.last_run)
@@ -32,10 +34,14 @@ class State:
             os.unlink(tmp)
             raise
 
+    def last_run_set(self):
+        return self.last_run != "1970-01-01T00:00:00Z"
+
     def doc(self, doc_id):
-        return self.docs.get(str(doc_id), {"content_hash": None, "changed_fields": [],
+        return self.docs.get(str(doc_id), {"content_hash": None, "set_values": {},
                                            "decisions": [], "fields_hash": None})
 
-    def mark_checked(self, doc_id, content_hash, fields_hash, changed_fields, decisions):
+    def mark_checked(self, doc_id, content_hash, fields_hash, set_values, decisions):
+        """set_values: field -> the value the checker last set, so it can tell if a reprocess undid it."""
         self.docs[str(doc_id)] = {"content_hash": content_hash, "fields_hash": fields_hash,
-                                  "changed_fields": changed_fields, "decisions": decisions}
+                                  "set_values": set_values, "decisions": decisions}

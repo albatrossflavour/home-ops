@@ -1,8 +1,10 @@
 import datetime
 import json
 import os
+import io
 import tempfile
 import unittest
+import urllib.error
 from zoneinfo import ZoneInfo
 
 from checker.judge import UsageLimit
@@ -18,13 +20,14 @@ class FakeClient:
         self.docs = {i: {"id": i, "title": f"Doc {i}", "tags": [5, 6], "document_type": 11, "correspondent": 20,
                          "owner": 9, "created": "2026-10-01", "content": content, "custom_fields": [],
                          "modified": f"2026-10-28T00:{i:02d}:00+11:00"} for i in range(1, n + 1)}
-        self.patches, self.notes_added = [], []
+        self.patches, self.notes_added, self.hist, self.since = [], [], {}, []
 
     def lookup(self, kind):
         return {"tags": TAGS, "document_types": {"Form": 10, "Manual": 11}, "correspondents": {"1Password": 20},
                 "users": {"tgreen": 9, "edward": 38}, "custom_fields": {"Amount": 7}}[kind]
 
     def ready_documents(self, since, exclude_tag_ids, limit):
+        self.since.append(since)
         ready = sorted((d for d in self.docs.values() if d["modified"] > since and not set(d["tags"]) & set(exclude_tag_ids)),
                        key=lambda d: d["modified"])
         return [dict(d) for d in ready[:limit]]
@@ -37,7 +40,7 @@ class FakeClient:
         return []
 
     def history(self, doc_id):
-        return []
+        return self.hist.get(doc_id, [])
 
     def patch(self, doc_id, fields):
         self.patches.append((doc_id, fields))
@@ -81,7 +84,8 @@ class RunTest(unittest.TestCase):
         self.sent = []
         self.env = {"MAX_DOCS_PER_RUN": "20", "HAND_EDITORS": "tgreen,dani", "PERSON_USERS": json.dumps({"Edward": "edward"}),
                     "OWNER_DEFAULT": "tgreen", "PAPERLESS_PUBLIC_URL": "https://p", "RULES": "rules",
-                    "CHANGES_LOG": os.path.join(self.dir.name, "changes.jsonl")}
+                    "CHANGES_LOG": os.path.join(self.dir.name, "changes.jsonl"),
+                    "CHECK_SINCE": "2026-10-27T00:00:00+11:00"}
 
     def tearDown(self):
         self.dir.cleanup()
@@ -123,6 +127,73 @@ class RunTest(unittest.TestCase):
         with open(self.env["CHANGES_LOG"]) as f:
             rows = [json.loads(line) for line in f]
         self.assertEqual((rows[0]["doc"], rows[0]["field"]), (1, "check-failed"))
+
+    def test_first_run_uses_check_since(self):
+        client = FakeClient(5)
+        self.go(client, Judge(), DRY_RUN="1", CHECK_SINCE="2026-10-28T00:03:00+11:00")
+        self.assertEqual(client.since, ["2026-10-28T00:03:00+11:00"])
+        client2 = FakeClient(0)
+        self.go(client2, Judge(), CHECK_SINCE="2026-10-28T00:03:00+11:00")
+        saved = State(self.state.path)
+        saved.load()
+        self.assertEqual(saved.last_run, "2026-10-28T00:03:00+11:00")
+
+    def test_closing_decision_not_reopened(self):
+        client = FakeClient(1)
+        first = proposal(decisions=[{"key": "secret-in-ocr", "text": "A secret is in the text"}])
+        judge = Judge({1: first, 2: proposal([{"field": "tags_add", "value": ["Edward"], "reason": "r", "evidence": ""}],
+                                              [{"key": "contains-secret-key", "text": "again"}])})
+        self.go(client, judge)
+        client.docs[1]["tags"].remove(3)  # Tony closes the decision
+        client.docs[1]["modified"] = "2026-10-28T09:00:00+11:00"
+        client.hist[1] = [{"timestamp": "2026-10-28T09:00:00Z", "action": "update", "actor": {"username": "tgreen"},
+                           "changes": {"tags": {"type": "m2m", "objects": ["needs-decision"], "operation": "delete"}}}]
+        self.go(client, judge)
+        self.assertEqual(judge.calls, 1)
+        self.assertNotIn(3, client.docs[1]["tags"])
+
+    def test_patch_4xx_skips_doc(self):
+        client = FakeClient(2)
+        real = client.patch
+
+        def patch(i, fields):
+            if i == 1:
+                raise urllib.error.HTTPError("u", 400, "bad", {}, io.BytesIO(b""))
+            return real(i, fields)
+        client.patch = patch
+        self.assertEqual(self.go(client, Judge()), 1)
+        self.assertEqual([p[0] for p in client.patches], [2])
+        with open(self.env["CHANGES_LOG"]) as f:
+            self.assertEqual(json.loads(f.readline())["field"], "check-failed")
+
+    def test_paperless_unreachable_stops(self):
+        client = FakeClient(2)
+
+        def gone(i):
+            raise urllib.error.URLError("refused")
+        client.document = gone
+        self.assertEqual(self.go(client, Judge()), 2)
+        self.assertIn("paperless", self.state.stopped)
+        self.assertEqual(self.state.last_run, "2026-10-27T00:00:00+11:00")
+
+    def test_note_failure_still_marks_state(self):
+        client = FakeClient(1)
+
+        def bad_note(i, text):
+            raise urllib.error.HTTPError("u", 400, "bad", {}, io.BytesIO(b""))
+        client.add_note = bad_note
+        judge = Judge()
+        self.go(client, judge)
+        self.go(client, judge)
+        self.assertEqual(judge.calls, 1)
+
+    def test_failed_tag_removal_logged(self):
+        client = FakeClient(1)
+        client.docs[1]["tags"] = [2, 5, 6]
+        self.go(client, Judge({1: proposal()}))
+        with open(self.env["CHANGES_LOG"]) as f:
+            rows = [json.loads(line) for line in f]
+        self.assertEqual([(r["field"], r["old"]) for r in rows], [("tags_remove", "paperless-gpt-failed")])
 
     def test_deleted_doc_skipped(self):
         client = FakeClient(2)

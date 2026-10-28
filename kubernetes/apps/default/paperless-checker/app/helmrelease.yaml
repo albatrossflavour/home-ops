@@ -47,6 +47,8 @@ spec:
               PAPERLESS_PUBLIC_URL: "https://paperless.${SECRET_DOMAIN}"
               CLAUDE_CODE_VERSION: "2.1.312"
               MAX_DOCS_PER_RUN: "20"
+              # Where the first run starts. Only read while there's no state file, so it never walks the back catalogue
+              CHECK_SINCE: "2026-10-27T00:00:00+11:00"
               SMTP_HOST: smtp-relay.default.svc.cluster.local
               DIGEST_FROM: "paperless-checker@${SECRET_DOMAIN}"
               # Report what it would do without changing anything. Remove to go live.

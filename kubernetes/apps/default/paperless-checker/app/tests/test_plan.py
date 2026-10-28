@@ -1,7 +1,7 @@
 import datetime
 import unittest
 
-from checker.plan import locked_fields, plan_changes
+from checker.plan import current_values, locked_fields, plan_changes
 
 NAMES = {
     "tags": {"Edward": 1, "Car": 2, "hit-by-a-bus-plan": 3, "needs-decision": 4,
@@ -24,10 +24,11 @@ def ch(field, value, reason="r", evidence=""):
     return {"field": field, "value": value, "reason": reason, "evidence": evidence}
 
 
-def plan(d, changes=(), decisions=(), locked=None, raised=()):
+def plan(d, changes=(), decisions=(), locked=None, raised=(), allow_new_decisions=True):
     return plan_changes(d, {"changes": list(changes), "decisions": list(decisions)}, names=NAMES,
                         locked=locked or {}, raised=set(raised), person_users={"Edward": 38},
-                        owner_default_id=4, amount_field_id=7, needs_decision_id=4, today=TODAY)
+                        owner_default_id=4, amount_field_id=7, needs_decision_id=4, today=TODAY,
+                        allow_new_decisions=allow_new_decisions)
 
 
 class PlanTest(unittest.TestCase):
@@ -96,29 +97,62 @@ class PlanTest(unittest.TestCase):
         patch, _, out = plan(doc(), decisions=decisions[:1], raised={"secret-in-ocr"})
         self.assertEqual((patch, out), ({}, []))
 
+    def test_title_capped_at_128(self):
+        patch, _, _ = plan(doc(), [ch("title", "x" * 200)])
+        self.assertEqual(len(patch["title"]), 128)
+
+    def test_no_new_decisions_when_disallowed(self):
+        patch, _, out = plan(doc(), [ch("document_type", "Form")], decisions=[{"key": "other-key", "text": "t"}],
+                             locked={"title": "hand"}, allow_new_decisions=False)
+        self.assertEqual(out, [])
+        self.assertEqual(patch, {"document_type": 10})
+
     def test_changes_record_old_and_new_names(self):
         _, changes, _ = plan(doc(), [ch("document_type", "Form", reason="kits are Form")])
         c = changes[0]
         self.assertEqual((c.field, c.old, c.new, c.reason), ("document_type", "Manual", "Form", "kits are Form"))
 
 
+def h(ts, actor, changes, action="update"):
+    return {"timestamp": ts, "action": action, "actor": {"username": actor} if actor else None, "changes": changes}
+
+
+SYSTEM = {"needs-decision", "paperless-gpt-auto", "paperless-gpt-failed"}
+NO_STATE = {"set_values": {}}
+
+
 class LockedFieldsTest(unittest.TestCase):
-    HISTORY = [
-        {"action": "update", "actor": {"username": "tgreen"}, "changes": {"title": ["a", "b"]}},
-        {"action": "update", "actor": {"username": "admin"}, "changes": {"tags": [[], [1]]}},
-        {"action": "update", "actor": None, "changes": {"owner": [1, 2]}},
-        {"action": "create", "actor": {"username": "tgreen"}, "changes": {"created": [None, "x"]}},
-        {"action": "update", "actor": {"username": "dani"}, "changes": {"custom_fields": [[], [1]]}},
-    ]
-
     def test_hand_edit_locks_field(self):
-        got = locked_fields(self.HISTORY, {"tgreen", "dani"}, {"content_hash": None, "changed_fields": []}, "h")
-        self.assertEqual(got, {"title": "hand", "amount": "hand"})
+        history = [  # newest first, as the API returns it
+            h("2026-10-05", "dani", {"custom_fields": [[], [1]]}),
+            h("2026-10-04", "tgreen", {"title": ["a", "b"]}),
+            h("2026-10-03", None, {"owner": ["1", "2"]}),
+            h("2026-10-02", "admin", {"tags": {"type": "m2m", "objects": ["Car"], "operation": "add"}}),
+            h("2026-10-01", "tgreen", {"created": ["None", "x"]}, action="create"),
+        ]
+        self.assertEqual(locked_fields(history, {"tgreen", "dani"}, NO_STATE, {}, SYSTEM),
+                         {"title": "hand", "amount": "hand"})
 
-    def test_checker_change_locked_until_content_changes(self):
-        state = {"content_hash": "h", "changed_fields": ["document_type"]}
-        self.assertEqual(locked_fields([], set(), state, "h"), {"document_type": "checker"})
-        self.assertEqual(locked_fields([], set(), state, "other"), {})
+    def test_lock_follows_latest_change(self):
+        overwritten = [h("2026-10-02", "admin", {"title": ["b", "c"]}), h("2026-10-01", "tgreen", {"title": ["a", "b"]})]
+        self.assertEqual(locked_fields(overwritten, {"tgreen"}, NO_STATE, {}, SYSTEM), {})
+        fixed = [h("2026-10-02", "tgreen", {"title": ["b", "c"]}), h("2026-10-01", "admin", {"title": ["a", "b"]})]
+        self.assertEqual(locked_fields(fixed, {"tgreen"}, NO_STATE, {}, SYSTEM), {"title": "hand"})
+
+    def test_system_tag_edit_does_not_lock(self):
+        history = [h("2026-10-02", "tgreen", {"tags": {"type": "m2m", "objects": ["needs-decision"], "operation": "delete"}})]
+        self.assertEqual(locked_fields(history, {"tgreen"}, NO_STATE, {}, SYSTEM), {})
+
+    def test_checker_lock_only_while_value_stands(self):
+        state = {"set_values": {"document_type": 10}}
+        self.assertEqual(locked_fields([], set(), state, {"document_type": 10}, SYSTEM), {"document_type": "checker"})
+        self.assertEqual(locked_fields([], set(), state, {"document_type": 11}, SYSTEM), {})
+
+    def test_current_values_ignore_system_tags(self):
+        d = doc(tags=[6, 4, 2], custom_fields=[{"field": 7, "value": "AUD1.00"}])
+        got = current_values(d, ignore_tag_ids={4}, amount_field_id=7)
+        self.assertEqual(got["tags"], [2, 6])
+        self.assertEqual(got["amount"], "AUD1.00")
 
 
 if __name__ == "__main__":

@@ -21,17 +21,34 @@ class Change:
     reason: str
 
 
-def locked_fields(history, hand_editors, doc_state, content_hash):
-    """Fields the checker must leave alone: 'hand' if a person edited it, 'checker' if we already did."""
-    locked = {}
-    for entry in history:
+def current_values(doc, ignore_tag_ids, amount_field_id):
+    """The fields the checker can set, in comparable form. System tags don't count."""
+    amount = next((f.get("value") for f in doc.get("custom_fields") or [] if f.get("field") == amount_field_id), None)
+    return {"title": doc.get("title"), "tags": sorted(set(doc.get("tags") or []) - set(ignore_tag_ids)),
+            "document_type": doc.get("document_type"), "correspondent": doc.get("correspondent"),
+            "created": doc.get("created"), "owner": doc.get("owner"), "amount": amount}
+
+
+def locked_fields(history, hand_editors, doc_state, current, system_tag_names):
+    """Fields the checker must leave alone.
+
+    'hand' if a person made the latest change to it. 'checker' while the value the checker set
+    still stands; once a reprocess overwrites it, the checker may fix it again.
+    """
+    last = {}
+    for entry in sorted(history, key=lambda e: e.get("timestamp") or ""):
+        if entry.get("action") != "update":
+            continue
         actor = (entry.get("actor") or {}).get("username")
-        if entry.get("action") == "update" and actor in hand_editors:
-            for key in entry.get("changes") or {}:
-                if key in HISTORY_FIELDS:
-                    locked[HISTORY_FIELDS[key]] = "hand"
-    if doc_state.get("content_hash") == content_hash:
-        for f in doc_state.get("changed_fields", []):
+        for key, value in (entry.get("changes") or {}).items():
+            if key not in HISTORY_FIELDS:
+                continue
+            if key == "tags" and isinstance(value, dict) and set(value.get("objects") or []) <= set(system_tag_names):
+                continue  # closing a decision or the AI's queue tags isn't a hand edit of the tags
+            last[HISTORY_FIELDS[key]] = actor
+    locked = {f: "hand" for f, actor in last.items() if actor in hand_editors}
+    for f, value in (doc_state.get("set_values") or {}).items():
+        if current.get(f) == value:
             locked.setdefault(f, "checker")
     return locked
 
@@ -44,8 +61,11 @@ def _iso(value, today):
     return d if EARLIEST <= d <= today else None
 
 
+TITLE_MAX = 128  # paperless rejects longer titles
+
+
 def plan_changes(doc, proposal, *, names, locked, raised, person_users, owner_default_id,
-                 amount_field_id, needs_decision_id, today):
+                 amount_field_id, needs_decision_id, today, allow_new_decisions=True):
     tag_ids = names["tags"]
     tag_names = {v: k for k, v in tag_ids.items()}
     applicable = {n for n in tag_ids if not n.startswith("paperless-gpt") and n != "needs-decision"}
@@ -76,7 +96,7 @@ def plan_changes(doc, proposal, *, names, locked, raised, person_users, owner_de
                     new_tags.discard(tid)
                     changes.append(Change("tags_remove", name, None, reason))
         elif field == "title" and isinstance(value, str) and value.strip() and value != doc.get("title"):
-            patch["title"] = value.strip()
+            patch["title"] = value.strip()[:TITLE_MAX]
             changes.append(Change("title", doc.get("title"), patch["title"], reason))
         elif field == "document_type" and value in names["document_types"]:
             if names["document_types"][value] != doc.get("document_type"):
@@ -112,6 +132,8 @@ def plan_changes(doc, proposal, *, names, locked, raised, person_users, owner_de
     for d in proposal.get("decisions", []):
         if KEY.match(str(d.get("key", ""))):
             decisions.append({"key": d["key"], "text": d.get("text", "")})
+    if not allow_new_decisions:
+        decisions = []
     seen, fresh = set(raised), []
     for d in decisions:
         if d["key"] not in seen:
