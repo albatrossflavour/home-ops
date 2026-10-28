@@ -117,6 +117,7 @@ def plan_changes(doc, proposal, *, names, locked, raised, person_users, owner_de
                 patch["created"] = value
                 changes.append(Change("created", doc.get("created"), value, reason))
         elif field == "amount" and isinstance(value, str) and AMOUNT.match(value):
+            value = f"{float(value):.2f}"  # paperless only takes two decimals
             fields = [f for f in doc.get("custom_fields") or [] if f.get("field") != amount_field_id]
             old = next((f.get("value") for f in doc.get("custom_fields") or [] if f.get("field") == amount_field_id), None)
             if old != f"AUD{value}":
