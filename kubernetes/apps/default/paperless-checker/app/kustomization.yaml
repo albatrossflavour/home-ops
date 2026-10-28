@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./paperless-checker.sops.yaml
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ../../../../templates/volsync
+# The pod runs the files in checker/ and run.sh; tests/ stays in git only.
+# No hash suffix: app-template takes the ConfigMap by name, and each cron run is a new pod anyway.
+configMapGenerator:
+  - name: paperless-checker-code
+    files:
+      - checker/__init__.py
+      - checker/digest.py
+      - checker/judge.py
+      - checker/main.py
+      - checker/paperless.py
+      - checker/plan.py
+      - checker/state.py
+  - name: paperless-checker-run
+    files:
+      - run.sh
+generatorOptions:
+  disableNameSuffixHash: true

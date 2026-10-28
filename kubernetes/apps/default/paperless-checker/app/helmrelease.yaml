@@ -1,0 +1,106 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app paperless-checker
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      *app:
+        type: cronjob
+        cronjob:
+          # Hourly, after paperless-gpt has had time to finish what arrived. See docs/operations/paperless.md
+          schedule: "5 * * * *"
+          timeZone: "Australia/Sydney"
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+          backoffLimit: 0
+        containers:
+          app:
+            image:
+              repository: nikolaik/python-nodejs
+              tag: "python3.13-nodejs22-slim@sha256:16adfd48198f3834ac1bc0b62293169dad2fdac9272b8409ba6efd541bc6cfa5"
+            command: ["sh", "/opt/run/run.sh"]
+            env:
+              TZ: "Australia/Sydney"
+              HOME: /data/home
+              PAPERLESS_URL: http://paperless.default.svc.cluster.local:8000
+              PAPERLESS_PUBLIC_URL: "https://paperless.${SECRET_DOMAIN}"
+              CLAUDE_CODE_VERSION: "2.1.312"
+              MAX_DOCS_PER_RUN: "20"
+              # Where the first run starts. Only read while there's no state file, so it never walks the back catalogue
+              CHECK_SINCE: "2026-10-27T00:00:00+11:00"
+              SMTP_HOST: smtp-relay.default.svc.cluster.local
+              DIGEST_FROM: "paperless-checker@${SECRET_DOMAIN}"
+              # Report what it would do without changing anything. Remove to go live.
+              DRY_RUN: "1"
+            envFrom:
+              - secretRef:
+                  name: paperless-checker-secret
+              - secretRef:
+                  name: paperless-checker-config
+            resources:
+              requests:
+                cpu: 20m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    persistence:
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /data
+      code:
+        type: configMap
+        name: paperless-checker-code
+        globalMounts:
+          - path: /app/checker
+      run:
+        type: configMap
+        name: paperless-checker-run
+        globalMounts:
+          - path: /opt/run
+      # The same prompts paperless-gpt uses, so there is one set of rules
+      rules:
+        type: secret
+        name: paperless-gpt-prompts
+        globalMounts:
+          - path: /rules
+            readOnly: true
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
