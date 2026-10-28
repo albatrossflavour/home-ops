@@ -86,6 +86,8 @@ class PlanTest(unittest.TestCase):
     def test_amount_format(self):
         p, _, _ = plan(doc(custom_fields=[{"field": 5, "value": "x"}]), [ch("amount", "30.00")])
         self.assertEqual(p["custom_fields"], [{"field": 5, "value": "x"}, {"field": 7, "value": "AUD30.00"}])
+        whole, _, _ = plan(doc(), [ch("amount", "500")])
+        self.assertEqual(whole["custom_fields"], [{"field": 7, "value": "AUD500.00"}])
         bad, _, _ = plan(doc(), [ch("amount", "$30")])
         self.assertEqual(bad, {})
 
