@@ -27,9 +27,7 @@ spec:
       *app:
         type: cronjob
         cronjob:
-          # Every 5 minutes while the back catalogue rescan runs; Forbid makes the runs back to back.
-          # Back to hourly ("5 * * * *") once it's through. See docs/operations/paperless.md
-          schedule: "*/5 * * * *"
+          schedule: "5 * * * *"
           timeZone: "Australia/Sydney"
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
