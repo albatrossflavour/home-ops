@@ -75,10 +75,17 @@ def _summary(d, names, amount_field_id):
             "owner": rev.get("users", {}).get(d.get("owner")), "amount": amount}
 
 
-def build_prompt(doc, neighbours, rules, names, locked=(), raised=(), amount_field_id=None):
+OLD = """This document is more than a month old, so anything it asked for has been dealt with.
+Do not raise decisions about deadlines, payments, renewals or anything else to act on, and where the
+rules are silent make the best call from the neighbours instead of asking. The only decisions still
+allowed are secrets in the text."""
+
+
+def build_prompt(doc, neighbours, rules, names, locked=(), raised=(), amount_field_id=None, old=False):
     lists = {k: sorted(v) for k, v in names.items() if k != "users"}
     parts = [
         INSTRUCTIONS,
+        *([OLD] if old else []),
         "Do not propose changes to: " + (", ".join(sorted(locked)) or "(nothing locked)"),
         "Decisions already raised on this document, do not raise again: " + (", ".join(sorted(raised)) or "(none)"),
         f"<house_rules>\n{rules}\n</house_rules>",

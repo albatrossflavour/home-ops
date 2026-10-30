@@ -76,3 +76,10 @@ class JudgeTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OldDocPromptTest(unittest.TestCase):
+    def test_old_docs_get_no_reminders(self):
+        self.assertIn("more than a month old", build_prompt(DOC, [], "R", NAMES, old=True))
+        self.assertNotIn("more than a month old", build_prompt(DOC, [], "R", NAMES))
+

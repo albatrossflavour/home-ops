@@ -69,7 +69,8 @@ def check_document(client, judge_fn, state, d, ctx, dry):
     locked = locked_fields(client.history(d["id"]), ctx["hand"], st, current, ctx["system_tag_names"],
                            ctx["system_tags"], ctx["hand_since"])
     prompt = build_prompt(d, client.neighbours(d), ctx["rules"], ctx["names"], locked,
-                          raised=st["decisions"], amount_field_id=ctx["amount_field"])
+                          raised=st["decisions"], amount_field_id=ctx["amount_field"],
+                          old=_older_than_a_month(d.get("created"), ctx["today"]))
     proposal = judge_fn(prompt)
     # Same text as when decisions were last raised: anything "new" is the same point reworded
     allow_new = not (st["decisions"] and st["content_hash"] == chash)
@@ -140,6 +141,14 @@ def maybe_digest(client, state, env, now, send_fn, needs_decision):
         send_fn(html, digest.subject(changes, open_decisions))
     state.last_digest = now.isoformat()
     state.stopped = None
+
+
+def _older_than_a_month(created, today):
+    """Old documents get fixed without reminders or questions; a missing or odd date counts as new."""
+    try:
+        return datetime.date.fromisoformat((created or "")[:10]) < today - datetime.timedelta(days=30)
+    except ValueError:
+        return False
 
 
 def _fatal(e):

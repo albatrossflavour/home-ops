@@ -114,6 +114,14 @@ class RunTest(unittest.TestCase):
         self.assertTrue(client.docs[4]["modified"] <= self.state.last_run < client.docs[8]["modified"])
         self.assertFalse({9, 10} & {p[0] for p in client.patches})  # the wave after the stop never ran
 
+    def test_month_old_cutoff(self):
+        from checker.main import _older_than_a_month
+        today = datetime.date(2026, 10, 30)
+        self.assertTrue(_older_than_a_month("2026-09-01", today))
+        self.assertFalse(_older_than_a_month("2026-10-15", today))
+        self.assertFalse(_older_than_a_month(None, today))
+        self.assertFalse(_older_than_a_month("junk", today))
+
     def test_usage_limit_keeps_done_docs(self):
         client = FakeClient(5)
         self.assertEqual(self.go(client, Judge(raise_on=3)), 2)
