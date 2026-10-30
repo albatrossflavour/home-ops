@@ -101,6 +101,19 @@ class RunTest(unittest.TestCase):
         self.assertEqual([p[0] for p in client.patches], list(range(1, 21)))
         self.assertEqual(self.state.last_run, client.docs[20]["modified"])
 
+    def test_workers_check_every_doc(self):
+        client = FakeClient(10)
+        self.assertEqual(self.go(client, Judge(), WORKERS="4"), 0)
+        self.assertEqual(sorted(p[0] for p in client.patches), list(range(1, 11)))
+        self.assertEqual(self.state.last_run, client.docs[10]["modified"])
+
+    def test_workers_stop_leaves_cursor_before_stop(self):
+        client = FakeClient(10)
+        self.assertEqual(self.go(client, Judge(raise_on=6), WORKERS="4"), 2)
+        # Call 6 lands somewhere in the second wave (docs 5-8), so the cursor stops inside it
+        self.assertTrue(client.docs[4]["modified"] <= self.state.last_run < client.docs[8]["modified"])
+        self.assertFalse({9, 10} & {p[0] for p in client.patches})  # the wave after the stop never ran
+
     def test_usage_limit_keeps_done_docs(self):
         client = FakeClient(5)
         self.assertEqual(self.go(client, Judge(raise_on=3)), 2)

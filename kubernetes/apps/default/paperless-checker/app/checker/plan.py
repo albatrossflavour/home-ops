@@ -35,17 +35,20 @@ def current_values(doc, ignore_tag_ids, amount_field_id):
             "created": doc.get("created"), "owner": doc.get("owner"), "amount": amount}
 
 
-def locked_fields(history, hand_editors, doc_state, current, system_tag_names, system_tag_ids=frozenset()):
+def locked_fields(history, hand_editors, doc_state, current, system_tag_names, system_tag_ids=frozenset(), hand_since=""):
     """Fields the checker must leave alone.
 
     'hand' if a person made the latest change to it. 'checker' while the value the checker set
     still stands; once a reprocess overwrites it, the checker may fix it again.
+    Edits before hand_since were the October cleanup scripts running as tgreen, so they don't count as hand.
     """
     last = {}
     for entry in sorted(history, key=lambda e: e.get("timestamp") or ""):
         if entry.get("action") != "update":
             continue
         actor = (entry.get("actor") or {}).get("username")
+        if hand_since and (entry.get("timestamp") or "") < hand_since:
+            actor = None
         for key, value in (entry.get("changes") or {}).items():
             if key not in HISTORY_FIELDS:
                 continue

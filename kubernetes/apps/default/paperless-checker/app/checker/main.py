@@ -5,7 +5,9 @@ import hashlib
 import json
 import os
 import sys
+import threading
 import urllib.error
+from concurrent.futures import ThreadPoolExecutor
 from zoneinfo import ZoneInfo
 
 from checker import digest
@@ -39,9 +41,12 @@ def _read_log(path, since):
     return [r for r in rows if not since or r["ts"] > since]
 
 
+_LOG_LOCK = threading.Lock()
+
+
 def _write_log(ctx, doc, rows):
     ts = ctx["now"].isoformat()
-    with open(ctx["log_path"], "a") as f:
+    with _LOG_LOCK, open(ctx["log_path"], "a") as f:
         for field, old, new, reason in rows:
             f.write(json.dumps({"ts": ts, "doc": doc["id"], "title": doc.get("title"), "field": field,
                                 "old": old, "new": new, "reason": reason}, default=str) + "\n")
@@ -62,7 +67,7 @@ def check_document(client, judge_fn, state, d, ctx, dry):
 
     current = current_values(d, ctx["system_tags"], ctx["amount_field"])
     locked = locked_fields(client.history(d["id"]), ctx["hand"], st, current, ctx["system_tag_names"],
-                           ctx["system_tags"])
+                           ctx["system_tags"], ctx["hand_since"])
     prompt = build_prompt(d, client.neighbours(d), ctx["rules"], ctx["names"], locked,
                           raised=st["decisions"], amount_field_id=ctx["amount_field"])
     proposal = judge_fn(prompt)
@@ -137,12 +142,20 @@ def maybe_digest(client, state, env, now, send_fn, needs_decision):
     state.stopped = None
 
 
+def _fatal(e):
+    """Errors that end the run rather than skip one document."""
+    if isinstance(e, urllib.error.HTTPError):
+        return e.code == 401 or e.code >= 500
+    return isinstance(e, (StopRun, urllib.error.URLError, OSError))
+
+
 def run(client, judge_fn, state, env, now, send_fn):
     dry = bool(env.get("DRY_RUN"))
     names = {k: client.lookup(k) for k in ("tags", "document_types", "correspondents", "users")}
     tags = names["tags"]
     ctx = {
         "names": names, "rules": env["RULES"], "now": now, "today": now.date(), "log_path": env["CHANGES_LOG"],
+        "hand_since": env.get("HAND_EDITS_SINCE", ""),
         "hand": {u.strip() for u in env.get("HAND_EDITORS", "").split(",") if u.strip()},
         "person_users": {t: names["users"][u] for t, u in json.loads(env.get("PERSON_USERS", "{}")).items()},
         "owner_default": names["users"][env["OWNER_DEFAULT"]],
@@ -155,14 +168,40 @@ def run(client, judge_fn, state, env, now, send_fn):
         # First run: start from CHECK_SINCE (or now), never the back catalogue
         state.last_run = env.get("CHECK_SINCE") or now.isoformat()
     cap = int(env.get("MAX_DOCS_PER_RUN", "20"))
-    code = 0
-    for listed in client.ready_documents(state.last_run, [tags["paperless-gpt-auto"]], cap):
+    workers = int(env.get("WORKERS", "1"))
+
+    def attempt(listed):
         try:
             d = client.document(listed["id"])
             if d is None:
                 log(f"{listed['id']}: gone, skipped")
             else:
                 check_document(client, judge_fn, state, d, ctx, dry)
+        except Exception as e:
+            # Record a skipped document straight away so the log stays in the order documents finished
+            if not dry and isinstance(e, JudgeError):
+                _write_log(ctx, listed, [("check-failed", None, str(e)[:200], "not checked; fix by hand or requeue it")])
+            elif not dry and isinstance(e, urllib.error.HTTPError) and not _fatal(e):
+                _write_log(ctx, listed, [("check-failed", None, f"paperless {e.code}", "not checked; fix by hand or requeue it")])
+            return e
+        return None
+
+    # Check a wave of documents at once, then settle them in order so the cursor only passes finished ones.
+    # Docs after a stop in the same wave may already be done; the hashes skip them next run.
+    listed_docs = client.ready_documents(state.last_run, [tags["paperless-gpt-auto"]], cap)
+    outcomes = []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for i in range(0, len(listed_docs), workers):
+            wave = listed_docs[i:i + workers]
+            results = list(pool.map(attempt, wave))
+            outcomes += zip(wave, results)
+            if any(r is not None and _fatal(r) for r in results):
+                break
+    code = 0
+    for listed, err in outcomes:
+        try:
+            if err:
+                raise err
         except StopRun as e:
             log(f"stopping: {e}")
             state.stopped = f"usage limit reached ({e})" if isinstance(e, UsageLimit) else str(e)
@@ -177,8 +216,6 @@ def run(client, judge_fn, state, env, now, send_fn):
             # A 4xx about this one document: skip it rather than block every later run
             log(f"{listed['id']}: paperless refused ({e.code}): {e}")
             code = 1
-            if not dry:
-                _write_log(ctx, listed, [("check-failed", None, f"paperless {e.code}", "not checked; fix by hand or requeue it")])
         except (urllib.error.URLError, OSError) as e:
             log(f"stopping: can't reach paperless: {e}")
             state.stopped = f"couldn't reach paperless ({e})"
@@ -188,8 +225,6 @@ def run(client, judge_fn, state, env, now, send_fn):
             # Skip it rather than stop, or one bad document blocks every run; the digest lists it
             log(f"{listed['id']}: judge failed: {e}")
             code = 1
-            if not dry:
-                _write_log(ctx, listed, [("check-failed", None, str(e)[:200], "not checked; fix by hand or requeue it")])
         if dry:
             continue
         state.last_run = listed["modified"]
