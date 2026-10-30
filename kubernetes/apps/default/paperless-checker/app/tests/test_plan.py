@@ -160,6 +160,14 @@ class LockedFieldsTest(unittest.TestCase):
         history = [h("2026-10-29", "tgreen", {"tags": [[8], [8, 2]]})]
         self.assertEqual(locked_fields(history, {"tgreen"}, NO_STATE, {}, SYSTEM, {8}), {"tags": "hand"})
 
+    def test_hand_edits_before_cutoff_do_not_lock(self):
+        # 6210 correspondents carried tgreen as last editor from the 2026-10-20 cleanup scripts
+        old = [h("2026-10-20", "tgreen", {"correspondent": ["a", "b"]})]
+        self.assertEqual(locked_fields(old, {"tgreen"}, NO_STATE, {}, SYSTEM, hand_since="2026-10-22"), {})
+        new = [h("2026-10-29", "tgreen", {"correspondent": ["a", "b"]})]
+        self.assertEqual(locked_fields(new, {"tgreen"}, NO_STATE, {}, SYSTEM, hand_since="2026-10-22"),
+                         {"correspondent": "hand"})
+
     def test_checker_lock_only_while_value_stands(self):
         state = {"set_values": {"document_type": 10}}
         self.assertEqual(locked_fields([], set(), state, {"document_type": 10}, SYSTEM), {"document_type": "checker"})
