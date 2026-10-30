@@ -27,8 +27,9 @@ spec:
       *app:
         type: cronjob
         cronjob:
-          # Hourly, after paperless-gpt has had time to finish what arrived. See docs/operations/paperless.md
-          schedule: "5 * * * *"
+          # Every 5 minutes while the back catalogue rescan runs; Forbid makes the runs back to back.
+          # Back to hourly ("5 * * * *") once it's through. See docs/operations/paperless.md
+          schedule: "*/5 * * * *"
           timeZone: "Australia/Sydney"
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
@@ -48,7 +49,7 @@ spec:
               CLAUDE_CODE_VERSION: "2.1.312"
               MAX_DOCS_PER_RUN: "1000"
               # Parallel claude calls; each is a node process, so memory scales with this
-              WORKERS: "6"
+              WORKERS: "10"
               # Where the first run starts. Only read while there's no state file, so it never walks the back catalogue
               CHECK_SINCE: "2026-10-27T00:00:00+11:00"
               # tgreen edits before this were the cleanup scripts, not hand fixes, so they don't lock fields
