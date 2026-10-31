@@ -76,7 +76,7 @@ spec:
       thanosImage:
         registry: quay.io
         repository: thanos/thanos
-        tag: "v0.42.4"
+        tag: "v0.42.5@sha256:0a546b98a8dd47735456ab389983675ee363d68127e334937a9fceeea10da5e7"
         # This chart splits the digest into its own field instead of the
         # usual tag@sha256 pattern - it IS pinned, a future audit grepping
         # for "@sha256" here will not find it and should check this field.
