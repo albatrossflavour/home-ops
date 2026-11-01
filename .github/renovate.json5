@@ -161,6 +161,18 @@
       allowedVersions: '<5',
     },
     {
+      description: [
+        'Keep n8n on the stable release line. n8n ships three lines at once: 2.45.x is stable (the stable and latest tags both point at it), 2.46.x is beta (the beta and next tags), and 3.0.x is on no channel at all and has not moved since 2026-10-28 while the other three shipped. Renovate cannot see this, because ignoreUnstable only filters semver prerelease strings and 2.46.3 is clean semver, so without this cap it offers the beta and the major as ordinary updates. n8n also runs DB migrations on upgrade, so a revert is a Postgres restore rather than a rollback. Raise the cap deliberately when 2.46 becomes stable.',
+      ],
+      matchDatasources: [
+        'docker',
+      ],
+      matchPackageNames: [
+        'docker.n8n.io/n8nio/n8n',
+      ],
+      allowedVersions: '<2.46',
+    },
+    {
       matchDatasources: [
         'helm',
       ],
