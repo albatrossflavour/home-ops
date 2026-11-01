@@ -9,11 +9,24 @@
     ':semanticCommits',
     ':automergeBranch',
   ],
-  docker: {
-    // Force AMD64 architecture for all container pulls
-    pinDigests: true,
-    versioning: 'docker'
-  },
+  // Digest pinning comes from the docker:pinDigests preset above, so there is
+  // no top-level docker block here. The one it replaced carried
+  // `pinDigests: true` and `versioning: 'docker'` under the comment "Force
+  // AMD64 architecture for all container pulls", which it never did: Renovate
+  // pins the manifest-list digest, not a per-arch manifest. The n8n digest is
+  // an application/vnd.oci.image.index.v1+json covering linux/amd64 and
+  // linux/arm64, so every node still resolves its own platform at pull time.
+  // Nothing here constrains architecture, and nothing ever did.
+  //
+  // `versioning: 'docker'` was also the docker datasource default
+  // (defaultVersioning = dockerVersioningId), and the block as written
+  // migrated to matchCategories: ['docker'], landing after the presets and
+  // overriding the preset's deliberate `pinDigests: false` for argocd,
+  // devcontainer, helmv3, and pyenv. Only devcontainer exists here, its image
+  // is the rolling tag ghcr.io/onedr0p/cluster-template/devcontainer:base,
+  // and Renovate has never pinned it, so dropping the block changed nothing
+  // observable. If devcontainer digests are ever wanted, ask for them
+  // explicitly rather than by reinstating a global override.
   dependencyDashboard: true,
   dependencyDashboardTitle: 'Renovate Dashboard 🤖',
   suppressNotifications: [
