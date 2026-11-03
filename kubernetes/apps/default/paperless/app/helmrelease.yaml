@@ -134,6 +134,15 @@ spec:
         className: "internal"
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          # Paired with the configuration-snippet on the `login` ingress below. Only one
+          # server-snippet per hostname is honoured by ingress-nginx, so the named location
+          # has to live here on the first ingress for this host.
+          nginx.ingress.kubernetes.io/server-snippet: |
+            location @paperless_csrf_retry {
+              # $${request_uri} escapes Flux's postBuild substitution, which would otherwise
+              # eat a bare $request_uri as an undefined variable. nginx reads ${request_uri}.
+              return 302 https://paperless.${SECRET_DOMAIN}$${request_uri};
+            }
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: "Utilities"
           gethomepage.dev/name: "Paperless NGX"
@@ -143,6 +152,32 @@ spec:
           - host: paperless.${SECRET_DOMAIN}
             paths:
               - path: /
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
+
+      # Django answers a login POST that arrives without a csrftoken cookie with a bare 403
+      # page, which is a dead end on a phone. iOS in-app browsers drop the cookie between the
+      # login GET and the POST. Bounce that 403 back to the login page, which issues a fresh
+      # cookie, rather than leaving the user stranded. $request_uri preserves ?next=, so the
+      # original deep link still lands after login.
+      #
+      # Deliberately scoped to /accounts/login/ and NOT applied to the `/` ingress above:
+      # proxy_intercept_errors would otherwise swallow every 403 the Angular UI relies on for
+      # permission handling. The GET of this path returns 200, so there is no redirect loop.
+      login:
+        className: "internal"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_intercept_errors on;
+            error_page 403 = @paperless_csrf_retry;
+        hosts:
+          - host: paperless.${SECRET_DOMAIN}
+            paths:
+              - path: /accounts/login/
+                pathType: Prefix
                 service:
                   identifier: app
                   port: http
