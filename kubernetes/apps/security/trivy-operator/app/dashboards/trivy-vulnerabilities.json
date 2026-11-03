@@ -183,7 +183,7 @@
             "type": "prometheus",
             "uid": "$${datasource}"
           },
-          "expr": "trivy_critical_fixable_total",
+          "expr": "sum(trivy_critical_fixable)",
           "refId": "A",
           "format": "time_series",
           "instant": true

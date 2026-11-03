@@ -25,6 +25,13 @@ spec:
   values:
     deploymentStrategy:
       type: Recreate
+    # The chart's appVersion has sat on 12.3.1 since 2026-01 while the 12.x
+    # image line kept patching, so trivy flagged 8 fixable CRITICAL CVEs in
+    # it. Pinning the image lets Renovate track it independently of the chart.
+    image:
+      registry: docker.io
+      repository: grafana/grafana
+      tag: "12.4.14@sha256:ae509d9ae8c1021ca32ec370a9ca975d40165eda9fccd1e1102d317ff8787cd7"
     downloadDashboardsImage:
       registry: docker.io
       repository: alpine/curl
@@ -540,7 +547,7 @@ spec:
       enabled: false
     extraContainers: |
       - name: set-folder-permissions
-        image: nicolaka/netshoot:v0.16@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+        image: alpine/k8s:1.37.2@sha256:dcb7185e112a453aa72f426754849a97357727ef8f40168fb208c8cf59952042
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
