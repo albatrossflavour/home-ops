@@ -375,6 +375,22 @@ spec:
             summary: "Thanos {{ $labels.job }} failing bucket {{ $labels.operation }} operations"
             description: "{{ $labels.job }} has been failing object-store {{ $labels.operation }} operations against the Thanos bucket for 15+ minutes. Recent metrics keep working (served from local Prometheus), but long-term/historical queries and new compaction may be degraded. Bucket is cluster Minio, itself NFS-backed - check NAS reachability first."
 
+        # 2026-11-03: found halted since 2026-01-28 with nothing watching it.
+        # A halted compactor keeps serving queries, so the only symptom is the
+        # bucket growing (655G against a steady state nearer 100G) and
+        # history older than the raw retention never being downsampled.
+        - alert: ThanosCompactHalted
+          expr: |
+            thanos_compact_halted == 1
+          for: 1h
+          labels:
+            severity: critical
+            component: observability
+            alert_group: storage
+          annotations:
+            summary: "Thanos compactor has halted"
+            description: "thanos_compact_halted has been 1 for an hour. The compactor stops on what it considers a critical error (usually overlapping blocks) and will not resume without a restart or a config change. Read the compactor log for the 'halting' line. While halted nothing is compacted, downsampled or deleted, so the bucket grows and long-term history is at risk if raw retention is ever applied without downsampled copies."
+
     - name: home-sensors
       rules:
         - alert: MqttExporterDown
