@@ -1,0 +1,36 @@
+---
+# Compactor scratch on the NAS instead of Ceph. The Ceph OSDs sit on the
+# control plane VMs, on the same Proxmox NVMe as each node's system disk, so
+# the compactor's scratch writes (3x replicated) pushed etcd commit latency
+# from 20ms to 1s and fired etcdHighCommitDurations within ten minutes of
+# the 100Gi ceph-block claim going live. Scratch is throwaway, and the
+# blocks it works on already live on this NAS, so this keeps the IO there.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: thanos-compactor-scratch
+spec:
+  capacity:
+    storage: 200Gi
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  nfs:
+    server: 192.168.1.22
+    path: /volume2/apps/thanos-compactor
+  claimRef:
+    namespace: observability
+    name: thanos-compactor-scratch
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: thanos-compactor-scratch
+  namespace: observability
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: ""
+  volumeName: thanos-compactor-scratch
+  resources:
+    requests:
+      storage: 200Gi
