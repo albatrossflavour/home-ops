@@ -187,7 +187,7 @@ spec:
         # size as scratch, about 55G at this cluster's 1.9G/day. The old 10Gi
         # openebs-hostpath claim sat on a node root disk with 20G free, and a
         # ceph-block claim hammered etcd (see pvc.yaml), so it is NFS.
-        existingClaim: thanos-compactor-scratch
+        existingClaim: thanos-compactor-scratch-vol1
       resources:
         requests:
           cpu: 10m
