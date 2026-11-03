@@ -163,6 +163,18 @@
     },
     {
       description: [
+        'nocodb moved from 0.x to date versioning (0.301.5 -> 2026.04.0 in 2026-04). Renovate 44 added maxMajorIncrement with a default of 500 and treats that as a major jump of 2026, so it silently skipped every release since. Confirmed 2026-11-03 with a local dry-run: "Skipping nocodb/nocodb@2026.10.1 because major increment 2026 exceeds maxMajorIncrement 500". Remove once the pin is on a 2026.x tag.',
+      ],
+      matchDatasources: [
+        'docker',
+      ],
+      matchPackageNames: [
+        'nocodb/nocodb',
+      ],
+      maxMajorIncrement: 0,
+    },
+    {
+      description: [
         'Hold sonarr on v4 until upstream ships v5 as stable: every v5 release is a prerelease, and v5 migrates the database so a revert means a restore. Remove once v5 is stable.',
       ],
       matchDatasources: [
@@ -397,20 +409,6 @@
         'datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( repository=(?<registryUrl>\\S+))?\\n.+: (&\\S+\\s)?(?<currentValue>\\S+)',
       ],
       datasourceTemplate: '{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}',
-    },
-    {
-      customType: 'regex',
-      description: [
-        'Process Grafana dashboards with gnetId',
-      ],
-      managerFilePatterns: [
-        '/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/',
-      ],
-      matchStrings: [
-        '# renovate: depName="(?<depName>[^"]+)"\\s+gnetId:\\s+(?<packageName>\\d+)\\s+revision:\\s+(?<currentValue>\\d+)',
-      ],
-      datasourceTemplate: 'grafana-dashboards',
-      versioningTemplate: 'regex:^(?<major>\\d+)$',
     },
     {
       customType: 'regex',
