@@ -327,23 +327,30 @@ spec:
         # is ever removed again, comment this group out with it.
         - alert: TrivyFixableMetricAbsent
           expr: |
-            absent(trivy_critical_fixable_total)
+            absent(trivy_critical_fixable)
           for: 2h
           labels:
             severity: warning
           annotations:
-            summary: "trivy_critical_fixable_total has vanished, TrivyFixableCriticalBacklog is blind"
+            summary: "trivy_critical_fixable has vanished, TrivyFixableCriticalBacklog is blind"
             description: "No fixable-CRITICAL metric has been present for 2h, so TrivyFixableCriticalBacklog cannot fire. Check the cert-expiry-pushgateway pod in kube-system and the trivy-fixable-check CronJob in security; the job logs the count it computed even when the push does not survive."
 
+        # Per image, unique CVEs, held for a week. A fresh OS-package CVE
+        # (brotli, openssl, perl) lands in nearly every image at once and
+        # upstream rebuilds clear it within days; a cluster-wide total over
+        # a 24h window was therefore permanently firing and told nobody
+        # which image to look at. Excluded: images with no newer upstream
+        # release at all (checked 2026-11-03), where the only fix is
+        # replacing the component, and that is a decision, not a page.
         - alert: TrivyFixableCriticalBacklog
           expr: |
-            trivy_critical_fixable_total > 10
-          for: 24h
+            trivy_critical_fixable{image!~"nwalke/tautulli_exporter|miguelndecarvalho/speedtest-exporter|emqx/emqx-exporter"} > 2
+          for: 7d
           labels:
             severity: warning
           annotations:
-            summary: "{{ $value }} fixable CRITICAL vulnerabilities sitting unaddressed"
-            description: "{{ $value }} CRITICAL vulnerabilities across the cluster have a fix already published upstream but haven't been picked up yet - a stale image pin somewhere is the usual cause (see the postgres16/nginx-reverse-proxy fixes in the audit doc for the pattern). Check `kubectl get vulnerabilityreports -A` and cross-reference fixedVersion fields to find which image(s)."
+            summary: "{{ $labels.image }} has carried {{ $value }} fixable CRITICAL CVEs for a week"
+            description: "Upstream has published fixes for {{ $value }} CRITICAL CVEs in {{ $labels.image }} and the running image has not picked them up in 7 days. Usual causes: Renovate PR sitting unmerged, a tag with no newer release, or an image we build ourselves that needs a rebuild. `kubectl get vulnerabilityreports -A -o json | jq '.items[] | select(.report.artifact.repository==\"{{ $labels.image }}\")'` lists the CVEs and fixedVersion fields."
 
     - name: thanos
       rules:

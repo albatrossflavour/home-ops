@@ -7,7 +7,7 @@
 # blind on every pod restart.
 #
 #   HubbleCiliumCertExpiresSoon  <- cert_expiry_timestamp_seconds
-#   TrivyFixableCriticalBacklog  <- trivy_critical_fixable_total
+#   TrivyFixableCriticalBacklog  <- trivy_critical_fixable
 #
 # Both were confirmed absent from Prometheus on 2026-09-06 with both alerts
 # not firing, while the trivy job had logged "fixable CRITICAL count: 112"
@@ -15,8 +15,8 @@
 # worse of the two: those mTLS certs are Helm-templated with no cert-manager
 # renewal behind them, so that alert is the only thing watching them.
 #
-# TrivyFixableCriticalBacklog carries `for: 24h` against a metric pushed once
-# daily, so without persistence any restart inside a 24-hour window resets the
+# TrivyFixableCriticalBacklog carries `for: 7d` against a metric pushed once
+# daily, so without persistence any restart inside that window resets the
 # clock and the alert can effectively never fire.
 #
 # ceph-block rather than openebs-hostpath. hostpath would pin this pod to one

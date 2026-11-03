@@ -34,12 +34,21 @@ spec:
                   # Perl regex/tar CVEs present in almost every Debian-based
                   # image - alerting on those would page on something
                   # nobody can act on until the distro patches it).
-                  count=$(kubectl get vulnerabilityreports -A -o json | \
-                    jq '[.items[].report.vulnerabilities[]? | select(.severity=="CRITICAL" and (.fixedVersion // "") != "")] | length')
-                  printf 'trivy_critical_fixable_total %s\n' "$count" > /tmp/metric.txt
+                  #
+                  # One series per image repository, counting unique CVE IDs.
+                  # The old single total counted per report per package, so
+                  # one OpenSSL CVE in one image scored three (libssl,
+                  # libcrypto, openssl) and twice again if the image ran in
+                  # two namespaces: 206 on 2026-11-03 for ~40 real CVEs,
+                  # with no way to tell which image from the alert.
+                  kubectl get vulnerabilityreports -A -o json | \
+                    jq -r '[.items[] | .report.artifact.repository as $img | .report.vulnerabilities[]? | select(.severity=="CRITICAL" and (.fixedVersion // "") != "") | {img: $img, id: .vulnerabilityID}] | unique | group_by(.img) | .[] | "trivy_critical_fixable{image=\"\(.[0].img)\"} \(length)"' \
+                    > /tmp/metric.txt
+                  # Pushing to one group replaces it wholesale, so images that
+                  # are fixed or removed drop out rather than going stale.
                   wget -q -O- --post-file=/tmp/metric.txt \
                     "http://cert-expiry-pushgateway.kube-system.svc.cluster.local:9091/metrics/job/trivy-fixable-check/instance/cluster"
-                  echo "fixable CRITICAL count: $count"
+                  echo "fixable CRITICAL by image:"; cat /tmp/metric.txt
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp
