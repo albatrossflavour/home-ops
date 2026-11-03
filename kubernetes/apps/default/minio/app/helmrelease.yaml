@@ -30,9 +30,17 @@ spec:
           reloader.stakater.com/auto: "true"
         containers:
           app:
+            # Silo is the Pigsty-maintained fork of the open-source MinIO
+            # server. MinIO Inc archived the upstream repo on 2026-04-24 and
+            # pulled the community images from Docker Hub and Quay, so the
+            # old quay.io/minio/minio pin could no longer be fetched from
+            # anywhere (switched 2026-11-03). Same on-disk format (xl-single),
+            # S3 API, MINIO_* env and /minio/* routes. Rollback image if
+            # needed: docker.io/pgsty/minio:RELEASE.2026-08-04T00-00-00Z plus
+            # the .minio.sys.pre-silo-20261103 copy on the NAS share.
             image:
-              repository: quay.io/minio/minio
-              tag: RELEASE.2024-07-31T05-46-26Z@sha256:9eea83a4e1425067e7b768397756efad19d36fc1c710808b8e1072236e8806c7
+              repository: docker.io/pgsty/silo
+              tag: RELEASE.2026-10-26T00-00-00Z@sha256:7bb2aff6b89efe1cb1303c10fc21d579447434ed06649ac9ec05a5e2dbf30ad7
             env:
               MINIO_API_CORS_ALLOW_ORIGIN: "https://minio.${SECRET_DOMAIN},https://s3.${SECRET_DOMAIN}"
               MINIO_BROWSER_REDIRECT_URL: "https://minio.${SECRET_DOMAIN}"
