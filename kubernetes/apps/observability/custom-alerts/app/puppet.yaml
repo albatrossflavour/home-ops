@@ -1137,15 +1137,55 @@ spec:
     - record: puppet_delivery_deploy_start_moves
       expr: changes(puppet_deploy_start_epoch[21600s]) and on(deployment, alias) (puppet_deploy_info
         == 1)
+    - record: puppet_delivery_dora_change_failure_ratio
+      expr: (count by (alias) ((puppet_deploy_end_epoch > time() - 2592000) and on(deployment,
+        alias) puppet_deploy_info{environment="production",state!="done",state!="cancelled"})
+        or on(alias) (count by (alias) ((puppet_deploy_end_epoch > time() - 2592000)
+        and on(deployment, alias) puppet_deploy_info{environment="production"}) *
+        0)) / count by (alias) ((puppet_deploy_end_epoch > time() - 2592000) and on(deployment,
+        alias) puppet_deploy_info{environment="production"})
+    - record: puppet_delivery_dora_deploys_per_week
+      expr: sum by (alias) (puppet_delivery_pipeline_deploys_7d{environment="production"})
+    - record: puppet_delivery_dora_inferred_change_failure_ratio
+      expr: |-
+        (count by (alias) (
+          ((puppet_deploy_end_epoch > time() - 2592000)
+          and on(deployment, alias) puppet_deploy_info{environment="production",state!="done",state!="cancelled"})
+          or ((puppet_deploy_end_epoch > time() - 2592000)
+          and on(deployment, alias) puppet_deploy_info{environment="production"}
+          and on(deployment, alias) puppet_delivery_release_regressed_window)
+        ) or on(alias) (count by (alias) ((puppet_deploy_end_epoch > time() - 2592000) and on(deployment, alias) puppet_deploy_info{environment="production"}) * 0)) / count by (alias) ((puppet_deploy_end_epoch > time() - 2592000) and on(deployment, alias) puppet_deploy_info{environment="production"})
+    - record: puppet_delivery_dora_lead_time_seconds
+      expr: quantile by (alias) (0.5, puppet_delivery_lead_time_seconds and on(deployment,
+        alias) puppet_deploy_info{environment="production"} and on(deployment, alias)
+        (puppet_deploy_end_epoch > time() - 2592000))
+    - record: puppet_delivery_dora_recovery_seconds
+      expr: quantile by (alias) (0.5, puppet_deploy_recovery_seconds and on(deployment,
+        alias) puppet_deploy_info{environment="production"} and on(deployment, alias)
+        (puppet_deploy_end_epoch > time() - 2592000))
+    - record: puppet_delivery_failed_run_share
+      expr: sum by (environment, alias) (puppet_code_deploy_status_nodes{status="failed"})
+        / sum by (environment, alias) (puppet_code_deploy_status_nodes)
     - record: puppet_delivery_fleet_converged_ratio
       expr: |-
         sum by (environment, alias) (puppet_code_deploy_status_nodes) / on(environment, alias) (
           count by (environment, alias) ((time() - puppet_report_timestamp_epoch) < 3600)
           or max by (environment, alias) (puppet_node_count{environment!="all"})
         )
+    - record: puppet_delivery_lead_time_seconds
+      expr: puppet_deploy_end_epoch - on(deployment, alias) puppet_deploy_pushed_epoch
     - record: puppet_delivery_pipeline_deploys_7d
       expr: count by (environment, alias) ((puppet_deploy_start_epoch > time() - 604800)
         * on(deployment, alias) group_left(environment) puppet_deploy_info)
+    - record: puppet_delivery_release_regressed
+      expr: |-
+        ((puppet_deploy_end_epoch < time() - 1800 > time() - 3600) * 0 + 1) and on(deployment, alias) (
+          puppet_deploy_info{state="done"} * on(environment, alias) group_left()
+          ((puppet_delivery_failed_run_share - puppet_delivery_failed_run_share offset 2h)
+          > 5 / 100)
+        )
+    - record: puppet_delivery_release_regressed_window
+      expr: max_over_time(puppet_delivery_release_regressed[2592000s])
     - record: puppet_delivery_seconds_unconverged
       expr: |-
         (time() - puppet_code_deploy_timestamp_epoch) and on(environment, alias) (sum by (environment, alias) (puppet_code_deploy_status_nodes) / on(environment, alias) (
@@ -1941,7 +1981,13 @@ spec:
         SLA", "", "") or label_replace(label_replace(100 * avg by (alias) (puppet_exporter_collector_success),
         "area", "data", "", ""), "signal", "Collectors succeeding", "", "") or label_replace(label_replace(100
         * avg by (alias) (avg_over_time(up{job="puppet"}[1h])), "area", "data", "",
-        ""), "signal", "Scrapes succeeding, last hour", "", "")
+        ""), "signal", "Scrapes succeeding, last hour", "", "") or label_replace(label_replace(40
+        * group by (alias) (ALERTS{alertstate="firing",severity="critical",pobs="true"})
+        or 100 * group by (alias) (up{job="puppet"}), "area", "alerts", "", ""), "signal",
+        "Critical alerts firing", "", "") or label_replace(label_replace(70 * group
+        by (alias) (ALERTS{alertstate="firing",severity="warning",pobs="true"}) or
+        100 * group by (alias) (up{job="puppet"}), "area", "alerts", "", ""), "signal",
+        "Warning alerts firing", "", "")
     - record: pobs_health_state
       expr: label_replace(min(pobs_health_score) >= 80, "state", "healthy", "", "")
         or label_replace(min(pobs_health_score) < 80, "state", "attention", "", "")
