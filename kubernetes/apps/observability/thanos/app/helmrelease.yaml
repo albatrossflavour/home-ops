@@ -164,13 +164,30 @@ spec:
     # Compactor - Downsamples and compacts object storage data
     compactor:
       enabled: true
-      retentionResolutionRaw: 14d
+      # 2026-11-03: the compactor had been halted since 2026-01-28 on
+      # "overlaps found while gathering blocks" (276 pairs of 2h blocks with
+      # identical labels and time range, mostly a full block plus a tiny one
+      # from a Prometheus restart mid-window). Nothing alerted on it, so 620G
+      # of raw 2h blocks piled up uncompacted and undownsampled for nine
+      # months. Vertical compaction lets it merge the overlapping pairs
+      # instead of halting.
+      extraFlags:
+        - --compact.enable-vertical-compaction
+      # TEMPORARY. Raw retention is 14d by policy, but downsampled 5m/1h
+      # copies of Feb-Oct 2026 do not exist yet, and retention would delete
+      # the raw blocks before downsampling ever reaches them. Leave this at
+      # 2y until 5m blocks cover up to the present (check bucketweb), then
+      # set it back to 14d and the compactor will clear the backlog itself.
+      retentionResolutionRaw: 2y
       retentionResolution5m: 180d
       retentionResolution1h: 5y
       persistence:
         enabled: true
-        storageClass: openebs-hostpath
-        size: 10Gi
+        # Compacting 2d blocks into 14d ones needs roughly twice the input
+        # size as scratch, about 55G at this cluster's 1.9G/day. The old 10Gi
+        # openebs-hostpath claim sat on a node root disk with 20G free.
+        storageClass: ceph-block
+        size: 100Gi
       resources:
         requests:
           cpu: 10m
