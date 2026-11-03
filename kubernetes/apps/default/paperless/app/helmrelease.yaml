@@ -143,6 +143,21 @@ spec:
               # mode and fails on any nginx variable it has never heard of.
               return 302 https://paperless.${SECRET_DOMAIN}$${request_uri};
             }
+            location @paperless_api_login {
+              # DRF answers an unauthenticated API request with 401 and never a login redirect,
+              # so a deep link to a document preview is a dead end in a browser. DRF content
+              # negotiates, so a text/html 401 is a browser navigation and a json one is the
+              # Angular UI's own XHR. Only the first is bounced to login. The second is passed
+              # back as a 401 so the UI's session handling still sees what it expects.
+              #
+              # The variable name below is assembled from the NGINX_VAR cluster setting, which
+              # is a literal dollar. The brace form nginx accepts elsewhere is rejected in an
+              # `if` condition, and a bare name would not survive Flux's strict substitution.
+              if (${NGINX_VAR}upstream_http_content_type ~* "text/html") {
+                return 302 https://paperless.${SECRET_DOMAIN}/accounts/login/?next=$${request_uri};
+              }
+              return 401;
+            }
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: "Utilities"
           gethomepage.dev/name: "Paperless NGX"
@@ -177,6 +192,24 @@ spec:
           - host: paperless.${SECRET_DOMAIN}
             paths:
               - path: /accounts/login/
+                pathType: Prefix
+                service:
+                  identifier: app
+                  port: http
+
+      # Same idea as `login` above, for API deep links. See @paperless_api_login for why this
+      # does not disturb the UI's own 401s.
+      api:
+        className: "internal"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_intercept_errors on;
+            error_page 401 = @paperless_api_login;
+        hosts:
+          - host: paperless.${SECRET_DOMAIN}
+            paths:
+              - path: /api/
                 pathType: Prefix
                 service:
                   identifier: app
