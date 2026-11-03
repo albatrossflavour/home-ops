@@ -49,6 +49,19 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
+              # A version bump can run a database migration before /health
+              # answers (1.6.2 took 40s on this database). Without this the
+              # liveness probe kills it at 30s every time and leaves the
+              # migration half applied.
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  periodSeconds: 10
+                  failureThreshold: 60
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
