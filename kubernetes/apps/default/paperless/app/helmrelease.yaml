@@ -139,8 +139,8 @@ spec:
           # has to live here on the first ingress for this host.
           nginx.ingress.kubernetes.io/server-snippet: |
             location @paperless_csrf_retry {
-              # $${request_uri} escapes Flux's postBuild substitution, which would otherwise
-              # eat a bare $request_uri as an undefined variable. nginx reads ${request_uri}.
+              # The doubled dollar escapes Flux's postBuild substitution, which runs in strict
+              # mode and fails on any nginx variable it has never heard of.
               return 302 https://paperless.${SECRET_DOMAIN}$${request_uri};
             }
           gethomepage.dev/enabled: "true"
@@ -160,8 +160,8 @@ spec:
       # Django answers a login POST that arrives without a csrftoken cookie with a bare 403
       # page, which is a dead end on a phone. iOS in-app browsers drop the cookie between the
       # login GET and the POST. Bounce that 403 back to the login page, which issues a fresh
-      # cookie, rather than leaving the user stranded. $request_uri preserves ?next=, so the
-      # original deep link still lands after login.
+      # cookie, rather than leaving the user stranded. The redirect keeps the original URI, so
+      # ?next= survives and the deep link still lands after login.
       #
       # Deliberately scoped to /accounts/login/ and NOT applied to the `/` ingress above:
       # proxy_intercept_errors would otherwise swallow every 403 the Angular UI relies on for
