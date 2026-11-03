@@ -5,10 +5,16 @@
 # from 20ms to 1s and fired etcdHighCommitDurations within ten minutes of
 # the 100Gi ceph-block claim going live. Scratch is throwaway, and the
 # blocks it works on already live on this NAS, so this keeps the IO there.
+#
+# It is on volume1, not volume2 with the Minio data. volume2 is a five disk
+# RAID5 of 3TB drives that saturated at 270 write IOPS the moment scratch
+# landed beside Minio, and Silo started throwing "0 drives provided" under
+# the load. volume1 is a separate array with an NVMe flashcache and sat idle.
+# The PV name carries the volume because the nfs path is immutable.
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: thanos-compactor-scratch
+  name: thanos-compactor-scratch-vol1
 spec:
   capacity:
     storage: 200Gi
@@ -17,20 +23,20 @@ spec:
   storageClassName: ""
   nfs:
     server: 192.168.1.22
-    path: /volume2/apps/thanos-compactor
+    path: /volume1/thanos-compactor
   claimRef:
     namespace: observability
-    name: thanos-compactor-scratch
+    name: thanos-compactor-scratch-vol1
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: thanos-compactor-scratch
+  name: thanos-compactor-scratch-vol1
   namespace: observability
 spec:
   accessModes: [ReadWriteOnce]
   storageClassName: ""
-  volumeName: thanos-compactor-scratch
+  volumeName: thanos-compactor-scratch-vol1
   resources:
     requests:
       storage: 200Gi
