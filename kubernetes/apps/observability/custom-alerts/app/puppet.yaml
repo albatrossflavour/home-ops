@@ -604,7 +604,8 @@ spec:
           shows how long since each CRL was regenerated.
         thresholds: crl_expiry_warning_days
     - alert: PuppetCertificateExpiringCritical
-      expr: "(puppet_certificate_expires_epoch - time()) / 86400 < 7"
+      expr: (puppet_certificate_expires_epoch{kind!="service"} - time()) / 86400 <
+        7
       for: 1h
       labels:
         severity: critical
@@ -626,7 +627,7 @@ spec:
           2. Cause: the node is live and its agent has stopped renewing. Check: a recent report timestamp, and `sudo /opt/puppetlabs/bin/puppet agent -t` on the node for any certificate error. Fix: reissue before the date. On the primary `sudo /opt/puppetlabs/bin/puppetserver ca clean --certname {{ $labels.node }}`, then on the node `sudo /opt/puppetlabs/bin/puppet ssl clean` and `sudo /opt/puppetlabs/bin/puppet agent -t`, then on the primary `sudo /opt/puppetlabs/bin/puppetserver ca sign --certname {{ $labels.node }}` unless autosigning signs it, then `sudo /opt/puppetlabs/bin/puppet agent -t` on the node again. Do the whole sequence in one sitting; the node has no valid certificate between the clean and the sign.
           3. Whatever the cause: the alert clears when the new certificate's expiry is read by the next poll, or when the old one is cleaned and its series disappears.
           **Finding the rest**
-          The expiry epoch: `puppet_certificate_expires_epoch{node="{{ $labels.node }}"}`. On the node, `sudo openssl x509 -noout -enddate -in "$(sudo /opt/puppetlabs/bin/puppet config print hostcert)"` prints the date from disk. The Triage board lists it under certificates that have not renewed, and the Node Detail board for the node carries its run history. How many others are this close: `count((puppet_certificate_expires_epoch - time()) / 86400 < 7)`. Whether the CA renews at all: `puppet_ca_auto_renewal_enabled` is 1 when it does.
+          The expiry epoch: `puppet_certificate_expires_epoch{node="{{ $labels.node }}"}`. On the node, `sudo openssl x509 -noout -enddate -in "$(sudo /opt/puppetlabs/bin/puppet config print hostcert)"` prints the date from disk. The Triage board lists it under certificates that have not renewed, and the Node Detail board for the node carries its run history. How many others are this close: `count((puppet_certificate_expires_epoch{kind!="service"} - time()) / 86400 < 7)`. Whether the CA renews at all: `puppet_ca_auto_renewal_enabled` is 1 when it does.
           **Escalate**
           If the reissue fails, or the count query shows many nodes this close, stop and hand the PE administrator the node names, the agent run output and the expiry dates. Puppet support wants the same plus the `puppetserver ca` command output from the primary.
           **Known noise**
@@ -637,7 +638,8 @@ spec:
           node's board.
         thresholds: cert_expiry_critical_days, cert_expiry_warning_days
     - alert: PuppetCertificateNotRenewing
-      expr: "(puppet_certificate_expires_epoch - time()) / 86400 < 14"
+      expr: (puppet_certificate_expires_epoch{kind!="service"} - time()) / 86400 <
+        14
       for: 1h
       labels:
         severity: warning
@@ -661,7 +663,7 @@ spec:
           4. Last: reissue by hand. On the primary `sudo /opt/puppetlabs/bin/puppetserver ca clean --certname {{ $labels.node }}`, then on the node `sudo /opt/puppetlabs/bin/puppet ssl clean` and `sudo /opt/puppetlabs/bin/puppet agent -t`, then on the primary `sudo /opt/puppetlabs/bin/puppetserver ca sign --certname {{ $labels.node }}` unless autosigning signs it, then `sudo /opt/puppetlabs/bin/puppet agent -t` on the node again. The node runs no Puppet between the clean and the sign, so do it in one sitting.
           5. Whatever the cause: the alert clears when the certificate's expiry moves past 14 days out and the next poll reads it, or when the certificate is cleaned and its series disappears.
           **Finding the rest**
-          The exact expiry: `puppet_certificate_expires_epoch{node="{{ $labels.node }}"}`. On the node, `sudo openssl x509 -noout -enddate -in "$(sudo /opt/puppetlabs/bin/puppet config print hostcert)"` prints the same date from the certificate on disk. Whether other nodes are in the same state: the Triage board lists every node whose certificate has not renewed, and `count((puppet_certificate_expires_epoch - time()) / 86400 < 14)` is how many. Whether the CA renews at all: `puppet_ca_auto_renewal_enabled` is 1 when it does.
+          The exact expiry: `puppet_certificate_expires_epoch{node="{{ $labels.node }}"}`. On the node, `sudo openssl x509 -noout -enddate -in "$(sudo /opt/puppetlabs/bin/puppet config print hostcert)"` prints the same date from the certificate on disk. Whether other nodes are in the same state: the Triage board lists every node whose certificate has not renewed, and `count((puppet_certificate_expires_epoch{kind!="service"} - time()) / 86400 < 14)` is how many. Whether the CA renews at all: `puppet_ca_auto_renewal_enabled` is 1 when it does.
           **Escalate**
           If the agent run prints a certificate error you cannot clear with the reissue, or auto-renewal is on and many nodes are not renewing, stop and hand the PE administrator the node name, the agent run output and the count query result. Puppet support wants the same plus the CA's `puppetserver` log for the window.
           **Known noise**
@@ -670,6 +672,75 @@ spec:
         where: The "Soonest To Expire" table on the Certificate Authority board, which
           lists the twenty node certificates closest to expiry with a link to each
           node's board.
+        thresholds: cert_expiry_critical_days, cert_expiry_warning_days
+    - alert: PuppetServiceCertExpiring
+      expr: (puppet_certificate_expires_epoch{kind="service"} - time()) / 86400 <
+        14
+      for: 1h
+      labels:
+        severity: warning
+        tier: platform
+        pobs: 'true'
+      annotations:
+        summary: PE service certificate {{ $labels.node }} expires in {{ $value |
+          printf "%.0f" }} days
+        description: |-
+          **What is wrong**
+          The CA-signed certificate `{{ $labels.node }}` has {{ $value | printf "%.0f" }} days left, under 14 days for more than an hour. PuppetDB has no node by that name, so it belongs to a PE service, such as `console-cert` for the console or `saml-cert` for SAML sign-in. No agent renews these.
+          **Risk**
+          Nothing fails yet. On expiry the service using it presents an expired certificate: for `console-cert` browsers refuse the console, and for `saml-cert` SAML sign-in fails. `PuppetServiceCertExpiringCritical` follows at 7 days.
+          **Severity and why**
+          Warning, because there are still 14 days and the fix is a working-hours job on the primary. It becomes critical at 7 days through the paired rule.
+          **When to act**
+          Working hours, before the critical threshold.
+          **What to do**
+          1. Cause: PE generated the certificate once at install or upgrade and has not touched it since. Check: the name is `console-cert` or `saml-cert`. Fix: on the primary, `sudo /opt/puppetlabs/bin/puppetserver ca clean --certname {{ $labels.node }}`, then remove `/etc/puppetlabs/puppet/ssl/certs/{{ $labels.node }}.pem` and `/etc/puppetlabs/puppet/ssl/private_keys/{{ $labels.node }}.pem`, then `sudo /opt/puppetlabs/bin/puppet agent -t` on the primary. PE's own console and RBAC classes generate the certificate again when its file is missing and restart the services that use it, so the console blips during that run. Do it in a quiet window. This fix is inferred from PE's own manifests and not yet tried on a live estate.
+          2. Cause: someone generated the certificate by hand with `puppetserver ca generate`, for a service outside PE. Check: the name is neither of the two above. Fix: find the owner and have them generate it again the same way, then install it wherever it is used.
+          3. Cause: the certname is a real machine that PuppetDB has forgotten. Check: `puppet_report_timestamp_epoch{node="{{ $labels.node }}"}` in Prometheus; a recent value means the node is live, and `PuppetCertificateNotRenewing` is the runbook to follow.
+          4. Whatever the cause: the alert clears when the next poll reads the new certificate's expiry, or when the old certificate is cleaned and its series disappears.
+          **Finding the rest**
+          The exact expiry: `puppet_certificate_expires_epoch{node="{{ $labels.node }}"}`. Every service certificate and its days left: `(puppet_certificate_expires_epoch{kind="service"} - time()) / 86400`. On the primary, `sudo /opt/puppetlabs/bin/puppetserver ca list --all` lists it with its alt names.
+          **Escalate**
+          If the agent run on the primary does not generate a new certificate, or the console fails to come back after it, stop and hand the PE administrator the certname, the agent run output and the expiry date. Puppet support wants the same plus the `puppetserver ca list` output.
+          **Known noise**
+          A certificate generated by hand for something since retired fires this until it is cleaned with `puppetserver ca clean`. Otherwise none known.
+        where_panel: pobs-ca/Soonest To Expire
+        where: The "Soonest To Expire" table on the Certificate Authority board, which
+          lists the certificates closest to expiry, service certificates included.
+        thresholds: cert_expiry_critical_days, cert_expiry_warning_days
+    - alert: PuppetServiceCertExpiringCritical
+      expr: (puppet_certificate_expires_epoch{kind="service"} - time()) / 86400 <
+        7
+      for: 1h
+      labels:
+        severity: critical
+        tier: platform
+        pobs: 'true'
+      annotations:
+        summary: PE service certificate {{ $labels.node }} expires in {{ $value |
+          printf "%.0f" }} days
+        description: |-
+          **What is wrong**
+          The CA-signed certificate `{{ $labels.node }}` has {{ $value | printf "%.0f" }} days left, under 7 days for more than an hour. PuppetDB has no node by that name, so it belongs to a PE service, such as `console-cert` for the console or `saml-cert` for SAML sign-in. No agent renews these.
+          **Risk**
+          On expiry the service using it presents an expired certificate: for `console-cert` browsers refuse the console, and for `saml-cert` SAML sign-in fails. Nothing renews it before then.
+          **Severity and why**
+          Critical, because the warning at 14 days went unanswered and the console or sign-in is days from failing. It pages.
+          **When to act**
+          Now, or at least before the expiry date.
+          **What to do**
+          1. Cause: PE generated the certificate once and has not touched it since. Check: the name is `console-cert` or `saml-cert`. Fix: on the primary, `sudo /opt/puppetlabs/bin/puppetserver ca clean --certname {{ $labels.node }}`, then remove `/etc/puppetlabs/puppet/ssl/certs/{{ $labels.node }}.pem` and `/etc/puppetlabs/puppet/ssl/private_keys/{{ $labels.node }}.pem`, then `sudo /opt/puppetlabs/bin/puppet agent -t` on the primary. PE's own console and RBAC classes generate it again when its file is missing and restart the services that use it, so the console blips during that run. This fix is inferred from PE's own manifests and not yet tried on a live estate.
+          2. Cause: someone generated the certificate by hand for a service outside PE. Check: the name is neither of the two above. Fix: find the owner and have them generate it again, then install it wherever it is used.
+          3. Whatever the cause: the alert clears when the next poll reads the new certificate's expiry, or when the old certificate is cleaned and its series disappears.
+          **Finding the rest**
+          The exact expiry: `puppet_certificate_expires_epoch{node="{{ $labels.node }}"}`. On the primary, `sudo /opt/puppetlabs/bin/puppetserver ca list --all` lists it with its alt names.
+          **Escalate**
+          If the agent run on the primary does not generate a new certificate, or the console fails to come back, hand the PE administrator the certname, the agent run output and the expiry date. Puppet support wants the same plus the `puppetserver ca list` output.
+          **Known noise**
+          None known.
+        where_panel: pobs-ca/Soonest To Expire
+        where: The "Soonest To Expire" table on the Certificate Authority board, which
+          lists the certificates closest to expiry, service certificates included.
         thresholds: cert_expiry_critical_days, cert_expiry_warning_days
   - name: pobs-cis
     rules:
@@ -4033,6 +4104,18 @@ spec:
     - record: pobs_alert_rule_info
       expr: vector(1)
       labels:
+        alertname: PuppetServiceCertExpiring
+        severity: warning
+        rule_group: certificates
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetServiceCertExpiringCritical
+        severity: critical
+        rule_group: certificates
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
         alertname: PobsCisScanStale
         severity: warning
         rule_group: cis
@@ -4564,182 +4647,6 @@ spec:
         alertname: PuppetInfraServiceNotRunning
         severity: warning
         rule_group: service_status
-  - name: plugin-au_essentials-au_essentials
-    rules:
-    - alert: AuEssentialsEvidenceStale
-      expr: sum by (alias) (au_essentials_freshness_nodes{freshness="stale"}) > 0
-      for: 6h
-      labels:
-        severity: warning
-        plugin: au_essentials
-        pobs: 'true'
-      annotations:
-        summary: Some systems hold Essentials evidence that cannot be trusted on {{
-          $labels.alias }}
-        description: |-
-          **What is wrong**
-          On the Puppet Enterprise (PE) install named in the alias label, au_essentials_freshness_nodes{freshness="stale"} has been above zero for 6 hours. A system is stale when its cached ASD Essentials for enterprise IT (Essentials) evidence is dated in the future, cannot be read as a date, or is older than twice the refresh period. That is a fault in the evidence cache on a system that is still reporting. It does not mean the system has stopped checking in.
-
-          **Risk**
-          The stale systems' contribution to the board's domain and indicator counts rests on evidence that may be out of date or tampered with, so those counts can show a control as working when it is not. The extent is limited to the stale systems.
-
-          **Severity and why**
-          Warning. The evidence is doubtful, not known to be wrong, so it does not page.
-
-          **When to act**
-          Before the next business day.
-
-          **What to do**
-          1. Future-dated or unreadable assessed_at. On one stale system read au_essentials/evidence.json under the agent's vardir (puppet config print vardir). Healthy is every assessed_at a readable date no later than now. A future date usually means the system's clock was ahead when the cache was written: check date against a trusted source and fix time synchronisation, and the cache corrects itself on the next refresh. A value that cannot be read as a date, or a future date with a correct clock, means the file was changed outside Puppet: delete evidence.json and run puppet agent -t to regenerate it, and treat a repeat as a security matter and escalate.
-          2. assessed_at older than twice the refresh period. The cache is rebuilt whenever its generated_at is older than the refresh period, so old assessed_at values can only sit under a generated_at that was changed outside Puppet or written while the clock was wrong. Check the clock as in step 1, then delete evidence.json and run puppet agent -t. If it comes back stale with a correct clock, treat it as a security matter and escalate.
-          The alert clears once the stale count returns to zero at the next poll.
-
-          **Finding the rest**
-          Stale count per install: sum by (alias) (au_essentials_freshness_nodes{freshness="stale"}). The stale systems are not named by this family. Find them with puppet query 'inventory[certname,facts.au_essentials_e4eit.freshness]{ facts.au_essentials_e4eit.freshness = "stale" }'.
-          A system that stopped reporting is not stale in this sense, because its last fact still reads fresh. No alert here sees them, AuEssentialsPopulationGap included, since they stay in both its counts. They appear only in pobs's own signals: puppet_node_exception{reason="not_reporting"} lists them by name, and puppet_node_exception_count{reason="not_reporting"} counts them.
-
-          **Escalate**
-          If a stale system keeps returning after its cache is regenerated and its clock is correct, hand the security team the system name, the cache file before it was deleted and the PuppetDB query result.
-
-          **Known noise**
-          A system restored from a snapshot or a virtual machine paused for a long time reports stale until its next run. That clears itself inside one refresh period, which is shorter than the 6 hour wait.
-    - alert: AuEssentialsNoDomainEvidence
-      expr: count by (alias) (au_essentials_control_nodes) unless on (alias) count
-        by (alias) (au_essentials_domain_nodes)
-      for: 6h
-      labels:
-        severity: warning
-        plugin: au_essentials
-        pobs: 'true'
-      annotations:
-        summary: Systems report control evidence but none reports Essentials domain
-          evidence on {{ $labels.alias }}
-        description: |-
-          **What is wrong**
-          Machines on the Puppet Enterprise (PE) install named in the alias label are reporting ISM control evidence (au_essentials_control_nodes has samples) but au_essentials_domain_nodes has had no samples there for 6 hours. Each install is judged on its own, so another install exporting the domain family does not hide this one. The au_essentials_e4eit fact, which turns that evidence into ASD Essentials for enterprise IT indicator outcomes, is not reaching pobs. This is the evidence pipeline failing, not a control failing. AuEssentialsNoEvidence covers the case where control evidence is missing too.
-
-          **Risk**
-          Every domain and indicator count on the Essentials board reads zero or no data, so a sign that an action isn't working would go unseen. The estate-wide signals on the board are not affected. Nothing is being enforced differently, so the exposure is in visibility.
-
-          **Severity and why**
-          Warning. No control is known to be failing, so it does not page. It waits for working hours.
-
-          **When to act**
-          Before the next business day.
-
-          **What to do**
-          1. Agents running a module version without the fact. Run the first PuppetDB query in Finding the rest. Healthy is the same count as agents holding au_essentials_control_states. Zero means agents have an au_essentials release older than the Essentials board: deploy the current module to the environment and wait for a run, no change window needed.
-          2. The fact failing to resolve. On one affected agent run puppet facts show au_essentials_e4eit --debug. Healthy is a hash with domains and indicators. Empty output with an error naming e4eit.yaml or e4eit_bindings.yaml means the catalogue files did not pluginsync: run puppet agent -t once and check lib/puppet_x/au_essentials/catalogue/ under the agent's vardir (puppet config print vardir) holds both files.
-          3. Plugin out of date on the primary. Healthy is the au_essentials_domain_nodes family listed by the curl in Finding the rest, with no rising queries_refused_total for au_essentials. If only au_essentials_control_nodes is listed, the primary has an older copy of the plugin's collector.yaml: deploy the current module to the primary's environment and let Puppet run there, which restarts pobs.
-          The alert clears once au_essentials_domain_nodes returns samples at the next poll.
-
-          **Finding the rest**
-          Agents holding the fact: puppet query 'inventory[count()]{ facts.au_essentials_e4eit is not null }'. Compare with puppet query 'inventory[count()]{ facts.au_essentials_control_states is not null }'. A lower first count means step 1 or 2 on the difference.
-          Refused queries: curl -s http://localhost:10050/metrics | grep 'queries_refused_total.*au_essentials'. A rising value means pobs asked PuppetDB for the domain counts and was answered nothing, and collector_success stays 1 meanwhile. The reason label says why: query_failed is PuppetDB failing the query, budget or too_many_groups is the collector asking for more than pobs allows.
-          Families exported: curl -s http://localhost:10050/metrics | grep -E '^au_essentials_(control|domain)_nodes' | cut -d'{' -f1 | sort -u.
-
-          **Escalate**
-          If agents hold the fact, no query is being refused and the primary exports au_essentials_control_nodes but not au_essentials_domain_nodes after a pobs restart, hand the platform team the two query results, both curl outputs and the pobs journal for the primary (journalctl -u pobs).
-
-          **Known noise**
-          None known.
-    - alert: AuEssentialsNoEvidence
-      expr: count by (alias) (puppet_exporter_collector_success{collector="au_essentials"})
-        unless on (alias) count by (alias) (au_essentials_control_nodes)
-      for: 6h
-      labels:
-        severity: warning
-        plugin: au_essentials
-        pobs: 'true'
-      annotations:
-        summary: No system is reporting Essentials evidence on {{ $labels.alias }}
-        description: |-
-          **What is wrong**
-          No machine is reporting ASD Essentials for enterprise IT (Essentials) control evidence to the Puppet Enterprise (PE) install named in the alias label. That install's pobs loaded the au_essentials plugin, but au_essentials_control_nodes has had no samples there for 6 hours. An install where the plugin is not declared or did not load is not in scope here. Each install is judged on its own, so a healthy second install does not hide this one. This is the evidence pipeline failing, not a control failing.
-
-          **Risk**
-          The Essentials board shows nothing, or stale data, for that install, so a real control failure there would go unseen. Nothing is being enforced differently, so the exposure is in visibility.
-
-          **Severity and why**
-          Warning. No control is known to be failing, so it does not page. It waits for working hours.
-
-          **When to act**
-          Before the next business day.
-
-          **What to do**
-          1. Evidence not being produced on agents. Run the PuppetDB query in Finding the rest on the primary named by the alias label. Healthy is a non-zero count. Zero means agents are not setting the au_essentials_control_states fact: check the au_essentials module is deployed to the environment and agents have run Puppet since. Fix by deploying the module and waiting for a run, no change window needed.
-          2. Plugin fails to load. That is not this alert's job: pobs's own PobsPluginLoadFailed alert fires when a plugin file is rejected (plugin_load_failed names the reason), and PobsPluginLoadFailed covers only a file that was rejected. An install whose plugin was declared but never placed on the primary has no collector_success series for au_essentials, so it looks the same as an install that does not run the plugin and raises no au_essentials alert at all. Check that every install meant to run it has the file: ls /etc/puppetlabs/pobs/collectors.d on the primary should list au_essentials.yaml, and observability::plugin { 'au_essentials': } should be in that primary's catalogue (puppet catalog or the node's classification). If this alert fires, the plugin loaded, so move on. puppet_exporter_plugins_loaded says nothing here, because the other plugins on the install count towards it.
-          3. Collector failing. Healthy is puppet_exporter_collector_success{collector="au_essentials"} equal to 1. At 0, read the pobs journal on the primary (journalctl -u pobs) for the error.
-          4. Fleet query refused. If collector_success is 1 and agents hold the fact, check puppet_exporter_plugin_queries_refused_total{plugin="au_essentials"}. Healthy is no series, or a value that has not moved in 6 hours. A value that is rising means pobs asked PuppetDB and was answered nothing, so the collector reports success while publishing no samples. The reason label says why: query_failed is PuppetDB failing the query (check PuppetDB health and the pobs journal), budget or too_many_groups is the collector asking for more than pobs allows.
-          The alert clears once au_essentials_control_nodes returns samples at the next poll.
-
-          **Finding the rest**
-          Agents holding the fact: puppet query 'inventory[count()]{ facts.au_essentials_control_states is not null }'. Zero means step 1.
-          Plugin state on the primary (the collector_success line is what puts the install in scope): curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*au_essentials'.
-          Which installs are affected: au_essentials_control_nodes grouped by alias lists the installs that do report, and the firing alert's alias label is the one that does not.
-
-          **Escalate**
-          If the fact is present on agents, the collector reports success and no query was refused, but the metric is still absent, hand the platform team the query result, the curl output and the pobs journal for the primary.
-
-          **Known noise**
-          None known.
-    - alert: AuEssentialsPopulationGap
-      expr: sum by (alias) (puppet_evidence_known_count{environment="all"}) > on (alias)
-        sum by (alias) (au_essentials_freshness_nodes)
-      for: 6h
-      labels:
-        severity: warning
-        plugin: au_essentials
-        pobs: 'true'
-      annotations:
-        summary: More systems are managed than report Essentials evidence on {{ $labels.alias
-          }}
-        description: |-
-          **What is wrong**
-          On the Puppet Enterprise (PE) install named in the alias label, puppet_evidence_known_count (all environments) is higher than the total of au_essentials_freshness_nodes, and has been for 6 hours. Known systems are those Puppet has a report for. The freshness family counts each system holding the Essentials fact once, whatever its domains and whether its value is fresh, stale or none, which is why it is used for the reporting total and the domain counts are not. Some managed systems are therefore missing from every count on the Essentials board.
-
-          **Risk**
-          The board's domain and indicator counts describe fewer systems than the estate holds, so a failing control on a missing system goes unseen and the figures look better than the estate is. Nothing is being enforced differently.
-
-          **Severity and why**
-          Warning. No control is known to be failing, and the usual cause is a deliberate exclusion. It does not page.
-
-          **When to act**
-          Before the next business day.
-
-          **What to do**
-          1. Deliberate exclusion. Systems with au_essentials::enable set to false drop out of the evidence by design. Healthy is the gap equalling the systems the site has chosen to exclude. Check Hiera for au_essentials::enable: false and compare the count. If the gap is exactly those systems, silence this alert (see Known noise) and record the exclusion where the assessor will see it.
-          2. Module never reached the system. A system that has not pluginsynced the module has no au_essentials_e4eit fact at all. Run the two name queries in Finding the rest. Names in the second list (systems Puppet knows) and not in the first (systems holding the fact) are the gap. The second list also holds systems that have never sent a report, which puppet_evidence_known_count does not count, so expect it to run a few names over the count. A name in the second and not the first that is not an exclusion needs the module deployed to its environment and a Puppet run, no change window needed. A system without the au_essentials class still has the fact and is counted, as unassigned.
-          3. Fact failing on some systems. On one missing system run puppet facts show au_essentials_e4eit --debug. Empty output with an error naming e4eit.yaml or e4eit_bindings.yaml means the catalogue files did not pluginsync: run puppet agent -t once.
-          The alert clears once the reporting total reaches the known count at the next poll, or when a silence expires.
-
-          **Finding the rest**
-          Known systems: puppet_evidence_known_count{environment="all",alias="ALIAS"}. Reporting systems: sum(au_essentials_freshness_nodes{alias="ALIAS"}). The difference is the gap.
-          Systems holding the fact: puppet query 'inventory[certname]{ facts.au_essentials_e4eit is not null }'. Systems Puppet knows: puppet query 'nodes[certname]{ }'. Names in the second and not the first are the gap.
-          Systems that have stopped checking in are not the cause, because they keep their last fact and stay in both counts. puppet_node_exception{reason="not_reporting",alias="ALIAS"} lists them if you need them.
-
-          **Escalate**
-          If the gap is not explained by exclusions, missing modules or a failing fact, hand the platform team the two counts, the two name lists and the output of puppet facts show au_essentials_e4eit --debug from one missing system.
-
-          **Known noise**
-          Fires on every install that excludes systems on purpose. Once the gap is confirmed as exclusions only, silence it in Alertmanager for the alias with amtool silence add alertname=AuEssentialsPopulationGap alias=ALIAS --duration=30d --comment 'deliberate exclusions, reviewed', and renew it when the exclusion list changes. A gap that grows after the silence is set will not be noticed, so review the count at each renewal.
-  - name: plugin-crosswalk-crosswalk
-    rules:
-    - alert: CrosswalkIso27001NoCoverage
-      expr: absent(crosswalk_annex_a_control_nodes)
-      for: 6h
-      labels:
-        severity: warning
-        plugin: crosswalk
-        pobs: 'true'
-      annotations:
-        summary: No node is reporting ISO/IEC 27001:2022 coverage
-        description: crosswalk is composing no ISO/IEC 27001:2022 coverage for any
-          node, so the scan-to-coverage pipeline is likely broken rather than any
-          control failing. Check scanalot is producing ARFs, the crosswalk_coverage
-          fact is present on scanned nodes, and the crosswalk collector is loaded
-          (puppet_exporter_plugins_loaded and collector_success{collector="crosswalk"}).
-          This is an evidence-pipeline alert, not a compliance finding.
   - name: plugin-pe_snapshot-pe_snapshot
     rules:
     - alert: PeSnapshotEndpointUnreachable
