@@ -1461,6 +1461,74 @@ spec:
         where_panel: pobs-operations/Which Plugins Were Refused, And Why
         where: The "Which Plugins Were Refused, And Why" table on the Internal Operations
           board, which lists each refused plugin with the reason the daemon gave.
+    - alert: PobsPluginQueriesRefused
+      expr: increase(puppet_exporter_plugin_queries_refused_total[15m]) > 0
+      for: 30m
+      labels:
+        severity: warning
+        tier: data
+        pobs: 'true'
+      annotations:
+        summary: Plugin {{ $labels.plugin }} on {{ $labels.instance }} is having fleet
+          queries refused ({{ $labels.reason }})
+        description: |-
+          **What is wrong**
+          Fleet queries from the `{{ $labels.plugin }}` plugin collector on {{ $labels.instance }} have been refused with reason `{{ $labels.reason }}` in every 15-minute window for half an hour.
+          **Risk**
+          A refused query gives the plugin nil, so the family behind it publishes no samples for that poll. Its boards go empty or hold a gap, and alerts reading the family see nothing to fire on.
+          **Severity and why**
+          Warning, because only the site's own plugin metrics are affected and the fleet metrics carry on. It waits for working hours.
+          **When to act**
+          Working hours, unless the reason is `query_failed` and PuppetDB is also down. Then the PuppetDB fault comes first.
+          **What to do**
+          1. Cause: `query_failed`, PuppetDB did not answer. Check: `puppet_exporter_source_consecutive_failures{instance="{{ $labels.instance }}"}` is above 0 for the PuppetDB host. Fix: restore PuppetDB. The plugin recovers on its next poll with no change to the plugin.
+          2. Cause: `too_many_groups`, a `count_values` path holds more distinct values than the plugin's limit. The limit is 1,000 unless the plugin declares more. Check: the journal line below names the path and the limit. Fix: count a coarser fact. If the values are bounded by something other than the fleet, set `budget: { groups: <number> }` on the plugin's declaration, up to the ceiling of 10,000.
+          3. Cause: `budget`, the plugin's poll makes more than 32 `count` or 4 `count_values` calls. A declared budget does not change this limit. Check: count the queries in the plugin's poll. Fix: combine conditions, or move the key into the value and use one `count_values`.
+          4. Then: `sudo systemctl restart pobs` after any change to the plugin. Loading is decided once at boot. The restart empties the fleet store until the next poll completes.
+          Whatever the cause: the alert clears about 15 minutes after the last refusal.
+          **Finding the rest**
+          Refusals by reason since the daemon started: `puppet_exporter_plugin_queries_refused_total{plugin="{{ $labels.plugin }}",instance="{{ $labels.instance }}"}`. The daemon's account of each one: `sudo journalctl -u pobs | grep "{{ $labels.plugin }}"` on the primary. A plugin polled every 15 minutes or slower through `collector_intervals` does not raise this alert, so read that counter directly for one of those.
+          **Escalate**
+          If the plugin is a site's own, hand the journal lines to its author. If it is one the module ships, hand the same lines to Puppet support. For `query_failed` with PuppetDB healthy, hand them to the PE administrator as well.
+          **Known noise**
+          None known.
+        where_panel: pobs-operations/Plugin Fleet Queries Refused
+        where: The "Plugin Fleet Queries Refused" table on the Internal Operations
+          board, which counts refusals by plugin and reason.
+    - alert: PobsPluginSeriesOverflow
+      expr: puppet_exporter_plugin_series_overflow > 0
+      for: 10m
+      labels:
+        severity: warning
+        tier: data
+        pobs: 'true'
+      annotations:
+        summary: pobs on {{ $labels.instance }} is dropping {{ $value | printf "%.0f"
+          }} series from plugin {{ $labels.plugin }}
+        description: |-
+          **What is wrong**
+          The `{{ $labels.plugin }}` plugin collector on {{ $labels.instance }} produced {{ $value | printf "%.0f" }} more series than its limit, and has done so for ten minutes. The daemon keeps the series the plugin produced first and leaves the rest out of the scrape.
+          **Risk**
+          Families the plugin declares later are short or missing from Prometheus. A board or alert reading them shows a count that looks whole and is too low.
+          **Severity and why**
+          Warning, because only the site's own plugin metrics are short and the fleet metrics carry on. It waits for working hours.
+          **When to act**
+          Working hours. It will not clear on its own while the plugin produces this many series.
+          **What to do**
+          1. Check: `sudo journalctl -u pobs | grep "plugin collector '{{ $labels.plugin }}' declared"` on the primary gives how many series it produced, how many were dropped and the limit it hit.
+          2. Cause: the plugin publishes something that grows with the fleet, such as one series per node. Check: the plugin's families in Prometheus carry a node or certname label. Fix: publish counts per team or per fact value, or move per-node data to the textfile collector. Do not raise the limit for this cause.
+          3. Cause: the family is bounded by something other than the fleet and is larger than the limit. Check: the series count in the journal line stays the same as nodes join. Fix: set `budget: { series: <number> }` on the plugin's declaration, up to the ceiling of 10,000. The default without a budget is 1,000.
+          4. Then: `sudo systemctl restart pobs`. A declaration is read once at boot, so a change does not count until the restart. The restart empties the fleet store until the next poll completes.
+          Whatever the cause: the alert clears on the first scrape where the plugin fits its limit.
+          **Finding the rest**
+          How many are dropped now: `puppet_exporter_plugin_series_overflow{plugin="{{ $labels.plugin }}",instance="{{ $labels.instance }}"}`. Whether the plugin's declaration is valid before a restart: `sudo /usr/local/bin/pobs-ctl plugin check <plugin dir>` on the primary.
+          **Escalate**
+          If the plugin is a site's own, hand the journal line to its author. If it is one the module ships, hand the same line and the output of the check above to Puppet support.
+          **Known noise**
+          None known.
+        where_panel: pobs-evidence-quality/Withheld Anywhere
+        where: The "Withheld Anywhere" table on the Evidence Quality board, which
+          lists this family with every other list that was cut short.
     - alert: PobsPollOverrun
       expr: puppet_exporter_poll_duration_seconds > puppet_exporter_polling_interval_seconds
       for: 10m
@@ -4230,6 +4298,18 @@ spec:
     - record: pobs_alert_rule_info
       expr: vector(1)
       labels:
+        alertname: PobsPluginQueriesRefused
+        severity: warning
+        rule_group: exporter
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PobsPluginSeriesOverflow
+        severity: warning
+        rule_group: exporter
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
         alertname: PobsPollOverrun
         severity: warning
         rule_group: exporter
@@ -4647,6 +4727,213 @@ spec:
         alertname: PuppetInfraServiceNotRunning
         severity: warning
         rule_group: service_status
+  - name: plugin-first_sight_e4eit-first_sight_e4eit
+    rules:
+    - alert: FirstSightE4eitNoEvidence
+      expr: count by (alias) (puppet_exporter_collector_success{collector="first_sight_e4eit"})
+        unless on (alias) count by (alias) (first_sight_e4eit_record_nodes) unless
+        on (alias) (sum by (alias) (first_sight_e4eit_excluded_nodes{reason=~"not_enabled|enable
+        false"}) > 0 unless on (alias) (sum by (alias) (first_sight_e4eit_declared_nodes{declared="true"})
+        > 0))
+      for: 6h
+      labels:
+        severity: warning
+        plugin: first_sight_e4eit
+        pobs: 'true'
+      annotations:
+        summary: No system is reporting Essentials for enterprise IT evidence on {{
+          $labels.alias }}
+        description: |-
+          **What is wrong**
+          No system is publishing Essentials for enterprise IT records to the Puppet Enterprise (PE) install named in the alias label. That install's pobs loaded the first_sight_e4eit plugin, but first_sight_e4eit_record_nodes has had no samples there for 6 hours. A site that leaves this standard out on every system, by not enabling it or with enable false, is not in scope here, and the excluded family shows that. Each install is judged on its own, so a healthy second install does not hide this one. This is the evidence pipeline failing, not a control failing.
+
+          **Risk**
+          The Essentials for enterprise IT board shows nothing for that install, so anything these checks would have seen there goes unseen. Nothing is being enforced differently, so the exposure is in visibility.
+
+          **Severity and why**
+          Warning. No control is known to be failing, so it does not page. It waits for working hours.
+
+          **When to act**
+          Before the next business day.
+
+          **What to do**
+          1. Evidence not being produced on agents. Run the PuppetDB queries in Finding the rest on the primary named by the alias label. Healthy is a non-zero count of systems holding first_sight_states and none reading failed. No system holding it means the first_sight module is not deployed to the environment or agents have not run Puppet since: deploy it and wait for a run, no change window needed. first_sight_e4eit_excluded_nodes reading unclassified on every system means the first_sight class is applied nowhere: classify the systems that should report, or remove the plugin. Systems reading failed: run puppet facts show first_sight_states --debug on one and read the error.
+
+          2. Plugin fails to load. That is not this alert's job: pobs's own PobsPluginLoadFailed alert fires when a plugin file is rejected. If this alert fires, the plugin loaded, so move on.
+
+          3. Collector failing. Healthy is puppet_exporter_collector_success{collector="first_sight_e4eit"} equal to 1. At 0, read the pobs journal on the primary (journalctl -u pobs) for the error.
+
+          4. Fleet query refused. If collector_success is 1 and agents hold the fact, check puppet_exporter_plugin_queries_refused_total{plugin="first_sight_e4eit"}. Healthy is no series, or a value that has not moved in 6 hours. A rising value means pobs asked PuppetDB and was answered nothing, so the collector reports success while publishing no samples. The reason label says why: query_failed is PuppetDB failing the query (check PuppetDB health and the pobs journal). too_many_groups is more distinct records than the declared budget allows, which needs the plugin regenerated. budget is more queries in a poll than POBS allows, which a declared plugin cannot reach, so escalate it.
+
+          The alert clears once first_sight_e4eit_record_nodes returns samples at the next poll.
+
+          **Finding the rest**
+          Agents holding the fact: puppet query 'inventory[count()]{ facts.first_sight_states is not null }'. Agents whose states fact failed: puppet query 'inventory[count()]{ facts.first_sight_population.states = "failed" }'.
+
+          Plugin state on the primary: curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*first_sight_e4eit'.
+
+          Systems declared and excluded: first_sight_e4eit_declared_nodes and first_sight_e4eit_excluded_nodes, grouped by alias.
+
+          **Escalate**
+          If the fact is present on agents, the collector reports success and no query was refused, but the family is still absent, hand the platform team the query results, the curl output and the pobs journal for the primary.
+
+          **Known noise**
+          None known.
+  - name: plugin-first_sight_essential_eight-first_sight_essential_eight
+    rules:
+    - alert: FirstSightEssentialEightNoEvidence
+      expr: count by (alias) (puppet_exporter_collector_success{collector="first_sight_essential_eight"})
+        unless on (alias) count by (alias) (first_sight_essential_eight_record_nodes)
+        unless on (alias) (sum by (alias) (first_sight_essential_eight_excluded_nodes{reason=~"not_enabled|enable
+        false"}) > 0 unless on (alias) (sum by (alias) (first_sight_essential_eight_declared_nodes{declared="true"})
+        > 0))
+      for: 6h
+      labels:
+        severity: warning
+        plugin: first_sight_essential_eight
+        pobs: 'true'
+      annotations:
+        summary: No system is reporting Essential Eight evidence on {{ $labels.alias
+          }}
+        description: |-
+          **What is wrong**
+          No system is publishing Essential Eight records to the Puppet Enterprise (PE) install named in the alias label. That install's pobs loaded the first_sight_essential_eight plugin, but first_sight_essential_eight_record_nodes has had no samples there for 6 hours. A site that leaves this standard out on every system, by not enabling it or with enable false, is not in scope here, and the excluded family shows that. Each install is judged on its own, so a healthy second install does not hide this one. This is the evidence pipeline failing, not a control failing.
+
+          **Risk**
+          The Essential Eight board shows nothing for that install, so anything these checks would have seen there goes unseen. Nothing is being enforced differently, so the exposure is in visibility.
+
+          **Severity and why**
+          Warning. No control is known to be failing, so it does not page. It waits for working hours.
+
+          **When to act**
+          Before the next business day.
+
+          **What to do**
+          1. Evidence not being produced on agents. Run the PuppetDB queries in Finding the rest on the primary named by the alias label. Healthy is a non-zero count of systems holding first_sight_states and none reading failed. No system holding it means the first_sight module is not deployed to the environment or agents have not run Puppet since: deploy it and wait for a run, no change window needed. first_sight_essential_eight_excluded_nodes reading unclassified on every system means the first_sight class is applied nowhere: classify the systems that should report, or remove the plugin. Systems reading failed: run puppet facts show first_sight_states --debug on one and read the error.
+
+          2. Plugin fails to load. That is not this alert's job: pobs's own PobsPluginLoadFailed alert fires when a plugin file is rejected. If this alert fires, the plugin loaded, so move on.
+
+          3. Collector failing. Healthy is puppet_exporter_collector_success{collector="first_sight_essential_eight"} equal to 1. At 0, read the pobs journal on the primary (journalctl -u pobs) for the error.
+
+          4. Fleet query refused. If collector_success is 1 and agents hold the fact, check puppet_exporter_plugin_queries_refused_total{plugin="first_sight_essential_eight"}. Healthy is no series, or a value that has not moved in 6 hours. A rising value means pobs asked PuppetDB and was answered nothing, so the collector reports success while publishing no samples. The reason label says why: query_failed is PuppetDB failing the query (check PuppetDB health and the pobs journal). too_many_groups is more distinct records than the declared budget allows, which needs the plugin regenerated. budget is more queries in a poll than POBS allows, which a declared plugin cannot reach, so escalate it.
+
+          The alert clears once first_sight_essential_eight_record_nodes returns samples at the next poll.
+
+          **Finding the rest**
+          Agents holding the fact: puppet query 'inventory[count()]{ facts.first_sight_states is not null }'. Agents whose states fact failed: puppet query 'inventory[count()]{ facts.first_sight_population.states = "failed" }'.
+
+          Plugin state on the primary: curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*first_sight_essential_eight'.
+
+          Systems declared and excluded: first_sight_essential_eight_declared_nodes and first_sight_essential_eight_excluded_nodes, grouped by alias.
+
+          **Escalate**
+          If the fact is present on agents, the collector reports success and no query was refused, but the family is still absent, hand the platform team the query results, the curl output and the pobs journal for the primary.
+
+          **Known noise**
+          None known.
+  - name: plugin-first_sight_ism-first_sight_ism
+    rules:
+    - alert: FirstSightIsmNoEvidence
+      expr: count by (alias) (puppet_exporter_collector_success{collector="first_sight_ism"})
+        unless on (alias) count by (alias) (first_sight_ism_record_nodes) unless on
+        (alias) (sum by (alias) (first_sight_ism_excluded_nodes{reason=~"not_enabled|enable
+        false"}) > 0 unless on (alias) (sum by (alias) (first_sight_ism_declared_nodes{declared="true"})
+        > 0))
+      for: 6h
+      labels:
+        severity: warning
+        plugin: first_sight_ism
+        pobs: 'true'
+      annotations:
+        summary: No system is reporting ISM evidence on {{ $labels.alias }}
+        description: |-
+          **What is wrong**
+          No system is publishing ISM records to the Puppet Enterprise (PE) install named in the alias label. That install's pobs loaded the first_sight_ism plugin, but first_sight_ism_record_nodes has had no samples there for 6 hours. A site that leaves this standard out on every system, by not enabling it or with enable false, is not in scope here, and the excluded family shows that. Each install is judged on its own, so a healthy second install does not hide this one. This is the evidence pipeline failing, not a control failing.
+
+          **Risk**
+          The ISM board shows nothing for that install, so anything these checks would have seen there goes unseen. Nothing is being enforced differently, so the exposure is in visibility.
+
+          **Severity and why**
+          Warning. No control is known to be failing, so it does not page. It waits for working hours.
+
+          **When to act**
+          Before the next business day.
+
+          **What to do**
+          1. Evidence not being produced on agents. Run the PuppetDB queries in Finding the rest on the primary named by the alias label. Healthy is a non-zero count of systems holding first_sight_states and none reading failed. No system holding it means the first_sight module is not deployed to the environment or agents have not run Puppet since: deploy it and wait for a run, no change window needed. first_sight_ism_excluded_nodes reading unclassified on every system means the first_sight class is applied nowhere: classify the systems that should report, or remove the plugin. Systems reading failed: run puppet facts show first_sight_states --debug on one and read the error.
+
+          2. Plugin fails to load. That is not this alert's job: pobs's own PobsPluginLoadFailed alert fires when a plugin file is rejected. If this alert fires, the plugin loaded, so move on.
+
+          3. Collector failing. Healthy is puppet_exporter_collector_success{collector="first_sight_ism"} equal to 1. At 0, read the pobs journal on the primary (journalctl -u pobs) for the error.
+
+          4. Fleet query refused. If collector_success is 1 and agents hold the fact, check puppet_exporter_plugin_queries_refused_total{plugin="first_sight_ism"}. Healthy is no series, or a value that has not moved in 6 hours. A rising value means pobs asked PuppetDB and was answered nothing, so the collector reports success while publishing no samples. The reason label says why: query_failed is PuppetDB failing the query (check PuppetDB health and the pobs journal). too_many_groups is more distinct records than the declared budget allows, which needs the plugin regenerated. budget is more queries in a poll than POBS allows, which a declared plugin cannot reach, so escalate it.
+
+          The alert clears once first_sight_ism_record_nodes returns samples at the next poll.
+
+          **Finding the rest**
+          Agents holding the fact: puppet query 'inventory[count()]{ facts.first_sight_states is not null }'. Agents whose states fact failed: puppet query 'inventory[count()]{ facts.first_sight_population.states = "failed" }'.
+
+          Plugin state on the primary: curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*first_sight_ism'.
+
+          Systems declared and excluded: first_sight_ism_declared_nodes and first_sight_ism_excluded_nodes, grouped by alias.
+
+          **Escalate**
+          If the fact is present on agents, the collector reports success and no query was refused, but the family is still absent, hand the platform team the query results, the curl output and the pobs journal for the primary.
+
+          **Known noise**
+          None known.
+  - name: plugin-first_sight_nist_csf_2-first_sight_nist_csf_2
+    rules:
+    - alert: FirstSightNistCsf2NoEvidence
+      expr: count by (alias) (puppet_exporter_collector_success{collector="first_sight_nist_csf_2"})
+        unless on (alias) count by (alias) (first_sight_nist_csf_2_record_nodes) unless
+        on (alias) (sum by (alias) (first_sight_nist_csf_2_excluded_nodes{reason=~"not_enabled|enable
+        false"}) > 0 unless on (alias) (sum by (alias) (first_sight_nist_csf_2_declared_nodes{declared="true"})
+        > 0))
+      for: 6h
+      labels:
+        severity: warning
+        plugin: first_sight_nist_csf_2
+        pobs: 'true'
+      annotations:
+        summary: No system is reporting NIST CSF 2.0 evidence on {{ $labels.alias
+          }}
+        description: |-
+          **What is wrong**
+          No system is publishing NIST CSF 2.0 records to the Puppet Enterprise (PE) install named in the alias label. That install's pobs loaded the first_sight_nist_csf_2 plugin, but first_sight_nist_csf_2_record_nodes has had no samples there for 6 hours. A site that leaves this standard out on every system, by not enabling it or with enable false, is not in scope here, and the excluded family shows that. Each install is judged on its own, so a healthy second install does not hide this one. This is the evidence pipeline failing, not a control failing.
+
+          **Risk**
+          The NIST CSF 2.0 board shows nothing for that install, so anything these checks would have seen there goes unseen. Nothing is being enforced differently, so the exposure is in visibility.
+
+          **Severity and why**
+          Warning. No control is known to be failing, so it does not page. It waits for working hours.
+
+          **When to act**
+          Before the next business day.
+
+          **What to do**
+          1. Evidence not being produced on agents. Run the PuppetDB queries in Finding the rest on the primary named by the alias label. Healthy is a non-zero count of systems holding first_sight_states and none reading failed. No system holding it means the first_sight module is not deployed to the environment or agents have not run Puppet since: deploy it and wait for a run, no change window needed. first_sight_nist_csf_2_excluded_nodes reading unclassified on every system means the first_sight class is applied nowhere: classify the systems that should report, or remove the plugin. Systems reading failed: run puppet facts show first_sight_states --debug on one and read the error.
+
+          2. Plugin fails to load. That is not this alert's job: pobs's own PobsPluginLoadFailed alert fires when a plugin file is rejected. If this alert fires, the plugin loaded, so move on.
+
+          3. Collector failing. Healthy is puppet_exporter_collector_success{collector="first_sight_nist_csf_2"} equal to 1. At 0, read the pobs journal on the primary (journalctl -u pobs) for the error.
+
+          4. Fleet query refused. If collector_success is 1 and agents hold the fact, check puppet_exporter_plugin_queries_refused_total{plugin="first_sight_nist_csf_2"}. Healthy is no series, or a value that has not moved in 6 hours. A rising value means pobs asked PuppetDB and was answered nothing, so the collector reports success while publishing no samples. The reason label says why: query_failed is PuppetDB failing the query (check PuppetDB health and the pobs journal). too_many_groups is more distinct records than the declared budget allows, which needs the plugin regenerated. budget is more queries in a poll than POBS allows, which a declared plugin cannot reach, so escalate it.
+
+          The alert clears once first_sight_nist_csf_2_record_nodes returns samples at the next poll.
+
+          **Finding the rest**
+          Agents holding the fact: puppet query 'inventory[count()]{ facts.first_sight_states is not null }'. Agents whose states fact failed: puppet query 'inventory[count()]{ facts.first_sight_population.states = "failed" }'.
+
+          Plugin state on the primary: curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*first_sight_nist_csf_2'.
+
+          Systems declared and excluded: first_sight_nist_csf_2_declared_nodes and first_sight_nist_csf_2_excluded_nodes, grouped by alias.
+
+          **Escalate**
+          If the fact is present on agents, the collector reports success and no query was refused, but the family is still absent, hand the platform team the query results, the curl output and the pobs journal for the primary.
+
+          **Known noise**
+          None known.
   - name: plugin-pe_snapshot-pe_snapshot
     rules:
     - alert: PeSnapshotEndpointUnreachable
