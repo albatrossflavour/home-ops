@@ -32,7 +32,7 @@ spec:
           main:
             image:
               repository: registry.gitlab.com/timvisee/send
-              tag: v3.5.0@sha256:a60476daf66eebc5fa5eb9ab00274c7723258a461957c30c8ec3a1e33a95262c
+              tag: v3.5.1@sha256:81916194df6842dc2b905039f5a49a852af82ff343abca084068a6707b5653df
             env:
               TZ: "${TZ}"
               BASE_URL: "https://send.${SECRET_DOMAIN}"
