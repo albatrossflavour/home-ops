@@ -173,12 +173,10 @@ spec:
       # instead of halting.
       extraFlags:
         - --compact.enable-vertical-compaction
-      # TEMPORARY. Raw retention is 14d by policy, but downsampled 5m/1h
-      # copies of Feb-Oct 2026 do not exist yet, and retention would delete
-      # the raw blocks before downsampling ever reaches them. Leave this at
-      # 2y until 5m blocks cover up to the present (check bucketweb), then
-      # set it back to 14d and the compactor will clear the backlog itself.
-      retentionResolutionRaw: 2y
+      # Raw was 2y from 2026-11-03 to 2026-11-09 while the compactor caught up
+      # nine months of downsampling. If raw ever needs raising again, check
+      # 5m coverage in bucketweb before lowering it back.
+      retentionResolutionRaw: 14d
       retentionResolution5m: 180d
       retentionResolution1h: 5y
       persistence:
