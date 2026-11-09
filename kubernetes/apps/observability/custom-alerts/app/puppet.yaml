@@ -2635,7 +2635,8 @@ spec:
           **Known noise**
           A site that has turned a Puppet Observability feature off but left its timer unit installed fires for ever; remove or mask the unit, or silence that `name` label in Alertmanager.
     - alert: PobsInfraUnitFailed
-      expr: node_systemd_unit_state{state="failed",pe_infrastructure="true"} == 1
+      expr: node_systemd_unit_state{state="failed",pe_infrastructure="true",name!~"pe-(bolt-server|ace-server|puppetdb|nginx|postgresql)\\.service"}
+        == 1
       for: 15m
       labels:
         severity: warning
@@ -3945,6 +3946,37 @@ spec:
         thresholds: scm_export_stale_human, scm_export_stale_seconds
   - name: pobs-service_status
     rules:
+    - alert: PuppetInfraPostgresStopped
+      expr: node_systemd_unit_state{state=~"inactive|failed",pe_infrastructure="true",name=~"pe-postgresql\\.service"}
+        == 1 and on (instance, name) max_over_time(node_systemd_unit_state{state="active",pe_infrastructure="true",name=~"pe-postgresql\\.service"}[7d])
+        == 1
+      for: 5m
+      labels:
+        severity: critical
+        tier: platform
+        pobs: 'true'
+      annotations:
+        summary: pe-postgresql is stopped on {{ $labels.instance }}
+        description: |-
+          **What is wrong**
+          The `pe-postgresql` unit on `{{ $labels.instance }}` has been stopped for five minutes, and it was active within the last week.
+          **Risk**
+          PE's services store their state in this database. While it is down, console logins fail and existing sessions are dropped, and PuppetDB, RBAC, the classifier, and the orchestrator cannot read or write.
+          **Severity and why**
+          Critical, and it pages. Most of PE depends on this unit, so nothing else can recover until it is back.
+          **When to act**
+          Now.
+          **What to do**
+          1. Cause: the unit was stopped cleanly. Run `sudo systemctl status pe-postgresql` on the host. `inactive` with no error in the journal is a clean stop. Unless someone is doing maintenance, run `sudo systemctl start pe-postgresql`.
+          2. Cause: the unit crashed. `failed` in the same output means it did, and `sudo journalctl -u pe-postgresql` carries the error. A full disk is a common reason (inferred), which `df -h` on the host confirms. Fix what the journal names, then start the unit.
+          3. Then: run `sudo puppet infrastructure status` on the primary and check that the services that depend on the database have come back.
+          4. Whatever the cause: the alert clears on its own once the unit is active again. Console users need to log in again.
+          **Finding the rest**
+          Everything else stopped on the host: `node_systemd_unit_state{instance="{{ $labels.instance }}",state=~"inactive|failed",name=~"pe-.*"} == 1`. When it stopped: `node_systemd_unit_state{instance="{{ $labels.instance }}",name="pe-postgresql.service",state="active"}` over a longer range.
+          **Escalate**
+          If the unit will not start or the journal names database corruption, hand it to the PE administrator straight away with the time it stopped and the journal lines.
+          **Known noise**
+          Planned maintenance and PE upgrades stop this unit, so silence the alert for the window.
     - alert: PuppetInfraServiceError
       expr: puppet_infra_service_up{state="error"} == 1
       for: 5m
@@ -3980,7 +4012,7 @@ spec:
           which lists every PE service component out of the running state with its
           host.
     - alert: PuppetInfraServiceNotRunning
-      expr: puppet_infra_service_up{state!~"running|error"} == 1
+      expr: puppet_infra_service_up{state!~"running|error|unreachable"} == 1
       for: 15m
       labels:
         severity: warning
@@ -4014,6 +4046,71 @@ spec:
         where: The "Which Services, And On Which Host" table on the TAM Check board,
           which lists every PE service component out of the running state with its
           host.
+    - alert: PuppetInfraServiceUnreachable
+      expr: max by (alias, host, service) (puppet_infra_service_up{state="unreachable"})
+        == 1
+      for: 5m
+      labels:
+        severity: warning
+        tier: platform
+        pobs: 'true'
+      annotations:
+        summary: "{{ $labels.service }} on {{ $labels.host }} is not answering its
+          status endpoint"
+        description: |-
+          **What is wrong**
+          The `{{ $labels.service }}` service on `{{ $labels.host }}` has not answered its status endpoint for five minutes. Either the service is stopped, or something between it and the pobs daemon is failing.
+          **Risk**
+          Whatever the service provides on that host is unavailable until it answers: catalogue compilation for `puppetserver`, orchestrated jobs for `orchestrator`, the console for `console`, patch runs for `patching_service`, workflows for `workflow_service`. Its other metrics stop updating too, so its boards show the last values read.
+          **Severity and why**
+          Warning, so it waits for working hours. One service not answering can be a deliberate stop, and the Puppet agent starts a stopped service on its next run. A service that answers and declares a fault is the critical `PuppetInfraServiceError`.
+          **When to act**
+          Working hours, unless the service is `puppetserver`, `orchestrator`, or `console`. Act now for those three, because agents, jobs, and the console depend on them.
+          **What to do**
+          1. Cause: the service is stopped. Run `systemctl status` on `{{ $labels.host }}` for the unit that owns it: pe-puppetserver, pe-orchestration-services, pe-console-services, pe-patching-service, pe-workflow-service, pe-host-action-collector, or pe-infra-assistant. `active (running)` rules this out, and `inactive` or `failed` confirms it. Start the unit with `systemctl start`, or leave it for the next agent run, unless someone stopped it on purpose.
+          2. Cause: the service is running but not serving. Read `/status/v1/services?level=debug` on its port, which is 8140 for puppetserver, 8143 for orchestrator, 4433 for console, 8146 for patching_service, 8148 for workflow_service, 8147 for host_action_collector, and 8145 for infra_assistant. The endpoint needs the host's own agent certificate, from `puppet config print hostcert`, `hostprivkey`, and `localcacert`. A JSON answer means the service is serving, so go to step 3. A refused or hung connection on an active unit means it is still starting or has wedged, and `journalctl` for that unit says which. Restart the unit if it has wedged. On a multi-compiler estate, pull the host out of the load balancer first, since a restart drops every in-flight compile on it.
+          3. Cause: the pobs daemon cannot reach a healthy service (inferred). Run `journalctl -u pobs` on the host running the daemon and find the `status_service` line for this host and port, which carries the error. A timeout or a certificate error while step 2 succeeds on the service's own host points at the network, a firewall, or the daemon's certificate.
+          4. Whatever the cause: the alert clears on its own within a minute or two of the service answering again.
+          **Finding the rest**
+          Everything else on the host that is not running: `puppet_infra_service_up{host="{{ $labels.host }}",state!="running"}`. Several services here means the host and not one service, so check its disk, memory, and PostgreSQL first. When it started: `puppet_infra_service_up{host="{{ $labels.host }}",service="{{ $labels.service }}",state="unreachable"}` over a longer range.
+          **Escalate**
+          If the unit will not stay up, or the journal names a fault you cannot fix, hand it to the PE administrator with the time it first went unreachable, the status endpoint output, and the journal lines.
+          **Known noise**
+          Planned maintenance and PE upgrades stop these services, so silence the alert for the window. A service that has been disabled for good keeps this alert until the daemon restarts, so run `systemctl restart pobs` on the host running it.
+        where_panel: pobs-tam-check/Which Services, And On Which Host
+        where: The "Which Services, And On Which Host" table on the TAM Check board,
+          which lists every PE service component out of the running state with its
+          host.
+    - alert: PuppetInfraUnitStopped
+      expr: node_systemd_unit_state{state=~"inactive|failed",pe_infrastructure="true",name=~"pe-(bolt-server|ace-server|puppetdb|nginx)\\.service"}
+        == 1 and on (instance, name) max_over_time(node_systemd_unit_state{state="active",pe_infrastructure="true",name=~"pe-(bolt-server|ace-server|puppetdb|nginx)\\.service"}[7d])
+        == 1
+      for: 5m
+      labels:
+        severity: warning
+        tier: platform
+        pobs: 'true'
+      annotations:
+        summary: "{{ $labels.name }} is stopped on {{ $labels.instance }}"
+        description: |-
+          **What is wrong**
+          The `{{ $labels.name }}` unit on `{{ $labels.instance }}` has been stopped for five minutes, and it was active within the last week.
+          **Risk**
+          `pe-bolt-server` and `pe-ace-server` run tasks and plans, so those fail. `pe-puppetdb` stores facts, catalogues, and reports, so anything that reads or writes them fails. `pe-nginx` is how users reach the console, so the console is unavailable.
+          **Severity and why**
+          Warning, so it waits for working hours. It can be a deliberate stop, and the Puppet agent starts a stopped unit on its next run. PostgreSQL has its own critical alert, `PuppetInfraPostgresStopped`.
+          **When to act**
+          Working hours, unless it is `pe-puppetdb` or `pe-nginx`, or a task or plan is due to run. Act now for those.
+          **What to do**
+          1. Cause: the unit was stopped cleanly. Run `sudo systemctl status {{ $labels.name }}` on the host. `inactive` with no error in the journal is a clean stop. Check whether someone stopped it for maintenance, then run `sudo systemctl start {{ $labels.name }}` or leave it for the next agent run.
+          2. Cause: the unit crashed. `failed` in the same output means it did, unless this is `pe-bolt-server`, which also reads `failed` after a clean stop, and `sudo journalctl -u {{ $labels.name }}` carries the error. Fix what it names, then start the unit.
+          3. Whatever the cause: the alert clears on its own once the unit is active again.
+          **Finding the rest**
+          Everything else stopped on the host: `node_systemd_unit_state{instance="{{ $labels.instance }}",state=~"inactive|failed",name=~"pe-.*"} == 1`. Several units here means the host and not one service, so check its disk and memory first. When it stopped: `node_systemd_unit_state{instance="{{ $labels.instance }}",name="{{ $labels.name }}",state="active"}` over a longer range.
+          **Escalate**
+          If the unit will not stay up, or the journal names a fault you cannot fix, hand it to the PE administrator with the time it stopped and the journal lines.
+          **Known noise**
+          Planned maintenance and PE upgrades stop these units, so silence the alert for the window. A unit retired for good keeps this alert for a week after it was last active, so silence that `name` and `instance` pair.
   - name: pobs-windows_compat
     rules:
     - record: node_boot_time_seconds
@@ -4718,6 +4815,12 @@ spec:
     - record: pobs_alert_rule_info
       expr: vector(1)
       labels:
+        alertname: PuppetInfraPostgresStopped
+        severity: critical
+        rule_group: service_status
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
         alertname: PuppetInfraServiceError
         severity: critical
         rule_group: service_status
@@ -4725,6 +4828,18 @@ spec:
       expr: vector(1)
       labels:
         alertname: PuppetInfraServiceNotRunning
+        severity: warning
+        rule_group: service_status
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetInfraServiceUnreachable
+        severity: warning
+        rule_group: service_status
+    - record: pobs_alert_rule_info
+      expr: vector(1)
+      labels:
+        alertname: PuppetInfraUnitStopped
         severity: warning
         rule_group: service_status
   - name: plugin-first_sight_e4eit-first_sight_e4eit
@@ -4876,6 +4991,109 @@ spec:
           Plugin state on the primary: curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*first_sight_ism'.
 
           Systems declared and excluded: first_sight_ism_declared_nodes and first_sight_ism_excluded_nodes, grouped by alias.
+
+          **Escalate**
+          If the fact is present on agents, the collector reports success and no query was refused, but the family is still absent, hand the platform team the query results, the curl output and the pobs journal for the primary.
+
+          **Known noise**
+          None known.
+  - name: plugin-first_sight_iso_27001-first_sight_iso_27001
+    rules:
+    - alert: FirstSightIso27001NoEvidence
+      expr: count by (alias) (puppet_exporter_collector_success{collector="first_sight_iso_27001"})
+        unless on (alias) count by (alias) (first_sight_iso_27001_record_nodes) unless
+        on (alias) (sum by (alias) (first_sight_iso_27001_excluded_nodes{reason=~"not_enabled|enable
+        false"}) > 0 unless on (alias) (sum by (alias) (first_sight_iso_27001_declared_nodes{declared="true"})
+        > 0))
+      for: 6h
+      labels:
+        severity: warning
+        plugin: first_sight_iso_27001
+        pobs: 'true'
+      annotations:
+        summary: No system is reporting ISO/IEC 27001 evidence on {{ $labels.alias
+          }}
+        description: |-
+          **What is wrong**
+          No system is publishing ISO/IEC 27001 records to the Puppet Enterprise (PE) install named in the alias label. That install's pobs loaded the first_sight_iso_27001 plugin, but first_sight_iso_27001_record_nodes has had no samples there for 6 hours. A site that leaves this standard out on every system, by not enabling it or with enable false, is not in scope here, and the excluded family shows that. Each install is judged on its own, so a healthy second install does not hide this one. This is the evidence pipeline failing, not a control failing.
+
+          **Risk**
+          The ISO/IEC 27001 board shows nothing for that install, so anything these checks would have seen there goes unseen. Nothing is being enforced differently, so the exposure is in visibility.
+
+          **Severity and why**
+          Warning. No control is known to be failing, so it does not page. It waits for working hours.
+
+          **When to act**
+          Before the next business day.
+
+          **What to do**
+          1. Evidence not being produced on agents. Run the PuppetDB queries in Finding the rest on the primary named by the alias label. Healthy is a non-zero count of systems holding first_sight_states and none reading failed. No system holding it means the first_sight module is not deployed to the environment or agents have not run Puppet since: deploy it and wait for a run, no change window needed. first_sight_iso_27001_excluded_nodes reading unclassified on every system means the first_sight class is applied nowhere: classify the systems that should report, or remove the plugin. Systems reading failed: run puppet facts show first_sight_states --debug on one and read the error.
+
+          2. Plugin fails to load. That is not this alert's job: pobs's own PobsPluginLoadFailed alert fires when a plugin file is rejected. If this alert fires, the plugin loaded, so move on.
+
+          3. Collector failing. Healthy is puppet_exporter_collector_success{collector="first_sight_iso_27001"} equal to 1. At 0, read the pobs journal on the primary (journalctl -u pobs) for the error.
+
+          4. Fleet query refused. If collector_success is 1 and agents hold the fact, check puppet_exporter_plugin_queries_refused_total{plugin="first_sight_iso_27001"}. Healthy is no series, or a value that has not moved in 6 hours. A rising value means pobs asked PuppetDB and was answered nothing, so the collector reports success while publishing no samples. The reason label says why: query_failed is PuppetDB failing the query (check PuppetDB health and the pobs journal). too_many_groups is more distinct records than the declared budget allows, which needs the plugin regenerated. budget is more queries in a poll than POBS allows, which a declared plugin cannot reach, so escalate it.
+
+          The alert clears once first_sight_iso_27001_record_nodes returns samples at the next poll.
+
+          **Finding the rest**
+          Agents holding the fact: puppet query 'inventory[count()]{ facts.first_sight_states is not null }'. Agents whose states fact failed: puppet query 'inventory[count()]{ facts.first_sight_population.states = "failed" }'.
+
+          Plugin state on the primary: curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*first_sight_iso_27001'.
+
+          Systems declared and excluded: first_sight_iso_27001_declared_nodes and first_sight_iso_27001_excluded_nodes, grouped by alias.
+
+          **Escalate**
+          If the fact is present on agents, the collector reports success and no query was refused, but the family is still absent, hand the platform team the query results, the curl output and the pobs journal for the primary.
+
+          **Known noise**
+          None known.
+  - name: plugin-first_sight_nis2-first_sight_nis2
+    rules:
+    - alert: FirstSightNis2NoEvidence
+      expr: count by (alias) (puppet_exporter_collector_success{collector="first_sight_nis2"})
+        unless on (alias) count by (alias) (first_sight_nis2_record_nodes) unless
+        on (alias) (sum by (alias) (first_sight_nis2_excluded_nodes{reason=~"not_enabled|enable
+        false"}) > 0 unless on (alias) (sum by (alias) (first_sight_nis2_declared_nodes{declared="true"})
+        > 0))
+      for: 6h
+      labels:
+        severity: warning
+        plugin: first_sight_nis2
+        pobs: 'true'
+      annotations:
+        summary: No system is reporting NIS2 evidence on {{ $labels.alias }}
+        description: |-
+          **What is wrong**
+          No system is publishing NIS2 records to the Puppet Enterprise (PE) install named in the alias label. That install's pobs loaded the first_sight_nis2 plugin, but first_sight_nis2_record_nodes has had no samples there for 6 hours. A site that leaves this standard out on every system, by not enabling it or with enable false, is not in scope here, and the excluded family shows that. Each install is judged on its own, so a healthy second install does not hide this one. This is the evidence pipeline failing, not a control failing.
+
+          **Risk**
+          The NIS2 board shows nothing for that install, so anything these checks would have seen there goes unseen. Nothing is being enforced differently, so the exposure is in visibility.
+
+          **Severity and why**
+          Warning. No control is known to be failing, so it does not page. It waits for working hours.
+
+          **When to act**
+          Before the next business day.
+
+          **What to do**
+          1. Evidence not being produced on agents. Run the PuppetDB queries in Finding the rest on the primary named by the alias label. Healthy is a non-zero count of systems holding first_sight_states and none reading failed. No system holding it means the first_sight module is not deployed to the environment or agents have not run Puppet since: deploy it and wait for a run, no change window needed. first_sight_nis2_excluded_nodes reading unclassified on every system means the first_sight class is applied nowhere: classify the systems that should report, or remove the plugin. Systems reading failed: run puppet facts show first_sight_states --debug on one and read the error.
+
+          2. Plugin fails to load. That is not this alert's job: pobs's own PobsPluginLoadFailed alert fires when a plugin file is rejected. If this alert fires, the plugin loaded, so move on.
+
+          3. Collector failing. Healthy is puppet_exporter_collector_success{collector="first_sight_nis2"} equal to 1. At 0, read the pobs journal on the primary (journalctl -u pobs) for the error.
+
+          4. Fleet query refused. If collector_success is 1 and agents hold the fact, check puppet_exporter_plugin_queries_refused_total{plugin="first_sight_nis2"}. Healthy is no series, or a value that has not moved in 6 hours. A rising value means pobs asked PuppetDB and was answered nothing, so the collector reports success while publishing no samples. The reason label says why: query_failed is PuppetDB failing the query (check PuppetDB health and the pobs journal). too_many_groups is more distinct records than the declared budget allows, which needs the plugin regenerated. budget is more queries in a poll than POBS allows, which a declared plugin cannot reach, so escalate it.
+
+          The alert clears once first_sight_nis2_record_nodes returns samples at the next poll.
+
+          **Finding the rest**
+          Agents holding the fact: puppet query 'inventory[count()]{ facts.first_sight_states is not null }'. Agents whose states fact failed: puppet query 'inventory[count()]{ facts.first_sight_population.states = "failed" }'.
+
+          Plugin state on the primary: curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*first_sight_nis2'.
+
+          Systems declared and excluded: first_sight_nis2_declared_nodes and first_sight_nis2_excluded_nodes, grouped by alias.
 
           **Escalate**
           If the fact is present on agents, the collector reports success and no query was refused, but the family is still absent, hand the platform team the query results, the curl output and the pobs journal for the primary.
