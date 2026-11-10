@@ -46,7 +46,7 @@ spec:
           app:
             image:
               repository: nocodb/nocodb
-              tag: 0.301.5@sha256:d9516f0bf546fd6c78a382ab0657626c683fca7aaafdbbe53c66baf15df7fc0d
+              tag: 2026.10.1@sha256:8c2dd06896d95e750d55010e529972c22c1ee73b22dce321b1d2de2e7d5cd6ae
             env:
               TZ: Australia/Sydney
               NC_DISABLE_TELE: "true"
