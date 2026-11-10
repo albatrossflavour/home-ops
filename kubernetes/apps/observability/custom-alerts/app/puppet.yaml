@@ -2114,6 +2114,8 @@ spec:
         capacity ceiling", "", "") or label_replace(label_replace(100 * clamp_max(avg
         by (alias) (puppet_compliance_score{standard="cis",score_type="adjusted"})
         / 90, 1), "area", "compliance", "", ""), "signal", "CIS score against target",
+        "", "") or label_replace(label_replace(100 * clamp_max(avg by (alias) (puppet_compliance_score{standard="stig",score_type="adjusted"})
+        / 90, 1), "area", "compliance", "", ""), "signal", "STIG score against target",
         "", "") or label_replace(label_replace(100 * clamp_min(1 - (sum by (alias)
         (puppet_remediation_items{state="breached"}) / clamp_min(sum by (alias) (puppet_remediation_items),
         1)) / 0.2, 0), "area", "compliance", "", ""), "signal", "Remediation past
@@ -3947,9 +3949,9 @@ spec:
   - name: pobs-service_status
     rules:
     - alert: PuppetInfraPostgresStopped
-      expr: node_systemd_unit_state{state=~"inactive|failed",pe_infrastructure="true",name=~"pe-postgresql\\.service"}
+      expr: label_replace(node_systemd_unit_state{state=~"inactive|failed",pe_infrastructure="true",name=~"pe-postgresql\\.service"}
         == 1 and on (instance, name) max_over_time(node_systemd_unit_state{state="active",pe_infrastructure="true",name=~"pe-postgresql\\.service"}[7d])
-        == 1
+        == 1, "host", "$1", "alias", "(.*)")
       for: 5m
       labels:
         severity: critical
@@ -4006,7 +4008,7 @@ spec:
           **Escalate**
           If a restart does not return the component to `running`, or the journal names a fault you cannot fix on the host, hand it to the PE administrator with the time the state changed, the `/status/v1/services?level=debug` output and the `journalctl` lines for the unit. If it points at PE itself, they take it to Puppet support with the same material.
           **Known noise**
-          None known.
+          While `PuppetInfraPostgresStopped` fires for the same host, this alert is held back, because the database outage explains it. Where the systemd collector is off that alert can't fire, so a PostgreSQL outage raises this once per affected service.
         where_panel: pobs-tam-check/Which Services, And On Which Host
         where: The "Which Services, And On Which Host" table on the TAM Check board,
           which lists every PE service component out of the running state with its
@@ -4076,7 +4078,7 @@ spec:
           **Escalate**
           If the unit will not stay up, or the journal names a fault you cannot fix, hand it to the PE administrator with the time it first went unreachable, the status endpoint output, and the journal lines.
           **Known noise**
-          Planned maintenance and PE upgrades stop these services, so silence the alert for the window. A service that has been disabled for good keeps this alert until the daemon restarts, so run `systemctl restart pobs` on the host running it.
+          Planned maintenance and PE upgrades stop these services, so silence the alert for the window. A service that has been disabled for good keeps this alert until the daemon restarts, so run `systemctl restart pobs` on the host running it. While `PuppetInfraPostgresStopped` fires for the same host, this alert is held back, because the database outage explains it.
         where_panel: pobs-tam-check/Which Services, And On Which Host
         where: The "Which Services, And On Which Host" table on the TAM Check board,
           which lists every PE service component out of the running state with its
@@ -4842,6 +4844,57 @@ spec:
         alertname: PuppetInfraUnitStopped
         severity: warning
         rule_group: service_status
+  - name: plugin-first_sight_cyber_trust-first_sight_cyber_trust
+    rules:
+    - alert: FirstSightCyberTrustNoEvidence
+      expr: count by (alias) (puppet_exporter_collector_success{collector="first_sight_cyber_trust"})
+        unless on (alias) count by (alias) (first_sight_cyber_trust_record_nodes)
+        unless on (alias) (sum by (alias) (first_sight_cyber_trust_excluded_nodes{reason=~"not_enabled|enable
+        false"}) > 0 unless on (alias) (sum by (alias) (first_sight_cyber_trust_declared_nodes{declared="true"})
+        > 0))
+      for: 6h
+      labels:
+        severity: warning
+        plugin: first_sight_cyber_trust
+        pobs: 'true'
+      annotations:
+        summary: No system is reporting Cyber Trust evidence on {{ $labels.alias }}
+        description: |-
+          **What is wrong**
+          No system is publishing Cyber Trust records to the Puppet Enterprise (PE) install named in the alias label. That install's pobs loaded the first_sight_cyber_trust plugin, but first_sight_cyber_trust_record_nodes has had no samples there for 6 hours. A site that leaves this standard out on every system, by not enabling it or with enable false, is not in scope here, and the excluded family shows that. Each install is judged on its own, so a healthy second install does not hide this one. This is the evidence pipeline failing, not a control failing.
+
+          **Risk**
+          The Cyber Trust board shows nothing for that install, so anything these checks would have seen there goes unseen. Nothing is being enforced differently, so the exposure is in visibility.
+
+          **Severity and why**
+          Warning. No control is known to be failing, so it does not page. It waits for working hours.
+
+          **When to act**
+          Before the next business day.
+
+          **What to do**
+          1. Evidence not being produced on agents. Run the PuppetDB queries in Finding the rest on the primary named by the alias label. Healthy is a non-zero count of systems holding first_sight_states and none reading failed. No system holding it means the first_sight module is not deployed to the environment or agents have not run Puppet since: deploy it and wait for a run, no change window needed. first_sight_cyber_trust_excluded_nodes reading unclassified on every system means the first_sight class is applied nowhere: classify the systems that should report, or remove the plugin. Systems reading failed: run puppet facts show first_sight_states --debug on one and read the error.
+
+          2. Plugin fails to load. That is not this alert's job: pobs's own PobsPluginLoadFailed alert fires when a plugin file is rejected. If this alert fires, the plugin loaded, so move on.
+
+          3. Collector failing. Healthy is puppet_exporter_collector_success{collector="first_sight_cyber_trust"} equal to 1. At 0, read the pobs journal on the primary (journalctl -u pobs) for the error.
+
+          4. Fleet query refused. If collector_success is 1 and agents hold the fact, check puppet_exporter_plugin_queries_refused_total{plugin="first_sight_cyber_trust"}. Healthy is no series, or a value that has not moved in 6 hours. A rising value means pobs asked PuppetDB and was answered nothing, so the collector reports success while publishing no samples. The reason label says why: query_failed is PuppetDB failing the query (check PuppetDB health and the pobs journal). too_many_groups is more distinct records than the declared budget allows, which needs the plugin regenerated. budget is more queries in a poll than POBS allows, which a declared plugin cannot reach, so escalate it.
+
+          The alert clears once first_sight_cyber_trust_record_nodes returns samples at the next poll.
+
+          **Finding the rest**
+          Agents holding the fact: puppet query 'inventory[count()]{ facts.first_sight_states is not null }'. Agents whose states fact failed: puppet query 'inventory[count()]{ facts.first_sight_population.states = "failed" }'.
+
+          Plugin state on the primary: curl -s http://localhost:10050/metrics | grep -E 'plugin_load_failed|queries_refused_total|collector_success.*first_sight_cyber_trust'.
+
+          Systems declared and excluded: first_sight_cyber_trust_declared_nodes and first_sight_cyber_trust_excluded_nodes, grouped by alias.
+
+          **Escalate**
+          If the fact is present on agents, the collector reports success and no query was refused, but the family is still absent, hand the platform team the query results, the curl output and the pobs journal for the primary.
+
+          **Known noise**
+          None known.
   - name: plugin-first_sight_e4eit-first_sight_e4eit
     rules:
     - alert: FirstSightE4eitNoEvidence
