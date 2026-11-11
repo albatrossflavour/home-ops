@@ -391,6 +391,34 @@ spec:
             summary: "Thanos compactor has halted"
             description: "thanos_compact_halted has been 1 for an hour. The compactor stops on what it considers a critical error (usually overlapping blocks) and will not resume without a restart or a config change. Read the compactor log for the 'halting' line. While halted nothing is compacted, downsampled or deleted, so the bucket grows and long-term history is at risk if raw retention is ever applied without downsampled copies."
 
+        # Pushed daily by thanos-history-canary (observability). Replaces the
+        # ruler canary, which could only see raw resolution and fired falsely
+        # once 1h was the only copy of 2026-01-01.
+        - alert: HistoricalHomeTemperatureDeleted
+          expr: |
+            thanos_history_canary_present == 0
+          for: 15m
+          labels:
+            severity: critical
+            component: observability
+            alert_group: storage
+          annotations:
+            summary: "Historical home temperature data from {{ $labels.date }} has been deleted"
+            description: "thanos-history-canary queried mqtt_temperature at {{ $labels.date }} with max_source_resolution=1h and got nothing back. The 1h blocks for that date are gone from the bucket. Check the compactor log for retention deletions and the 1h retention flag."
+
+        - alert: ThanosHistoryCanaryStale
+          expr: |
+            time() - push_time_seconds{job="thanos-history-canary"} > 2 * 86400
+            or absent(push_time_seconds{job="thanos-history-canary"})
+          for: 1h
+          labels:
+            severity: warning
+            component: observability
+            alert_group: storage
+          annotations:
+            summary: "thanos-history-canary has not pushed for two days"
+            description: "HistoricalHomeTemperatureDeleted is blind. Check the thanos-history-canary CronJob in observability (a failed Thanos query exits before pushing) and the cert-expiry-pushgateway pod in kube-system."
+
     - name: home-sensors
       rules:
         - alert: MqttExporterDown

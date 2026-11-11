@@ -23,6 +23,13 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    # Chart 10.5.15 is the last in this repo and defaults to Grafana 12.3.1,
+    # so without a pinned tag Renovate had nothing to bump. Same pin as
+    # observability/grafana.
+    image:
+      registry: docker.io
+      repository: grafana/grafana
+      tag: "13.3.0@sha256:488984b716c0862639f91a698adbe2862677a5a07bad42da5f03f3030883b205"
     admin:
       existingSecret: grafana-shitbox-admin
     deploymentStrategy:
