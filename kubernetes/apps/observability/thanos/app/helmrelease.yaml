@@ -212,17 +212,10 @@ spec:
                 labels:
                   severity: critical
                   component: monitoring
-          - name: "HistoricalDataIntegrity"
-            rules:
-              - alert: "HistoricalHomeTemperatureDeleted"
-                annotations:
-                  summary: "Historical home temperature data from 2026-01-01 has been deleted"
-                  description: "mqtt_temperature data from 2026-01-01T12:00:00Z (unix: 1767268800) is no longer accessible in Thanos. Data has been deleted from object storage."
-                expr: absent(mqtt_temperature{job="mqtt-exporter"} @ 1767268800)
-                for: 15m
-                labels:
-                  severity: critical
-                  component: monitoring
+      # The HistoricalHomeTemperatureDeleted canary moved to the
+      # thanos-history-canary CronJob: the ruler only queries raw resolution,
+      # so it cannot see history once the 5m blocks age out (fired falsely
+      # 2026-11-10 with the 1h data intact).
       dnsDiscovery:
         enabled: true
       persistence:

@@ -1,0 +1,66 @@
+---
+# Checks that 2026-01-01 home temperature data is still in the Thanos bucket.
+# This used to be a ruler alert, but the ruler queries at raw resolution, and
+# past the 180d 5m retention the only copy is 1h. That made it fire on
+# 2026-11-10 with the data intact. This queries with max_source_resolution=1h
+# and pushes 1/0 to the Pushgateway that trivy-fixable-check already uses.
+# Alerts are in custom-alerts (thanos group).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: thanos-history-canary
+spec:
+  schedule: "45 6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: thanos-history-canary
+        spec:
+          containers:
+            - name: thanos-history-canary
+              image: alpine/k8s:1.37.2@sha256:dcb7185e112a453aa72f426754849a97357727ef8f40168fb208c8cf59952042
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  # A failed query exits non-zero before pushing, so the
+                  # stale-push alert catches a broken canary instead of it
+                  # reporting the data as gone.
+                  curl -sfG -m 120 "http://thanos-query.observability.svc.cluster.local:9090/api/v1/query" \
+                    --data-urlencode 'query=count(count_over_time(mqtt_temperature{job="mqtt-exporter"}[3h] @ 1767268800))' \
+                    --data-urlencode 'max_source_resolution=1h' > /tmp/r.json
+                  jq -e '.status == "success"' /tmp/r.json > /dev/null
+                  present=$(jq '.data.result | if length > 0 then 1 else 0 end' /tmp/r.json)
+                  printf 'thanos_history_canary_present{date="2026-01-01"} %s\n' "$present" > /tmp/metric.txt
+                  curl -sf --data-binary @/tmp/metric.txt \
+                    "http://cert-expiry-pushgateway.kube-system.svc.cluster.local:9091/metrics/job/thanos-history-canary/instance/cluster"
+                  cat /tmp/metric.txt
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            - name: tmp
+              emptyDir: {}
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
