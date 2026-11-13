@@ -195,17 +195,17 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-      local:
-        enabled: true
-        type: nfs
-        server: "192.168.1.22"
-        path: /volume2/Backups/ha/local
-        globalMounts:
-          - path: /config/www/local
-      photos:
-        enabled: true
-        type: nfs
-        server: "192.168.1.22"
-        path: /volume2/Backups/ha/photos
-        globalMounts:
-          - path: /config/www/photos
+#     local:
+#       enabled: true
+#       type: nfs
+#       server: "192.168.1.22"
+#       path: /volume2/Backups/ha/local
+#       globalMounts:
+#         - path: /config/www/local
+#     photos:
+#       enabled: true
+#       type: nfs
+#       server: "192.168.1.22"
+#       path: /volume2/Backups/ha/photos
+#       globalMounts:
+#         - path: /config/www/photos
