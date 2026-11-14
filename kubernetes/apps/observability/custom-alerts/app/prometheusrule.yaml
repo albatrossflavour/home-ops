@@ -517,3 +517,43 @@ spec:
           annotations:
             summary: "NAS mirror is skipping {{ $value }} more unreadable files than a week ago"
             description: "The count of files the NAS refuses to hand over has risen. The known baseline is 48 across Media and PlexMediaServer. A rise means new content is being created with permissions the sync account cannot read, so it is silently not being backed up. Check the Permission denied lines in /var/log/nas-sync.log on ankh."
+
+    # Unpoller keeps serving its last good snapshot when it cannot reach the
+    # controller, so `up` stays 1, every unpoller_* series stays present, and
+    # the dashboards look populated while showing stale numbers. On 2026-11-11
+    # the readonly password was rotated without the 1Password copy, the account
+    # locked, and nothing fired for three days. The cache age is the only
+    # signal that moves: 52s healthy, 198292s by day three, -1 after a restart
+    # with no cache at all.
+    - name: unpoller
+      rules:
+        - alert: UnpollerDataStale
+          expr: |
+            max(unpoller_prometheus_cache_age_seconds) > 900
+            or max(unpoller_prometheus_cache_age_seconds) < 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unpoller has not refreshed UniFi data for {{ $value | humanizeDuration }}"
+            description: "unpoller is serving a frozen snapshot (or none at all, when the value is -1). Every unpoller_* series is still present, so dashboards look fine and absent() cannot catch this. Check the unpoller pod log for an auth error against https://192.168.1.1: a locked or rotated credential looks exactly like this. The API key lives in the 1Password discworld item `unifi`."
+
+        - alert: UnpollerRefreshFailing
+          expr: |
+            increase(unpoller_prometheus_refresh_failures_total[30m]) > 10
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unpoller is failing to poll the UniFi controller"
+            description: "{{ $value | humanize }} refresh failures in the last 30 minutes. Pairs with UnpollerDataStale; this one fires first, while the snapshot is still fresh enough to pass the age check."
+
+        - alert: UnpollerMetricsAbsent
+          expr: |
+            absent(unpoller_prometheus_cache_age_seconds)
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unpoller is not being scraped at all"
+            description: "No unpoller_prometheus_cache_age_seconds series for 30m, so UnpollerDataStale has nothing to evaluate. Check the unpoller pod and its ServiceMonitor in observability."
