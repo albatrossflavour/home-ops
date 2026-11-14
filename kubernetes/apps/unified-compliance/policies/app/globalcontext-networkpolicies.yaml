@@ -4,7 +4,7 @@
 # GlobalContextEntry caches exactly one resource type, and this cluster uses
 # CiliumNetworkPolicy for its own rollout while some charts ship core
 # NetworkPolicy objects.
-apiVersion: kyverno.io/v2beta1
+apiVersion: kyverno.io/v2
 kind: GlobalContextEntry
 metadata:
   name: ciliumnetworkpolicies
@@ -17,7 +17,7 @@ spec:
     - name: namespaces
       jmesPath: "[].metadata.namespace"
 ---
-apiVersion: kyverno.io/v2beta1
+apiVersion: kyverno.io/v2
 kind: GlobalContextEntry
 metadata:
   name: networkpolicies

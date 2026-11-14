@@ -6,7 +6,7 @@
 #
 # The projection flattens each ReplicationSource to "<namespace>/<sourcePVC>",
 # which is the key require-pvc-backup matches against.
-apiVersion: kyverno.io/v2beta1
+apiVersion: kyverno.io/v2
 kind: GlobalContextEntry
 metadata:
   name: replicationsources
