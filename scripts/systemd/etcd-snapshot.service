@@ -1,0 +1,16 @@
+# Installed by `task talos:maintenance:etcd-snapshot-timer`, which replaces
+# @REPO@ with the path of this checkout. Edit it here, not in
+# ~/.config/systemd/user.
+[Unit]
+Description=Take a verified etcd snapshot to the NAS
+Documentation=file://@REPO@/.taskfiles/Talos/Maintenance.yaml
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=@REPO@
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+# magrat, not the default weatherwax: a snapshot reads the whole database,
+# and magrat is the control-plane node without a worn drive under it.
+ExecStart=/usr/bin/env task talos:maintenance:etcd-snapshot node=192.168.8.12

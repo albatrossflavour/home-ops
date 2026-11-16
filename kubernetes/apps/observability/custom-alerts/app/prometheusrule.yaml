@@ -92,6 +92,35 @@ spec:
             summary: "cert_expiry_timestamp_seconds has vanished, HubbleCiliumCertExpiresSoon is blind"
             description: "No cert expiry metric has been present for 2h, so HubbleCiliumCertExpiresSoon cannot fire regardless of the real cert state. These Cilium/Hubble mTLS certs are Helm-templated with no cert-manager renewal behind them, so this alert is the only thing watching them. Check the cert-expiry-pushgateway pod in kube-system and the cert-expiry-check CronJob."
 
+        # The etcd snapshots are taken daily by a systemd timer on the
+        # workstation, outside the cluster, so nothing here would notice if
+        # it stopped. etcd-snapshot-check (kube-system) reads the NAS every
+        # six hours and pushes the newest snapshot's mtime. 36h is one missed
+        # daily run plus slack. Snapshots under 8MB are not counted, so a
+        # truncated file cannot keep this quiet.
+        - alert: EtcdSnapshotStale
+          expr: |
+            time() - etcd_snapshot_newest_timestamp_seconds > 36 * 3600
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "The newest etcd snapshot on the NAS is {{ $value | humanizeDuration }} old"
+            description: "No valid etcd snapshot has landed in 192.168.1.22:/volume2/Backups/etcd for {{ $value | humanizeDuration }}. They are taken daily at 17:20 UTC by the etcd-snapshot systemd user timer on ponder. Check `systemctl --user status etcd-snapshot.timer etcd-snapshot.service` and `journalctl --user -u etcd-snapshot.service` there, that /mnt/nas-backups is mounted, and that the home-ops checkout is on a branch where `task talos:maintenance:etcd-snapshot` works. A value near 56 years means no valid snapshot exists at all."
+
+        # Blind-detector for the alert above, same reasoning as
+        # CertExpiryMetricAbsent: if the check job or the Pushgateway breaks,
+        # the stale alert stops firing and that looks like good news.
+        - alert: EtcdSnapshotMetricAbsent
+          expr: |
+            absent(etcd_snapshot_newest_timestamp_seconds)
+          for: 12h
+          labels:
+            severity: warning
+          annotations:
+            summary: "etcd_snapshot_newest_timestamp_seconds has vanished, EtcdSnapshotStale is blind"
+            description: "No etcd snapshot age metric has been present for 12h, so EtcdSnapshotStale cannot fire whatever the real state of the backups. Check the etcd-snapshot-check CronJob and the cert-expiry-pushgateway pod in kube-system, and that 192.168.1.22:/volume2/Backups/etcd still mounts."
+
         - alert: AuthentikServiceDown
           expr: |
             up{job="authentik-server-metrics"} == 0
