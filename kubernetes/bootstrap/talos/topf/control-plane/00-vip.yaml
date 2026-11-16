@@ -1,0 +1,5 @@
+# The Kubernetes API VIP, shared between the three control-plane nodes.
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+name: 192.168.8.20
+link: ethSel0

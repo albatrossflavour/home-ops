@@ -1,0 +1,4 @@
+machine:
+  certSANs:
+    - 192.168.8.20
+    - 127.0.0.1 # KubePrism
