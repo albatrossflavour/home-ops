@@ -80,8 +80,10 @@ tasks:
     preconditions:
       - msg: 1Password CLI not found - install from https://developer.1password.com/docs/cli/get-started/
         sh: command -v op
+      # env -u: a set OP_SERVICE_ACCOUNT_TOKEN overrides --account, and the
+      # service account cannot see the discworld vault.
       - msg: Not authenticated with 1Password CLI - run 'op signin'
-        sh: op vault list >/dev/null 2>&1
+        sh: env -u OP_SERVICE_ACCOUNT_TOKEN op vault list --account="thegreens.1password.com" >/dev/null 2>&1
       - msg: Missing backup script
         sh: test -f {{.SCRIPTS_DIR}}/backup-to-1password.sh
 
@@ -96,8 +98,10 @@ tasks:
     preconditions:
       - msg: 1Password CLI not found - install from https://developer.1password.com/docs/cli/get-started/
         sh: command -v op
+      # env -u: a set OP_SERVICE_ACCOUNT_TOKEN overrides --account, and the
+      # service account cannot see the discworld vault.
       - msg: Not authenticated with 1Password CLI - run 'op signin'
-        sh: op vault list >/dev/null 2>&1
+        sh: env -u OP_SERVICE_ACCOUNT_TOKEN op vault list --account="thegreens.1password.com" >/dev/null 2>&1
       - msg: Missing restore script
         sh: test -f {{.SCRIPTS_DIR}}/restore-from-1password.sh
 
@@ -107,12 +111,17 @@ tasks:
       Shows all homeops backup items currently stored in the 1Password vault.
       Useful for verifying backups exist before attempting restore.
     cmds:
-      - op item list --vault="discworld" --account="thegreens.1password.com" | grep "homeops-" || echo "No backup items found"
+      # Listed first and filtered second, so an op failure is an error and
+      # not "No backup items found". env -u: a set OP_SERVICE_ACCOUNT_TOKEN
+      # overrides --account, and the service account cannot see discworld.
+      - |
+        items=$(env -u OP_SERVICE_ACCOUNT_TOKEN op item list --vault="discworld" --account="thegreens.1password.com")
+        echo "$items" | grep "homeops-" || echo "No backup items found"
     preconditions:
       - msg: 1Password CLI not found - install from https://developer.1password.com/docs/cli/get-started/
         sh: command -v op
       - msg: Not authenticated with 1Password CLI - run 'op signin'
-        sh: op vault list --account="thegreens.1password.com" >/dev/null 2>&1
+        sh: env -u OP_SERVICE_ACCOUNT_TOKEN op vault list --account="thegreens.1password.com" >/dev/null 2>&1
 
   .template:
     internal: true

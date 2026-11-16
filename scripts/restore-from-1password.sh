@@ -4,6 +4,11 @@
 
 set -euo pipefail
 
+# These backups live in the discworld vault, which only the user account can
+# see. A set OP_SERVICE_ACCOUNT_TOKEN overrides --account, so op would run as
+# the service account and report that the vault does not exist.
+unset OP_SERVICE_ACCOUNT_TOKEN
+
 VAULT="discworld"
 ACCOUNT="thegreens.1password.com"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
