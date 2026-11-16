@@ -38,7 +38,11 @@ spec:
                   cpu: 10m
                   memory: 16Mi
                 limits:
-                  memory: 64Mi
+                  # 2026-11-16: 64Mi was OOMKilled twice in a row on a node
+                  # that had just rebooted, before the third attempt worked.
+                  # Copying promtool goes through the page cache, and on a
+                  # cold node that cache is charged to this container.
+                  memory: 256Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true

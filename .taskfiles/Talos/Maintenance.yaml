@@ -126,14 +126,25 @@ tasks:
       Parameters:
         node: Node IP address
         version: Target Talos version (e.g., v1.9.5)
+        drain_timeout: How long to wait for the drain (default: 15m)
 
       The task will:
       1. Validate parameters
       2. Perform upgrade with --preserve and --wait flags
       3. Verify node comes back Ready
+
+      WHY THE DRAIN TIMEOUT IS 15m
+
+      talosctl's default is 5m. ingress-nginx has a 300s termination grace
+      period, so a node carrying an ingress controller races the default and
+      loses: on 2026-11-16 the greebo upgrade aborted with "error draining
+      node" and left the node cordoned on the old version. Prometheus (600s)
+      and postgres16 (1800s) have longer grace periods still. Re-running the
+      task on an already drained node is safe and finishes the upgrade.
     vars:
       NODE: '{{.node | default ""}}'
       VERSION: '{{.version | default ""}}'
+      DRAIN_TIMEOUT: '{{.drain_timeout | default "15m"}}'
       IMAGE: "factory.talos.dev/installer/{{.SCHEMATIC}}:{{.VERSION}}"
     preconditions:
       - sh: '[ -n "{{.NODE}}" ]'
@@ -149,7 +160,8 @@ tasks:
           --nodes {{.NODE}} \
           --image {{.IMAGE}} \
           --preserve \
-          --wait
+          --wait \
+          --drain-timeout {{.DRAIN_TIMEOUT}}
       - echo "Waiting for node to become Ready..."
       - kubectl --kubeconfig {{.KUBECONFIG}} wait --for=condition=Ready node --all --timeout=10m
       - echo "[OK] Node {{.NODE}} upgraded successfully"
@@ -197,36 +209,102 @@ tasks:
         task talos:maintenance:upgrade-control-plane version=v1.9.5
 
       Upgrades in this order:
-      1. weatherwax (192.168.8.10) - No Ceph OSD
-      2. ogg (192.168.8.11) - Has Ceph OSD
-      3. magrat (192.168.8.12) - Has Ceph OSD
+      1. weatherwax (192.168.8.10)
+      2. ogg (192.168.8.11)
+      3. magrat (192.168.8.12)
+
+      All three carry an etcd member, a Ceph mon and a Ceph OSD, and usually
+      a postgres16 instance. Every pool is size 3 / min_size 2, so a second
+      OSD going down before the first is back stops I/O on every PVC. The
+      task therefore waits for Ceph and etcd to be healthy after each node
+      (wait-healthy) and fails if they do not get there.
 
       IMPORTANT: Automatically enables Ceph maintenance mode before starting.
+
+      BEFORE RUNNING
+
+      If the postgres16 primary is on a control-plane node, move it to an
+      instance on a node that is already upgraded first. Its PDB
+      (postgres16-primary) allows zero disruptions, so the drain cannot
+      evict it:
+
+        kubectl cnpg promote postgres16 <instance> -n database
     vars:
       VERSION: '{{.version | default ""}}'
     preconditions:
       - sh: '[ -n "{{.VERSION}}" ]'
         msg: "version parameter required (e.g., version=v1.9.5)"
     cmds:
+      - task: wait-healthy
       - task: ceph-maintenance-start
       - task: upgrade-node
         vars:
           node: "192.168.8.10"
           version: "{{.VERSION}}"
+      - task: wait-healthy
       - task: upgrade-node
         vars:
           node: "192.168.8.11"
           version: "{{.VERSION}}"
-      - echo "Waiting for Ceph OSD to recover..."
-      - sleep 30
+      - task: wait-healthy
       - task: upgrade-node
         vars:
           node: "192.168.8.12"
           version: "{{.VERSION}}"
-      - echo "Waiting for Ceph cluster to stabilize..."
-      - sleep 60
+      - task: wait-healthy
       - task: ceph-maintenance-end
       - echo "[OK] All control-plane nodes upgraded"
+
+  wait-healthy:
+    desc: Wait until Ceph and etcd are healthy enough to take another node down
+    summary: |
+      Blocks until all of these hold, and fails after 15 minutes if they do not:
+
+      - every node is Ready
+      - every Ceph OSD is up and every PG is active+clean
+      - etcd answers on all three control-plane nodes with no errors and
+        every member on the same raft index
+
+      Ceph health is NOT required to be HEALTH_OK. The cluster sits at
+      HEALTH_WARN at baseline, and noout/norebalance add a warning of their
+      own during maintenance. The signal is PG and OSD state.
+
+      Usage:
+        task talos:maintenance:wait-healthy
+    silent: true
+    cmds:
+      - |
+        deadline=$(( $(date +%s) + 900 ))
+        while :; do
+          problem=""
+          notready=$(kubectl --kubeconfig {{.KUBECONFIG}} get nodes --no-headers 2>/dev/null | awk '$2!="Ready"' | wc -l)
+          [ "$notready" -eq 0 ] || problem="$notready node(s) not Ready"
+          if [ -z "$problem" ]; then
+            ceph=$(kubectl --kubeconfig {{.KUBECONFIG}} exec -n rook-ceph deployment/rook-ceph-tools -- ceph status -f json 2>/dev/null)
+            pgs=$(echo "$ceph" | jq -r '.pgmap.num_pgs // 0')
+            clean=$(echo "$ceph" | jq -r '[.pgmap.pgs_by_state[]? | select(.state_name=="active+clean") | .count] | add // 0')
+            osds=$(echo "$ceph" | jq -r '.osdmap.num_osds // 0')
+            up=$(echo "$ceph" | jq -r '.osdmap.num_up_osds // 0')
+            if [ "$pgs" -eq 0 ] || [ "$pgs" -ne "$clean" ]; then problem="ceph: $clean of $pgs PGs active+clean"; fi
+            if [ -z "$problem" ] && { [ "$osds" -eq 0 ] || [ "$osds" -ne "$up" ]; }; then problem="ceph: $up of $osds OSDs up"; fi
+          fi
+          if [ -z "$problem" ]; then
+            etcd=$(talosctl --talosconfig {{.TALOSCONFIG}} -n {{.CONTROLPLANE}} etcd status 2>&1)
+            members=$(echo "$etcd" | awk 'NR>1' | wc -l)
+            indexes=$(echo "$etcd" | awk 'NR>1 {print $9}' | sort -u | wc -l)
+            # A healthy row has 14 fields: the ERRORS column is empty. More
+            # than that means a member reported an error. Counting matches of
+            # "error" instead would always hit the ERRORS column header.
+            errors=$(echo "$etcd" | awk 'NR>1 && NF>14' | wc -l)
+            healthy=$(echo "$etcd" | awk 'NR>1 && NF==14' | wc -l)
+            if [ "$members" -ne 3 ] || [ "$healthy" -ne 3 ] || [ "$errors" -ne 0 ]; then problem="etcd: $healthy of 3 members healthy"; fi
+            if [ -z "$problem" ] && [ "$indexes" -ne 1 ]; then problem="etcd: members on $indexes different raft indexes"; fi
+          fi
+          if [ -z "$problem" ]; then echo "[OK] nodes Ready, $pgs PGs active+clean, $up OSDs up, etcd in sync"; break; fi
+          if [ "$(date +%s)" -ge "$deadline" ]; then echo "FAILED: not healthy after 15m - $problem"; exit 1; fi
+          echo "waiting - $problem"
+          sleep 15
+        done
 
   upgrade-cluster:
     desc: Upgrade entire cluster
