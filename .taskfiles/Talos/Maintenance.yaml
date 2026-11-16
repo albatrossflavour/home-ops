@@ -595,6 +595,62 @@ tasks:
       - msg: "{{.DIR}} does not exist"
         sh: test -d "{{.DIR}}"
 
+  etcd-snapshot-timer:
+    desc: Install the daily etcd snapshot timer on this workstation
+    summary: |
+      Installs and enables a systemd user timer that runs
+      `task talos:maintenance:etcd-snapshot` every day at 17:20 UTC. The unit
+      files live in scripts/systemd/ and are copied into
+      ~/.config/systemd/user with this checkout's path filled in. Safe to run
+      again after editing them.
+
+      Usage:
+        task talos:maintenance:etcd-snapshot-timer
+
+      WHY A TIMER ON THE WORKSTATION
+
+      A snapshot needs the Talos API and somewhere to put ~600MB. The
+      workstation already has both: the talosconfig and the NAS mount at
+      /mnt/nas-backups. Doing it in the cluster would mean granting a pod a
+      Talos API role and changing machine config on all three control-plane
+      nodes, for a job that also has to work when the cluster is unwell.
+
+      WHAT IT DEPENDS ON
+
+      - This checkout staying where it is, on a branch where the snapshot
+        task works. The unit runs the task from here.
+      - User lingering, so the timer runs when nobody is logged in. This
+        task refuses to install without it.
+      - /mnt/nas-backups being mounted. The snapshot task refuses to write
+        otherwise.
+
+      HOW YOU FIND OUT IT STOPPED
+
+      Not from this machine. The etcd-snapshot-check CronJob in kube-system
+      reads the NAS every six hours, and EtcdSnapshotStale fires when the
+      newest snapshot is more than 36 hours old.
+
+      Check it by hand with:
+        systemctl --user list-timers etcd-snapshot.timer
+        journalctl --user -u etcd-snapshot.service -n 50
+    vars:
+      UNIT_DIR: '{{.HOME}}/.config/systemd/user'
+      SRC_DIR: '{{.ROOT_DIR}}/scripts/systemd'
+    preconditions:
+      - sh: command -v systemctl
+        msg: "systemctl not found - this needs a systemd workstation"
+      - sh: '[ "$(loginctl show-user "$USER" -p Linger --value)" = "yes" ]'
+        msg: "User lingering is off, so the timer would only run while logged in. Run: sudo loginctl enable-linger $USER"
+      - sh: test -f {{.SRC_DIR}}/etcd-snapshot.service && test -f {{.SRC_DIR}}/etcd-snapshot.timer
+        msg: "Unit files missing from {{.SRC_DIR}}"
+    cmds:
+      - mkdir -p {{.UNIT_DIR}}
+      - sed 's#@REPO@#{{.ROOT_DIR}}#g' {{.SRC_DIR}}/etcd-snapshot.service > {{.UNIT_DIR}}/etcd-snapshot.service
+      - cp {{.SRC_DIR}}/etcd-snapshot.timer {{.UNIT_DIR}}/etcd-snapshot.timer
+      - systemctl --user daemon-reload
+      - systemctl --user enable --now etcd-snapshot.timer
+      - systemctl --user list-timers etcd-snapshot.timer --no-pager
+
   backup-health:
     desc: Check Volsync backup health
     summary: |

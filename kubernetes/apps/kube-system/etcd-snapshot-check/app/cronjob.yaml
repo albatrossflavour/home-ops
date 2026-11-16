@@ -1,0 +1,101 @@
+---
+# Reports how old the newest etcd snapshot on the NAS is.
+#
+# The snapshots are taken on the workstation (ponder) by a systemd user timer
+# that runs `task talos:maintenance:etcd-snapshot` daily at 17:20 UTC. See
+# scripts/systemd/etcd-snapshot.timer. Nothing in the cluster takes them: a
+# snapshot needs the Talos API, and handing a pod that credential is a bigger
+# change than a timer.
+#
+# This job exists because that timer can stop without anyone noticing. Before
+# 2026-11-16 the snapshot was a manual task, and the newest one on the NAS was
+# ten weeks old. It looks at the files themselves, not at whether the timer
+# thinks it ran, so it also catches a full NAS, a broken mount on ponder, or
+# a snapshot directory somebody emptied.
+#
+# Alerts: EtcdSnapshotStale and EtcdSnapshotMetricAbsent in
+# observability/custom-alerts.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: etcd-snapshot-check
+spec:
+  # Every six hours, at 50 past so it lands after the 17:20 UTC snapshot and
+  # clear of the Volsync windows at the top of the hour.
+  schedule: "50 */6 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          containers:
+            - name: etcd-snapshot-check
+              image: alpine:3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  # A snapshot under 8MB is not a real one. Same threshold
+                  # as the task that takes them.
+                  MIN_BYTES=8388608
+                  newest=0; size=0; count=0
+                  for f in /snapshots/etcd-*.snap; do
+                    [ -f "$f" ] || continue
+                    bytes=$(stat -c %s "$f")
+                    [ "$bytes" -ge "$MIN_BYTES" ] || continue
+                    count=$((count + 1))
+                    mtime=$(stat -c %Y "$f")
+                    if [ "$mtime" -gt "$newest" ]; then newest=$mtime; size=$bytes; fi
+                  done
+                  {
+                    echo "# TYPE etcd_snapshot_newest_timestamp_seconds gauge"
+                    echo "etcd_snapshot_newest_timestamp_seconds $newest"
+                    echo "# TYPE etcd_snapshot_newest_size_bytes gauge"
+                    echo "etcd_snapshot_newest_size_bytes $size"
+                    echo "# TYPE etcd_snapshot_count gauge"
+                    echo "etcd_snapshot_count $count"
+                  } > /tmp/metrics.txt
+                  wget -q -O- --post-file=/tmp/metrics.txt \
+                    "http://cert-expiry-pushgateway.kube-system.svc.cluster.local:9091/metrics/job/etcd-snapshot-check"
+                  echo "snapshots: $count, newest mtime: $newest, size: $size bytes"
+              volumeMounts:
+                - name: snapshots
+                  mountPath: /snapshots
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  # Not 32Mi: on 2026-11-16 two containers with tight limits
+                  # failed on freshly booted nodes, where a cold page cache
+                  # is charged to whichever container reads the files first.
+                  memory: 64Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            # The same export ponder mounts at /mnt/nas-backups. Read-only:
+            # this job has no business writing to the backups.
+            - name: snapshots
+              nfs:
+                server: 192.168.1.22
+                path: /volume2/Backups/etcd
+                readOnly: true
+            - name: tmp
+              emptyDir: {}
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
