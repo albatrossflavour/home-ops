@@ -51,7 +51,7 @@ tasks:
     platforms: ["linux/amd64", "linux/arm64"]
     cmds:
       - for:
-          - budimanjojo/talhelper?as=talhelper&type=script
+          - postfinance/topf?as=topf&type=script
           - cloudflare/cloudflared?as=cloudflared&type=script
           - FiloSottile/age?as=age&type=script
           - fluxcd/flux2?as=flux&type=script

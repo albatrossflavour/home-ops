@@ -5,6 +5,7 @@ version: "3"
 vars:
   SCHEMATIC: "2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757"
   TALOSCONFIG: "{{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig/talosconfig"
+  TOPF_DIR: "{{.KUBERNETES_DIR}}/bootstrap/talos/topf"
   KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
   CONTROLPLANE: "192.168.8.10,192.168.8.11,192.168.8.12"
 
@@ -365,9 +366,14 @@ tasks:
     # the output and buries the thing the operator is meant to be reading.
     silent: true
     summary: |
-      Applies Talos configuration to a node. Shows a dry-run diff of exactly
+      Renders a node's config with topf, shows a dry-run diff of exactly
       what would change on that node and asks for confirmation before doing
       anything.
+
+      The config is rendered fresh on every run, into a private temporary
+      directory that is removed afterwards. Nothing rendered is left on disk
+      to go stale, which is how the old clusterconfig/ files ended up months
+      behind talconfig.yaml.
 
       Usage:
         task talos:maintenance:apply-config node=ogg ip=192.168.8.11
@@ -387,9 +393,9 @@ tasks:
       from what the nodes actually run. Four namespaces would have dropped
       from 'baseline' to 'privileged' with no warning and no error.
 
-      CI cannot catch that class of problem. The Talhelper check validates
-      schema and version compatibility against talconfig.yaml, but it has
-      no idea what is running on the nodes. Only a diff against the live
+      CI cannot catch that class of problem. The Talhelper check renders
+      the configs with topf and validates them, but it has no idea what is
+      running on the nodes. Only a diff against the live
       node reveals "git says delete a thing the cluster is using".
 
       CONTROL PLANE ORDER
@@ -408,24 +414,37 @@ tasks:
       NODE_IP: '{{.ip | default ""}}'
       INSECURE: '{{.insecure | default "false"}}'
       ASSUME_YES: '{{.yes | default "false"}}'
-      CONFIG_FILE: "{{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig/witches-{{.NODE_NAME}}.yaml"
+      # mktemp -d creates the directory 0700, which is what keeps the
+      # rendered secrets private. Task's shell has no umask builtin.
+      RENDER_DIR:
+        sh: mktemp -d
+      CONFIG_FILE: "{{.RENDER_DIR}}/{{.NODE_NAME}}.yaml"
       INSECURE_FLAG: '{{if eq .INSECURE "true"}}--insecure{{end}}'
     preconditions:
       - sh: '[ -n "{{.NODE_NAME}}" ]'
         msg: "node parameter required (e.g., node=ogg)"
       - sh: '[ -n "{{.NODE_IP}}" ]'
         msg: "ip parameter required (e.g., ip=192.168.8.11)"
-      - sh: '[ -f "{{.CONFIG_FILE}}" ]'
-        msg: "Config not found: {{.CONFIG_FILE}} - run talhelper genconfig first"
+      - sh: command -v topf
+        msg: "topf not found - see https://github.com/postfinance/topf/releases"
+      - sh: 'grep -qE "^  - host: {{.NODE_NAME}}$" "{{.TOPF_DIR}}/topf.yaml"'
+        msg: "{{.NODE_NAME}} is not a node in {{.TOPF_DIR}}/topf.yaml"
       # Guards against handing a node another node's config, which would
       # rewrite its hostname and network identity. Skipped for insecure
       # applies, where the node is in maintenance mode and has no identity yet.
       - sh: '[ "{{.INSECURE}}" = "true" ] || [ "$(talosctl --talosconfig {{.TALOSCONFIG}} --nodes {{.NODE_IP}} get hostname -o jsonpath=''{.spec.hostname}'' 2>/dev/null)" = "{{.NODE_NAME}}" ]'
         msg: "{{.NODE_IP}} does not report hostname {{.NODE_NAME}} - refusing to apply the wrong node's config"
     cmds:
+      # The rendered config holds every cluster secret. Remove it however the
+      # task ends.
+      - defer: rm -rf "{{.RENDER_DIR}}"
+      - |
+        cd "{{.TOPF_DIR}}"
+        SOPS_AGE_KEY_FILE="{{.AGE_FILE}}" topf render --output "{{.RENDER_DIR}}" --nodes-filter '^{{.NODE_NAME}}$' --log-level warn
+        test -s "{{.CONFIG_FILE}}" || { echo "topf did not render {{.NODE_NAME}}"; exit 1; }
       - |
         echo "Node:        {{.NODE_NAME}} ({{.NODE_IP}})"
-        echo "Config file: {{.CONFIG_FILE}}"
+        echo "Rendered by: topf, from {{.TOPF_DIR}}"
         echo "Insecure:    {{.INSECURE}}"
         echo ""
         echo "=== DRY RUN - what would change on {{.NODE_NAME}} ==="

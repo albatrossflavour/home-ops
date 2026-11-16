@@ -2,12 +2,24 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+# Machine configs are rendered and applied with topf
+# (https://github.com/postfinance/topf). talhelper, which this file used
+# until 2026-11-16, is archived and cannot render Talos 1.14 configs.
+#
+# topf reads topf.yaml and the patch directories beside it, and decrypts
+# talsecret.sops.yaml through sops. Every topf command below sets
+# SOPS_AGE_KEY_FILE itself: the root Taskfile's env block does not override a
+# value already exported by the shell, and a shell pointing at a different
+# age key makes the decrypt fail with "no identity matched".
 vars:
-  TALHELPER_CLUSTER_DIR: "{{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig"
-  TALHELPER_SECRET_FILE: "{{.KUBERNETES_DIR}}/bootstrap/talos/talsecret.sops.yaml"
-  TALHELPER_CONFIG_FILE: "{{.KUBERNETES_DIR}}/bootstrap/talos/talconfig.yaml"
+  TOPF_DIR: "{{.KUBERNETES_DIR}}/bootstrap/talos/topf"
+  TOPF_CONFIG_FILE: "{{.TOPF_DIR}}/topf.yaml"
+  TALOS_CLUSTER_DIR: "{{.KUBERNETES_DIR}}/bootstrap/talos/clusterconfig"
+  TALOS_SECRET_FILE: "{{.KUBERNETES_DIR}}/bootstrap/talos/talsecret.sops.yaml"
   HELMFILE_FILE: "{{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml"
-  TALOSCONFIG_FILE: "{{.TALHELPER_CLUSTER_DIR}}/talosconfig"
+  TALOSCONFIG_FILE: "{{.TALOS_CLUSTER_DIR}}/talosconfig"
+  # Any control-plane node; used to fetch the kubeconfig.
+  CONTROLLER: "192.168.8.10"
 
 env:
   TALOSCONFIG: "{{.TALOSCONFIG_FILE}}"
@@ -21,22 +33,29 @@ tasks:
 
   bootstrap:
     desc: Bootstrap the Talos cluster
-    dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
+    # UNTESTED since the move to topf on 2026-11-16: this path only runs when
+    # building a cluster from nodes in maintenance mode, and there has been
+    # no cluster to build. Read it before relying on it.
+    #
+    # `SOPS_AGE_KEY_FILE="{{.AGE_FILE}}" topf apply --auto-bootstrap` applies each node's config (it detects
+    # maintenance mode itself, so there is no --insecure flag), then
+    # bootstraps etcd. If talsecret.sops.yaml does not exist, topf asks before
+    # generating a new bundle and encrypts it on write when .sops.yaml has a
+    # matching rule, which it does for talos/*.sops.yaml.
+    dir: "{{.TOPF_DIR}}"
     cmds:
-      - |
-        if [ ! -f "{{.TALHELPER_SECRET_FILE}}" ]; then
-            talhelper gensecret > {{.TALHELPER_SECRET_FILE}}
-            sops --encrypt --in-place {{.TALHELPER_SECRET_FILE}}
-        fi
-      - talhelper genconfig --config-file {{.TALHELPER_CONFIG_FILE}} --secret-file {{.TALHELPER_SECRET_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}}
-      - talhelper gencommand apply --config-file {{.TALHELPER_CONFIG_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="--insecure" | bash
-      - until talhelper gencommand bootstrap --config-file {{.TALHELPER_CONFIG_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} | bash; do sleep 10; done
+      - SOPS_AGE_KEY_FILE="{{.AGE_FILE}}" topf apply --auto-bootstrap
+      - mkdir -p {{.TALOS_CLUSTER_DIR}}
+      # Created empty and private first: the file holds the Talos admin key.
+      - touch {{.TALOSCONFIG_FILE}} && chmod 600 {{.TALOSCONFIG_FILE}} && SOPS_AGE_KEY_FILE="{{.AGE_FILE}}" topf talosconfig > {{.TALOSCONFIG_FILE}}
       - task: fetch-kubeconfig
       - task: install-helm-apps
       - talosctl health --server=false
     preconditions:
-      - msg: Missing talhelper config file
-        sh: test -f {{.TALHELPER_CONFIG_FILE}}
+      - msg: Missing topf config file
+        sh: test -f {{.TOPF_CONFIG_FILE}}
+      - msg: topf not found - see https://github.com/postfinance/topf/releases
+        sh: command -v topf
       - msg: Missing Sops config file
         sh: test -f {{.SOPS_CONFIG_FILE}}
       - msg: Missing Sops Age key file
@@ -44,11 +63,13 @@ tasks:
 
   fetch-kubeconfig:
     desc: Fetch kubeconfig
+    # talosctl, not `topf kubeconfig`: topf's kubeconfig is a temporary admin
+    # credential that expires after 12 hours.
     dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
-    cmd: until talhelper gencommand kubeconfig --config-file {{.TALHELPER_CONFIG_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="{{.ROOT_DIR}} --force" | bash; do sleep 10; done
+    cmd: until talosctl kubeconfig --nodes {{.CONTROLLER}} --force {{.ROOT_DIR}}; do sleep 10; done
     preconditions:
-      - msg: Missing talhelper config file
-        sh: test -f {{.TALHELPER_CONFIG_FILE}}
+      - msg: Missing talosconfig
+        sh: test -f {{.TALOSCONFIG_FILE}}
 
   install-helm-apps:
     desc: Bootstrap core apps needed for Talos
@@ -67,7 +88,8 @@ tasks:
     desc: Upgrade Talos on a node
     dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
     cmds:
-      - talosctl --nodes {{.node}} upgrade --image {{.image}} --wait=true --timeout=10m --preserve=true --reboot-mode={{.mode}}
+      # 15m drain: ingress-nginx's 300s shutdown races talosctl's 5m default.
+      - talosctl --nodes {{.node}} upgrade --image {{.image}} --wait=true --timeout=30m --drain-timeout=15m --preserve=true --reboot-mode={{.mode}}
       - talosctl --nodes {{.node}} health --wait-timeout=10m --server=false
     vars:
       mode: '{{.mode | default "default"}}'
@@ -122,10 +144,19 @@ tasks:
 
   nuke:
     desc: Resets nodes back to maintenance mode
-    dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
+    # UNTESTED since the move to topf on 2026-11-16, for the obvious reason.
+    #
+    # Keeps the old behaviour: without --force only the STATE and EPHEMERAL
+    # partitions are wiped (--full=false), with --force the whole install
+    # disk is. topf's own default is the full wipe, so --full is always
+    # passed explicitly. topf asks for its own confirmation as well.
+    dir: "{{.TOPF_DIR}}"
     prompt: This will destroy your cluster and reset the nodes back to maintenance mode... continue?
-    cmd: talhelper gencommand reset --config-file {{.TALHELPER_CONFIG_FILE}} --out-dir {{.TALHELPER_CLUSTER_DIR}} --extra-flags="--reboot {{- if eq .CLI_FORCE false }} --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL{{ end }} --graceful=false --wait=false" | bash
+    cmd: SOPS_AGE_KEY_FILE="{{.AGE_FILE}}" topf reset --graceful=false --full={{if eq .CLI_FORCE false}}false{{else}}true{{end}}
+    preconditions:
+      - msg: Missing topf config file
+        sh: test -f {{.TOPF_CONFIG_FILE}}
 
   .reset:
     internal: true
-    cmd: rm -rf {{.TALHELPER_CLUSTER_DIR}} {{.TALHELPER_SECRET_FILE}} {{.TALHELPER_CONFIG_FILE}}
+    cmd: rm -rf {{.TALOS_CLUSTER_DIR}} {{.TALOS_SECRET_FILE}}
