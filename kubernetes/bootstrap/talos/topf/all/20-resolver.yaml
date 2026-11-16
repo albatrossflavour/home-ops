@@ -1,0 +1,10 @@
+# Host DNS and search domains. Was machine.features.hostDNS and
+# machine.network.disableSearchDomain before Talos 1.14.
+apiVersion: v1alpha1
+kind: ResolverConfig
+searchDomains:
+  disableDefault: true
+hostDNS:
+  enabled: true
+  resolveMemberNames: true
+  forwardKubeDNSToHost: true # Requires Cilium `bpf.masquerade: false`

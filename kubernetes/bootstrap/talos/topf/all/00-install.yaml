@@ -3,8 +3,12 @@
 # selector cannot pick the wrong one the way a raw /dev/sda path can if device
 # enumeration order shifts. The virtio disks report no serial or WWID to
 # select on.
-machine:
-  install:
-    diskSelector:
-      size: "< 60GB"
-    wipe: false
+#
+# GB is the metric unit (10^9 bytes), the same as the "< 60GB" this replaced.
+# topf fills in installer.image from talosVersion and schematicId.
+apiVersion: v1alpha1
+kind: UnattendedInstallConfig
+provisioning:
+  diskSelector:
+    match: disk.size < 60u * GB
+  wipe: false

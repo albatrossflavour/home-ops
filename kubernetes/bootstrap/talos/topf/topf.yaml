@@ -10,7 +10,7 @@ clusterEndpoint: https://192.168.8.20:6443
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
 kubernetesVersion: v1.36.3
 # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-talosVersion: v1.13.12
+talosVersion: v1.14.6
 schematicId: 2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
 # The existing talhelper secrets bundle, unchanged. topf reads it through
 # sops, so SOPS_AGE_KEY_FILE has to point at age.key.

@@ -1,12 +1,13 @@
-machine:
-  files:
-    - op: create
-      path: /etc/cri/conf.d/20-customization.part
-      content: |-
-        [plugins."io.containerd.grpc.v1.cri"]
-          enable_unprivileged_ports = true
-          enable_unprivileged_icmp = true
-        [plugins."io.containerd.grpc.v1.cri".containerd]
-          discard_unpacked_layers = false
-        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
-          discard_unpacked_layers = false
+# Was a machine.files entry writing /etc/cri/conf.d/20-customization.part
+# before Talos 1.14. Applying or changing it restarts CRI.
+apiVersion: v1alpha1
+kind: CRICustomizationConfig
+name: unprivileged-ports
+content: |-
+  [plugins."io.containerd.grpc.v1.cri"]
+    enable_unprivileged_ports = true
+    enable_unprivileged_icmp = true
+  [plugins."io.containerd.grpc.v1.cri".containerd]
+    discard_unpacked_layers = false
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+    discard_unpacked_layers = false

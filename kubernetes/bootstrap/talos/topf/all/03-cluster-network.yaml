@@ -1,9 +1,9 @@
-# Flannel is disabled because Cilium is the CNI.
-cluster:
-  network:
-    cni:
-      name: none
-    podSubnets:
-      - 10.69.0.0/16
-    serviceSubnets:
-      - 10.96.0.0/16
+# The generated defaults are 10.244.0.0/16 and 10.96.0.0/12. These are what
+# the cluster was built with, and changing them on a running cluster is not a
+# thing.
+apiVersion: v1alpha1
+kind: KubeNetworkConfig
+podSubnets:
+  - 10.69.0.0/16
+serviceSubnets:
+  - 10.96.0.0/16
