@@ -61,13 +61,33 @@ jobs:
           sudo install -m 0755 talhelper /usr/local/bin/talhelper
           talhelper --version
 
-      # Deliberately `validate talconfig` and not `genconfig`. genconfig needs
-      # to decrypt talsecret.sops.yaml, which would mean putting the age key
-      # into GitHub Actions secrets - the one key that decrypts every secret in
-      # the cluster and cannot be recovered if lost. Validating the config file
-      # catches the version and schema failures that have actually bitten,
-      # without that exposure. It does not inspect the contents of the patch
-      # files under patches/, which is the accepted gap.
       - name: Validate talconfig
         shell: bash
         run: talhelper validate talconfig "${TALCONFIG}"
+
+      # Render every node's config, against a throwaway secret bundle.
+      #
+      # `validate` alone only looks at talconfig.yaml. It never reads the
+      # files under patches/, and it reports an unsupported Talos version as
+      # a warning. On 2026-11-16 a bump to Talos v1.14.6 passed this check
+      # while `genconfig` failed with six conflicts between v1alpha1 fields in
+      # the patches and the new 1.14 config documents.
+      #
+      # The real talsecret.sops.yaml is NOT decrypted here, and the age key
+      # stays out of GitHub Actions: it decrypts every secret in the cluster
+      # and cannot be recovered if lost. `talhelper gensecret` makes a fresh
+      # bundle, which is all rendering needs. The output holds no real
+      # secrets and is thrown away with the runner.
+      - name: Render node configs with a throwaway secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          WORK="$(mktemp -d)"
+          talhelper gensecret > "${WORK}/talsecret.yaml"
+          cd "$(dirname "${TALCONFIG}")"
+          talhelper genconfig \
+            --config-file "$(basename "${TALCONFIG}")" \
+            --secret-file "${WORK}/talsecret.yaml" \
+            --out-dir "${WORK}/out"
+          rm -rf "${WORK}"
