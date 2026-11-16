@@ -262,7 +262,7 @@ The vzdump job covers eight guests: `102, 500, 501, 502, 503, 700, 851,
 91001`, to the PBS datastore at 62% of 1 TB.
 
 Excluding roughly 35 templates, about 25 real guests are uncovered. Most are
-defensible: the Talos nodes are cattle rebuilt from `talconfig.yaml`, the
+defensible: the Talos nodes are cattle rebuilt from `topf.yaml`, the
 puppet lab VMs are disposable, and VM 201 is the PBS server itself.
 
 LXC 700 (pihole) is backed up while 701 and 702 (pihole1, pihole2) are not,

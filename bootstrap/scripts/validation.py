@@ -7,7 +7,7 @@ import re
 import socket
 import sys
 
-GLOBAL_CLI_TOOLS = ["age", "flux", "helmfile", "sops", "jq", "kubeconform", "kustomize", "talosctl", "talhelper"]
+GLOBAL_CLI_TOOLS = ["age", "flux", "helmfile", "sops", "jq", "kubeconform", "kustomize", "talosctl", "topf"]
 CLOUDFLARE_TOOLS = ["cloudflared"]
 
 

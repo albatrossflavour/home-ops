@@ -160,6 +160,15 @@ task talos:upgrade-k8s controller=<ip> to=<version>
 task talos:nuke
 ```
 
+Machine configs are rendered by [topf](https://github.com/postfinance/topf) from `kubernetes/bootstrap/talos/topf/` (talhelper was archived and replaced on 2026-11-16). See the README in that directory. To change a node's config, edit the patches and run:
+
+```bash
+# Renders, shows a dry-run diff against the live node, asks before applying
+task talos:maintenance:apply-config node=<hostname> ip=<ip>
+```
+
+The `Talhelper` required check now runs topf and `talosctl validate`. It keeps its old name because renaming a required check means changing branch protection in the same step.
+
 ### Pre-commit and Validation
 
 ```bash
