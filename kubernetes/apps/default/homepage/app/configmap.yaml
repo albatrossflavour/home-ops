@@ -140,8 +140,7 @@ data:
             widget:
               type: unifi
               url: https://192.168.1.1
-              username: {{HOMEPAGE_VAR_UNIFI_USERNAME}}
-              password: {{HOMEPAGE_VAR_UNIFI_PASSWORD}}
+              key: {{HOMEPAGE_VAR_UNIFI_KEY}}
         - Luggage:
             href: https://192.168.1.22:5006
             icon: mdi-nas-#BCBDAC
