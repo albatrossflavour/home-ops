@@ -1,0 +1,51 @@
+---
+# Talos cluster definition for topf (https://github.com/postfinance/topf).
+#
+# Replaces talconfig.yaml. talhelper was archived on 2026-08-26 and cannot
+# render Talos 1.14 configs. Patches live beside this file and merge in this
+# order: all/, then control-plane/ or worker/, then node/<host>/, each in
+# filename order.
+clusterName: witches
+clusterEndpoint: https://192.168.8.20:6443
+# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+kubernetesVersion: v1.36.3
+# renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+talosVersion: v1.13.12
+schematicId: 2dacffae5966040d295675d639c94cde1fc31eef656ae244b07aad3552ac3757
+# The existing talhelper secrets bundle, unchanged. topf reads it through
+# sops, so SOPS_AGE_KEY_FILE has to point at age.key.
+secretsPath: ../talsecret.sops.yaml
+nodes:
+  - host: weatherwax
+    ip: 192.168.8.10
+    role: control-plane
+    data:
+      mac: "bc:24:11:95:66:3b"
+  - host: ogg
+    ip: 192.168.8.11
+    role: control-plane
+    data:
+      mac: "bc:24:11:26:e4:81"
+  - host: magrat
+    ip: 192.168.8.12
+    role: control-plane
+    data:
+      # 2026-08-31: corrected from bc:24:11:0b:3c:9b, which no longer matched
+      # the node's NIC. A selector that matches nothing wipes the node's
+      # network config on the next full apply.
+      mac: "bc:24:11:e2:60:8b"
+  - host: wuffles
+    ip: 192.168.8.13
+    role: worker
+    data:
+      mac: "bc:24:11:38:1a:ea"
+  - host: aching
+    ip: 192.168.8.14
+    role: worker
+    data:
+      mac: "bc:24:11:b5:59:f8"
+  - host: greebo
+    ip: 192.168.8.15
+    role: worker
+    data:
+      mac: "bc:24:11:5b:3e:b3"

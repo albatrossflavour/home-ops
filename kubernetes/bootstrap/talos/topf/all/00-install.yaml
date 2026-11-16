@@ -1,0 +1,10 @@
+# Every node's boot disk is 54GB. The only other disks in the fleet are the
+# Ceph OSD data disks on weatherwax, ogg and magrat (537-591GB), so a size
+# selector cannot pick the wrong one the way a raw /dev/sda path can if device
+# enumeration order shifts. The virtio disks report no serial or WWID to
+# select on.
+machine:
+  install:
+    diskSelector:
+      size: "< 60GB"
+    wipe: false

@@ -1,0 +1,3 @@
+# topf render output and any locally generated bundle. Both hold cluster secrets.
+output/
+secrets.yaml
