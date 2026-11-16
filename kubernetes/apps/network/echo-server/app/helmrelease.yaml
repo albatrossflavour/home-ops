@@ -54,8 +54,14 @@ spec:
             resources:
               requests:
                 cpu: 10m
-              limits:
                 memory: 64Mi
+              limits:
+                # 2026-11-16: 64Mi was too tight to start in. After a drain
+                # moved the pod to a freshly booted node it hit the limit
+                # 4.7 million times (memory.events max), took ~48s to start
+                # listening and was killed by its liveness probe each time.
+                # Steady state is about 42Mi, so the request stays at 64Mi.
+                memory: 128Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
