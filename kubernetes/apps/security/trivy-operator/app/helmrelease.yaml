@@ -50,7 +50,21 @@ spec:
       enabled: true
     trivy:
       ignoreUnfixed: false
+      # The built-in server's cache is the vulnerability DB, which it can
+      # download again, so it gets an emptyDir and not a 5Gi PVC on the
+      # default (replicated) storage class.
+      storageClassEnabled: false
     operator:
+      # 2026-11-16: run the built-in Trivy server, which forces
+      # trivy.mode=ClientServer. In Standalone mode the scan containers in a
+      # job pod share one cache directory and time out waiting for its lock
+      # ("cache may be in use by another process"): 920 of 947 failed scan
+      # containers in 24h. scanJobsConcurrentLimit below only limits how many
+      # job pods run, it does nothing for containers inside the same pod.
+      # With the server holding the DB and cache, scan containers have no
+      # local cache to lock. Server resources are the chart defaults
+      # (512Mi/1Gi) and want sizing once there is a peak to size from.
+      builtInTrivyServer: true
       # Default is 10. The initial cluster-wide sweep already showed cache
       # lock contention between sibling scan containers in the same job pod
       # (multi-container workloads get one scan container per target

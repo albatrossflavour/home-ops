@@ -1,9 +1,9 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
-# Two policies, different selectors, same app family. Derived from a live
-# 6h Hubble capture (2026-09-01).
+# Three policies, different selectors, same app family. The first two were
+# derived from a live 6h Hubble capture (2026-09-01).
 #
-# Rollback: `kubectl delete ciliumnetworkpolicy security-trivy-operator security-trivy-scan-jobs -n security`.
+# Rollback: `kubectl delete ciliumnetworkpolicy security-trivy-operator security-trivy-scan-jobs security-trivy-server -n security`.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -34,6 +34,14 @@ spec:
     matchLabels:
       app.kubernetes.io/managed-by: trivy-operator
   egress:
+    # Scan containers are clients of the built-in Trivy server (2026-11-16).
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: trivy-server
+      toPorts:
+        - ports:
+            - port: "4954"
+              protocol: TCP
     # Pulling image manifests from whatever registry each scan target came
     # from - unpredictable destinations, not attempting to enumerate them.
     - toEntities:
@@ -50,3 +58,32 @@ spec:
         - ports:
             - port: "53"
               protocol: UDP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: security-trivy-server
+  namespace: security
+spec:
+  # The built-in Trivy server (2026-11-16). Not derived from a Hubble
+  # capture like the two above: written from what the server does, then
+  # checked against live scans.
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: trivy-server
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/managed-by: trivy-operator
+      toPorts:
+        - ports:
+            - port: "4954"
+              protocol: TCP
+  egress:
+    # Vulnerability DB downloads from mirror.gcr.io.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
