@@ -1,12 +1,34 @@
-cluster:
-  allowSchedulingOnControlPlanes: true
-  controllerManager:
-    extraArgs:
-      bind-address: 0.0.0.0
-  coreDNS:
-    disabled: true
-  proxy:
-    disabled: true
-  scheduler:
-    extraArgs:
-      bind-address: 0.0.0.0
+# Workloads run on the control-plane nodes, so the NoSchedule taint that
+# Talos 1.14 lists explicitly is removed. Was
+# cluster.allowSchedulingOnControlPlanes: true.
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+taints:
+  node-role.kubernetes.io/control-plane:
+    $patch: delete
+---
+apiVersion: v1alpha1
+kind: KubeControllerManagerConfig
+extraArgs:
+  bind-address: 0.0.0.0
+---
+apiVersion: v1alpha1
+kind: KubeSchedulerConfig
+extraArgs:
+  bind-address: 0.0.0.0
+---
+# Cilium replaces kube-proxy.
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+enabled: false
+---
+# CoreDNS is deployed by Flux, not by Talos.
+apiVersion: v1alpha1
+kind: KubeCoreDNSConfig
+enabled: false
+---
+# Cilium is the CNI. Without this Talos deploys Flannel. Was
+# cluster.network.cni.name: none.
+apiVersion: v1alpha1
+kind: KubeFlannelCNIConfig
+$patch: delete

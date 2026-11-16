@@ -1,0 +1,22 @@
+# Talos 1.14 generates three documents for a NEW cluster that a cluster
+# upgraded from 1.13 does not have. Each one changes behaviour if it is
+# applied, so each is removed here to keep the nodes as they are. Turning one
+# on is a decision to make on its own, not a side effect of a version bump.
+#
+# SecurityProfileConfig (workloadIsolation: true) moves containerd, the
+# kubelet and every pod into a separate PID and mount namespace.
+apiVersion: v1alpha1
+kind: SecurityProfileConfig
+$patch: delete
+---
+# VolumeConfig EPHEMERAL (mount.secure: true) remounts /var nosuid and nodev.
+# OpenEBS hostpath volumes live under /var/openebs/local.
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+$patch: delete
+---
+# FilesystemTrimConfig trims eligible filesystems weekly.
+apiVersion: v1alpha1
+kind: FilesystemTrimConfig
+$patch: delete

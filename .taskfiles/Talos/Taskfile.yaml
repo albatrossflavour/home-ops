@@ -89,7 +89,7 @@ tasks:
     dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
     cmds:
       # 15m drain: ingress-nginx's 300s shutdown races talosctl's 5m default.
-      - talosctl --nodes {{.node}} upgrade --image {{.image}} --wait=true --timeout=30m --drain-timeout=15m --preserve=true --reboot-mode={{.mode}}
+      - talosctl --nodes {{.node}} upgrade --image {{.image}} --wait=true --timeout=30m --drain-timeout=15m --reboot-mode={{.mode}}
       - talosctl --nodes {{.node}} health --wait-timeout=10m --server=false
     vars:
       mode: '{{.mode | default "default"}}'

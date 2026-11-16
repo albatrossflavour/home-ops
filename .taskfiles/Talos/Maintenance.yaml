@@ -131,7 +131,8 @@ tasks:
 
       The task will:
       1. Validate parameters
-      2. Perform upgrade with --preserve and --wait flags
+      2. Perform upgrade with --wait (talosctl 1.14 dropped --preserve;
+         preserving the node's data has been the default since Talos 1.8)
       3. Verify node comes back Ready
 
       WHY THE DRAIN TIMEOUT IS 15m
@@ -146,7 +147,9 @@ tasks:
       NODE: '{{.node | default ""}}'
       VERSION: '{{.version | default ""}}'
       DRAIN_TIMEOUT: '{{.drain_timeout | default "15m"}}'
-      IMAGE: "factory.talos.dev/installer/{{.SCHEMATIC}}:{{.VERSION}}"
+      # metal-installer is the path topf renders into the node configs. The
+      # older "installer" path resolves to the same image digest.
+      IMAGE: "factory.talos.dev/metal-installer/{{.SCHEMATIC}}:{{.VERSION}}"
     preconditions:
       - sh: '[ -n "{{.NODE}}" ]'
         msg: "node parameter required (e.g., node=192.168.8.11)"
@@ -160,7 +163,6 @@ tasks:
           upgrade \
           --nodes {{.NODE}} \
           --image {{.IMAGE}} \
-          --preserve \
           --wait \
           --drain-timeout {{.DRAIN_TIMEOUT}}
       - echo "Waiting for node to become Ready..."

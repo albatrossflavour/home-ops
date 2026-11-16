@@ -36,6 +36,17 @@ SOPS_AGE_KEY_FILE=../../../../age.key topf apply --dry-run
 
 `SOPS_AGE_KEY_FILE` has to point at the repo's `age.key`. If your shell already exports a different key file, the decrypt fails with "no identity matched any of the recipients", which is what the tasks avoid by setting it themselves.
 
+## Config format
+
+The patches are written for Talos 1.14, which moved most settings out of the old `machine:` and `cluster:` blocks into separate documents (`KubeAPIServerConfig`, `ResolverConfig`, `UnattendedInstallConfig`, and so on). A setting can't be given in both forms, and a 1.13 node doesn't know the new document kinds, so these patches don't apply to anything older than 1.14.
+
+Two things here are deliberate and look odd:
+
+- The kubelet is still configured under `machine.kubelet`. The 1.14 `KubeletConfig` document has no way to express extra mounts, and OpenEBS hostpath needs `/var/openebs/local` mounted into the kubelet, so `all/24-kubelet.yaml.tpl` deletes the generated document and keeps the old form.
+- `all/05-upgraded-cluster-defaults.yaml` deletes three documents Talos generates for new clusters (workload isolation, a secure `/var` mount, and weekly filesystem trim). A cluster upgraded from 1.13 doesn't have them, and each changes behaviour if applied.
+
+Talos also generates defaults that would be wrong here if left alone: Flannel, kube-proxy, CoreDNS, the control-plane `NoSchedule` taint, and the pod and service subnets. `all/03-cluster-network.yaml` and `control-plane/22-cluster.yaml` override or remove each one, so read those before deleting anything that looks redundant.
+
 ## Things that will catch you out
 
 - `topf render` doesn't validate, so it will write a config that a node rejects. The `Talhelper` CI check runs `talosctl validate` on every rendered config for that reason, and a dry-run against the node is still the real test.

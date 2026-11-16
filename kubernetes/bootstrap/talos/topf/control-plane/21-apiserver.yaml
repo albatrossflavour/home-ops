@@ -1,0 +1,9 @@
+apiVersion: v1alpha1
+kind: KubeAPIServerConfig
+certExtraSANs:
+  - 192.168.8.20
+  - 127.0.0.1 # KubePrism
+resources:
+  requests:
+    cpu: 200m
+    memory: 4Gi
