@@ -4848,6 +4848,81 @@ spec:
         alertname: PuppetInfraUnitStopped
         severity: warning
         rule_group: service_status
+  - name: plugin-first_sight-first_sight
+    rules:
+    - alert: FirstSightCisScansMissing
+      expr: sum(first_sight_cis_scan_nodes{state!="fresh"}) > 0
+      for: 1d
+      labels:
+        severity: warning
+        plugin: first_sight
+        pobs: 'true'
+      annotations:
+        summary: "{{ $value }} systems have no CIS-CAT scan under a week old"
+        description: The CIS-backed checks read not assessed on them. Check scanalot's
+          runs and CIS-CAT on those systems; the judge only reads the ARF the scan
+          leaves.
+    - alert: FirstSightResultsAbsent
+      expr: absent(first_sight_nodes)
+      for: 30m
+      labels:
+        severity: warning
+        plugin: first_sight
+        pobs: 'true'
+      annotations:
+        summary: Puppet Observability has had no First Sight results for 30 minutes
+        description: The collector on the primary could not fetch results.json from
+          the judge. Check /etc/puppetlabs/pobs/first_sight.yaml, the judge host's
+          first-sight-serve service and its firewall, and the pobs journal.
+    - alert: FirstSightResultsStale
+      expr: time() - first_sight_judged_timestamp_seconds > 2 * 86400
+      for: 1h
+      labels:
+        severity: warning
+        plugin: first_sight
+        pobs: 'true'
+      annotations:
+        summary: The First Sight judge has not written results for two days
+        description: The judge runs daily on its own host. Check first-sight-judge.timer
+          and its journal there, and the collect job in the orchestrator.
+    - alert: FirstSightRunFailed
+      expr: first_sight_run_ok == 0
+      for: 10m
+      labels:
+        severity: warning
+        plugin: first_sight
+        pobs: 'true'
+      annotations:
+        summary: The First Sight judge's last run failed
+        description: status.json on the judge host carries the error. The boards keep
+          the previous run's counts until a run finishes, and nodes go stale after
+          max_age_days.
+    - alert: FirstSightStaleNodes
+      expr: sum(first_sight_nodes{status="stale"}) > 0
+      for: 1h
+      labels:
+        severity: warning
+        plugin: first_sight
+        pobs: 'true'
+      annotations:
+        summary: First Sight is not counting {{ $value }} systems whose readings are
+          older than its age limit
+        description: Collection has failed on those systems for longer than max_age_days
+          (2 by default), so their checks are left out of every count. Look at results.json
+          on the judge host for each node's reason, and at the collect job in the
+          orchestrator.
+    - alert: FirstSightTokenAgeing
+      expr: first_sight_token_age_days > 350
+      for: 1h
+      labels:
+        severity: warning
+        plugin: first_sight
+        pobs: 'true'
+      annotations:
+        summary: The First Sight judge's RBAC token file is {{ $value }} days old
+        description: A token made with a one-year lifetime stops working at 365 days.
+          Make a new one as the judge user (docs/install.md step 4) and replace the
+          token file on the judge host.
   - name: plugin-pe_snapshot-pe_snapshot
     rules:
     - alert: PeSnapshotEndpointUnreachable
