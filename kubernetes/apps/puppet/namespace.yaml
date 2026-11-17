@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: puppet
+  labels:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+    # Baseline, not restricted: the CD4PE 5.18.0 ui, pipelinesinfra and
+    # postgres images all start as root (checked on the lab host), and the
+    # postgres entrypoint chowns its directories before dropping to uid 999.
+    pod-security.kubernetes.io/enforce: baseline

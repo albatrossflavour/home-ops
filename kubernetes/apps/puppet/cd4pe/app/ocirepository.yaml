@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: cd4pe
+spec:
+  interval: 12h
+  url: oci://ghcr.io/albatrossflavour/charts/cd4pe
+  ref:
+    tag: 0.3.0
+    digest: sha256:6010b8e844b1d4d35168cbce6f5e74abffcbb678cc7911035f8bcd15cc94963e
+  layerSelector:
+    mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"

@@ -1,0 +1,52 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Puppet Security Compliance Management, from the unofficial chart at
+# github.com/albatrossflavour/puppet-helm-charts.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: scm
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: scm
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    hostname: scm.${SECRET_DOMAIN}
+    auth:
+      existingSecret: scm-secret
+    ingress:
+      className: internal
+      annotations:
+        external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    gatekeeper:
+      # oauth2-proxy calls Keycloak on the public hostname. Point that at the
+      # internal ingress so it doesn't depend on Pi-hole having the record.
+      hostAliases:
+        - ip: 192.168.8.21
+          hostnames:
+            - scm.${SECRET_DOMAIN}
+    pe:
+      existingSecret: scm-pe-certs
+    mtlsProxy:
+      enabled: true
+      # Nodes send scan reports here on 30303 with their PE certificates. The
+      # ingress only carries 80 and 443, so the proxy has its own address.
+      # external-dns only publishes Ingress objects, so the name is a
+      # hand-kept host record on the Pi-holes.
+      hostname: scm-agents.${SECRET_DOMAIN}
+      service:
+        type: LoadBalancer
+        port: 30303
+        annotations:
+          io.cilium/lb-ipam-ips: 192.168.8.32

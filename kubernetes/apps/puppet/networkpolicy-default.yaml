@@ -1,0 +1,46 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# Baseline for the puppet namespace (CD4PE and SCM).
+#
+# Not derived from a Hubble capture: written from what the cd4peadm and
+# complyadm modules wire up, before either app had run here. Each app's
+# containers only talk to their own siblings, but the rule is namespace-wide
+# rather than per app to keep it readable.
+#
+# Per-app egress beyond this lives in each app's own directory.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy -n puppet puppet-default`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: puppet-default
+  namespace: puppet
+spec:
+  endpointSelector: {}
+  ingress:
+    # Kubelet probes.
+    - fromEntities:
+        - host
+        - remote-node
+    # ingress-nginx.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+    # Components talk to each other.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: puppet
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: puppet

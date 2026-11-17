@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Continuous Delivery for Puppet Enterprise, from the unofficial chart at
+# github.com/albatrossflavour/puppet-helm-charts.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cd4pe
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: cd4pe
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    hostname: cd4pe.${SECRET_DOMAIN}
+    backendHostname: cd4pe-backend.${SECRET_DOMAIN}
+    rootUser:
+      email: admin@${SECRET_DOMAIN}
+    auth:
+      existingSecret: cd4pe-secret
+    license:
+      existingSecret: cd4pe-licence
+    ingress:
+      className: internal
+      annotations:
+        external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        nginx.ingress.kubernetes.io/proxy-body-size: 75m
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    queryToken:
+      persistence:
+        # pipelinesinfra writes the token and query reads it, from two pods.
+        storageClass: ceph-filesystem

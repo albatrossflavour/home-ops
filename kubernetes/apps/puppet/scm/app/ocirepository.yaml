@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: scm
+spec:
+  interval: 12h
+  url: oci://ghcr.io/albatrossflavour/charts/scm
+  ref:
+    tag: 0.2.0
+    digest: sha256:f07732754164bd7832b785b9d441b5ba0a8fad9912a1976ddc983b88fa3c7650
+  layerSelector:
+    mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"

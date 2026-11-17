@@ -1,0 +1,64 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# The namespace baseline is in ../../networkpolicy-default.yaml.
+#
+# gatekeeper (oauth2-proxy) does OIDC discovery, token redemption and userinfo
+# against Keycloak on the public hostname, the same as a complyadm install
+# does. Here that means going out to the internal ingress controller and back
+# in through frontdoor.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy -n puppet scm-gatekeeper-egress scm-scarpy-egress`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: scm-gatekeeper-egress
+  namespace: puppet
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: scm
+      app.kubernetes.io/component: gatekeeper
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# scarpy calls the PE primary (orchestrator, RBAC, PuppetDB) once PE is
+# connected in the UI. The primary is outside the cluster.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: scm-scarpy-egress
+  namespace: puppet
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: scm
+      app.kubernetes.io/component: scarpy
+  egress:
+    - toEntities:
+        - world
+---
+# Lab nodes send scan reports to the mTLS proxy through its own load balancer
+# address. The proxy only answers a caller holding a certificate from the PE CA.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: scm-mtls-proxy-ingress
+  namespace: puppet
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: scm
+      app.kubernetes.io/component: mtls-proxy
+  ingress:
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

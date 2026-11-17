@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cilium/cilium/main/pkg/k8s/apis/cilium.io/client/crds/v2/CiliumNetworkPolicy.json
+# The namespace baseline is in ../../networkpolicy-default.yaml.
+#
+# pipelinesinfra calls out to whatever it is integrated with: the PE primary
+# (orchestrator, code manager, PuppetDB), the VCS, and an LDAP or SAML
+# provider. Those are set in the UI, so the destinations cannot be listed here.
+#
+# Rollback: `kubectl delete ciliumnetworkpolicy -n puppet cd4pe-pipelinesinfra-egress`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cd4pe-pipelinesinfra-egress
+  namespace: puppet
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: cd4pe
+      app.kubernetes.io/component: pipelinesinfra
+  egress:
+    - toEntities:
+        - world
