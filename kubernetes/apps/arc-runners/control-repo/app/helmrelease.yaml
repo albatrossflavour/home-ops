@@ -5,13 +5,6 @@ kind: HelmRelease
 metadata:
   name: arc-runner-control-repo
 spec:
-  # Suspended since 2026-11-18, together with maxRunners: 0 below. The old
-  # control-repo was renamed to control-repo-legacy and a new repo took the
-  # name, so GitHub no longer knows this scale set: the controller cannot
-  # create a listener, and every upgrade times out and rolls back. Phase 9 of
-  # the lab rebuild re-registers it against the new repo, restores
-  # maxRunners to 3, and removes this line.
-  suspend: true
   interval: 30m
   chart:
     spec:
@@ -62,11 +55,7 @@ spec:
     # would spend its life doing nothing. Raise minRunners if cold start ever
     # costs more than it saves.
     minRunners: 0
-    # Held at zero since 2026-11-18. The old control-repo was renamed to
-    # control-repo-legacy and a new repo took the name, so this scale set now
-    # follows the name to a repo it was never wired for. Restore to 3 when the
-    # lab rebuild re-points CD4PE (phase 9).
-    maxRunners: 0
+    maxRunners: 3
 
     containerMode:
       # kubernetes mode would give each job its own pod and need a PVC per job.
@@ -128,8 +117,9 @@ spec:
                     key: apiToken
               # The endpoint too, so the workflow carries no hostnames and a
               # renumbered CD4PE is a change here rather than in three repos.
+              # The backend Ingress of the cd4pe chart, in the puppet namespace.
               - name: CD4PE_WEBHOOK_URL
-                value: http://cd4pe.lab.albatrossflavour.com:8000/github/push
+                value: https://cd4pe-backend.lab.${SECRET_DOMAIN}/github/push
             # Explicit resources so this namespace can take a ResourceQuota
             # later without silently rejecting every job, which is the trap
             # media-quota hit.

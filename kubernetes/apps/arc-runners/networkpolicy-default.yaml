@@ -15,10 +15,10 @@
 # delivery failed with "failed to connect to host"), so the runner makes the
 # call from inside the network instead.
 #
-# CD4PE is scoped to its IP and port rather than toEntities: world, the same
-# reasoning as utilities' NAS minio rule: the destination is fixed and known.
-# If cd4pe is ever renumbered this rule breaks and the relay stops, which is
-# the correct failure mode for a job that reaches into the Puppet network.
+# CD4PE runs in the puppet namespace and its backend is published on the
+# external ingress controller, so the rule names those controller pods on 443
+# rather than toEntities: world. A load balancer address that belongs to the
+# cluster resolves to the pods behind it, so an IP rule would not match.
 #
 # No ingress rules beyond probes. Nothing should ever connect *to* a runner.
 #
@@ -53,10 +53,13 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # CD4PE's webhook listener, for the Impact Analysis relay.
-    - toCIDR:
-        - 192.168.7.11/32
+    # CD4PE's webhook listener, for the Impact Analysis relay, through the
+    # external ingress controller that serves cd4pe-backend.lab.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+            app.kubernetes.io/instance: ingress-nginx-external
       toPorts:
         - ports:
-            - port: "8000"
+            - port: "443"
               protocol: TCP
