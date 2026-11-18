@@ -5,6 +5,13 @@ kind: HelmRelease
 metadata:
   name: arc-runner-control-repo
 spec:
+  # Suspended since 2026-11-18, together with maxRunners: 0 below. The old
+  # control-repo was renamed to control-repo-legacy and a new repo took the
+  # name, so GitHub no longer knows this scale set: the controller cannot
+  # create a listener, and every upgrade times out and rolls back. Phase 9 of
+  # the lab rebuild re-registers it against the new repo, restores
+  # maxRunners to 3, and removes this line.
+  suspend: true
   interval: 30m
   chart:
     spec:
