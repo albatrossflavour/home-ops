@@ -20,22 +20,25 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    hostname: scm.${SECRET_DOMAIN}
+    hostname: scm.lab.${SECRET_DOMAIN}
     auth:
       existingSecret: scm-secret
     ingress:
-      className: internal
+      # The external class, as grafana does, so the cloudflared tunnel and the
+      # LAN reach the UI on the one name.
+      className: external
       annotations:
-        external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
         nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     gatekeeper:
       # oauth2-proxy calls Keycloak on the public hostname. Point that at the
-      # internal ingress so it doesn't depend on Pi-hole having the record.
+      # external ingress, which serves it, so it doesn't depend on Pi-hole
+      # having the record or go out through Cloudflare and back.
       hostAliases:
-        - ip: 192.168.8.21
+        - ip: 192.168.8.23
           hostnames:
-            - scm.${SECRET_DOMAIN}
+            - scm.lab.${SECRET_DOMAIN}
     pe:
       existingSecret: scm-pe-certs
     mtlsProxy:
@@ -43,8 +46,9 @@ spec:
       # Nodes send scan reports here on 30303 with their PE certificates. The
       # ingress only carries 80 and 443, so the proxy has its own address.
       # external-dns only publishes Ingress objects, so the name is a
-      # hand-kept host record on the Pi-holes.
-      hostname: scm-agents.${SECRET_DOMAIN}
+      # hand-kept host record on the Pi-holes. The proxy serves a certificate
+      # from the PE CA for this name, not the ingress certificate.
+      hostname: scm-agents.lab.${SECRET_DOMAIN}
       service:
         type: LoadBalancer
         port: 30303

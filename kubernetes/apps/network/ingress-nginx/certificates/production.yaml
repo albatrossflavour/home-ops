@@ -18,6 +18,7 @@ spec:
     - bandcamp.tv
     - puppet.lab.albatrossflavour.com
     - cd4pe.lab.albatrossflavour.com
+    - cd4pe-backend.lab.albatrossflavour.com
     - scm.lab.albatrossflavour.com
     - dashboard.lab.albatrossflavour.com
     - pdlf.net
