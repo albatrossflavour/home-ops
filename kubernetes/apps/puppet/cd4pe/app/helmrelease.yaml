@@ -29,15 +29,9 @@ spec:
     license:
       existingSecret: cd4pe-licence
     ingress:
-      # The external class, as grafana does, so the cloudflared tunnel and the
-      # LAN reach the UI on the one name. The chart puts both Ingresses on one
-      # class, so the backend sits there too, but the tunnel only routes
-      # cd4pe.lab: webhooks reach the backend from inside the network.
-      className: external
-      annotations:
-        external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        nginx.ingress.kubernetes.io/proxy-body-size: 75m
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      # The chart puts the UI and the backend on one ingress class, and they
+      # need different ones, so the two Ingresses are in ./ingress.yaml.
+      enabled: false
     queryToken:
       persistence:
         # pipelinesinfra writes the token and query reads it, from two pods.

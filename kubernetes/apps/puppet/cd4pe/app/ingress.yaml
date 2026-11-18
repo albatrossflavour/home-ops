@@ -1,0 +1,57 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/networking.k8s.io/ingress_v1.json
+# The UI goes out through the cloudflared tunnel on the external class, like
+# the other lab UIs. The backend only takes the webhook relay from the
+# arc-runners scale set and job hardware on the LAN, so it stays on the
+# internal class and is never published to Cloudflare. The chart's own
+# Ingresses are off (ingress.enabled: false), because it puts both on one class.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cd4pe-ui-external
+  annotations:
+    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+    nginx.ingress.kubernetes.io/proxy-body-size: 75m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+spec:
+  ingressClassName: external
+  tls:
+    - hosts:
+        - cd4pe.lab.${SECRET_DOMAIN}
+  rules:
+    - host: cd4pe.lab.${SECRET_DOMAIN}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cd4pe-ui
+                port:
+                  name: http
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/networking.k8s.io/ingress_v1.json
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cd4pe-backend-internal
+  annotations:
+    external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+    nginx.ingress.kubernetes.io/proxy-body-size: 75m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+spec:
+  ingressClassName: internal
+  tls:
+    - hosts:
+        - cd4pe-backend.lab.${SECRET_DOMAIN}
+  rules:
+    - host: cd4pe-backend.lab.${SECRET_DOMAIN}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cd4pe-pipelinesinfra
+                port:
+                  name: backend

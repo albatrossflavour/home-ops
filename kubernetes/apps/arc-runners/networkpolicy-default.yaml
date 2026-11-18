@@ -15,9 +15,10 @@
 # delivery failed with "failed to connect to host"), so the runner makes the
 # call from inside the network instead.
 #
-# The relay posts to cd4pe-backend.lab, which resolves through Cloudflare like
-# the other lab names and comes back in through the cloudflared tunnel, so the
-# world rule on 443 below is what carries it. No CD4PE-specific rule is needed.
+# The relay posts to cd4pe-backend.lab, which is only published on the internal
+# ingress controller, so the rule names those controller pods on 443. A load
+# balancer address that belongs to the cluster resolves to the pods behind it,
+# so an IP rule would not match.
 #
 # No ingress rules beyond probes. Nothing should ever connect *to* a runner.
 #
@@ -45,10 +46,19 @@ spec:
             - port: "53"
               protocol: TCP
     # github.com and api.github.com: collecting the job, reporting status,
-    # downloading any actions the workflow uses. Also the CD4PE relay, which
-    # reaches cd4pe-backend.lab through Cloudflare.
+    # downloading any actions the workflow uses.
     - toEntities:
         - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # CD4PE's webhook listener, for the relay, through the internal ingress
+    # controller that serves cd4pe-backend.lab.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+            app.kubernetes.io/instance: ingress-nginx-internal
       toPorts:
         - ports:
             - port: "443"
