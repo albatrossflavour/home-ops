@@ -9,6 +9,7 @@ data:
   puppet-lab.yaml: |
     endpoints:
       - name: Puppet Enterprise
+        enabled: false
         url: "https://puppet.lab.albatrossflavour.com/"
         group: "Puppet Lab"
         description: "Infrastructure Automation"
@@ -23,6 +24,7 @@ data:
           - type: pushover
 
       - name: CD4PE
+        enabled: false
         url: "https://cd4pe.lab.albatrossflavour.com/"
         group: "Puppet Lab"
         description: "Continuous Deployment"
@@ -37,6 +39,7 @@ data:
           - type: pushover
 
       - name: SCE
+        enabled: false
         url: "https://sce.lab.albatrossflavour.com/"
         group: "Puppet Lab"
         description: "Compliance Engine"
@@ -51,6 +54,7 @@ data:
           - type: pushover
 
       - name: Puppet Dashboard
+        enabled: false
         url: "https://dashboard.lab.albatrossflavour.com/"
         group: "Puppet Lab"
         description: "Infrastructure Dashboard"
