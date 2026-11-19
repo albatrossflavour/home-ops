@@ -8,7 +8,7 @@ spec:
   interval: 12h
   url: oci://ghcr.io/albatrossflavour/charts/cd4pe
   ref:
-    tag: 0.4.1
-    digest: sha256:6ff7e40017531e8e4ea8e06a6c9031acbb4e23c9e8826b2928e1ba2095a9eb80
+    tag: 0.4.2
+    digest: sha256:f673b04696fbcfbeb1653bc56c5b0dd30091731939bf40eb2ac0b4e4664f6856
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"

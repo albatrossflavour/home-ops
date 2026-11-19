@@ -28,6 +28,23 @@ spec:
       existingSecret: cd4pe-secret
     license:
       existingSecret: cd4pe-licence
+    signup:
+      # CD4PE has no admin "create user": the root account's add user goes
+      # through sign-up too. So sign-up stays open to the LAN and closed to
+      # the internet. LAN clients reach the external controller from their own
+      # address or, with externalTrafficPolicy Cluster, a node's (192.168.8.x).
+      # Tunnel traffic reaches it from a cloudflared pod (10.69.x), so it's
+      # refused. The controller's X-Real-IP and X-Forwarded-For come from the
+      # request's own X-Forwarded-For (enable-real-ip trusts every source), so
+      # the address checked is X-Ingress-Peer-Addr, which the Ingress in
+      # ./ingress.yaml sets to the connection's address, believed only from
+      # the pod network.
+      allowedSources:
+        - 192.168.0.0/16
+      clientAddress:
+        header: X-Ingress-Peer-Addr
+        trustedProxies:
+          - 10.69.0.0/16
     ingress:
       # The chart puts the UI and the backend on one ingress class, and they
       # need different ones, so the two Ingresses are in ./ingress.yaml.

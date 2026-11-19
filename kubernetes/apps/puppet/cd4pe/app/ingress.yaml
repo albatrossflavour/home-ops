@@ -13,6 +13,12 @@ metadata:
     external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
     nginx.ingress.kubernetes.io/proxy-body-size: 75m
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    # The connection's own address, before enable-real-ip rewrites it from
+    # the client's X-Forwarded-For. It replaces any X-Ingress-Peer-Addr the
+    # client sent. The chart lets sign-up through only when it's in
+    # signup.allowedSources (./helmrelease.yaml).
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Ingress-Peer-Addr $realip_remote_addr;
 spec:
   ingressClassName: external
   tls:
