@@ -43,8 +43,8 @@ spec:
               TZ: "Australia/Sydney"
               PIHOLE_URLS: "http://192.168.9.2,http://192.168.9.3,http://192.168.9.4"
               DOMAIN_FILTER: "${SECRET_DOMAIN}"
-              # Deletes stay off until the dry run has been read against the live records.
-              DRY_RUN: "true"
+              # Dry run read against the live records on 2026-11-19: nothing stale to delete, then enabled.
+              DRY_RUN: "false"
             envFrom:
               - secretRef:
                   name: external-dns-pihole-reaper-secret
