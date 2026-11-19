@@ -23,6 +23,7 @@ spec:
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: network
+            app.kubernetes.io/instance: ingress-nginx-external
       toPorts:
         - ports:
             - port: "443"
