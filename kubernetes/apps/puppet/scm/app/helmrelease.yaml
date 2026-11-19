@@ -33,8 +33,11 @@ spec:
         nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     gatekeeper:
       # oauth2-proxy calls Keycloak on the public hostname. Point that at the
-      # external ingress, which serves it, so it doesn't depend on Pi-hole
-      # having the record or go out through Cloudflare and back.
+      # external ingress controller, which serves scm.lab, so a login doesn't
+      # go out through Cloudflare and back. hostAliases only takes an address,
+      # so this is ingress-nginx-external's load balancer IP, pinned by
+      # io.cilium/lb-ipam-ips in network/ingress-nginx/external/helmrelease.yaml.
+      # Change both together.
       hostAliases:
         - ip: 192.168.8.23
           hostnames:

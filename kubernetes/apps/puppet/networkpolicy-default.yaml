@@ -7,7 +7,12 @@
 # containers only talk to their own siblings, but the rule is namespace-wide
 # rather than per app to keep it readable.
 #
-# Per-app egress beyond this lives in each app's own directory.
+# Per-app egress beyond this lives in each app's own directory, and so does
+# ingress from the ingress controllers: each app lets in only the controller
+# that serves its Ingress, on that Ingress's backend port. Nothing else in the
+# network namespace (cloudflared, echo-server, external-dns, lab-dns-sync,
+# dns-export, nebula-sync) reaches these pods. cloudflared comes in through the
+# external controller like any other client.
 #
 # Rollback: `kubectl delete ciliumnetworkpolicy -n puppet puppet-default`.
 apiVersion: cilium.io/v2
@@ -22,10 +27,6 @@ spec:
     - fromEntities:
         - host
         - remote-node
-    # ingress-nginx.
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: network
     # Components talk to each other.
     - fromEndpoints:
         - matchLabels:

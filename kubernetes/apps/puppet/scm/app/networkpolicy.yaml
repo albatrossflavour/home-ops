@@ -4,10 +4,11 @@
 #
 # gatekeeper (oauth2-proxy) does OIDC discovery, token redemption and userinfo
 # against Keycloak on the public hostname, the same as a complyadm install
-# does. Here that means going out to the internal ingress controller and back
-# in through frontdoor.
+# does. Here that means going out to the external ingress controller, which
+# serves scm.lab (gatekeeper.hostAliases in helmrelease.yaml), and back in
+# through frontdoor.
 #
-# Rollback: `kubectl delete ciliumnetworkpolicy -n puppet scm-gatekeeper-egress scm-scarpy-egress`.
+# Rollback: `kubectl delete ciliumnetworkpolicy -n puppet scm-gatekeeper-egress scm-scarpy-egress scm-mtls-proxy-ingress scm-frontdoor-ingress`.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -58,6 +59,29 @@ spec:
   ingress:
     - fromEntities:
         - world
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+---
+# The scm Ingress is on the external class, so only that controller reaches
+# frontdoor, on its http port. frontdoor is what blocks /auth/admin, so nothing
+# else may reach identity, graphql, or the databases directly.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: scm-frontdoor-ingress
+  namespace: puppet
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: scm
+      app.kubernetes.io/component: frontdoor
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+            app.kubernetes.io/instance: ingress-nginx-external
       toPorts:
         - ports:
             - port: "8080"
