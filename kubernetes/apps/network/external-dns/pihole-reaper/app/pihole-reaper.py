@@ -18,7 +18,7 @@ Never touched: A records (hosts), CNAMEs never in the ledger, CNAMEs whose targe
 changed since they were ledgered, and any host an ingress still asks for under another target.
 
 Safety: no ingresses read or fewer than MIN_DESIRED records wanted aborts the run; at most
-MAX_DELETES per Pi-hole per run; an unreadable Pi-hole is skipped.
+MAX_DELETES per Pi-hole per run (the rest wait for the next run); an unreadable Pi-hole is skipped.
 
 Env:
   PIHOLE_URLS     comma-separated Pi-hole base URLs (all share PIHOLE_PASSWORD)
@@ -183,9 +183,8 @@ def main():
             kept = len(recs) - len(hits)
             log(f"{base}: {len(recs)} CNAMEs, {len(hits)} stale to remove, {kept} untouched")
             if len(hits) > MAX_DELETES:
-                log(f"  more than {MAX_DELETES} deletions in one run, refusing")
-                failed = True
-                continue
+                log(f"  more than {MAX_DELETES} stale, deleting {MAX_DELETES} now and the rest next run")
+                hits = hits[:MAX_DELETES]
             for r, entry in hits:
                 if DRY:
                     log(f"  would delete {entry}")
