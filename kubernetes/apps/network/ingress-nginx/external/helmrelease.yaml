@@ -27,6 +27,10 @@ spec:
     fullnameOverride: ingress-nginx-external
     controller:
       allowSnippetAnnotations: true
+      # Backends see the address the controller worked out, not one a LAN
+      # client wrote into CF-Connecting-IP.
+      proxySetHeaders:
+        CF-Connecting-IP: $remote_addr
       replicaCount: 2
       affinity:
         podAntiAffinity:
@@ -61,7 +65,14 @@ spec:
         client-body-timeout: 120
         client-header-timeout: 120
         enable-brotli: "true"
+        # Internet traffic arrives from a cloudflared pod, which carries the
+        # client's address in CF-Connecting-IP (set by Cloudflare's edge).
+        # Trust that header only from the pod network. LAN clients keep their
+        # TCP peer, and whatever X-Forwarded-For, X-Real-IP or
+        # CF-Connecting-IP they send is ignored and overwritten below.
         enable-real-ip: "true"
+        forwarded-for-header: CF-Connecting-IP
+        proxy-real-ip-cidr: 10.69.0.0/16
         # OpenTelemetry tracing to Grafana Tempo
         enable-opentelemetry: "true"
         otlp-collector-host: tempo.observability.svc.cluster.local
