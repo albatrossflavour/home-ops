@@ -45,6 +45,7 @@ spec:
               DOMAIN_FILTER: "${SECRET_DOMAIN}"
               # Dry run read against the live records on 2026-11-19: nothing stale to delete, then enabled.
               DRY_RUN: "false"
+              ADOPT: "cd4pe-test.albatrossflavour.com,internal.albatrossflavour.com;cd4pe-test-backend.albatrossflavour.com,internal.albatrossflavour.com;scm-test.albatrossflavour.com,internal.albatrossflavour.com;jellyfin.albatrossflavour.com,internal.albatrossflavour.com;loki.albatrossflavour.com,internal.albatrossflavour.com;netbox.albatrossflavour.com,internal.albatrossflavour.com;penpot.albatrossflavour.com,internal.albatrossflavour.com;stirling-pdf.albatrossflavour.com,internal.albatrossflavour.com"
             envFrom:
               - secretRef:
                   name: external-dns-pihole-reaper-secret
