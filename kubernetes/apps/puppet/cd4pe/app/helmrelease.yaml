@@ -34,11 +34,10 @@ spec:
       # the internet. LAN clients reach the external controller from their own
       # address or, with externalTrafficPolicy Cluster, a node's (192.168.8.x).
       # Tunnel traffic reaches it from a cloudflared pod (10.69.x), so it's
-      # refused. The controller's X-Real-IP and X-Forwarded-For come from the
-      # request's own X-Forwarded-For (enable-real-ip trusts every source), so
-      # the address checked is X-Ingress-Peer-Addr, which the Ingress in
-      # ./ingress.yaml sets to the connection's address, believed only from
-      # the pod network.
+      # refused. The controller's X-Real-IP is the tunnel client's public
+      # address there, which says nothing about LAN or not, so the address
+      # checked is X-Ingress-Peer-Addr, which the Ingress in ./ingress.yaml
+      # sets to the connection's address, believed only from the pod network.
       allowedSources:
         - 192.168.0.0/16
       clientAddress:

@@ -14,7 +14,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: 75m
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     # The connection's own address, before enable-real-ip rewrites it from
-    # the client's X-Forwarded-For. It replaces any X-Ingress-Peer-Addr the
+    # CF-Connecting-IP. It replaces any X-Ingress-Peer-Addr the
     # client sent. The chart lets sign-up through only when it's in
     # signup.allowedSources (./helmrelease.yaml).
     nginx.ingress.kubernetes.io/configuration-snippet: |
