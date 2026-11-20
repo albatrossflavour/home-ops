@@ -58,7 +58,11 @@ spec:
         client-body-timeout: 120
         client-header-timeout: 120
         enable-brotli: "true"
-        enable-real-ip: "true"
+        # Nothing proxies in front of this controller (LAN clients and pods reach
+        # the VIP directly), so it trusts no forwarding header and uses the TCP
+        # peer. With this on and proxy-real-ip-cidr left at its 0.0.0.0/0
+        # default, any LAN client could set the X-Real-IP its backends see.
+        enable-real-ip: "false"
         # OpenTelemetry tracing to Grafana Tempo
         enable-opentelemetry: "true"
         otlp-collector-host: tempo.observability.svc.cluster.local
