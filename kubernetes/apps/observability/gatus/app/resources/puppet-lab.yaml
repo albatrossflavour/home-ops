@@ -9,7 +9,6 @@ data:
   puppet-lab.yaml: |
     endpoints:
       - name: Puppet Enterprise
-        enabled: false
         url: "https://puppet.lab.albatrossflavour.com/"
         group: "Puppet Lab"
         description: "Infrastructure Automation"
@@ -23,8 +22,21 @@ data:
         alerts:
           - type: pushover
 
+      - name: Puppet Server
+        url: "https://puppet.lab.albatrossflavour.com:8140/status/v1/simple"
+        group: "Puppet Lab"
+        description: "Puppet Server status"
+        tags: ["puppet", "automation", "critical", "lab"]
+        interval: 2m
+        client:
+          insecure: true
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pushover
+
       - name: CD4PE
-        enabled: false
         url: "https://cd4pe.lab.albatrossflavour.com/"
         group: "Puppet Lab"
         description: "Continuous Deployment"
@@ -38,6 +50,21 @@ data:
         alerts:
           - type: pushover
 
+      - name: SCM
+        url: "https://scm.lab.albatrossflavour.com/"
+        group: "Puppet Lab"
+        description: "Source Control Management"
+        tags: ["puppet", "cicd", "automation", "lab"]
+        interval: 2m
+        client:
+          insecure: true
+        conditions:
+          - "[STATUS] < 400"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pushover
+
+      # Disabled: SCE is not deployed on the rebuilt lab yet. This comes back with the SCE work.
       - name: SCE
         enabled: false
         url: "https://sce.lab.albatrossflavour.com/"
@@ -54,16 +81,34 @@ data:
           - type: pushover
 
       - name: Puppet Dashboard
-        enabled: false
-        url: "https://dashboard.lab.albatrossflavour.com/"
+        url: "https://dashboard.lab.albatrossflavour.com/api/health"
         group: "Puppet Lab"
-        description: "Infrastructure Dashboard"
+        description: "Grafana, the Puppet Observability dashboard"
         tags: ["puppet", "monitoring", "dashboard", "lab"]
         interval: 2m
         client:
           insecure: true
         conditions:
-          - "[STATUS] < 400"
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: pushover
+
+      - name: POBS MCP
+        url: "https://mcp.lab.albatrossflavour.com:10052/mcp"
+        group: "Puppet Lab"
+        description: "Puppet Observability MCP server"
+        tags: ["puppet", "monitoring", "mcp", "lab"]
+        interval: 2m
+        method: POST
+        headers:
+          Content-Type: "application/json"
+          Accept: "application/json, text/event-stream"
+        body: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"gatus","version":"1"}}}'
+        client:
+          insecure: true
+        conditions:
+          - "[STATUS] == 200"
           - "[RESPONSE_TIME] < 5000"
         alerts:
           - type: pushover
