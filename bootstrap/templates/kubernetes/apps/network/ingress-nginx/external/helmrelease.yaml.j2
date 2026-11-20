@@ -26,6 +26,10 @@ spec:
   values:
     fullnameOverride: ingress-nginx-external
     controller:
+      # Backends see the address the controller worked out, not one a LAN
+      # client wrote into CF-Connecting-IP.
+      proxySetHeaders:
+        CF-Connecting-IP: $remote_addr
       service:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: "external.${SECRET_DOMAIN}"
@@ -46,7 +50,14 @@ spec:
         client-body-timeout: 120
         client-header-timeout: 120
         enable-brotli: "true"
+        # Internet traffic arrives from a cloudflared pod, which carries the
+        # client's address in CF-Connecting-IP (set by Cloudflare's edge).
+        # Trust that header only from the pod network. LAN clients keep their
+        # TCP peer, and whatever X-Forwarded-For, X-Real-IP or
+        # CF-Connecting-IP they send is ignored and overwritten below.
         enable-real-ip: "true"
+        forwarded-for-header: CF-Connecting-IP
+        proxy-real-ip-cidr: "#{ bootstrap_pod_network.split(',')[0] }#"
         hsts-max-age: 31449600
         keep-alive-requests: 10000
         keep-alive: 120
