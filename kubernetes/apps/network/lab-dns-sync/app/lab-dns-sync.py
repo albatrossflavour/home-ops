@@ -31,7 +31,7 @@ Env:
   PUPPETDB_URL      default https://puppet.lab.albatrossflavour.com:8081
   PUPPETDB_TOKEN    required, PE RBAC token (PuppetDB takes X-Authentication)
   PUPPETDB_CACERT   optional path to the Puppet CA cert; unset means no verify
-  MANAGED_RE        default -puppet-(development|production)-\\d+\\.lab\\.
+  MANAGED_RE        default -puppet-(development|production)-\\d+\\.(lab|gce)\\.
   PROXMOX_URL       default https://192.168.5.10:8006
   PROXMOX_TOKEN     optional, "user@realm!tokenid=secret". Unset skips Proxmox
   PROXMOX_TAG       default pecdm
@@ -43,7 +43,7 @@ import ipaddress, json, os, re, ssl, sys, urllib.parse, urllib.request
 PIHOLE = os.environ.get("PIHOLE_URL", "http://192.168.9.2").rstrip("/")
 REPLICAS = [u.strip().rstrip("/") for u in os.environ.get("PIHOLE_REPLICAS", "").split(",") if u.strip()]
 PDB = os.environ.get("PUPPETDB_URL", "https://puppet.lab.albatrossflavour.com:8081").rstrip("/")
-MANAGED = re.compile(os.environ.get("MANAGED_RE", r"-puppet-(development|production)-\d+\.lab\."))
+MANAGED = re.compile(os.environ.get("MANAGED_RE", r"-puppet-(development|production)-\d+\.(lab|gce)\."))
 PVE = os.environ.get("PROXMOX_URL", "https://192.168.5.10:8006").rstrip("/")
 PVE_TAG = os.environ.get("PROXMOX_TAG", "pecdm")
 PVE_MANAGED = re.compile(os.environ.get("PROXMOX_MANAGED_RE", r" pe-(server|psql|compiler|node)-\d+-[0-9a-f]+\."))
