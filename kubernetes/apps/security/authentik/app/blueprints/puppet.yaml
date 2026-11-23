@@ -3,8 +3,9 @@
 # The other half is profile::pe::sso in the control repo, which gives PE the
 # issuer, the sign-on and logout URLs under /application/saml/puppet/, the
 # signing certificate, and the attribute names of the four mappings below.
-# PE's own URLs are fixed by the console's hostname. Only authentik Admins may
-# use it, and PE maps that group to its Administrators role.
+# PE's own URLs are fixed by the console's hostname. Only authentik Admins and
+# Puppet Viewer may use it, and PE maps those groups to its Administrators and
+# Viewers roles.
 #
 # This takes over the provider and application made by hand for the old lab,
 # matched by name and slug, so every setting PE depends on is stated here.
@@ -51,3 +52,9 @@ entries:
       group: !Find [authentik_core.group, [name, authentik Admins]]
     attrs:
       order: 0
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf app
+      group: !Find [authentik_core.group, [name, Puppet Viewer]]
+    attrs:
+      order: 1
