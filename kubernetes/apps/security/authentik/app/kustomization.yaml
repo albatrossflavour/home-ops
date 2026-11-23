@@ -6,4 +6,12 @@ resources:
   - ./helm-release.yaml
   - ./networkpolicy.yaml
   - ../../../../templates/gatus/external
+# Blueprints the worker applies on start and whenever they change. The chart
+# mounts the ConfigMap by name (blueprints.configMaps in helm-release.yaml).
+configMapGenerator:
+  - name: authentik-blueprints
+    files:
+      - blueprints/strings-site.yaml
+generatorOptions:
+  disableNameSuffixHash: true
   #  - ./outpost.yaml
