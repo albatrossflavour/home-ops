@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+# Homepage's Authentik widget reads a user count and the login and failed
+# login counts. It used to borrow an expiring superuser token on tgreen; this
+# gives it a service account that can only view users and events, with a
+# non-expiring token whose value is 1Password "authentik homepage widget
+# token", which Homepage's ExternalSecret also reads. The worker gets it as
+# HOMEPAGE_WIDGET_TOKEN through authentik-secret (not AUTHENTIK_*, which
+# authentik reads as its own configuration).
+version: 1
+metadata:
+  name: homepage-widget
+entries:
+  - model: authentik_rbac.role
+    id: role
+    identifiers:
+      name: Homepage widget
+    attrs:
+      permissions:
+        - authentik_core.view_user
+        - authentik_events.view_event
+  - model: authentik_core.group
+    id: group
+    identifiers:
+      name: Homepage widget
+    attrs:
+      roles:
+        - !KeyOf role
+      is_superuser: false
+  - model: authentik_core.user
+    id: user
+    identifiers:
+      username: homepage-widget
+    attrs:
+      name: Homepage widget
+      type: service_account
+      is_active: true
+      path: services
+      groups:
+        - !KeyOf group
+  - model: authentik_core.token
+    identifiers:
+      identifier: homepage-widget
+    attrs:
+      user: !KeyOf user
+      intent: api
+      expiring: false
+      key: !Env HOMEPAGE_WIDGET_TOKEN
+      description: Homepage's Authentik widget (home-ops blueprint)
