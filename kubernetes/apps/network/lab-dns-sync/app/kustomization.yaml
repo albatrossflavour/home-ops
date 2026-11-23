@@ -4,3 +4,14 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+# The script, its curated records and the Puppet CA, each kept once as a file.
+# No name hash: the HelmRelease mounts it by name, and each CronJob run is a
+# new pod that reads the current copy.
+configMapGenerator:
+  - name: lab-dns-sync-files
+    files:
+      - lab-dns-sync.py
+      - curated.json
+      - puppet-ca.pem
+generatorOptions:
+  disableNameSuffixHash: true

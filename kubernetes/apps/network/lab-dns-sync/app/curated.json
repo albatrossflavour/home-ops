@@ -1,0 +1,21 @@
+{
+  "hosts": [
+    "192.168.7.10 puppet.lab.albatrossflavour.com",
+    "192.168.7.13 dashboard.lab.albatrossflavour.com",
+    "192.168.7.14 mcp.lab.albatrossflavour.com",
+    "192.168.7.15 soundwave.lab.albatrossflavour.com",
+    "192.168.7.16 firstsight.lab.albatrossflavour.com",
+    "192.168.7.17 strings.lab.albatrossflavour.com",
+    "192.168.8.32 scm-agents.lab.albatrossflavour.com"
+  ],
+  "absent_hosts": [],
+  "rev_servers": [
+    "true,192.168.7.20/32,192.168.7.20,ad.albatrossflavour.com"
+  ],
+  "allow_regex": [
+    {
+      "domain": "(\\.|^)ad\\.albatrossflavour\\.com$",
+      "comment": "lab AD domain, which mmotti regex 75 blocks for its .ad. label"
+    }
+  ]
+}
