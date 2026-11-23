@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+# The lab's Puppet Enterprise console signs in through this SAML provider.
+# The other half is profile::pe::sso in the control repo, which gives PE the
+# issuer, the sign-on and logout URLs under /application/saml/puppet/, the
+# signing certificate, and the attribute names of the four mappings below.
+# PE's own URLs are fixed by the console's hostname. Only authentik Admins may
+# use it, and PE maps that group to its Administrators role.
+#
+# This takes over the provider and application made by hand for the old lab,
+# matched by name and slug, so every setting PE depends on is stated here.
+version: 1
+metadata:
+  name: puppet
+entries:
+  - model: authentik_providers_saml.samlprovider
+    id: provider
+    identifiers:
+      name: Puppet Enterprise
+    attrs:
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      acs_url: https://puppet.lab.albatrossflavour.com/saml/v1/acs
+      sp_binding: post
+      audience: https://puppet.lab.albatrossflavour.com/saml/v1/meta
+      # PE's idp_entity_id. Stated so it does not depend on authentik's default.
+      issuer_override: https://id.albatrossflavour.com/application/saml/puppet/
+      signing_kp: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+      sign_assertion: true
+      sign_response: false
+      digest_algorithm: http://www.w3.org/2001/04/xmlenc#sha256
+      signature_algorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
+      property_mappings:
+        - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/username]]
+        - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/name]]
+        - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/email]]
+        - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/groups]]
+  - model: authentik_core.application
+    id: app
+    identifiers:
+      slug: puppet
+    attrs:
+      name: Puppet
+      group: Puppet
+      provider: !KeyOf provider
+      meta_launch_url: https://puppet.lab.albatrossflavour.com
+      meta_description: The lab's Puppet Enterprise console
+      policy_engine_mode: any
+  - model: authentik_policies.policybinding
+    identifiers:
+      target: !KeyOf app
+      group: !Find [authentik_core.group, [name, authentik Admins]]
+    attrs:
+      order: 0
