@@ -11,6 +11,7 @@ resources:
 configMapGenerator:
   - name: authentik-blueprints
     files:
+      - blueprints/puppet.yaml
       - blueprints/seamstress.yaml
       - blueprints/homepage-widget.yaml
 generatorOptions:
