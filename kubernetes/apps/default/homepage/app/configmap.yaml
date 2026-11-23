@@ -81,6 +81,16 @@ data:
               href: https://dashboard.lab.albatrossflavour.com
               siteMonitor: https://dashboard.lab.albatrossflavour.com
               description: ""
+        - Strings:
+            - icon: si-spring-#FFAE1A
+              href: https://strings.lab.albatrossflavour.com
+              siteMonitor: https://strings.lab.albatrossflavour.com
+              description: ""
+        - OpenVAS:
+            - icon: si-springsecurity-#FFAE1A
+              href: https://openvas.lab.albatrossflavour.com
+              siteMonitor: https://openvas.lab.albatrossflavour.com
+              description: ""
         - control-repo:
             - icon: si-github-#BCBDAC
               href: 'https://github.com/albatrossflavour/control-repo'
