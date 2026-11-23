@@ -3,8 +3,7 @@
 # (seamstress's oauth2-proxy). The client secret is in 1Password
 # "seamstress oidc client" and reaches the worker as
 # SEAMSTRESS_OIDC_CLIENT_SECRET through authentik-secret. Only authentik
-# Admins may use it. The last two entries remove the provider and application
-# it had as seamstress, before the module and node were renamed.
+# Admins may use it.
 version: 1
 metadata:
   name: seamstress
@@ -48,11 +47,3 @@ entries:
       group: !Find [authentik_core.group, [name, authentik Admins]]
     attrs:
       order: 0
-  - model: authentik_core.application
-    state: absent
-    identifiers:
-      slug: strings-site
-  - model: authentik_providers_oauth2.oauth2provider
-    state: absent
-    identifiers:
-      name: strings-site
