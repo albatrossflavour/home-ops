@@ -31,6 +31,9 @@ spec:
       envFrom:
         - secretRef:
             name: authentik-secret
+    blueprints:
+      configMaps:
+        - authentik-blueprints
     authentik:
       log_level: info
       avatars: "gravatar,initials"
