@@ -81,10 +81,10 @@ data:
               href: https://dashboard.lab.albatrossflavour.com
               siteMonitor: https://dashboard.lab.albatrossflavour.com
               description: ""
-        - Strings:
+        - Seamstress:
             - icon: si-spring-#FFAE1A
-              href: https://strings.lab.albatrossflavour.com
-              siteMonitor: https://strings.lab.albatrossflavour.com
+              href: https://seamstress.lab.albatrossflavour.com
+              siteMonitor: https://seamstress.lab.albatrossflavour.com
               description: ""
         - OpenVAS:
             - icon: si-springsecurity-#FFAE1A

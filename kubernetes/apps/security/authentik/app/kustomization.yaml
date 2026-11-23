@@ -11,7 +11,7 @@ resources:
 configMapGenerator:
   - name: authentik-blueprints
     files:
-      - blueprints/strings-site.yaml
+      - blueprints/seamstress.yaml
 generatorOptions:
   disableNameSuffixHash: true
   #  - ./outpost.yaml

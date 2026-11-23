@@ -1,25 +1,27 @@
 # yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
-# strings.lab's Puppet module reference signs in through this OIDC client
-# (strings_site's oauth2-proxy). The client secret is in 1Password
-# "strings oidc client" and reaches the worker as STRINGS_OIDC_CLIENT_SECRET
-# through authentik-secret. Only authentik Admins may use it.
+# seamstress.lab's Puppet module reference signs in through this OIDC client
+# (seamstress's oauth2-proxy). The client secret is in 1Password
+# "seamstress oidc client" and reaches the worker as
+# SEAMSTRESS_OIDC_CLIENT_SECRET through authentik-secret. Only authentik
+# Admins may use it. The last two entries remove the provider and application
+# it had as seamstress, before the module and node were renamed.
 version: 1
 metadata:
-  name: strings-site
+  name: seamstress
 entries:
   - model: authentik_providers_oauth2.oauth2provider
     id: provider
     identifiers:
-      name: strings-site
+      name: seamstress
     attrs:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       client_type: confidential
-      client_id: strings-site
-      client_secret: !Env STRINGS_OIDC_CLIENT_SECRET
+      client_id: seamstress
+      client_secret: !Env SEAMSTRESS_OIDC_CLIENT_SECRET
       redirect_uris:
         - matching_mode: strict
-          url: https://strings.lab.albatrossflavour.com/oauth2/callback
+          url: https://seamstress.lab.albatrossflavour.com/oauth2/callback
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
@@ -28,11 +30,11 @@ entries:
   - model: authentik_core.application
     id: app
     identifiers:
-      slug: strings-site
+      slug: seamstress
     attrs:
-      name: Strings
+      name: Seamstress
       provider: !KeyOf provider
-      meta_launch_url: https://strings.lab.albatrossflavour.com/
+      meta_launch_url: https://seamstress.lab.albatrossflavour.com/
       meta_description: Puppet module reference for the lab's environments
       policy_engine_mode: any
   - model: authentik_policies.policybinding
@@ -41,3 +43,11 @@ entries:
       group: !Find [authentik_core.group, [name, authentik Admins]]
     attrs:
       order: 0
+  - model: authentik_core.application
+    state: absent
+    identifiers:
+      slug: strings-site
+  - model: authentik_providers_oauth2.oauth2provider
+    state: absent
+    identifiers:
+      name: strings-site
