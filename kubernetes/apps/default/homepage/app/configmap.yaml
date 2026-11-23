@@ -82,7 +82,7 @@ data:
               siteMonitor: https://dashboard.lab.albatrossflavour.com
               description: ""
         - Seamstress:
-            - icon: si-spring-#FFAE1A
+            - icon: si-spring_creators-#FFAE1A
               href: https://seamstress.lab.albatrossflavour.com
               siteMonitor: https://seamstress.lab.albatrossflavour.com
               description: ""
