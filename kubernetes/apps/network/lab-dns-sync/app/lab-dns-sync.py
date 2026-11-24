@@ -36,6 +36,11 @@ hour, and clients that ask a replica first would otherwise get NXDOMAIN for up
 to an hour after a record is added. nebula-sync's copy then matches what is
 already there.
 
+misc.dnsmasq_lines is only compared, never written. Pi-hole FTL 6.9 refuses that
+key over its API, so neither this script nor nebula-sync can copy it, and a
+change has to be made on each host with pihole-FTL --config. When the Pi-holes
+disagree the run says which lines each one has and exits non-zero.
+
 Env:
   PIHOLE_URL        default http://192.168.9.2
   PIHOLE_REPLICAS   optional, comma-separated replica URLs sharing the password
@@ -268,11 +273,28 @@ def pihole_session(base):
     return sid
 
 
-def sync_pihole(base, want, managed, cur):
-    """Bring one Pi-hole's managed records and settings in line. True on success."""
+def dnsmasq_lines_agree(lines):
+    """True if every Pi-hole that was read has the same misc.dnsmasq_lines."""
+    if len({tuple(sorted(v)) for v in lines.values()}) <= 1:
+        return True
+    log("misc.dnsmasq_lines differs between Pi-holes. Set it on each host with")
+    log("pihole-FTL --config misc.dnsmasq_lines, it cannot be set over the API:")
+    for base, have in lines.items():
+        log(f"  {base}: {json.dumps(have)}")
+    return False
+
+
+def sync_pihole(base, want, managed, cur, lines):
+    """Bring one Pi-hole's managed records and settings in line. True on success.
+
+    Its misc.dnsmasq_lines is recorded in lines, for comparing afterwards.
+    """
     sid = pihole_session(base)
     hdr = {"X-FTL-SID": sid}
     try:
+        _, body = http(f"{base}/api/config/misc/dnsmasq_lines", headers=hdr)
+        lines[base] = json.loads(body)["config"]["misc"]["dnsmasq_lines"]
+
         _, body = http(f"{base}/api/config/dns/hosts", headers=hdr)
         have = set(json.loads(body)["config"]["dns"]["hosts"])
         mine = {h for h in have if any(m.search(h) for m in managed)}
@@ -350,13 +372,16 @@ def main():
     # Primary first. A replica that fails doesn't stop the others; the run
     # just reports failure so it is visible.
     failed = False
+    lines = {}
     for base in [PIHOLE] + REPLICAS:
         try:
-            if not sync_pihole(base, want, managed, cur):
+            if not sync_pihole(base, want, managed, cur, lines):
                 failed = True
         except Exception as exc:  # noqa: BLE001
             log(f"{base}: sync failed: {exc}")
             failed = True
+    if not dnsmasq_lines_agree(lines):
+        failed = True
     if failed:
         log("finished with errors")
         return 1
