@@ -38,7 +38,28 @@ spec:
               tag: latest@sha256:59c51378460f6dc8707cc91a16aa62dff5cd5dd8b39353658b45cb00d6bfddd8
             env:
               TZ: "Australia/Sydney"
-              FULL_SYNC: "true"
+              # Everything a full sync copies, spelt out, because the
+              # exclusion below is only honoured when FULL_SYNC is false.
+              FULL_SYNC: "false"
+              SYNC_CONFIG_DNS: "true"
+              SYNC_CONFIG_DHCP: "true"
+              SYNC_CONFIG_NTP: "true"
+              SYNC_CONFIG_RESOLVER: "true"
+              SYNC_CONFIG_DATABASE: "true"
+              SYNC_CONFIG_MISC: "true"
+              SYNC_CONFIG_DEBUG: "true"
+              SYNC_GRAVITY_DHCP_LEASES: "true"
+              SYNC_GRAVITY_GROUP: "true"
+              SYNC_GRAVITY_AD_LIST: "true"
+              SYNC_GRAVITY_AD_LIST_BY_GROUP: "true"
+              SYNC_GRAVITY_DOMAIN_LIST: "true"
+              SYNC_GRAVITY_DOMAIN_LIST_BY_GROUP: "true"
+              SYNC_GRAVITY_CLIENT: "true"
+              SYNC_GRAVITY_CLIENT_BY_GROUP: "true"
+              # Pi-hole FTL 6.9 refuses misc.dnsmasq_lines over the API, and
+              # one refused key fails the whole run. lab-dns-sync reports when
+              # the Pi-holes disagree on it instead.
+              SYNC_CONFIG_MISC_EXCLUDE: dnsmasq_lines
             envFrom:
               - secretRef:
                   name: nebula-sync-secret
