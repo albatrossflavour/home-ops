@@ -1288,7 +1288,7 @@ spec:
           **When to act**
           Next working day. Nothing is down; the rule set is behind.
           **What to do**
-          1. Cause: the rules are behind the exporter. Check: `count by (version) (pobs_alert_rules_info)` is what the rules say they were rendered at and `count by (version) (puppet_exporter_build_info)` is what the exporter runs. Healthy is one version in each and the same one in both; unhealthy is two different versions, or no `pobs_alert_rules_info` series at all. Fix: render the rule set again at the exporter's version and deploy it. On the primary, `sudo /opt/puppetlabs/puppet/bin/ruby /etc/puppetlabs/code/environments/production/modules/observability/files/pobs_ctl.rb alerts prometheusrule` writes the PrometheusRule for a Kubernetes stack; on a Puppet-managed Prometheus the next Puppet run after the module upgrade writes it.
+          1. Cause: the rules are behind the exporter. Check: `count by (version) (pobs_alert_rules_info)` is what the rules say they were rendered at and `count by (version) (puppet_exporter_build_info)` is what the exporter runs. Healthy is one version in each and the same one in both; unhealthy is two different versions, or no `pobs_alert_rules_info` series at all. Fix: render the rule set again at the exporter's version and deploy it. On the primary, `sudo /opt/puppetlabs/puppet/bin/ruby /etc/puppetlabs/code-staging/environments/production/modules/observability/files/pobs_ctl.rb alerts prometheusrule` writes the PrometheusRule for a Kubernetes stack; on a Puppet-managed Prometheus the next Puppet run after the module upgrade writes it.
           2. Cause: the exporter is behind the rules. Check: the same two queries, with the exporter's version the older of the two. Fix: upgrade the module on the primary so the daemon matches the rules. A module upgrade restarts the daemon, so do it in a change window if the estate has one.
           3. Cause: two Prometheuses hold different rule sets. Check: two versions in `pobs_alert_rules_info` at once. Fix: redeploy the rules on the one that is behind, as in step 1.
           Whatever the cause: the alert clears on the next evaluation after both versions match. Nothing clears it without a redeploy.
@@ -4859,9 +4859,9 @@ spec:
         pobs: 'true'
       annotations:
         summary: "{{ $value }} systems have no CIS-CAT scan under a week old"
-        description: The CIS-backed checks read not assessed on them. Check scanalot's
-          runs and CIS-CAT on those systems; the judge only reads the ARF the scan
-          leaves.
+        description: The CIS-backed checks read not assessed on them. Check first_sight::cis
+          on those systems (scans.json under the vardir's first_sight/cis, and the
+          assessor); the judge only reads the ARF the scan leaves.
     - alert: FirstSightResultsAbsent
       expr: absent(first_sight_nodes)
       for: 30m
