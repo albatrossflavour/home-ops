@@ -52,6 +52,10 @@ spec:
               # Application configuration
               PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
               PAPERLESS_CSRF_TRUSTED_ORIGINS: https://paperless.${SECRET_DOMAIN}
+              # From 3.5.1, PAPERLESS_URL alone narrows ALLOWED_HOSTS to its hostname plus
+              # localhost (paperless-ngx #14735). paperless-gpt and paperless-checker call the
+              # service name, so it has to be listed or they get 400 Bad Request.
+              PAPERLESS_ALLOWED_HOSTS: paperless.default.svc.cluster.local
               PAPERLESS_PORT: "8000"
               PAPERLESS_TIME_ZONE: "Australia/Sydney"
               PAPERLESS_WEBSERVER_WORKERS: "2"
