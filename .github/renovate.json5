@@ -1,5 +1,8 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  description: [
+    'Digest pinning comes from the docker:pinDigests preset, so there is deliberately no top-level docker block. The old one claimed to force amd64 pulls and never did: Renovate pins the manifest-list digest, so each node still pulls its own platform. Its versioning: docker was already the default, and as migrated it overrode the preset\'s pinDigests: false for argocd, devcontainer, helmv3 and pyenv. If devcontainer digests are ever wanted, ask for them explicitly rather than reinstating a global override. Kept here because Renovate\'s config migration (#2312) strips JSON5 comments. Full history in #2123.',
+  ],
   extends: [
     'config:recommended',
     'docker:enableMajor',
@@ -18,11 +21,20 @@
     'prIgnoreNotification',
   ],
   rebaseWhen: 'conflicted',
+  // Without a timezone the weekend is UTC, which ran from Saturday mid-morning
+  // to Monday mid-morning here.
+  timezone: 'Australia/Sydney',
   schedule: [
     'every weekend',
   ],
   ignorePaths: [
     '**/*.sops.*',
+    // Apps whose ks.yaml is commented out of their namespace kustomization.
+    // Their bumps change nothing live. Remove the line if one is re-enabled.
+    'kubernetes/apps/media/jellyfin/**',
+    'kubernetes/apps/media/mylar/**',
+    'kubernetes/apps/observability/overseerr-exporter/**',
+    'kubernetes/apps/utilities/pdi-keepalive/**',
   ],
   flux: {
     managerFilePatterns: [
@@ -177,7 +189,7 @@
         'docker',
       ],
       matchPackageNames: [
-        'docker.n8n.io/n8nio/n8n',
+        'docker.io/n8nio/n8n',
       ],
       allowedVersions: '<2.46',
     },
