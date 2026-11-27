@@ -48,7 +48,7 @@ spec:
           app:
             image:
               repository: amruthpillai/reactive-resume
-              tag: "v6.1.1@sha256:14b5d175444957f04ad6b7fd89acc133ca62d10d239fcff9901ff0bf2e9f5ecb"
+              tag: "v6.1.1@sha256:af6747abf38a38d23c00caa2405115f0b64c92a6b379810d7739dcd5af133b77"
             env:
               TZ: ${TZ}
               PORT: "3000"
