@@ -36,7 +36,7 @@ spec:
           app:
             image:
               repository: nodered/node-red
-              tag: 5.0.9-minimal@sha256:fc51fc5fa0bf12be8f52ed49645618e6c27a74953ce21c7eeec2e165d520d01c
+              tag: 5.0.10-minimal@sha256:a708670129c72ea50d48a6f31bee2f7f8fc61bd0502807e68e861db878e3d111
             env:
               TZ: Australia/Sydney
               NODE_RED_ENABLE_PROJECTS: "true"
