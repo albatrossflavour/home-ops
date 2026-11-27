@@ -47,11 +47,15 @@ spec:
           app:
             image:
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: "3.4.2@sha256:d704e84f88300eb6ab001ab15720a2330ff99169cf9f94d6b8fcc44b63a84c84"
+              tag: "3.5.1@sha256:8508853b8a0f8394074260957d0be186c8c64f346973b24a7583de4580f306b9"
             env:
               # Application configuration
               PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
               PAPERLESS_CSRF_TRUSTED_ORIGINS: https://paperless.${SECRET_DOMAIN}
+              # From 3.5.1, PAPERLESS_URL alone narrows ALLOWED_HOSTS to its hostname plus
+              # localhost (paperless-ngx #14735). paperless-gpt and paperless-checker call the
+              # service name, so it has to be listed or they get 400 Bad Request.
+              PAPERLESS_ALLOWED_HOSTS: paperless.default.svc.cluster.local
               PAPERLESS_PORT: "8000"
               PAPERLESS_TIME_ZONE: "Australia/Sydney"
               PAPERLESS_WEBSERVER_WORKERS: "2"
