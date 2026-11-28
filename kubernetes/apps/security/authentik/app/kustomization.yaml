@@ -14,6 +14,7 @@ configMapGenerator:
       - blueprints/puppet.yaml
       - blueprints/seamstress.yaml
       - blueprints/homepage-widget.yaml
+      - blueprints/pobs-mcp.yaml
 generatorOptions:
   disableNameSuffixHash: true
   #  - ./outpost.yaml
