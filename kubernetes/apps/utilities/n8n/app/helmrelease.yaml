@@ -49,7 +49,7 @@ spec:
         containers:
           app:
             image:
-              repository: docker.n8n.io/n8nio/n8n
+              repository: docker.io/n8nio/n8n
               tag: 2.45.7@sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d
             env:
               TZ: Australia/Sydney
