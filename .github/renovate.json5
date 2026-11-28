@@ -60,17 +60,36 @@
   packageRules: [
     {
       description: [
-        'Disable digest pinning for OCIRepository resources - they do not support digests',
+        'Do not add digests to chart versions or Flux sources. Charts in OCI registries are looked up as docker, so docker:pinDigests would write version: 1.2.3@sha256:... into HelmRelease and helmfile chart versions, which neither accepts. The flux and helmfile managers only ever see charts and sources, never container images, so this is scoped by manager rather than by file name. A rule matching ocirepository.yaml and flux.yaml missed HelmReleases, the bootstrap helmfile and the ocirepository-*.yaml files. Digests already in an OCIRepository ref are still kept current.',
       ],
       matchManagers: [
         'flux',
+        'helmfile',
       ],
-      matchDatasources: [
-        'docker',
+      pinDigests: false,
+    },
+    {
+      description: [
+        'kube-prometheus-stack takes the thanos digest in its own sha: field. Renovate writes a pinned digest into tag: and leaves sha: alone, which renders a double-digest reference the kubelet cannot pull (#2096). Keep tag: a plain version.',
       ],
       matchFileNames: [
-        '**/ocirepository.yaml',
-        '**/flux.yaml',
+        'kubernetes/apps/observability/kube-prometheus-stack/app/helmrelease.yaml',
+      ],
+      matchPackageNames: [
+        'quay.io/thanos/thanos',
+      ],
+      pinDigests: false,
+    },
+    {
+      description: [
+        'topf reads kubernetesVersion and talosVersion as plain versions and templates them into image references, so a digest there breaks the render.',
+      ],
+      matchFileNames: [
+        'kubernetes/bootstrap/talos/topf/**',
+      ],
+      matchPackageNames: [
+        'ghcr.io/siderolabs/kubelet',
+        'ghcr.io/siderolabs/installer',
       ],
       pinDigests: false,
     },
