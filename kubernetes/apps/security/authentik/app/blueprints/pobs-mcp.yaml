@@ -57,3 +57,37 @@ entries:
       group: !Find [authentik_core.group, [name, Puppet Viewer]]
     attrs:
       order: 1
+  # PAG and Gatus, which can't sign in through a browser, get tokens through
+  # this confidential client with the client-credentials grant. authentik
+  # issues them as its own service account for the provider, and a PE user of
+  # that name holds infrastructure_assistant:use. Tokens last 30 days because
+  # PAG can only send a fixed header and its token is rotated by hand; Gatus
+  # fetches its own. The secret is in 1Password "pobs-mcp machines oauth
+  # client" and reaches the worker as POBS_MCP_MACHINES_CLIENT_SECRET.
+  - model: authentik_providers_oauth2.oauth2provider
+    id: machines-provider
+    identifiers:
+      name: pobs-mcp-machines
+    attrs:
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      client_type: confidential
+      grant_types:
+        - client_credentials
+      client_id: pobs-mcp-machines
+      client_secret: !Env POBS_MCP_MACHINES_CLIENT_SECRET
+      access_token_validity: days=30
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+  - model: authentik_core.application
+    id: machines-app
+    identifiers:
+      slug: pobs-mcp-machines
+    attrs:
+      name: Puppet Observability MCP (machines)
+      group: Puppet
+      provider: !KeyOf machines-provider
+      meta_description: PAG's and Gatus's tokens for pobs-mcp on mcp.lab (observability R1300 trial)
+      policy_engine_mode: any
