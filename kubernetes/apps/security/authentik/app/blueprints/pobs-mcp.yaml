@@ -76,6 +76,8 @@ entries:
         - client_credentials
       client_id: pobs-mcp-machines
       client_secret: !Env POBS_MCP_MACHINES_CLIENT_SECRET
+      # Required by the serialiser even with no browser sign-in to return to.
+      redirect_uris: []
       access_token_validity: days=30
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
       property_mappings:

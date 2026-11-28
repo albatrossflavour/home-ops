@@ -105,8 +105,15 @@ data:
           Content-Type: "application/json"
           Accept: "application/json, text/event-stream"
         body: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"gatus","version":"1"}}}'
+        # pobs-mcp wants an OAuth token while observability R1300 trials it.
+        # Gatus fetches its own from authentik's pobs-mcp-machines client.
         client:
           insecure: true
+          oauth2:
+            token-url: "https://id.albatrossflavour.com/application/o/token/"
+            client-id: "pobs-mcp-machines"
+            client-secret: "$${POBS_MCP_MACHINES_CLIENT_SECRET}"
+            scopes: ["openid", "profile"]
         conditions:
           - "[STATUS] == 200"
           - "[RESPONSE_TIME] < 5000"
