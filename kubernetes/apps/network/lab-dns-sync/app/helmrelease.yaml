@@ -37,7 +37,7 @@ spec:
           app:
             image:
               repository: python
-              tag: 3.12-alpine
+              tag: 3.15-alpine@sha256:0f9552bb28711333da16915ec146f5e6bb44a7fdac9ced15dc17c2e0206346dd
             command: ["python3", "/app/lab-dns-sync.py"]
             env:
               TZ: "Australia/Sydney"
